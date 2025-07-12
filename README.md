@@ -9,3 +9,11 @@ slide_name=ゼロからのROS入門で置き換えてください
 slide_name_origin/slide_name_pptxはpptxファイルをzip展開してモノです
 これと同じ内容のreveal.jsのパワポを作ってもらえないでしょうかslide_name_origin/slide_name.txtにあります
 新しいディレクトリを作って、そのなかにhtmlやmediaのコピーをつくってください
+
+
+## 音声指示だし
+sudo apt update
+sudo apt install ffmpeg
+pip install openai-whisper
+pip install pydub
+pip install pyaudio
