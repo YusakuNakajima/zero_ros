@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブレンド半径の視覚的解説</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        input[type='range']::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            margin-top: -8px; /* Adjust thumb position */
+        }
+        input[type='range']::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900">ブレンド半径の視覚的解説</h1>
+            <p class="text-slate-600 mt-2">スライダーを動かして、ロボットの軌道がどう変わるか確認しましょう。</p>
+        </div>
+
+        <!-- Canvas for visualization -->
+        <div class="bg-slate-100 rounded-xl overflow-hidden border border-slate-200 mb-6">
+            <canvas id="robotPathCanvas"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div>
+                <label for="blendRadius" class="block text-lg font-bold mb-2 text-slate-700">ブレンド半径: <span id="radiusValue" class="text-blue-600 font-mono">20</span> mm</label>
+                <input type="range" id="blendRadius" min="0" max="150" value="20" class="w-full h-4 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="bg-slate-100 p-4 rounded-xl border border-slate-200">
+                <h3 class="font-bold text-lg mb-2 text-slate-800">凡例</h3>
+                <ul class="space-y-2">
+                    <li class="flex items-center">
+                        <span class="w-4 h-4 rounded-full bg-gray-700 mr-3"></span>
+                        <span>ウェイポイント (目標地点)</span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="w-4 h-1 bg-red-500 mr-3"></span>
+                        <span>ブレンド半径 = 0 の軌道</span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="w-4 h-1 bg-blue-600 mr-3"></span>
+                        <span>ブレンドを適用した軌道</span>
+                    </li>
+                    <li class="flex items-center">
+                         <span class="w-4 h-4 rounded-full border-2 border-dashed border-purple-500 mr-3 relative flex items-center justify-center"><span class="w-2 h-2 bg-purple-500 rounded-full"></span></span>
+                        <span>ブレンドの円/半径/中心点</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="mt-8 pt-6 border-t border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-3">図の解説</h2>
+            <div class="space-y-4 text-slate-700">
+                <p><strong class="text-purple-500">紫の点線/実線</strong>で描かれた円、半径、中心点がブレンドの基準です。<strong class="text-blue-600">青い軌道</strong>は、この円の弧に沿って滑らかに方向転換します。</p>
+                <p>ブレンド半径とは、この<strong class="text-purple-500">紫の円の半径</strong>を指します。半径を大きくすると円が大きくなり、中心点はウェイポイントから離れていきます。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('robotPathCanvas');
+        const ctx = canvas.getContext('2d');
+        const radiusSlider = document.getElementById('blendRadius');
+        const radiusValueSpan = document.getElementById('radiusValue');
+
+        let waypoints = [];
+
+        function setupCanvas() {
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, 600);
+            canvas.width = size;
+            canvas.height = size * 0.6;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            waypoints = [
+                { x: w * 0.1, y: h * 0.8 },
+                { x: w * 0.35, y: h * 0.2 },
+                { x: w * 0.65, y: h * 0.2 },
+                { x: w * 0.9, y: h * 0.8 }
+            ];
+            
+            draw();
+        }
+
+        function getDistance(p1, p2) {
+            return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
+
+        function drawWaypoint(p) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#334155'; // slate-700
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawSharpPath() {
+            if (waypoints.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(waypoints[0].x, waypoints[0].y);
+            for (let i = 1; i < waypoints.length; i++) {
+                ctx.lineTo(waypoints[i].x, waypoints[i].y);
+            }
+            ctx.strokeStyle = '#ef4444'; // red-500
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+        
+        function drawAllRadiusVisualizations(radius) {
+            if (radius <= 0.1 || waypoints.length < 3) return;
+
+            for (let i = 1; i < waypoints.length - 1; i++) {
+                const p0 = waypoints[i - 1];
+                const p1 = waypoints[i];
+                const p2 = waypoints[i + 1];
+
+                const v1 = { x: p0.x - p1.x, y: p0.y - p1.y };
+                const v2 = { x: p2.x - p1.x, y: p2.y - p1.y };
+                const len1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+                const len2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+                if (len1 === 0 || len2 === 0) continue;
+                
+                const angle = Math.acos(Math.max(-1, Math.min(1, (v1.x * v2.x + v1.y * v2.y) / (len1 * len2))));
+                if (Math.abs(Math.tan(angle / 2)) < 1e-6) continue;
+
+                let tangentDist = radius / Math.tan(angle / 2);
+                let effectiveRadius = radius;
+                if (tangentDist > len1 / 2 || tangentDist > len2 / 2) {
+                    tangentDist = Math.min(len1 / 2, len2 / 2);
+                    effectiveRadius = tangentDist * Math.tan(angle / 2);
+                }
+
+                const t1 = { x: p1.x + v1.x / len1 * tangentDist, y: p1.y + v1.y / len1 * tangentDist };
+                const t2 = { x: p1.x + v2.x / len2 * tangentDist, y: p1.y + v2.y / len2 * tangentDist };
+
+                const bisector = { x: v1.x / len1 + v2.x / len2, y: v1.y / len1 + v2.y / len2 };
+                const bisectorLen = Math.sqrt(bisector.x ** 2 + bisector.y ** 2);
+                if (bisectorLen < 1e-6) continue;
+
+                const normalizedBisector = { x: bisector.x / bisectorLen, y: bisector.y / bisectorLen };
+                const centerDist = Math.sqrt(effectiveRadius ** 2 + tangentDist ** 2);
+                const center = {
+                    x: p1.x + normalizedBisector.x * centerDist,
+                    y: p1.y + normalizedBisector.y * centerDist
+                };
+
+                // --- Start Drawing Visualization ---
+                ctx.strokeStyle = '#a855f7';
+                ctx.fillStyle = '#a855f7';
+                ctx.lineWidth = 1.5;
+
+                // Dashed circle
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.arc(center.x, center.y, effectiveRadius, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Radius lines
+                ctx.beginPath();
+                ctx.moveTo(center.x, center.y);
+                ctx.lineTo(t1.x, t1.y);
+                ctx.moveTo(center.x, center.y);
+                ctx.lineTo(t2.x, t2.y);
+                ctx.stroke();
+                
+                // Center point
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function drawBlendedPath(radius) {
+            if (waypoints.length < 2) return;
+            
+            ctx.beginPath();
+            ctx.moveTo(waypoints[0].x, waypoints[0].y);
+
+            for (let i = 1; i < waypoints.length - 1; i++) {
+                const p0 = waypoints[i - 1];
+                const p1 = waypoints[i];
+                const p2 = waypoints[i + 1];
+
+                const v1 = { x: p0.x - p1.x, y: p0.y - p1.y };
+                const v2 = { x: p2.x - p1.x, y: p2.y - p1.y };
+                const len1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+                const len2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+                if (len1 === 0 || len2 === 0) {
+                    ctx.lineTo(p1.x, p1.y);
+                    continue;
+                }
+
+                const angle = Math.acos(Math.max(-1, Math.min(1, (v1.x * v2.x + v1.y * v2.y) / (len1 * len2))));
+                if (Math.abs(Math.tan(angle / 2)) < 1e-6) {
+                    ctx.lineTo(p1.x, p1.y);
+                    continue;
+                }
+                
+                let tangentDist = radius / Math.tan(angle / 2);
+                let effectiveRadius = radius;
+                if (tangentDist > len1 / 2 || tangentDist > len2 / 2) {
+                    tangentDist = Math.min(len1 / 2, len2 / 2);
+                    effectiveRadius = tangentDist * Math.tan(angle / 2);
+                }
+                
+                if (tangentDist < 0) tangentDist = 0;
+
+                const t1 = { x: p1.x + v1.x / len1 * tangentDist, y: p1.y + v1.y / len1 * tangentDist };
+                const t2 = { x: p1.x + v2.x / len2 * tangentDist, y: p1.y + v2.y / len2 * tangentDist };
+
+                ctx.lineTo(t1.x, t1.y);
+
+                if (effectiveRadius > 0.1) {
+                    ctx.arcTo(p1.x, p1.y, t2.x, t2.y, effectiveRadius);
+                } else {
+                     ctx.lineTo(p1.x, p1.y);
+                }
+            }
+            ctx.lineTo(waypoints[waypoints.length - 1].x, waypoints[waypoints.length - 1].y);
+            
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function drawDistances() {
+            ctx.font = "bold 14px 'Noto Sans JP', sans-serif";
+            ctx.fillStyle = '#475569';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+
+            for (let i = 0; i < waypoints.length - 1; i++) {
+                const p1 = waypoints[i];
+                const p2 = waypoints[i + 1];
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2;
+                const distance = getDistance(p1, p2);
+
+                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                const offsetX = Math.sin(angle) * 15;
+                const offsetY = -Math.cos(angle) * 15;
+                
+                ctx.save();
+                ctx.translate(midX + offsetX, midY + offsetY);
+                ctx.rotate(angle > Math.PI / 2 || angle < -Math.PI / 2 ? angle + Math.PI : angle);
+                ctx.fillText(`${distance.toFixed(0)} mm`, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const radius = parseFloat(radiusSlider.value);
+            radiusValueSpan.textContent = radius.toFixed(0);
+
+            // Draw in a specific order to prevent overlap issues
+            drawSharpPath();
+            drawAllRadiusVisualizations(radius);
+            drawBlendedPath(radius); 
+            drawDistances();
+            waypoints.forEach(drawWaypoint);
+        }
+
+        radiusSlider.addEventListener('input', draw);
+        window.addEventListener('resize', setupCanvas);
+        
+        setupCanvas();
+    </script>
+</body>
+</html>

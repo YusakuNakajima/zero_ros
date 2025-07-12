@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>ゼロからのロボットアーム入門</title>
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/monokai.min.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>ゼロからのロボットアーム入門</h1>
+				</section>
+				<section>
+					<h2>はじめに</h2>
+					<ul>
+						<li>本講義の目標</li>
+						<li>対象者</li>
+						<li>内容</li>
+						<li>本講義でやらないこと</li>
+					</ul>
+				</section>
+				<section>
+					<h2>ロボットアームの操作</h2>
+					<p>ロボットアームを動かすための基礎知識</p>
+				</section>
+				<section>
+					<h2>目的に応じたロボット制御方法</h2>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<h3>手先位置・姿勢の制御</h3>
+							<img src="media/image10.jpg">
+						</div>
+						<div style="flex: 1;">
+							<h3>関節角度の制御</h3>
+							<img src="media/image17.jpg">
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>オススメ参考資料</h2>
+					<ul>
+						<li>ロボット制御学ハンドブック</li>
+						<li>ROSロボットプログラミング</li>
+					</ul>
+				</section>
+				<section>
+					<h2>ロボットを動かす方法</h2>
+					<ul>
+						<li>順運動学</li>
+						<li>逆運動学</li>
+					</ul>
+				</section>
+				<section>
+					<h2>基本的な動かし方</h2>
+					<ul>
+						<li>ROSの概要</li>
+						<li>MoveIt!の概要</li>
+					</ul>
+				</section>
+				<section>
+					<h2>ロボットアームの手先(TCP)</h2>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<img src="media/image13.png">
+						</div>
+						<div style="flex: 1;">
+							<img src="media/image9.png">
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>ロボットアームの構造</h2>
+					<img src="media/image2.png">
+				</section>
+				<section>
+					<h2>ロボットの座標(pose)</h2>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<img src="media/image20.png">
+						</div>
+						<div style="flex: 1;">
+							<img src="media/image4.png">
+						</div>
+						<div style="flex: 1;">
+							<img src="media/image14.png">
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>姿勢=位置+向き</h2>
+					<img src="media/image12.png">
+				</section>
+				<section>
+					<h2>ロボットアームの軸の数はなぜ6が多い</h2>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<img src="media/image8.png">
+						</div>
+						<div style="flex: 1;">
+							<img src="media/image16.png">
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>ロボットのモーションの種類</h2>
+					<img src="media/image6.jpg">
+				</section>
+				<section>
+					<h2>連続的なロボットモーション</h2>
+					<img src="media/image22.jpg">
+				</section>
+				<section>
+					<h2>滑らかなモーションの作り方</h2>
+					<iframe data-src="intaractive_app/ur_blend_radius.html" width="100%" height="500px" frameborder="0"></iframe>
+				</section>
+				<section>
+					<h2>ロボットアームの精度について</h2>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<img src="media/image23.png">
+						</div>
+						<div style="flex: 1;">
+							<img src="media/image26.png">
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>URのプログラム例</h2>
+					<pre><code class="language-python">
+# URScript
+movel(p[0.1, 0.2, 0.3, 0, 3.14, 0], a=1.2, v=0.25)
+					</code></pre>
+				</section>
+				<section>
+					<h2>以上でロボットの基本動作はできるはず</h2>
+					<p>Let’s enjoy robot!</p>
+				</section>
+				<section>
+					<h2>ロボットアーム選定</h2>
+					<p>ロボットアームの選び方</p>
+				</section>
+				<section>
+					<h2>ざっくり４種類</h2>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<h3>垂直多関節ロボット</h3>
+							<img src="media/image7.png">
+						</div>
+						<div style="flex: 1;">
+							<h3>水平多関節ロボット(SCARA)</h3>
+							<img src="media/image15.png">
+						</div>
+					</div>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<h3>パラレルリンクロボット</h3>
+							<img src="media/image24.png">
+						</div>
+						<div style="flex: 1;">
+							<h3>双腕ロボット</h3>
+							<img src="media/image21.png">
+						</div>
+					</div>
+					<div style="display: flex;">
+						<div style="flex: 1;">
+							<h3>協働ロボット</h3>
+							<img src="media/image18.png">
+						</div>
+						<div style="flex: 1;">
+							<h3>人型ロボット</h3>
+							<img src="media/image19.png">
+						</div>
+						<div style="flex: 1;">
+							<h3>移動ロボット</h3>
+							<img src="media/image25.png">
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>産業用ロボット系列</h2>
+					<ul>
+						<li>FANUC</li>
+						<li>Yaskawa</li>
+						<li>Kawasaki</li>
+						<li>Denso</li>
+						<li>Universal Robots</li>
+					</ul>
+				</section>
+				<section>
+					<h2>高機能協働ロボット</h2>
+					<ul>
+						<li>UR</li>
+						<li>Franka Emika</li>
+						<li>DOBOT</li>
+					</ul>
+				</section>
+				<section>
+					<h2>中華系ロボット</h2>
+					<ul>
+						<li>Unitree</li>
+						<li>Robosen</li>
+						<li>Xiaomi</li>
+					</ul>
+				</section>
+				<section>
+					<h2>教育用ロボット</h2>
+					<ul>
+						<li>LEGO Mindstorms</li>
+						<li>mBot</li>
+						<li>Raspberry Pi</li>
+					</ul>
+				</section>
+				<section>
+					<h2>ダントツのオススメロボット</h2>
+					<img src="media/image7.png">
+				</section>
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
