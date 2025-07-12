@@ -15,7 +15,7 @@ WAVE_OUTPUT_FILENAME = "output.wav"
 
 # モデルのロード
 # 新しいモデルを指定
-model_id = "openai/whisper-large-v3-turbo"
+model_id = "whisper-large-v3-turbo-ct2"
 
 # device="cuda" でGPUを使用します。CPUを使用する場合は device="cpu" に変更してください。
 # compute_typeは推論の精度を設定します。
@@ -23,12 +23,12 @@ model_id = "openai/whisper-large-v3-turbo"
 device = "cpu" # または "cpu"
 compute_type = "float32" # GPUなら"float16"、CPUなら"int8"や"float32"
 
-print(f"モデル {model_id} をダウンロード中...")
-model_path = snapshot_download(repo_id=model_id)
-print("モデルダウンロード完了。")
+print(f"モデル {model_id} をロード中...")
+# model_path = snapshot_download(repo_id=model_id)
+# print("モデルダウンロード完了。")
 
-print(f"モデル {model_path} をロード中...")
-model = WhisperModel(model_path, device=device, compute_type=compute_type)
+# print(f"モデル {model_path} をロード中...")
+model = WhisperModel(model_id, device=device, compute_type=compute_type)
 print("モデルロード完了。")
 
 # 録音処理 (変更なし)
