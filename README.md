@@ -14,6 +14,6 @@ slide_name_origin/slide_name_pptxはpptxファイルをzip展開してモノで�
 ## 音声指示だし
 sudo apt update
 sudo apt install ffmpeg
-pip install openai-whisper
-pip install pydub
-pip install pyaudio
+uv add openai-whisper
+uv add pydub
+uv add pyaudio
