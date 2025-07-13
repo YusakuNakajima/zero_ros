@@ -4,16 +4,9 @@
 
 ## スライド生成の指示だし
 
-slide_name=ゼロからのROS入門で置き換えてください
 
-slide_name_origin/slide_name_pptxはpptxファイルをzip展開してモノです
-これと同じ内容のreveal.jsのパワポを作ってもらえないでしょうかslide_name_origin/slide_name.txtにあります
-新しいディレクトリを作って、そのなかにhtmlやmediaのコピーをつくってください
+"origin_slides/ゼロからのROS入門~アーム位置制御とモーションプランニング~"にはpptxファイルをzip展開してモノとテキストだけ書きだしたtxtが入っています
+新しいディレクトリを作ってこれと同じ内容のreveal.jsのパワポを作ってもらえないでしょうか
+画像はmediaディレクトリに入っていますのでコピーして使ってください
+またテキストはtxtに書いてあるので、スライドの文章に使ってください
 
-
-## 音声指示だし
-sudo apt update
-sudo apt install ffmpeg
-uv add openai-whisper
-uv add pydub
-uv add pyaudio
