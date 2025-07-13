@@ -1,277 +1,278 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>ゼロからのロボットアーム入門</title>
+        <title>ゼロからのロボットアーム入門</title>
 
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
-
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/monokai.min.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>
-					<h1>ゼロからのロボットアーム入門</h1>
-					<p>大阪大学 中島優作</p>
-				</section>
-				<section>
-					<h2>はじめに</h2>
-					<ul>
-						<li>本講義の目標</li>
-						<li>対象者</li>
-						<li>内容
-							<ul>
-								<li>この資料はロボットの中でもロボットアームに特化した内容です</li>
-								<li>AVRなどの移動ロボットは対象外です</li>
-								<li>モノを掴んで運ぶなど簡単な動きを作ることを目的としています</li>
-							</ul>
-						</li>
-						<li>本講義でやらないこと</li>
-					</ul>
-					<h3>目次</h3>
-					<ul>
-						<li>ロボットアームの操作</li>
-						<li>ロボットアームの選定</li>
-					</ul>
-				</section>
-				<section>
-					<h2>ロボットアームの操作</h2>
-					<p>ロボットアームを動かすための基礎知識</p>
-				</section>
-				<section>
-					<h2>目的に応じたロボット制御方法</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<h3>手先位置・姿勢の制御</h3>
-							<img src="media/end_effector_position_control.jpg">
-							<p>本スライド</p>
-							<ul>
-								<li>まず動かしてみたい</li>
-								<li>直線等のシンプルなモーションでモノの移動ができれば十分</li>
-							</ul>
-						</div>
-						<div style="flex: 1;">
-							<h3>関節角度の制御</h3>
-							<img src="media/joint_angle_control.jpg">
-							<p>ROS入門へ(別スライド)</p>
-							<ul>
-								<li>複雑な動きや制御を作りたい</li>
-								<li>様々なメーカーのロボットやセンサを統合したシステムを作りたい</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>オススメ参考資料</h2>
-					<ul>
-						<li>ロボット制御学ハンドブック</li>
-						<li>ROSロボットプログラミング</li>
-					</ul>
-					<h3>産業用ロボットTheビギニング</h3>
-					<p>ここの資料で説明しているような産業用ロボットの基礎的な情報を網羅</p>
-					<h3>イラストで学ぶロボット工学</h3>
-					<p>初歩的な内容を網羅的に扱っていて<br>最初に読むのにちょうど良い<br>まずは8章まで読むのがよい<br>最も基本の位置制御まで扱っている</p>
-				</section>
-				<section>
-					<h2>ロボットを動かす方法</h2>
-					<ul>
-						<li>順運動学</li>
-						<li>逆運動学</li>
-						<li>ティーチングペンダント(TP)</li>
-						<li>プログラミング</li>
-					</ul>
-				</section>
-				<section>
-					<h2>ティーチングペンダントとプログラミング</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<h3>ティーチングペンダント(TP)</h3>
-							<ul>
-								<li>タブレット端末で操作</li>
-								<li>設定や動作テストで使用</li>
-							</ul>
-						</div>
-						<div style="flex: 1;">
-							<h3>プログラミング</h3>
-							<ul>
-								<li>研究で使うのは基本こっち</li>
-								<li>Python等で外部制御</li>
-								<li>センサ等との統合も可能</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>基本的な動かし方</h2>
-					<ul>
-						<li>Tool Center Point(TCP)を登録</li>
-						<li>座標をプログラムで指定</li>
-						<li>モーションの種類を選択</li>
-						<li>ROSやPythonで外部制御</li>
-					</ul>
-				</section>
-				<section>
-					<h2>ロボットアームの手先(TCP)</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/robot_arm_tcp_example1.png">
-							<p>乳棒とヘラがエンドエフェクタ<br>TCPは乳棒の先端</p>
-						</div>
-						<div style="flex: 1;">
-							<img src="media/robot_arm_tcp_example2.png">
-							<p>グリッパがエンドエフェクタ<br>TCPはグリッパの中央(が多い)</p>
-						</div>
-					</div>
-					<p>ロボットの手先の座標をTool Center Point(TCP)と言う</p>
-					<p>TCPは複数登録/切り替え可能<br>2つ以上ツールを持たせる場合に便利</p>
-				</section>
-				<section>
-					<h2>ロボットアームの構造</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/robot_arm_structure.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>ジョイント(関節)</h3>
-							<p>モーターが入っている関節部</p>
-							<h3>リンク</h3>
-							<p>ジョイントを繋ぐ部分</p>
-							<h3>エンドエフェクタ</h3>
-							<p>作業をする手先・付け替え可能</p>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>ロボットの座標(pose)</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/robot_pose_position.png">
-							<h3>関節座標系</h3>
-							<p>6軸(or 7軸)それぞれの角度を指定</p>
-							<p>図はhttps://www.mirai-lab.co.jp/all/1101より引用</p>
-						</div>
-						<div style="flex: 1;">
-							<img src="media/robot_pose_orientation.png">
-							<h3>ベース座標系</h3>
-							<p>ロボットの根本を基準に直交座標系で指定</p>
-						</div>
-						<div style="flex: 1;">
-							<img src="media/robot_pose_example.png">
-							<h3>ツール座標系</h3>
-							<p>ロボットの手先を基準に直交座標系で指定</p>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>姿勢=位置+向き</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/pose_definition.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>位置(position)</h3>
-							<p>XYZ座標</p>
-							<h3>向き(orientation)</h3>
-							<p>オイラー角(XYZ軸回転)</p>
-							<p>姿勢 = 位置 + 向き</p>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>ロボットアームの軸の数はなぜ6が多い</h2>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/monokai.min.css">
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h1>ゼロからのロボットアーム入門</h1>
+                    <p>大阪大学 中島優作</p>
+                </section>
+                <section>
+                    <h2>はじめに</h2>
+                    <ul>
+                        <li>本講義の目標</li>
+                        <li>対象者</li>
+                        <li>内容
+                            <ul>
+                                <li>この資料はロボットの中でもロボットアームに特化した内容です</li>
+                                <li>AVRなどの移動ロボットは対象外です</li>
+                                <li>モノを掴んで運ぶなど簡単な動きを作ることを目的としています</li>
+                            </ul>
+                        </li>
+                        <li>本講義でやらないこと</li>
+                    </ul>
+                    <h3>目次</h3>
+                    <ul>
+                        <li>ロボットアームの操作</li>
+                        <li>ロボットアームの選定</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>ロボットアームの操作</h2>
+                    <p>ロボットアームを動かすための基礎知識</p>
+                </section>
+                <section>
+                    <h2>目的に応じたロボット制御方法</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h3>手先位置・姿勢の制御</h3>
+                            <img src="media/end_effector_position_control.jpg">
+                            <p>本スライド</p>
+                            <ul>
+                                <li>まず動かしてみたい</li>
+                                <li>直線等のシンプルなモーションでモノの移動ができれば十分</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>関節角度の制御</h3>
+                            <img src="media/joint_angle_control.jpg">
+                            <p>ROS入門へ(別スライド)</p>
+                            <ul>
+                                <li>複雑な動きや制御を作りたい</li>
+                                <li>様々なメーカーのロボットやセンサを統合したシステムを作りたい</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>オススメ参考資料</h2>
+                    <ul>
+                        <li>ロボット制御学ハンドブック</li>
+                        <li>ROSロボットプログラミング</li>
+                    </ul>
+                    <h3>産業用ロボットTheビギニング</h3>
+                    <p>ここの資料で説明しているような産業用ロボットの基礎的な情報を網羅</p>
+                    <h3>イラストで学ぶロボット工学</h3>
+                    <p>初歩的な内容を網羅的に扱っていて<br>最初に読むのにちょうど良い<br>まずは8章まで読むのがよい<br>最も基本の位置制御まで扱っている</p>
+                </section>
+                <section>
+                    <h2>ロボットを動かす方法</h2>
+                    <ul>
+                        <li>順運動学</li>
+                        <li>逆運動学</li>
+                        <li>ティーチングペンダント(TP)</li>
+                        <li>プログラミング</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>ティーチングペンダントとプログラミング</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h3>ティーチングペンダント(TP)</h3>
+                            <ul>
+                                <li>タブレット端末で操作</li>
+                                <li>設定や動作テストで使用</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>プログラミング</h3>
+                            <ul>
+                                <li>研究で使うのは基本こっち</li>
+                                <li>Python等で外部制御</li>
+                                <li>センサ等との統合も可能</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>基本的な動かし方</h2>
+                    <ul>
+                        <li>Tool Center Point(TCP)を登録</li>
+                        <li>座標をプログラムで指定</li>
+                        <li>モーションの種類を選択</li>
+                        <li>ROSやPythonで外部制御</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>ロボットアームの手先(TCP)</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_tcp_example1.png">
+                            <p>乳棒とヘラがエンドエフェクタ<br>TCPは乳棒の先端</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_tcp_example2.png">
+                            <p>グリッパがエンドエフェクタ<br>TCPはグリッパの中央(が多い)</p>
+                        </div>
+                    </div>
+                    <p>ロボットの手先の座標をTool Center Point(TCP)と言う</p>
+                    <p>TCPは複数登録/切り替え可能<br>2つ以上ツールを持たせる場合に便利</p>
+                </section>
+                <section>
+                    <h2>ロボットアームの構造</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_structure.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>ジョイント(関節)</h3>
+                            <p>モーターが入っている関節部</p>
+                            <h3>リンク</h3>
+                            <p>ジョイントを繋ぐ部分</p>
+                            <h3>エンドエフェクタ</h3>
+                            <p>作業をする手先・付け替え可能</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>ロボットの座標(pose)</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_pose_position.png">
+                            <h3>関節座標系</h3>
+                            <p>6軸(or 7軸)それぞれの角度を指定</p>
+                            <p>図はhttps://www.mirai-lab.co.jp/all/1101より引用</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/robot_pose_orientation.png">
+                            <h3>ベース座標系</h3>
+                            <p>ロボットの根本を基準に直交座標系で指定</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/robot_pose_example.png">
+                            <h3>ツール座標系</h3>
+                            <p>ロボットの手先を基準に直交座標系で指定</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>姿勢=位置+向き</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/pose_definition.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>位置(position)</h3>
+                            <p>XYZ座標</p>
+                            <h3>向き(orientation)</h3>
+                            <p>オイラー角(XYZ軸回転)</p>
+                            <p>姿勢 = 位置 + 向き</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>ロボットアームの軸の数はなぜ6が多い</h2>
 					<p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元			3次元		6次元</p>
-					<p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
-					<p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/robot_arm_6axis_example1.png">
-							<p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6</p>
-						</div>
-						<div style="flex: 1;">
-							<img src="media/robot_arm_6axis_example2.png">
-							<p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>ロボットのモーションの種類</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/robot_motion_types.jpg">
-						</div>
-						<div style="flex: 1;">
-							<h3>PTP</h3>
-							<p>関節空間で最短・高速</p>
-							<h3>LIN</h3>
-							<p>直線動作・動きに制限</p>
-							<h3>CIRC</h3>
-							<p>円弧動作・障害物回避</p>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>連続的なロボットモーション</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/continuous_robot_motion.jpg">
-						</div>
-						<div style="flex: 1;">
-							<ul>
-								<li>複数のwaypoints指定で連続動作</li>
-								<li>各点で停止すると動きがガタつく</li>
-								<li>滑らかな動きには補間処理が必要</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>滑らかなモーションの作り方</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<iframe data-src="intaractive_app/ur_blend_radius.html" width="100%" height="400px" frameborder="0"></iframe>
-						</div>
-						<div style="flex: 1;">
-							<ul>
-								<li>スプライン補間、最小躍度軌道</li>
-								<li>厳密にwaypointsを通らない処理</li>
-								<li>メーカーごとに呼び方が異なる</li>
-								<li>例：Denso(パス動作)、UR(ブレンド半径)</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>ロボットアームの精度について</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/robot_accuracy_example1.png">
-						</div>
-						<div style="flex: 1;">
-							<ul>
-								<li>仕様書の精度≠位置決め精度</li>
-								<li>繰り返し精度のみ保証</li>
-								<li>電源を切ると位置がリセット</li>
-								<li>高精度には電源をつけたまま運用</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>URのプログラム例</h2>
-					<p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
-					<p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
-					<ul>
-						<li>PTP = moveJ</li>
-						<li>LIN = moveL</li>
-						<li>CIRC = moveC</li>
-					</ul>
-					<pre><code class="language-python">
+                    <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
+                    <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_6axis_example1.png">
+                            <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_6axis_example2.png">
+                            <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>ロボットのモーションの種類</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_motion_types.jpg">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>PTP</h3>
+                            <p>関節空間で最短・高速</p>
+                            <h3>LIN</h3>
+                            <p>直線動作・動きに制限</p>
+                            <h3>CIRC</h3>
+                            <p>円弧動作・障害物回避</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>連続的なロボットモーション</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/continuous_robot_motion.jpg">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>複数のwaypoints指定で連続動作</li>
+                                <li>各点で停止すると動きがガタつく</li>
+                                <li>滑らかな動きには補間処理が必要</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>滑らかなモーションの作り方</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <iframe data-src="intaractive_app/ur_blend_radius.html" width="100%" height="400px" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>スプライン補間、最小躍度軌道</li>
+                                <li>厳密にwaypointsを通らない処理</li>
+                                <li>メーカーごとに呼び方が異なる</li>
+                                <li>例：Denso(パス動作)、UR(ブレンド半径)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>ロボットアームの精度について</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_accuracy_example1.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>仕様書の精度≠位置決め精度</li>
+                                <li>繰り返し精度のみ保証</li>
+                                <li>電源を切ると位置がリセット</li>
+                                <li>高精度には電源をつけたまま運用</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>URのプログラム例</h2>
+                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
+                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
+                    <ul>
+                        <li>PTP = moveJ</li>
+                        <li>LIN = moveL</li>
+                        <li>CIRC = moveC</li>
+                    </ul>
+                    <pre><code class="language-python">
 import rtde_control
 import rtde_receive
 import time
@@ -300,169 +301,172 @@ try:
 
 finally:
     rtde_r.disconnect()
-					</code></pre>
-					<p>安全確認してから実行してください</p>
-				</section>
-				<section>
-					<h2>以上でロボットの基本動作はできるはず</h2>
-					<p>Let’s enjoy robot!</p>
-					<p>もっと複雑な制御やセンサの統合をやりたい方は、<br>「ゼロからのROS入門」へ</p>
-					<p>粉体粉砕をしたい方は<br>「粉体粉砕パッケージの解説」へ</p>
-				</section>
-				<section>
-					<h2>ロボットアーム選定</h2>
-					<p>ロボットアームの選び方</p>
-					<p>ここでは協働ロボットを対象にしています</p>
-				</section>
-				<section>
-					<h2>ざっくり４種類</h2>
-					<p>高価格<br>多機能<br>(≠多用途)</p>
-					<p>低価格<br>単機能</p>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<h3>垂直多関節ロボット</h3>
-							<img src="media/vertical_multi_joint_robot.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>水平多関節ロボット(SCARA)</h3>
-							<img src="media/horizontal_multi_joint_robot.png">
-						</div>
-					</div>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<h3>パラレルリンクロボット</h3>
-							<img src="media/parallel_link_robot.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>双腕ロボット</h3>
-							<img src="media/dual_arm_robot.png">
-						</div>
-					</div>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<h3>協働ロボット</h3>
-							<img src="media/collaborative_robot.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>人型ロボット</h3>
-							<img src="media/humanoid_robot.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>移動ロボット</h3>
-							<img src="media/mobile_robot.png">
-						</div>
-					</div>
-				</section>
-				<section>
-					<h2>産業用ロボット系列</h2>
-					<ul>
-						<li>FANUC、Yaskawa、Kawasaki、Denso、UR</li>
-						<li>ハードウェアがしっかりしている</li>
-						<li>産業用ロボット+安全機能</li>
-						<li>FAベースで使いにくい場合も</li>
-						<li>外部制御が限定的</li>
-					</ul>
-				</section>
-				<section>
-					<h2>高機能協働ロボット</h2>
-					<ul>
-						<li>UR、Franka Emika、DOBOT</li>
-						<li>機能を妥協していない協働ロボット</li>
-						<li>マニピュレーション研究でよく使用</li>
-						<li>オープンな外部制御</li>
-						<li>ROSから全機能制御可能</li>
-					</ul>
-				</section>
-				<section>
-					<h2>中華系ロボット</h2>
-					<ul>
-						<li>Unitree、Robosen、Xiaomi</li>
-						<li>とにかく安価</li>
-						<li>ハードウェア品質は控えめ</li>
-						<li>用途によっては十分</li>
-						<li>Pythonからの制御が整備</li>
-						<li>外部制御性は限定的</li>
-					</ul>
-				</section>
-				<section>
-					<h2>教育用ロボット</h2>
-					<ul>
-						<li>LEGO Mindstorms、mBot、Raspberry Pi</li>
-						<li>3Dプリンタ使用で低コスト</li>
-						<li>剛性低く精密制御は困難</li>
-						<li>原理検証用途</li>
-						<li>Python制御が整備済み</li>
-						<li>学習向け(実務には不向き)</li>
-					</ul>
-				</section>
-				<section>
-					<h2>ダントツのオススメロボット</h2>
-					<div style="display: flex;">
-						<div style="flex: 1;">
-							<img src="media/vertical_multi_joint_robot.png">
-						</div>
-						<div style="flex: 1;">
-							<h3>ユニバーサルロボット</h3>
-							<ul>
-								<li>研究者からユーザまでオススメ</li>
-								<li>圧倒的に使いやすい</li>
-								<li>ロボットが置物になりにくい</li>
-								<li>値段がボトルネック</li>
-								<li>2025年時点で400万円~</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-			</div>
-		</div>
+                    </code></pre>
+                    <p>安全確認してから実行してください</p>
+                </section>
+                <section>
+                    <h2>以上でロボットの基本動作はできるはず</h2>
+                    <p>Let’s enjoy robot!</p>
+                    <p>もっと複雑な制御やセンサの統合をやりたい方は、<br>「ゼロからのROS入門」へ</p>
+                    <p>粉体粉砕をしたい方は<br>「粉体粉砕パッケージの解説」へ</p>
+                </section>
+                <section>
+                    <h2>ロボットアーム選定</h2>
+                    <p>ロボットアームの選び方</p>
+                    <p>ここでは協働ロボットを対象にしています</p>
+                </section>
+                <section>
+                    <h2>ざっくり４種類</h2>
+                    <p>高価格<br>多機能<br>(≠多用途)</p>
+                    <p>低価格<br>単機能</p>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h3>垂直多関節ロボット</h3>
+                            <img src="media/vertical_multi_joint_robot.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>水平多関節ロボット(SCARA)</h3>
+                            <img src="media/horizontal_multi_joint_robot.png">
+                        </div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h3>パラレルリンクロボット</h3>
+                            <img src="media/parallel_link_robot.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>双腕ロボット</h3>
+                            <img src="media/dual_arm_robot.png">
+                        </div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h3>協働ロボット</h3>
+                            <img src="media/collaborative_robot.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>人型ロボット</h3>
+                            <img src="media/humanoid_robot.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>移動ロボット</h3>
+                            <img src="media/mobile_robot.png">
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>産業用ロボット系列</h2>
+                    <ul>
+                        <li>FANUC、Yaskawa、Kawasaki、Denso、UR</li>
+                        <li>ハードウェアがしっかりしている</li>
+                        <li>産業用ロボット+安全機能</li>
+                        <li>FAベースで使いにくい場合も</li>
+                        <li>外部制御が限定的</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>高機能協働ロボット</h2>
+                    <ul>
+                        <li>UR、Franka Emika、DOBOT</li>
+                        <li>機能を妥協していない協働ロボット</li>
+                        <li>マニピュレーション研究でよく使用</li>
+                        <li>オープンな外部制御</li>
+                        <li>ROSから全機能制御可能</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>中華系ロボット</h2>
+                    <ul>
+                        <li>Unitree、Robosen、Xiaomi</li>
+                        <li>とにかく安価</li>
+                        <li>ハードウェア品質は控えめ</li>
+                        <li>用途によっては十分</li>
+                        <li>Pythonからの制御が整備</li>
+                        <li>外部制御性は限定的</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>教育用ロボット</h2>
+                    <ul>
+                        <li>LEGO Mindstorms、mBot、Raspberry Pi</li>
+                        <li>3Dプリンタ使用で低コスト</li>
+                        <li>剛性低く精密制御は困難</li>
+                        <li>原理検証用途</li>
+                        <li>Python制御が整備済み</li>
+                        <li>学習向け(実務には不向き)</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>ダントツのオススメロボット</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/vertical_multi_joint_robot.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>ユニバーサルロボット</h3>
+                            <ul>
+                                <li>研究者からユーザまでオススメ</li>
+                                <li>圧倒的に使いやすい</li>
+                                <li>ロボットが置物になりにくい</li>
+                                <li>値段がボトルネック</li>
+                                <li>2025年時点で400万円~</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				// 基本的な表示設定
-				controls: true,  // ナビゲーションUIを表示
-				progress: true,  // 進捗バーを表示
-				center: true,    // スライドを中央揃え
-				hash: true,      // URLにスライド番号を反映
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
 
-				// プラグインの有効化
-				plugins: [
-					RevealMarkdown,
-					RevealHighlight,
-					RevealNotes,
-					RevealZoom,      // Zoomプラグインを有効化
-					RevealMenu,      // Menuプラグインを有効化
-					RevealChalkboard // Chalkboardプラグインを有効化
-				],
+        <script>
+            // More info about initialization & config:
+            // - https://revealjs.com/initialization/
+            // - https://revealjs.com/config/
+            Reveal.initialize({
+                // 基本的な表示設定
+                controls: true,   // ナビゲーションUIを表示
+                progress: true,   // 進捗バーを表示
+                center: true,     // スライドを中央揃え
+                hash: true,       // URLにスライド番号を反映
 
-				// 各プラグインの設定（任意）
-				menu: {
-					numbers: true, // 目次にスライド番号を表示
-					title: 'プレゼンテーション目次' // メニューのタイトル
-				},
-				chalkboard: {
-					boardmarkerWidth: 3,
-					chalkWidth: 7,
-					transition: 200,
-					theme: "chalkboard"
-				},
+                // プラグインの有効化
+                plugins: [
+                    RevealMarkdown,
+                    RevealHighlight,
+                    RevealNotes,
+                    RevealZoom,      // Zoomプラグインを有効化
+                    RevealMenu,      // Menuプラグインを有効化
+                    RevealChalkboard // Chalkboardプラグインを有効化
+                ],
 
-				// キーボードショートカットのカスタマイズ
-				keyboard: {
-					'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+                // 各プラグインの設定（任意）
+                menu: {
+                    numbers: true, // 目次にスライド番号を表示
+                    title: 'プレゼンテーション目次' // メニューのタイトル
+                },
+                chalkboard: {
+                    boardmarkerWidth: 3,
+                    chalkWidth: 7,
+                    transition: 200,
+                    theme: "chalkboard"
+                },
 
-					// その他のChalkboardショートカットはデフォルトで有効
-				}
-			});
-		</script>
-	</body>
+                // キーボードショートカットのカスタマイズ
+                keyboard: {
+                    'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+
+                    // その他のChalkboardショートカットはデフォルトで有効
+                }
+            });
+        </script>
+    </body>
 </html>
