@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オイラー角 vs クォータニオン：姿勢補間の比較</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            overscroll-behavior: none;
+        }
+        .slider-label {
+            width: 80px;
+        }
+        .slider-value {
+            width: 50px;
+            text-align: right;
+        }
+        .control-panel {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 overflow-hidden">
+    <div id="app-container" class="w-full h-screen flex flex-col md:flex-row">
+        
+        <!-- 3D Canvas -->
+        <div id="canvas-container" class="flex-grow h-1/2 md:h-full relative">
+            <canvas id="main-canvas"></canvas>
+            <div class="absolute top-4 left-4 text-white p-2 rounded-lg bg-black bg-opacity-50">
+                <h2 class="text-lg font-bold">オイラー角 (ジンバルロックの問題)</h2>
+            </div>
+            <div class="absolute top-4 right-4 text-white p-2 rounded-lg bg-black bg-opacity-50">
+                <h2 class="text-lg font-bold">クォータニオン (SLERP)</h2>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="w-full md:w-96 p-4 overflow-y-auto h-1/2 md:h-full flex flex-col space-y-4 control-panel text-gray-800 border-t-2 md:border-l-2 md:border-t-0 border-gray-700">
+            <h1 class="text-2xl font-bold text-center">姿勢補間コントローラー</h1>
+            
+            <div class="p-4 bg-gray-200 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">開始角度 (°)</h3>
+                <div id="start-controls"></div>
+            </div>
+
+            <div class="p-4 bg-gray-200 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">終了角度 (°)</h3>
+                <div id="end-controls"></div>
+            </div>
+
+            <div class="p-4 bg-gray-200 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">補間 (t)</h3>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm">0.0</span>
+                    <input type="range" id="interpolation-slider" min="0" max="1" step="0.01" value="0" class="w-full">
+                    <span class="text-sm">1.0</span>
+                </div>
+            </div>
+
+            <button id="play-animation-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-lg">
+                アニメーション再生
+            </button>
+            
+            <button id="reset-pose-btn" class="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors duration-200 text-lg">
+                初期姿勢に戻す
+            </button>
+
+            <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded-lg flex-grow">
+                <h3 class="font-bold">解説</h3>
+                <p class="text-sm mt-1">
+                    <strong>オイラー角:</strong> X, Y, Z軸周りの回転を個別に指定する方法。直感的ですが、特定の角度（例: X軸を±90°回転）でY軸とZ軸の回転が同じ効果になり、自由な回転ができなくなる「ジンバルロック」問題が発生します。左のオブジェクトはこの現象により不自然な動きをすることがあります。
+                </p>
+                <p class="text-sm mt-2">
+                    <strong>クォータニオン:</strong> 4つの数値で3次元空間の回転を表現する方法。ジンバルロックを回避でき、常に2つの姿勢間の最短かつ滑らかな補間（SLERP）を実現します。右のオブジェクトが示すように、自然な回転アニメーションに不可欠です。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Global variables ---
+        let scene, camera, renderer, controls;
+        let eulerObject, quaternionObject;
+        
+        const startEuler = new THREE.Euler(0, 0, 0, 'XYZ');
+        const endEuler = new THREE.Euler(Math.PI / 2, Math.PI, 0, 'XYZ');
+
+        const interpolationSlider = document.getElementById('interpolation-slider');
+        const playBtn = document.getElementById('play-animation-btn');
+        const resetBtn = document.getElementById('reset-pose-btn'); // Added reset button
+
+        // --- Initialization ---
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111827); // bg-gray-900
+
+            // Camera
+            const container = document.getElementById('canvas-container');
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 1.5, 5);
+
+            // Renderer
+            const canvas = document.getElementById('main-canvas');
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+
+            // Create objects
+            createObjects();
+            
+            // Create UI controls
+            createAngleControls('start', document.getElementById('start-controls'), startEuler);
+            createAngleControls('end', document.getElementById('end-controls'), endEuler);
+            
+            // Set initial state
+            resetPoses(); // Use reset function for initial setup
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            interpolationSlider.addEventListener('input', (e) => updateRotations(parseFloat(e.target.value)));
+            playBtn.addEventListener('click', playAnimation);
+            resetBtn.addEventListener('click', resetPoses); // Added event listener
+        }
+        
+        // --- Create 3D Objects ---
+        function createObjects() {
+            // Use a cone geometry to better visualize orientation
+            const geometry = new THREE.ConeGeometry(0.5, 1.5, 32);
+            geometry.rotateX(Math.PI / 2); // Point along Z axis
+
+            // Euler Object (Left)
+            const eulerMaterial = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.5 }); // blue-500
+            eulerObject = new THREE.Mesh(geometry, eulerMaterial);
+            eulerObject.position.x = -2;
+            scene.add(eulerObject);
+
+            // Quaternion Object (Right)
+            const quaternionMaterial = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.5 }); // green-600
+            quaternionObject = new THREE.Mesh(geometry.clone(), quaternionMaterial);
+            quaternionObject.position.x = 2;
+            scene.add(quaternionObject);
+            
+            // Add coordinate axes helpers for clarity
+            const axesHelper = new THREE.AxesHelper(1);
+            eulerObject.add(axesHelper.clone());
+            quaternionObject.add(axesHelper.clone());
+        }
+
+        // --- UI Control Generation ---
+        function createAngleControls(type, container, euler) {
+            ['x', 'y', 'z'].forEach(axis => {
+                const controlDiv = document.createElement('div');
+                controlDiv.className = 'flex items-center space-x-2 my-1';
+                
+                const label = document.createElement('label');
+                label.className = 'slider-label';
+                label.textContent = `${axis.toUpperCase()}軸:`;
+                
+                const slider = document.createElement('input');
+                slider.type = 'range';
+                slider.min = -180;
+                slider.max = 180;
+                slider.step = 1;
+                slider.value = THREE.MathUtils.radToDeg(euler[axis]);
+                slider.className = 'w-full';
+                
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'slider-value';
+                valueSpan.textContent = `${slider.value}°`;
+                
+                slider.addEventListener('input', () => {
+                    const degrees = parseFloat(slider.value);
+                    valueSpan.textContent = `${degrees}°`;
+                    euler[axis] = THREE.MathUtils.degToRad(degrees);
+                    updateRotations(parseFloat(interpolationSlider.value));
+                });
+                
+                controlDiv.appendChild(label);
+                controlDiv.appendChild(slider);
+                controlDiv.appendChild(valueSpan);
+                container.appendChild(controlDiv);
+            });
+        }
+
+        // --- Core Logic: Interpolation ---
+        function updateRotations(t) {
+            interpolationSlider.value = t;
+
+            // 1. Euler Interpolation (Linear)
+            const interpolatedEuler = new THREE.Euler(
+                (1 - t) * startEuler.x + t * endEuler.x,
+                (1 - t) * startEuler.y + t * endEuler.y,
+                (1 - t) * startEuler.z + t * endEuler.z,
+                'XYZ' // Order is important
+            );
+            eulerObject.rotation.copy(interpolatedEuler);
+
+            // 2. Quaternion Interpolation (SLERP)
+            const startQuat = new THREE.Quaternion().setFromEuler(startEuler);
+            const endQuat = new THREE.Quaternion().setFromEuler(endEuler);
+            
+            quaternionObject.quaternion.copy(startQuat).slerp(endQuat, t);
+        }
+
+        // --- Animation & State Management ---
+        function resetPoses() {
+            // Reset start angle sliders
+            const startSliders = document.querySelectorAll('#start-controls input');
+            const startValues = [0, 0, 0];
+            startSliders.forEach((slider, index) => {
+                slider.value = startValues[index];
+                slider.dispatchEvent(new Event('input')); 
+            });
+
+            // Reset end angle sliders
+            const endSliders = document.querySelectorAll('#end-controls input');
+            const endValues = [90, 180, 180];
+            endSliders.forEach((slider, index) => {
+                slider.value = endValues[index];
+                slider.dispatchEvent(new Event('input'));
+            });
+            
+            // Reset interpolation slider and update view
+            interpolationSlider.value = 0;
+            updateRotations(0);
+        }
+
+        function playAnimation() {
+            playBtn.disabled = true;
+            playBtn.textContent = '再生中...';
+            
+            let t = 0;
+            const duration = 2000; // 2 seconds
+            let startTime = null;
+
+            function animateStep(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                t = Math.min(progress / duration, 1);
+                
+                updateRotations(t);
+                
+                if (t < 1) {
+                    requestAnimationFrame(animateStep);
+                } else {
+                    playBtn.disabled = false;
+                    playBtn.textContent = 'アニメーション再生';
+                }
+            }
+            requestAnimationFrame(animateStep);
+        }
+
+        // --- Rendering Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- Event Handlers ---
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // --- Start ---
+        init();
+        animate();
+
+    </script>
+</body>
+</html>

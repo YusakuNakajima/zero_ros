@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ヤコビアンと手先速度の可視化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+        .matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            border-left: 2px solid #6b7280;
+            border-right: 2px solid #6b7280;
+            padding: 10px;
+            border-radius: 8px;
+            width: 180px;
+            justify-items: center;
+        }
+        .matrix-cell {
+            background-color: #374151;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        .vector {
+            display: grid;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10px;
+            border-left: 2px solid #6b7280;
+            border-right: 2px solid #6b7280;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100px;
+        }
+        .vector-cell {
+            background-color: #374151;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col lg:flex-row h-screen overflow-hidden">
+
+    <!-- コントロールパネル -->
+    <div class="w-full lg:w-1/3 p-6 bg-gray-800 shadow-lg overflow-y-auto">
+        <h1 class="text-2xl font-bold mb-2 text-cyan-400">ヤコビアン可視化ツール</h1>
+        <p class="text-sm text-gray-400 mb-6">ロボットアームの関節速度と手先速度の関係を探る</p>
+
+        <div class="space-y-6">
+            <!-- 関節の角度制御 -->
+            <div>
+                <h2 class="text-lg font-semibold mb-3 text-gray-200">関節角度 (θ)</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="theta1" class="block text-sm font-medium text-gray-300">関節1 (θ1): <span id="theta1_val">0</span>°</label>
+                        <input type="range" id="theta1" min="-180" max="180" value="30" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="theta2" class="block text-sm font-medium text-gray-300">関節2 (θ2): <span id="theta2_val">0</span>°</label>
+                        <input type="range" id="theta2" min="-180" max="180" value="45" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 関節の速度制御 -->
+            <div>
+                <h2 class="text-lg font-semibold mb-3 text-gray-200">関節角速度 (dθ/dt)</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="d_theta1" class="block text-sm font-medium text-gray-300">関節1速度 (dθ1): <span id="d_theta1_val">0</span></label>
+                        <input type="range" id="d_theta1" min="-100" max="100" value="10" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="d_theta2" class="block text-sm font-medium text-gray-300">関節2速度 (dθ2): <span id="d_theta2_val">0</span></label>
+                        <input type="range" id="d_theta2" min="-100" max="100" value="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+                 <button id="reset-speed" class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    速度をゼロにリセット
+                </button>
+            </div>
+
+            <!-- データ表示 -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-4 text-gray-200">計算結果</h2>
+                <div class="flex items-center justify-around space-x-2 text-center">
+                    <!-- 手先速度ベクトル -->
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">手先速度<br>[vx, vy]</p>
+                        <div class="vector">
+                            <div id="vx_val" class="vector-cell">0.00</div>
+                            <div id="vy_val" class="vector-cell">0.00</div>
+                        </div>
+                    </div>
+                    <div class="text-2xl text-gray-500">=</div>
+                    <!-- ヤコビアン -->
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">ヤコビアン J(θ)</p>
+                        <div class="matrix">
+                            <div id="j11" class="matrix-cell">0.00</div>
+                            <div id="j12" class="matrix-cell">0.00</div>
+                            <div id="j21" class="matrix-cell">0.00</div>
+                            <div id="j22" class="matrix-cell">0.00</div>
+                        </div>
+                    </div>
+                    <div class="text-2xl text-gray-500">×</div>
+                    <!-- 関節角速度ベクトル -->
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">関節速度<br>[dθ1, dθ2]</p>
+                        <div class="vector">
+                            <div id="d_theta1_vec" class="vector-cell">0.00</div>
+                            <div id="d_theta2_vec" class="vector-cell">0.00</div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-4 text-xs text-gray-500 text-center font-mono">
+                    <p>手先速度 = J(θ) × 関節速度</p>
+                </div>
+                <!-- 注意書きを追加 -->
+                <div class="mt-4 pt-4 border-t border-gray-700">
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        <span class="font-bold text-cyan-400">ヤコビアン J(θ) とは:</span><br>
+                        現在の関節角度 (θ) における「姿勢」を考慮し、各関節の回転速度 (dθ/dt) を手先のXY方向の速度 (vx, vy) に変換するための行列です。アームの姿勢が変わると、この行列の値も変化します。
+                    </p>
+                </div>
+            </div>
+             <!-- 手先位置表示 -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                 <h2 class="text-lg font-semibold mb-2 text-gray-200">手先位置 (x, y)</h2>
+                 <p class="text-center font-mono text-cyan-400 text-lg">
+                    (<span id="pos_x">0.00</span>, <span id="pos_y">0.00</span>)
+                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D表示エリア -->
+    <div id="canvas-container" class="w-full lg:w-2/3 h-full bg-black"></div>
+
+    <script type="module">
+        // --- Three.jsの初期設定 ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(
+            container.clientWidth / -2, container.clientWidth / 2,
+            container.clientHeight / 2, container.clientHeight / -2,
+            1, 1000
+        );
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        // --- DOM要素の取得 ---
+        const theta1Slider = document.getElementById('theta1');
+        const theta2Slider = document.getElementById('theta2');
+        const dTheta1Slider = document.getElementById('d_theta1');
+        const dTheta2Slider = document.getElementById('d_theta2');
+        
+        const theta1Val = document.getElementById('theta1_val');
+        const theta2Val = document.getElementById('theta2_val');
+        const dTheta1Val = document.getElementById('d_theta1_val');
+        const dTheta2Val = document.getElementById('d_theta2_val');
+
+        const j11 = document.getElementById('j11');
+        const j12 = document.getElementById('j12');
+        const j21 = document.getElementById('j21');
+        const j22 = document.getElementById('j22');
+
+        const vxVal = document.getElementById('vx_val');
+        const vyVal = document.getElementById('vy_val');
+        const dTheta1Vec = document.getElementById('d_theta1_vec');
+        const dTheta2Vec = document.getElementById('d_theta2_vec');
+        
+        const posXVal = document.getElementById('pos_x');
+        const posYVal = document.getElementById('pos_y');
+
+        const resetSpeedBtn = document.getElementById('reset-speed');
+
+        // --- 定数と変数 ---
+        const l1 = 100; // リンク1の長さ
+        const l2 = 80;  // リンク2の長さ
+        const VELOCITY_SCALE = 5; // 速度ベクトルの表示倍率
+        let armGroup, velocityArrow;
+
+        // --- 初期化処理 ---
+        function init() {
+            // レンダラーの設定
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // カメラの設定
+            camera.position.z = 500;
+            
+            // グリッドの追加
+            const gridHelper = new THREE.GridHelper(1000, 20, 0x444444, 0x444444);
+            gridHelper.rotation.x = Math.PI / 2;
+            scene.add(gridHelper);
+            
+            // 座標軸の追加 (X:赤, Y:緑)
+            const axesHelper = new THREE.AxesHelper(50);
+            scene.add(axesHelper);
+
+            // アームの作成
+            createArm();
+            
+            // 速度ベクトルの矢印を作成
+            const dir = new THREE.Vector3(1, 0, 0);
+            const origin = new THREE.Vector3(0, 0, 0);
+            const length = 1;
+            const hex = 0xffff00; // 黄色
+            velocityArrow = new THREE.ArrowHelper(dir, origin, length, hex, 20, 10);
+            scene.add(velocityArrow);
+
+            // イベントリスナーの設定
+            theta1Slider.addEventListener('input', updateUI);
+            theta2Slider.addEventListener('input', updateUI);
+            dTheta1Slider.addEventListener('input', updateUI);
+            dTheta2Slider.addEventListener('input', updateUI);
+            resetSpeedBtn.addEventListener('click', () => {
+                dTheta1Slider.value = 0;
+                dTheta2Slider.value = 0;
+                updateUI();
+            });
+            window.addEventListener('resize', onWindowResize, false);
+
+            // 初期表示更新
+            updateUI();
+            animate();
+        }
+
+        // --- アームのジオメトリ作成 ---
+        function createArm() {
+            armGroup = new THREE.Group();
+
+            // リンク1
+            const link1Geom = new THREE.BoxGeometry(l1, 10, 10);
+            const link1Mat = new THREE.MeshBasicMaterial({ color: 0x00aaff });
+            const link1Mesh = new THREE.Mesh(link1Geom, link1Mat);
+            link1Mesh.position.x = l1 / 2;
+            
+            // リンク2
+            const link2Geom = new THREE.BoxGeometry(l2, 8, 8);
+            const link2Mat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const link2Mesh = new THREE.Mesh(link2Geom, link2Mat);
+            link2Mesh.position.x = l2 / 2;
+            
+            // 関節
+            const joint1Geom = new THREE.CircleGeometry(8, 32);
+            const joint1Mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const joint1Mesh = new THREE.Mesh(joint1Geom, joint1Mat);
+
+            const joint2Geom = new THREE.CircleGeometry(6, 32);
+            const joint2Mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const joint2Mesh = new THREE.Mesh(joint2Geom, joint2Mat);
+
+            // 階層構造の作成
+            const link2Group = new THREE.Group();
+            link2Group.position.x = l1;
+            link2Group.add(link2Mesh);
+            link2Group.add(joint2Mesh);
+
+            armGroup.add(joint1Mesh);
+            armGroup.add(link1Mesh);
+            armGroup.add(link2Group);
+            
+            armGroup.name = "arm";
+            link1Mesh.name = "link1";
+            link2Group.name = "link2Group";
+
+            scene.add(armGroup);
+        }
+
+        // --- UIと計算の更新 ---
+        function updateUI() {
+            // スライダーの値を取得
+            const t1_deg = parseFloat(theta1Slider.value);
+            const t2_deg = parseFloat(theta2Slider.value);
+            const dt1_raw = parseFloat(dTheta1Slider.value);
+            const dt2_raw = parseFloat(dTheta2Slider.value);
+
+            // ラジアンに変換
+            const t1 = THREE.MathUtils.degToRad(t1_deg);
+            const t2 = THREE.MathUtils.degToRad(t2_deg);
+            // 速度はスケールを調整
+            const dt1 = dt1_raw / 1000.0; 
+            const dt2 = dt2_raw / 1000.0;
+
+            // UIの値を更新
+            theta1Val.textContent = t1_deg.toFixed(0);
+            theta2Val.textContent = t2_deg.toFixed(0);
+            dTheta1Val.textContent = dt1_raw.toFixed(0);
+            dTheta2Val.textContent = dt2_raw.toFixed(0);
+            dTheta1Vec.textContent = dt1.toFixed(3);
+            dTheta2Vec.textContent = dt2.toFixed(3);
+
+            // --- 順運動学 (Forward Kinematics) ---
+            // 手先の位置を計算
+            const x = l1 * Math.cos(t1) + l2 * Math.cos(t1 + t2);
+            const y = l1 * Math.sin(t1) + l2 * Math.sin(t1 + t2);
+            posXVal.textContent = x.toFixed(2);
+            posYVal.textContent = y.toFixed(2);
+
+            // --- ヤコビアンの計算 ---
+            const s1 = Math.sin(t1);
+            const c1 = Math.cos(t1);
+            const s12 = Math.sin(t1 + t2);
+            const c12 = Math.cos(t1 + t2);
+
+            const j11_val = -l1 * s1 - l2 * s12;
+            const j12_val = -l2 * s12;
+            const j21_val =  l1 * c1 + l2 * c12;
+            const j22_val =  l2 * c12;
+            
+            // ヤコビアンの表示を更新
+            j11.textContent = j11_val.toFixed(2);
+            j12.textContent = j12_val.toFixed(2);
+            j21.textContent = j21_val.toFixed(2);
+            j22.textContent = j22_val.toFixed(2);
+
+            // --- 手先速度の計算 ---
+            // v = J * dθ
+            const vx = j11_val * dt1 + j12_val * dt2;
+            const vy = j21_val * dt1 + j22_val * dt2;
+
+            // 手先速度の表示を更新
+            vxVal.textContent = vx.toFixed(2);
+            vyVal.textContent = vy.toFixed(2);
+            
+            // 3Dモデルの更新
+            updateArmModel(t1, t2, x, y, vx, vy);
+        }
+        
+        // --- 3Dモデルの更新 ---
+        function updateArmModel(t1, t2, x, y, vx, vy) {
+            const link1 = armGroup.getObjectByName("link1");
+            const link2Group = armGroup.getObjectByName("link2Group");
+
+            if(link1 && link2Group) {
+                armGroup.rotation.z = t1;
+                link2Group.rotation.z = t2;
+            }
+            
+            // 速度ベクトルの更新
+            const velocityVector = new THREE.Vector3(vx, vy, 0);
+            const velocityMagnitude = velocityVector.length();
+            
+            velocityArrow.position.set(x, y, 0);
+            velocityArrow.setDirection(velocityVector.normalize());
+            velocityArrow.setLength(velocityMagnitude * VELOCITY_SCALE, 20, 10);
+            velocityArrow.visible = velocityMagnitude > 0.001; // 小さすぎる場合は非表示
+        }
+        
+        // --- アニメーションループ ---
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 速度に基づいて角度を自動更新
+            const dt1_raw = parseFloat(dTheta1Slider.value);
+            const dt2_raw = parseFloat(dTheta2Slider.value);
+            
+            let current_t1 = parseFloat(theta1Slider.value);
+            let current_t2 = parseFloat(theta2Slider.value);
+            
+            current_t1 += dt1_raw * 0.05; // 速度に応じて角度を変化させる
+            current_t2 += dt2_raw * 0.05;
+            
+            // 角度が-180~180の範囲に収まるように調整
+            current_t1 = (current_t1 + 180) % 360 - 180;
+            current_t2 = (current_t2 + 180) % 360 - 180;
+            
+            theta1Slider.value = current_t1;
+            theta2Slider.value = current_t2;
+
+            updateUI(); // 毎フレームUIと計算を更新
+            renderer.render(scene, camera);
+        }
+
+        // --- ウィンドウリサイズ処理 ---
+        function onWindowResize() {
+            camera.left = container.clientWidth / -2;
+            camera.right = container.clientWidth / 2;
+            camera.top = container.clientHeight / 2;
+            camera.bottom = container.clientHeight / -2;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // --- 実行 ---
+        init();
+
+    </script>
+</body>
+</html>
