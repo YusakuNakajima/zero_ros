@@ -6,6 +6,7 @@
     <title>逆ヤコビアンとインバースキネマティクスの可視化</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -147,6 +148,12 @@
                  </div>
                  <p class="text-xs text-gray-500 text-center mt-2">※このデモでは |det(J)| が5000未満で「特異点に近い」、100未満で「特異点」と判定されます。</p>
             </div>
+
+            <!-- ★追加: 関節速度プロット -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-2 text-gray-200">関節速度の履歴プロット</h2>
+                <canvas id="velocityChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -193,22 +200,27 @@
         const resetPostureBtn = document.getElementById('reset-posture');
 
         // --- 定数と変数 ---
-        const l1 = 100; // リンク1の長さ
-        const l2 = 80;  // リンク2の長さ
-        const IK_GAIN = 0.5; // IKのゲイン（大きいほど速く目標に近づく）
-        const IK_TOLERANCE = 1; // IKの許容誤差
-        const SINGULARITY_THRESHOLD_STOP = 100; // IKを停止する行列式の閾値
-        const SINGULARITY_THRESHOLD_WARN = 5000; // 警告を表示する行列式の閾値
+        const l1 = 100;
+        const l2 = 80;
+        const IK_GAIN = 0.5;
+        const IK_TOLERANCE = 1;
+        const SINGULARITY_THRESHOLD_STOP = 100;
+        const SINGULARITY_THRESHOLD_WARN = 5000;
 
         let armGroup, targetMarker;
         let targetPosition = new THREE.Vector3();
         let isIkActive = false;
 
-        // --- 時間管理用の変数 ---
         const clock = new THREE.Clock();
         const logicUpdateRate = 10; 
         const logicUpdateInterval = 1 / logicUpdateRate;
         let timeSinceLastUpdate = 0;
+
+        // --- ★追加: プロット用の変数 ---
+        let velocityChart;
+        let dTheta1History = [];
+        let dTheta2History = [];
+        const MAX_HISTORY_LENGTH = 100;
 
         // --- 初期化処理 ---
         function init() {
@@ -233,20 +245,71 @@
             targetMarker.visible = false;
             scene.add(targetMarker);
 
+            initChart(); // ★追加: チャートの初期化
+
             // イベントリスナーの設定
-            theta1Slider.addEventListener('input', () => { isIkActive = false; });
-            theta2Slider.addEventListener('input', () => { isIkActive = false; });
+            theta1Slider.addEventListener('input', () => { isIkActive = false; clearPlotData(); });
+            theta2Slider.addEventListener('input', () => { isIkActive = false; clearPlotData(); });
             container.addEventListener('mousedown', onCanvasMouseDown, false);
             
             resetPostureBtn.addEventListener('click', () => {
                 isIkActive = false;
                 theta1Slider.value = 30;
                 theta2Slider.value = 45;
+                clearPlotData();
             });
 
             window.addEventListener('resize', onWindowResize, false);
 
             animate();
+        }
+
+        // --- ★追加: チャートの初期化 ---
+        function initChart() {
+            const ctx = document.getElementById('velocityChart').getContext('2d');
+            velocityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'dθ1 (関節1速度)',
+                        data: dTheta1History,
+                        borderColor: '#38bdf8', // light blue
+                        tension: 0.1
+                    }, {
+                        label: 'dθ2 (関節2速度)',
+                        data: dTheta2History,
+                        borderColor: '#fb923c', // orange
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    animation: { duration: 0 },
+                    scales: {
+                        y: {
+                            title: { display: true, text: '関節速度 (rad/step)', color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            title: { display: true, text: 'ステップ', color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+        
+        // --- ★追加: プロットデータのリセット ---
+        function clearPlotData() {
+            dTheta1History.length = 0;
+            dTheta2History.length = 0;
+            if (velocityChart) {
+                velocityChart.data.labels.length = 0;
+                velocityChart.update();
+            }
         }
 
         // --- アームのジオメトリ作成 ---
@@ -293,6 +356,7 @@
             targetXVal.textContent = targetPosition.x.toFixed(1);
             targetYVal.textContent = targetPosition.y.toFixed(1);
 
+            clearPlotData(); // ★追加: プロットをリセット
             isIkActive = true;
         }
 
@@ -389,47 +453,51 @@
             vxVec.textContent = vx.toFixed(2);
             vyVec.textContent = vy.toFixed(2);
 
-            // 特異点の警告表示を2段階に
+            let dt1_val = 0, dt2_val = 0;
+
             if (Math.abs(detJ) < SINGULARITY_THRESHOLD_STOP) {
                 singularityWarning.textContent = "特異点！IKを停止しました。";
                 j_inv_11.textContent = "Inf"; j_inv_12.textContent = "Inf";
                 j_inv_21.textContent = "Inf"; j_inv_22.textContent = "Inf";
                 dTheta1Vec.textContent = "Inf";
                 dTheta2Vec.textContent = "Inf";
-            } else if (Math.abs(detJ) < SINGULARITY_THRESHOLD_WARN) {
-                singularityWarning.textContent = "特異点に近いです！";
-                updateMatrixAndVectors(detJ, vx, vy);
             } else {
-                singularityWarning.textContent = "";
-                updateMatrixAndVectors(detJ, vx, vy);
+                if (Math.abs(detJ) < SINGULARITY_THRESHOLD_WARN) {
+                    singularityWarning.textContent = "特異点に近いです！";
+                } else {
+                    singularityWarning.textContent = "";
+                }
+                
+                const invDetJ = 1.0 / detJ;
+                const j_inv_11_val = j22_val * invDetJ;
+                const j_inv_12_val = -j12_val * invDetJ;
+                const j_inv_21_val = -j21_val * invDetJ;
+                const j_inv_22_val = j11_val * invDetJ;
+
+                j_inv_11.textContent = j_inv_11_val.toFixed(2);
+                j_inv_12.textContent = j_inv_12_val.toFixed(2);
+                j_inv_21.textContent = j_inv_21_val.toFixed(2);
+                j_inv_22.textContent = j_inv_22_val.toFixed(2);
+
+                dt1_val = j_inv_11_val * vx + j_inv_12_val * vy;
+                dt2_val = j_inv_21_val * vx + j_inv_22_val * vy;
+                dTheta1Vec.textContent = dt1_val.toFixed(2);
+                dTheta2Vec.textContent = dt2_val.toFixed(2);
             }
-        }
+            
+            // ★追加: プロットの更新
+            if (isIkActive) {
+                dTheta1History.push(dt1_val);
+                dTheta2History.push(dt2_val);
+                velocityChart.data.labels.push(dTheta1History.length);
 
-        function updateMatrixAndVectors(detJ, vx, vy) {
-            const t1_rad = THREE.MathUtils.degToRad(parseFloat(theta1Slider.value));
-            const t2_rad = THREE.MathUtils.degToRad(parseFloat(theta2Slider.value));
-            const s1 = Math.sin(t1_rad), c1 = Math.cos(t1_rad);
-            const s12 = Math.sin(t1_rad + t2_rad), c12 = Math.cos(t1_rad + t2_rad);
-            const j11_val = -l1 * s1 - l2 * s12;
-            const j22_val =  l2 * c12;
-            const j12_val = -l2 * s12;
-            const j21_val =  l1 * c1 + l2 * c12;
-
-            const invDetJ = 1.0 / detJ;
-            const j_inv_11_val = j22_val * invDetJ;
-            const j_inv_12_val = -j12_val * invDetJ;
-            const j_inv_21_val = -j21_val * invDetJ;
-            const j_inv_22_val = j11_val * invDetJ;
-
-            j_inv_11.textContent = j_inv_11_val.toFixed(2);
-            j_inv_12.textContent = j_inv_12_val.toFixed(2);
-            j_inv_21.textContent = j_inv_21_val.toFixed(2);
-            j_inv_22.textContent = j_inv_22_val.toFixed(2);
-
-            const dt1 = j_inv_11_val * vx + j_inv_12_val * vy;
-            const dt2 = j_inv_21_val * vx + j_inv_22_val * vy;
-            dTheta1Vec.textContent = dt1.toFixed(2);
-            dTheta2Vec.textContent = dt2.toFixed(2);
+                if (dTheta1History.length > MAX_HISTORY_LENGTH) {
+                    dTheta1History.shift();
+                    dTheta2History.shift();
+                    velocityChart.data.labels.shift();
+                }
+                velocityChart.update();
+            }
         }
 
         // --- アニメーションループ ---
