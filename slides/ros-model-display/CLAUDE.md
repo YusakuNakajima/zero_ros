@@ -168,7 +168,7 @@
 ## ファイル構成
 
 ```
-robot-model-display/
+ros-model-display/
 ├── index.html          # メインスライドファイル
 ├── media/              # 画像・動画ファイル
 │   ├── image1.png     # タイトル背景
