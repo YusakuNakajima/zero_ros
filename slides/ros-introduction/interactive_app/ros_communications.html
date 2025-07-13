@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROS Topic, Service, Action 解説</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        .concept-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Animation styles */
+        .node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            position: relative;
+        }
+        .arrow {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background-color: #60a5fa; /* blue-400 */
+        }
+        /* Default right-pointing arrowhead */
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            border-top: 4px solid #60a5fa;
+            border-right: 4px solid #60a5fa;
+        }
+        .packet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #f87171; /* red-400 */
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        /* Arrow color variants */
+        .arrow-response { background-color: #4ade80; /* green-400 */ }
+        .arrow-response::after { border-top-color: #4ade80; border-right-color: #4ade80; }
+        .arrow-feedback { background-color: #fbbf24; /* amber-400 */ }
+        .arrow-feedback::after { border-top-color: #fbbf24; border-right-color: #fbbf24; }
+
+        /* New style for Right-to-Left arrows */
+        .arrow-rtl::after {
+            right: auto;
+            left: -1px;
+            transform: translateY(-50%) rotate(225deg); /* Point left */
+        }
+        .arrow-rtl .label {
+            position: absolute;
+            top: -20px;
+            right: 2px;
+        }
+
+        /* Topic Animation */
+        @keyframes topic-flow {
+            0% { left: 0%; opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 90%; opacity: 0; }
+        }
+        .topic-packet-1 { animation: topic-flow 4s ease-in-out infinite; animation-delay: 0s; }
+        .topic-packet-2 { animation: topic-flow 4s ease-in-out infinite; animation-delay: 1.5s; }
+
+        /* Service Animation - Corrected for synchronous behavior */
+        @keyframes service-request {
+            0%      { left: 0%; opacity: 0; }
+            5%      { opacity: 1; }
+            25%     { left: 90%; opacity: 1; }
+            25.01%  { opacity: 0; }
+            100%    { opacity: 0; }
+        }
+        @keyframes service-response {
+            0%      { opacity: 0; }
+            50%     { right: 0%; opacity: 0; }
+            50.01%  { opacity: 1; }
+            75%     { right: 90%; opacity: 1; }
+            75.01%  { opacity: 0; }
+            100%    { opacity: 0; }
+        }
+        .service-request-packet { animation: service-request 5s ease-in-out infinite; }
+        .service-response-packet {
+            animation: service-response 5s ease-in-out infinite;
+            background-color: #4ade80; /* green-400 */
+        }
+        
+        /* Action Animation */
+        @keyframes action-goal {
+            0% { left: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            20% { left: 90%; opacity: 1; }
+            25% { left: 90%; opacity: 0; }
+            100% { opacity: 0; }
+        }
+        @keyframes action-feedback {
+            0%, 25% { opacity: 0; }
+            /* First feedback */
+            30% { right: 0%; opacity: 1; }
+            48% { right: 90%; opacity: 1; }
+            49% { right: 90%; opacity: 0; }
+            /* Second feedback */
+            55% { right: 0%; opacity: 1; }
+            73% { right: 90%; opacity: 1; }
+            74% { right: 90%; opacity: 0; }
+            100% { opacity: 0; }
+        }
+        @keyframes action-result {
+             0%, 80% { opacity: 0; }
+            85% { right: 0%; opacity: 1; }
+            95% { right: 90%; opacity: 1; }
+            100% { right: 90%; opacity: 0; }
+        }
+        .action-goal-packet { animation: action-goal 8s ease-in-out infinite; }
+        .action-feedback-packet { animation: action-feedback 8s linear infinite; background-color: #fbbf24; /* amber-400 */ }
+        .action-result-packet { animation: action-result 8s ease-in-out infinite; background-color: #4ade80; /* green-400 */ }
+
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">ROS通信の仕組み</h1>
+            <p class="mt-4 text-lg text-gray-600">Topic, Service, Actionの違いを理解しよう</p>
+        </header>
+
+        <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Topic Card -->
+            <div id="topic" class="concept-card bg-white rounded-xl shadow-md overflow-hidden p-6 border-t-4 border-blue-500">
+                <h2 class="text-2xl font-bold text-blue-800 mb-4">1. Topic (トピック)</h2>
+                <p class="mb-4 text-gray-600">
+                    <strong>「出版-購読」モデル</strong>の非同期通信。一方向のデータストリームを配信します。ラジオ放送のように、送信者（Publisher）は受信者（Subscriber）を意識せず、ただ情報を発信し続けます。
+                </p>
+                <div class="bg-gray-100 rounded-lg p-4 mb-4 min-h-[220px]">
+                    <h3 class="font-semibold text-center mb-4">動作イメージ</h3>
+                    <div class="relative flex items-center justify-center h-40">
+                        <div class="absolute left-0 text-center">
+                            <div class="node bg-red-200 text-red-800">Publisher</div>
+                            <span class="text-sm font-medium">送信者</span>
+                        </div>
+                        <div class="text-center z-10">
+                            <div class="w-24 h-12 bg-blue-500 text-white flex items-center justify-center rounded-lg shadow-lg">/topic</div>
+                        </div>
+                        <div class="absolute right-0 flex flex-col space-y-12">
+                           <div class="text-center">
+                                <div class="node bg-green-200 text-green-800">Subscriber 1</div>
+                                <span class="text-sm font-medium">受信者1</span>
+                           </div>
+                           <div class="text-center">
+                                <div class="node bg-green-200 text-green-800">Subscriber 2</div>
+                                <span class="text-sm font-medium">受信者2</span>
+                           </div>
+                        </div>
+                        <div class="absolute left-[80px] w-[calc(100%-160px)] h-full">
+                            <div class="arrow" style="width: 30%; left: 0; top: 50%; transform: translateY(-50%);">
+                                <div class="packet topic-packet-1"></div>
+                            </div>
+                            <div class="arrow" style="width: 30%; right: 0; top: 25%; transform: translateY(-50%);">
+                                <div class="packet topic-packet-1" style="animation-delay: 1s;"></div>
+                            </div>
+                            <div class="arrow" style="width: 30%; right: 0; top: 75%; transform: translateY(-50%);">
+                                 <div class="packet topic-packet-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2">特徴</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li><strong class="text-blue-600">一対多 / 多対多:</strong> 複数の送受信が可能</li>
+                        <li><strong class="text-blue-600">非同期:</strong> 送信者は応答を待たない</li>
+                        <li><strong class="text-blue-600">継続的なデータ:</strong> センサーデータなど、流れ続ける情報に最適</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Service Card -->
+            <div id="service" class="concept-card bg-white rounded-xl shadow-md overflow-hidden p-6 border-t-4 border-green-500">
+                <h2 class="text-2xl font-bold text-green-800 mb-4">2. Service (サービス)</h2>
+                <p class="mb-4 text-gray-600">
+                    <strong>「要求-応答」モデル</strong>の同期通信。クライアントがサーバーに処理を要求し、完了するまで待機します。関数の呼び出しのように、明確な結果が1回だけ返ってきます。
+                </p>
+                <div class="bg-gray-100 rounded-lg p-4 mb-4 min-h-[220px]">
+                    <h3 class="font-semibold text-center mb-4">動作イメージ</h3>
+                    <div class="relative flex items-center justify-between h-40 px-4">
+                        <div class="text-center">
+                            <div class="node bg-blue-200 text-blue-800">Client</div>
+                            <span class="text-sm font-medium">要求側</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="node bg-purple-200 text-purple-800">Server</div>
+                            <span class="text-sm font-medium">提供側</span>
+                        </div>
+                        <div class="absolute left-[80px] w-[calc(100%-160px)] h-full">
+                            <!-- Request -->
+                            <div class="arrow" style="left: 0; top: 35%;">
+                                <div class="packet service-request-packet"></div>
+                                <span class="label absolute top-[-20px] left-2 text-sm text-gray-600">Request</span>
+                            </div>
+                             <!-- Response -->
+                            <div class="arrow arrow-response arrow-rtl" style="left: 0; top: 65%;">
+                                <div class="packet service-response-packet"></div>
+                                <span class="label text-sm text-gray-600">Response</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2">特徴</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li><strong class="text-green-600">一対一:</strong> 要求と応答はペア</li>
+                        <li><strong class="text-green-600">同期:</strong> クライアントは応答が来るまで処理が止まる</li>
+                        <li><strong class="text-green-600">単発の処理:</strong> 特定の計算や設定変更などに最適</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Card -->
+            <div id="action" class="concept-card bg-white rounded-xl shadow-md overflow-hidden p-6 border-t-4 border-yellow-500">
+                <h2 class="text-2xl font-bold text-yellow-800 mb-4">3. Action (アクション)</h2>
+                <p class="mb-4 text-gray-600">
+                    <strong>長時間かかるタスク</strong>のための非同期通信。Serviceに似ていますが、途中の経過（フィードバック）を受け取ったり、タスクをキャンセルしたりできます。
+                </p>
+                <div class="bg-gray-100 rounded-lg p-4 mb-4 min-h-[220px]">
+                    <h3 class="font-semibold text-center mb-4">動作イメージ</h3>
+                     <div class="relative flex items-center justify-between h-40 px-4">
+                        <div class="text-center">
+                            <div class="node bg-blue-200 text-blue-800">Action Client</div>
+                            <span class="text-sm font-medium">要求側</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="node bg-purple-200 text-purple-800">Action Server</div>
+                            <span class="text-sm font-medium">実行側</span>
+                        </div>
+                        <div class="absolute left-[80px] w-[calc(100%-160px)] h-full">
+                            <!-- Goal -->
+                            <div class="arrow" style="left: 0; top: 25%;">
+                                <div class="packet action-goal-packet"></div>
+                                <span class="label absolute top-[-20px] left-2 text-sm text-gray-600">Goal</span>
+                            </div>
+                            <!-- Feedback -->
+                            <div class="arrow arrow-feedback arrow-rtl" style="left: 0; top: 50%;">
+                                <div class="packet action-feedback-packet"></div>
+                                <span class="label text-sm text-gray-600">Feedback</span>
+                            </div>
+                             <!-- Result -->
+                            <div class="arrow arrow-response arrow-rtl" style="left: 0; top: 75%;">
+                                <div class="packet action-result-packet"></div>
+                                <span class="label text-sm text-gray-600">Result</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2">特徴</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li><strong class="text-yellow-600">一対一:</strong> GoalとResult/Feedbackはペア</li>
+                        <li><strong class="text-yellow-600">非同期:</strong> Goalを投げた後、クライアントは他の処理を続けられる</li>
+                        <li><strong class="text-yellow-600">フィードバックとキャンセル:</strong> ナビゲーションなど時間のかかるタスクに最適</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="text-center mt-12 text-gray-500">
+            <p>&copy; 2024 ROS Communication Explainer. All rights reserved.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
