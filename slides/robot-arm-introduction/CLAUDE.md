@@ -35,7 +35,7 @@
 13. **ロボットアームの軸数**
     - なぜ6軸が多いのか
 14. **ロボットのモーションの種類**
-    - PTP（Point to Point）、LIN（Linear）、CIRC（Circular）
+    - 大きく分けてPTP（Point to Point）、LIN（Linear）、CIRC（Circular）
 15. **連続的なロボットモーション**
 16. **滑らかなモーションの作り方**
 17. **ロボットアームの精度について**
