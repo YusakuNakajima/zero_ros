@@ -65,22 +65,59 @@
 * **スライド n+2: 参考資料**
     * `<h2>`, `<ul>`
 
----
+-----
 
-#### 4. JavaScript設定
+## 4\. JavaScript設定
 
-* **Reveal.jsライブラリ**:
-    * `reveal.js`
-* **プラグイン**:
-    * `zoom.js`
-* **初期化設定**:
-    * `controls: true` (ナビゲーションUIを表示)
-    * `progress: true` (進捗バーを表示)
-    * `center: true` (スライドを中央揃え)
-    * `hash: true` (URLにスライド番号を反映)
-    * `plugins: [ RevealZoom ]` (Zoomプラグインを有効化)
+Reveal.jsのプレゼンテーションに機能を追加するため、以下のライブラリとプラグインを読み込み、初期化設定を行います。
 
----
+### Reveal.jsライブラリ
+
+  * `dist/reveal.js`: Reveal.jsのコアライブラリです。
+
+### プラグイン
+
+以下のプラグインを追加で読み込みます。これらはスライドの機能性を高めます。
+
+  * `plugin/zoom/zoom.js`: スライドの特定領域を拡大表示する機能を提供します。
+  * `plugin/menu/menu.js`: プレゼンテーションの目次や便利な機能を提供するメニューを表示します。
+  * `plugin/chalkboard/plugin.js`: スライド上への書き込み（描画）や黒板モードを可能にします。
+
+### 初期化設定
+
+`Reveal.initialize()`を使ってReveal.jsをセットアップします。ここでは、表示オプションとプラグインの有効化、さらに各プラグインの基本的な設定を含めます。
+
+```javascript
+Reveal.initialize({
+    // 基本的な表示設定
+    controls: true,  // ナビゲーションUIを表示
+    progress: true,  // 進捗バーを表示
+    center: true,    // スライドを中央揃え
+    hash: true,      // URLにスライド番号を反映
+
+    // プラグインの有効化
+    plugins: [
+        RevealZoom,      // Zoomプラグインを有効化
+        RevealMenu,      // Menuプラグインを有効化
+        RevealChalkboard // Chalkboardプラグインを有効化
+    ],
+
+    // 各プラグインの設定（任意）
+    menu: {
+        numbers: true, // 目次にスライド番号を表示
+        title: 'プレゼンテーション目次' // メニューのタイトル
+    },
+    chalkboard: {
+        showControls: true, 
+        // その他、ブラシの色や線の太さなどを設定可能
+    },
+    // キーボードショートカットのカスタマイズ
+    keyboard: {
+        'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+        // その他のChalkboardショートカットはデフォルトで有効
+    }
+});
+```
 
 #### 5. 非機能要件
 
@@ -105,7 +142,7 @@
 ### 学習順序
 
 - **初学者**: ロボットアーム入門 → ROS入門
-- **ROS実践者**: ロボットモデル表示 → アーム制御 → シミュレータ接続
+- **ROS実践者**: ロボットモデル表示 → シミュレータ接続 → アーム制御 
 - **上級者**: 必要な部分を選択的に学習
 
 各スライドディレクトリには詳細な`CLAUDE.md`ファイルがあり、学習内容や構成を確認できます。
