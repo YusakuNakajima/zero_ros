@@ -7,7 +7,7 @@
     
     <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.3.1/dist/reset.css">
     <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.3.1/dist/reveal.css">
-    <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.3.1/dist/theme/white.css">
+    <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.3.1/dist/theme/black.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
         <div class="slides">
             
             <!-- タイトルスライド -->
-            <section data-background-image="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800" data-background-opacity="0.5">
+            <section data-background-image="../robot-arm-introduction/media/moveit.png" data-background-opacity="0.5">
                 <h1>ゼロからのROS入門</h1>
                 <h2>~アーム位置制御とモーションプランニング~</h2>
                 <p>大阪大学 中島優作</p>
@@ -45,13 +45,19 @@
             <!-- ロボット制御の書籍 -->
             <section>
                 <h2>ロボット制御の書籍</h2>
-                <ul>
-                    <li class="fragment"><strong>イラストで学ぶロボット工学</strong><br>
-                        初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</li>
-                    <li class="fragment"><strong>実践ロボット制御</strong><br>
-                        名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍<br>
-                        理論的な詳しさと実装面までの手引きが充実している</li>
-                </ul>
+                <div style="display: flex; align-items: center; gap: 2em;">
+                    <div style="flex: 1;">
+                        <h3>イラストで学ぶロボット工学</h3>
+                        <p>初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</p>
+                        <img src="media/image4.png" alt="イラストで学ぶロボット工学" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <h3>実践ロボット制御</h3>
+                        <p>名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍<br>
+                        理論的な詳しさと実装面までの手引きが充実している</p>
+                        <img src="media/image2.png" alt="実践ロボット制御" style="width: 100%;">
+                    </div>
+                </div>
             </section>
 
             <!-- アーム制御の前提知識 -->
@@ -62,15 +68,21 @@
             <!-- ロボットアームの構造 -->
             <section>
                 <h2>ロボットアームの構造</h2>
-                <ul>
-                    <li><strong>ジョイント(関節)</strong> - モーターが入っていて動く</li>
-                    <li><strong>リンク</strong> - ジョイントを繋ぐ<br>
-                        剛性が高い方がロボット動作の精度が良くなる</li>
-                    <li><strong>エンドエフェクタ(手先効果器)</strong> - 作業をする手先<br>
-                        作業に応じて付け替える2本指や5本指のハンド吸盤</li>
-                </ul>
-                <img src="media/image4.png" alt="ロボットアーム構造図" style="width: 60%;">
-                <p style="font-size: 0.6em;">FAプロダクツより引用(https://jss1.jp/column/column_162/)</p>
+                <div style="display: flex; align-items: center; gap: 2em;">
+                    <div style="flex: 1;">
+                        <img src="media/image13.png" alt="ロボットアーム構造図" style="width: 100%;">
+                        <p style="font-size: 0.6em;">FAプロダクツより引用(https://jss1.jp/column/column_162/)</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <ul>
+                            <li><strong>ジョイント(関節)</strong> - モーターが入っていて動く</li>
+                            <li><strong>リンク</strong> - ジョイントを繋ぐ<br>
+                                剛性が高い方がロボット動作の精度が良くなる</li>
+                            <li><strong>エンドエフェクタ(手先効果器)</strong> - 作業をする手先<br>
+                                作業に応じて付け替える2本指や5本指のハンド吸盤</li>
+                        </ul>
+                    </div>
+                </div>
             </section>
 
             <!-- アーム制御は組合せ -->
@@ -107,16 +119,31 @@
             <!-- ロボットの制御種類 -->
             <section>
                 <h2>多くのロボットは位置/速度制御</h2>
-                <ul>
-                    <li>Universal Robot</li>
-                    <li>DENSO</li>
-                    <li>Dobot</li>
-                </ul>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; margin: 2em 0;">
+                    <div style="text-align: center;">
+                        <img src="media/image2.png" alt="UR" style="width: 80%;">
+                        <p>Universal Robot</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="media/image5.png" alt="DENSO" style="width: 80%;">
+                        <p>DENSO</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="media/image8.png" alt="Dobot" style="width: 80%;">
+                        <p>Dobot</p>
+                    </div>
+                </div>
                 <h3 style="margin-top: 2em;">一部のロボットはトルク制御可能</h3>
-                <ul>
-                    <li>Franka Robotics</li>
-                    <li>KUKA</li>
-                </ul>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em; margin: 1em 0;">
+                    <div style="text-align: center;">
+                        <img src="media/image12.png" alt="Franka" style="width: 80%;">
+                        <p>Franka Robotics</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="media/image15.png" alt="KUKA" style="width: 80%;">
+                        <p>KUKA</p>
+                    </div>
+                </div>
             </section>
 
             <!-- よく使うROSのアームコントローラ -->
@@ -141,7 +168,6 @@
                 <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
                     position_controllers/JointTrajectoryController
                 </p>
-                <img src="media/image8.png" alt="コントローラ命名規則" style="width: 70%;">
             </section>
 
             <!-- 本編の内容 -->
@@ -163,267 +189,273 @@
                 </div>
             </section>
 
-            <!-- MoveItによるアーム制御 -->
+            <!-- MoveItによるアーム制御 (スライド10) -->
             <section>
-                <h2>MoveItによるアーム制御</h2>
-            </section>
+                <section>
+                    <h2>MoveItによるアーム制御</h2>
+                </section>
 
-            <!-- MoveItで何ができるか -->
-            <section>
-                <h2>MoveItで何ができるか</h2>
-                <p>ROS用のアーム制御ソフトウェア</p>
-                <div style="margin-top: 2em;">
-                    <h3>MoveIt 3 Step</h3>
+                <!-- MoveItで何ができるか (縦スライド) -->
+                <section>
+                    <h2>MoveItで何ができるか</h2>
+                    <p>ROS用のアーム制御ソフトウェア</p>
+                    <div style="margin-top: 2em;">
+                        <h3>MoveIt 3 Step</h3>
+                        <ol>
+                            <li>目標姿勢を指定</li>
+                            <li>障害物を回避可能なモーションプランニング</li>
+                            <li>実行！</li>
+                        </ol>
+                    </div>
+                    <img src="media/image11.png" alt="MoveIt概要" style="width: 60%;">
+                </section>
+
+                <!-- MoveItのモーションプランニングの手順 (縦スライド) -->
+                <section>
+                    <h2>MoveItのモーションプランニングの手順</h2>
                     <ol>
-                        <li>目標姿勢を指定</li>
-                        <li>障害物を回避可能なモーションプランニング</li>
-                        <li>実行！</li>
+                        <li><strong>ロボット手先の目標姿勢決定：</strong>直交座標系 or 関節座標系</li>
+                        <li><strong>逆運動学：</strong>1の目標姿勢が直交座標系なら関節座標系に変換</li>
+                        <li><strong>モーションプランニング</strong>
+                            <ul style="font-size: 0.8em;">
+                                <li>障害物：Planning Sceneで予め設定</li>
+                                <li>パスプランニング：障害物を回避するパスを計算</li>
+                            </ul>
+                        </li>
+                        <li><strong>実行：</strong>パスをJointTrajectoryControllerで実行</li>
                     </ol>
-                </div>
-                <img src="media/image11.png" alt="MoveIt概要" style="width: 60%;">
-            </section>
+                    <img src="media/image12.png" alt="プランニング手順" style="width: 50%;">
+                </section>
 
-            <!-- MoveItのモーションプランニングの手順 -->
-            <section>
-                <h2>MoveItのモーションプランニングの手順</h2>
-                <ol>
-                    <li><strong>ロボット手先の目標姿勢決定：</strong>直交座標系 or 関節座標系</li>
-                    <li><strong>逆運動学：</strong>1の目標姿勢が直交座標系なら関節座標系に変換</li>
-                    <li><strong>モーションプランニング</strong>
+                <!-- 手先の姿勢の表現 (縦スライド) -->
+                <section>
+                    <h2>手先の姿勢の表現</h2>
+                    <p>姿勢(pose)は位置(position)+向き(orientation)で表現</p>
+                    <ul>
+                        <li><strong>位置：</strong>XYZで表す</li>
+                        <li><strong>向き：</strong>位置制御ではオイラー角 or クオータニオンを使う
+                            <ul style="font-size: 0.8em;">
+                                <li><strong>オイラー角</strong> - 直観的にわかりやすいがジンバルロックがあるので軌道や軌跡の計算には向かない</li>
+                                <li><strong>クオータニオン</strong> - 人にはわかりにくいがジンバルロックがないので軌道や軌跡の計算に便利</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <img src="media/image13.png" alt="姿勢表現" style="width: 30%;">
+                </section>
+
+                <!-- 姿勢の表現 - オススメの実装 (縦スライド) -->
+                <section>
+                    <h2>姿勢の表現 - オススメの実装</h2>
+                    <ul>
+                        <li><strong>目標姿勢の計算は直観的にわかりやすいオイラー角</strong><br>
+                            ここでzyxオイラーで指定</li>
+                        <li><strong>ロボット動作ではオイラー角→クォータニオンに変換</strong><br>
+                            pythonだとscipy.Rotation等でオイラー角とクオータニオンの変換を計算可能</li>
+                    </ul>
+                    <img src="media/image14.png" alt="実装例" style="width: 60%;">
+                </section>
+
+                <!-- 逆運動学の必要性 (縦スライド) -->
+                <section>
+                    <h2>逆運動学の必要性</h2>
+                    <p>XYZでロボットの手先姿勢を指定したい<br>
+                    ただ、動かせるのはロボットの関節<br>
+                    そこで手先姿勢→ロボットの関節をする必要があり、これを逆運動学という</p>
+                    <img src="media/image15.png" alt="逆運動学説明" style="width: 70%;">
+                    <p style="font-size: 0.6em;">https://rt-net.jp/humanoid/archives/2652</p>
+                </section>
+
+                <!-- 逆運動学の解き方 (縦スライド) -->
+                <section>
+                    <h2>逆運動学の解き方(IKソルバー)</h2>
+                    <div style="margin-bottom: 1.5em;">
+                        <h3>解析解</h3>
+                        <p style="font-size: 0.8em;">ロボットの構造に基づいて導出された式を用いて、関節角度を直接計算する方法<br>
+                        数値解より計算が早くロバスト性も高い<br>
+                        普通のロボットアームは解析解が存在するような機械的構造をしている</p>
+                    </div>
+                    <div>
+                        <h3>数値解</h3>
+                        <p style="font-size: 0.8em;">反復計算(最適化計算)によってロボットアームの関節角度を近似的に求める手法<br>
+                        反復計算が必要なので解析解より計算時間がかかる<br>
+                        現在は計算機の速度も上がっているので数値解を使うことが多い</p>
+                    </div>
+                </section>
+
+                <!-- MoveIt2で使えるIKソルバー (縦スライド) -->
+                <section>
+                    <h2>MoveIt2で使えるIKソルバー</h2>
+                    <div style="margin-bottom: 1.5em;">
+                        <h3>数値解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li>障害物：Planning Sceneで予め設定</li>
-                            <li>パスプランニング：障害物を回避するパスを計算</li>
+                            <li><strong>pick_ik</strong> - MoveIt2用に実装されたソルバーでMoveIt2ならオススメ<br>
+                                グローバルミニマム：進化的アルゴリズム、ローカルミニマム：勾配降下法を組みあわせている</li>
+                            <li><strong>TRACK-IK</strong> - ROS1と共通ソルバーを使いたい場合にオススメ<br>
+                                ニュートン法とSQP(逐次二次計画法)のハイブリッドで収束</li>
                         </ul>
-                    </li>
-                    <li><strong>実行：</strong>パスをJointTrajectoryControllerで実行</li>
-                </ol>
-                <img src="media/image12.png" alt="プランニング手順" style="width: 50%;">
-            </section>
-
-            <!-- 手先の姿勢の表現 -->
-            <section>
-                <h2>手先の姿勢の表現</h2>
-                <p>姿勢(pose)は位置(position)+向き(orientation)で表現</p>
-                <ul>
-                    <li><strong>位置：</strong>XYZで表す</li>
-                    <li><strong>向き：</strong>位置制御ではオイラー角 or クオータニオンを使う
+                    </div>
+                    <div>
+                        <h3>解析解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong>オイラー角</strong> - 直観的にわかりやすいがジンバルロックがあるので軌道や軌跡の計算には向かない</li>
-                            <li><strong>クオータニオン</strong> - 人にはわかりにくいがジンバルロックがないので軌道や軌跡の計算に便利</li>
+                            <li><strong>IKFast</strong> - 高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
                         </ul>
-                    </li>
-                </ul>
-                <img src="media/image13.png" alt="姿勢表現" style="width: 40%;">
-            </section>
+                    </div>
+                </section>
 
-            <!-- 姿勢の表現 - オススメの実装 -->
-            <section>
-                <h2>姿勢の表現 - オススメの実装</h2>
-                <ul>
-                    <li><strong>目標姿勢の計算は直観的にわかりやすいオイラー角</strong><br>
-                        ここでzyxオイラーで指定</li>
-                    <li><strong>ロボット動作ではオイラー角→クォータニオンに変換</strong><br>
-                        pythonだとscipy.Rotation等でオイラー角とクオータニオンの変換を計算可能</li>
-                </ul>
-                <img src="media/image14.png" alt="実装例" style="width: 60%;">
-            </section>
+                <!-- Pythonで使えるIKソルバー (縦スライド) -->
+                <section>
+                    <h2>Pythonで使えるIKソルバー</h2>
+                    <div style="margin-bottom: 1.5em;">
+                        <h3>数値解ソルバー</h3>
+                        <ul style="font-size: 0.8em;">
+                            <li><strong>TRACK-IK</strong> - これまで長年使われてきた実績があるので安心して使える<br>
+                                track_ik_pythonにpython実装もある</li>
+                            <li><strong>QuIK</strong> - 2024年に発表されたばかりの高速な数値会IK手法<br>
+                                投稿を見る限り解が近いIKであれば10us程度で解けそう<br>
+                                ROS2用のC++実装やpythonラッパーが公開されている</li>
+                        </ul>
+                    </div>
+                </section>
 
-            <!-- 逆運動学の必要性 -->
-            <section>
-                <h2>逆運動学の必要性</h2>
-                <p>XYZでロボットの手先姿勢を指定したい<br>
-                ただ、動かせるのはロボットの関節<br>
-                そこで手先姿勢→ロボットの関節をする必要があり、これを逆運動学という</p>
-                <img src="media/image15.png" alt="逆運動学説明" style="width: 70%;">
-                <p style="font-size: 0.6em;">https://rt-net.jp/humanoid/archives/2652</p>
-            </section>
-
-            <!-- 逆運動学の解き方 -->
-            <section>
-                <h2>逆運動学の解き方(IKソルバー)</h2>
-                <div style="margin-bottom: 1.5em;">
-                    <h3>解析解</h3>
-                    <p style="font-size: 0.8em;">ロボットの構造に基づいて導出された式を用いて、関節角度を直接計算する方法<br>
-                    数値解より計算が早くロバスト性も高い<br>
-                    普通のロボットアームは解析解が存在するような機械的構造をしている</p>
-                </div>
-                <div>
-                    <h3>数値解</h3>
-                    <p style="font-size: 0.8em;">反復計算(最適化計算)によってロボットアームの関節角度を近似的に求める手法<br>
-                    反復計算が必要なので解析解より計算時間がかかる<br>
-                    現在は計算機の速度も上がっているので数値解を使うことが多い</p>
-                </div>
-            </section>
-
-            <!-- MoveIt2で使えるIKソルバー -->
-            <section>
-                <h2>MoveIt2で使えるIKソルバー</h2>
-                <div style="margin-bottom: 1.5em;">
-                    <h3>数値解ソルバー</h3>
-                    <ul style="font-size: 0.8em;">
-                        <li><strong>pick_ik</strong> - MoveIt2用に実装されたソルバーでMoveIt2ならオススメ<br>
-                            グローバルミニマム：進化的アルゴリズム、ローカルミニマム：勾配降下法を組みあわせている</li>
-                        <li><strong>TRACK-IK</strong> - ROS1と共通ソルバーを使いたい場合にオススメ<br>
-                            ニュートン法とSQP(逐次二次計画法)のハイブリッドで収束</li>
+                <!-- MoveIt2で使えるパスプランニング (縦スライド) -->
+                <section>
+                    <h2>MoveIt2で使えるパスプランニング</h2>
+                    <ul>
+                        <li><strong>産業用ロボモーション</strong>
+                            <ul><li>Pilz Industrial Motion Planner (障害物を考慮しない)</li></ul>
+                        </li>
+                        <li><strong>サンプリングベース</strong>
+                            <ul><li>OMPL</li></ul>
+                        </li>
+                        <li><strong>最適化ベース</strong>
+                            <ul><li>CHOMP</li><li>STOMP</li></ul>
+                        </li>
                     </ul>
-                </div>
-                <div>
-                    <h3>解析解ソルバー</h3>
-                    <ul style="font-size: 0.8em;">
-                        <li><strong>IKFast</strong> - 高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
+                    <img src="media/image1.jpg" alt="パスプランニング手法" style="width: 60%;">
+                    <p style="font-size: 0.6em;">https://opensource-robotics.tokyo.jp/?p=4313</p>
+                </section>
+
+                <!-- サンプリングベースの手法(RRT) (縦スライド) -->
+                <section>
+                    <h2>サンプリングベースの手法(RRT)</h2>
+                    <p>MoveItでデフォルトで使う</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>ランダムにパスを伸ばして障害物がなかったら採用、を繰り返す</li>
+                        <li>単純なRRTだとジグザグなので、実際は後処理をかけてスムーズにする</li>
+                        <li>MoveItのデフォルトではスタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
                     </ul>
-                </div>
-            </section>
+                    <img src="media/image2.png" alt="RRT説明" style="width: 50%;">
+                </section>
 
-            <!-- Pythonで使えるIKソルバー -->
-            <section>
-                <h2>Pythonで使えるIKソルバー</h2>
-                <div style="margin-bottom: 1.5em;">
-                    <h3>数値解ソルバー</h3>
-                    <ul style="font-size: 0.8em;">
-                        <li><strong>TRACK-IK</strong> - これまで長年使われてきた実績があるので安心して使える<br>
-                            track_ik_pythonにpython実装もある</li>
-                        <li><strong>QuIK</strong> - 2024年に発表されたばかりの高速な数値会IK手法<br>
-                            投稿を見る限り解が近いIKであれば10us程度で解けそう<br>
-                            ROS2用のC++実装やpythonラッパーが公開されている</li>
+                <!-- 最適化ベースの手法(CHOMP) (縦スライド) -->
+                <section>
+                    <h2>最適化ベースの手法(CHOMP)</h2>
+                    <ul style="font-size: 0.9em;">
+                        <li><strong>コスト：</strong>障害物の距離を遠く、軌道の距離を短く、など</li>
+                        <li><strong>最適化：</strong>勾配降下法</li>
+                        <li>コストの設計と初期軌道の引きの良さによって収束時間や得られた軌道の良しあしが決まる</li>
+                        <li>障害物が多い実用場面では正直使いにくい</li>
                     </ul>
-                </div>
+                    <img src="media/image3.png" alt="CHOMP説明" style="width: 60%;">
+                </section>
+
+                <!-- 最適化ベースの手法(STOMP) (縦スライド) -->
+                <section>
+                    <h2>最適化ベースの手法(STOMP)</h2>
+                    <ul style="font-size: 0.9em;">
+                        <li><strong>コスト：</strong>障害物の距離を遠く、軌道の距離を短く、など</li>
+                        <li><strong>最適化：</strong>確率的最適化</li>
+                        <li>軌道にノイズを載せて最適化</li>
+                        <li>軌道は最適化で決めるけど、最適化はサンプリングベースなので、最適化とサンプリングのハイブリッドでもある</li>
+                        <li>滑らかさはCHOMPより劣るが解が収束しやすく実用上は使いやすい</li>
+                    </ul>
+                </section>
+
             </section>
 
-            <!-- MoveIt2で使えるパスプランニング -->
+            <!-- JointTrajectoryControllerによるアーム制御 (スライド23) -->
             <section>
-                <h2>MoveIt2で使えるパスプランニング</h2>
-                <ul>
-                    <li><strong>産業用ロボモーション</strong>
-                        <ul><li>Pilz Industrial Motion Planner (障害物を考慮しない)</li></ul>
-                    </li>
-                    <li><strong>サンプリングベース</strong>
-                        <ul><li>OMPL</li></ul>
-                    </li>
-                    <li><strong>最適化ベース</strong>
-                        <ul><li>CHOMP</li><li>STOMP</li></ul>
-                    </li>
-                </ul>
-                <img src="media/image1.jpg" alt="パスプランニング手法" style="width: 60%;">
-                <p style="font-size: 0.6em;">https://opensource-robotics.tokyo.jp/?p=4313</p>
-            </section>
+                <section>
+                    <h2>JointTrajectoryControllerによるアーム制御</h2>
+                    <p>略してJTC</p>
+                </section>
 
-            <!-- サンプリングベースの手法(RRT) -->
-            <section>
-                <h2>サンプリングベースの手法(RRT)</h2>
-                <p>MoveItでデフォルトで使う</p>
-                <ul style="font-size: 0.9em;">
-                    <li>ランダムにパスを伸ばして障害物がなかったら採用、を繰り返す</li>
-                    <li>単純なRRTだとジグザグなので、実際は後処理をかけてスムーズにする</li>
-                    <li>MoveItのデフォルトではスタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
-                </ul>
-                <img src="media/image2.png" alt="RRT説明" style="width: 50%;">
-            </section>
+                <!-- JTCでの実装の流れ (縦スライド) -->
+                <section>
+                    <h2>JTCでの実装の流れは5ステップ</h2>
+                    <ol>
+                        <li>ロボット手先の目標姿勢決定(XYZ座標で指定)</li>
+                        <li>逆運動学(手先目標姿勢に対応するロボット関節角度計算)</li>
+                        <li>軌道・軌跡生成</li>
+                        <li>実行</li>
+                    </ol>
+                    <img src="media/image6.jpg" alt="JTC実装フロー" style="width: 70%;">
+                </section>
 
-            <!-- 最適化ベースの手法(CHOMP) -->
-            <section>
-                <h2>最適化ベースの手法(CHOMP)</h2>
-                <ul style="font-size: 0.9em;">
-                    <li><strong>コスト：</strong>障害物の距離を遠く、軌道の距離を短く、など</li>
-                    <li><strong>最適化：</strong>勾配降下法</li>
-                    <li>コストの設計と初期軌道の引きの良さによって収束時間や得られた軌道の良しあしが決まる</li>
-                    <li>障害物が多い実用場面では正直使いにくい</li>
-                </ul>
-                <img src="media/image3.png" alt="CHOMP説明" style="width: 60%;">
-            </section>
+                <!-- 目標姿勢の計算 (縦スライド) -->
+                <section>
+                    <h2>目標姿勢の計算</h2>
+                    <ul>
+                        <li>powder_grindingパッケージだとmotion_generatorが行う</li>
+                        <li>1つの姿勢ではなく、連続的な姿勢の変化を計算</li>
+                        <li>連続的な姿勢の集まりをwaypointsと呼ぶ(図の赤点のこと)</li>
+                    </ul>
+                    <img src="media/image7.jpg" alt="目標姿勢計算" style="width: 60%;">
+                </section>
 
-            <!-- 最適化ベースの手法(STOMP) -->
-            <section>
-                <h2>最適化ベースの手法(STOMP)</h2>
-                <ul style="font-size: 0.9em;">
-                    <li><strong>コスト：</strong>障害物の距離を遠く、軌道の距離を短く、など</li>
-                    <li><strong>最適化：</strong>確率的最適化</li>
-                    <li>軌道にノイズを載せて最適化</li>
-                    <li>軌道は最適化で決めるけど、最適化はサンプリングベースなので、最適化とサンプリングのハイブリッドでもある</li>
-                    <li>滑らかさはCHOMPより劣るが解が収束しやすく実用上は使いやすい</li>
-                </ul>
-            </section>
+                <!-- 軌跡・軌道生成 (縦スライド) -->
+                <section>
+                    <h2>軌跡・軌道生成</h2>
+                    <ul style="font-size: 0.9em;">
+                        <li><strong>軌跡：</strong>逆運動学で得た解(JointTrajectory)を並べたもの<br>
+                            どこを通るのかという空間的な情報を列挙したもの</li>
+                        <li><strong>軌道：</strong>時間的な情報を加えたもの</li>
+                        <li>JointTrajectoryControllerでは軌道計算を自動的に行ってくれる</li>
+                        <li>ユーザーが渡すのはPositionとTimeFromStartだけ</li>
+                    </ul>
+                    <img src="media/image9.png" alt="軌跡軌道生成" style="width: 50%;">
+                    <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
+                </section>
 
-            <!-- JointTrajectoryControllerによるアーム制御 -->
-            <section>
-                <h2>JointTrajectoryControllerによるアーム制御</h2>
-                <p>略してJTC</p>
-            </section>
+                <!-- 実行 (縦スライド) -->
+                <section>
+                    <h2>実行</h2>
+                    <ul style="font-size: 0.9em;">
+                        <li>TopicやActionで軌跡(JointTrajectory)を送信することで実行</li>
+                        <li><strong>Topicで送った場合：</strong>即時反映される</li>
+                        <li><strong>Actionで送った場合：</strong>目標到達までの状態や、過負荷などで目標のTrajectoiryからずれていないかを確認できる</li>
+                    </ul>
+                    <img src="media/image10.jpg" alt="実行方法" style="width: 60%;">
+                    <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
+                </section>
 
-            <!-- JTCでの実装の流れ -->
-            <section>
-                <h2>JTCでの実装の流れは5ステップ</h2>
-                <ol>
-                    <li>ロボット手先の目標姿勢決定(XYZ座標で指定)</li>
-                    <li>逆運動学(手先目標姿勢に対応するロボット関節角度計算)</li>
-                    <li>軌道・軌跡生成</li>
-                    <li>実行</li>
-                </ol>
-                <img src="media/image6.jpg" alt="JTC実装フロー" style="width: 70%;">
-            </section>
+                <!-- JTCの実装例 (縦スライド) -->
+                <section>
+                    <h2>JTCの実装例</h2>
+                    <table style="font-size: 0.8em; margin: auto;">
+                        <tr>
+                            <td>目標姿勢の決定</td>
+                            <td>：Scipy Rotation Module</td>
+                        </tr>
+                        <tr>
+                            <td>逆運動学</td>
+                            <td>：TrackIK</td>
+                        </tr>
+                        <tr>
+                            <td>軌道生成</td>
+                            <td>：JointTrajectoryController</td>
+                        </tr>
+                        <tr>
+                            <td>軌跡生成</td>
+                            <td>：JointTrajectoryController</td>
+                        </tr>
+                        <tr>
+                            <td>実行</td>
+                            <td>：JointTrajectoryController</td>
+                        </tr>
+                    </table>
+                </section>
 
-            <!-- 目標姿勢の計算 -->
-            <section>
-                <h2>目標姿勢の計算</h2>
-                <ul>
-                    <li>powder_grindingパッケージだとmotion_generatorが行う</li>
-                    <li>1つの姿勢ではなく、連続的な姿勢の変化を計算</li>
-                    <li>連続的な姿勢の集まりをwaypointsと呼ぶ(図の赤点のこと)</li>
-                </ul>
-                <img src="media/image7.jpg" alt="目標姿勢計算" style="width: 60%;">
-            </section>
-
-            <!-- 軌跡・軌道生成 -->
-            <section>
-                <h2>軌跡・軌道生成</h2>
-                <ul style="font-size: 0.9em;">
-                    <li><strong>軌跡：</strong>逆運動学で得た解(JointTrajectory)を並べたもの<br>
-                        どこを通るのかという空間的な情報を列挙したもの</li>
-                    <li><strong>軌道：</strong>時間的な情報を加えたもの</li>
-                    <li>JointTrajectoryControllerでは軌道計算を自動的に行ってくれる</li>
-                    <li>ユーザーが渡すのはPositionとTimeFromStartだけ</li>
-                </ul>
-                <img src="media/image9.png" alt="軌跡軌道生成" style="width: 50%;">
-                <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
-            </section>
-
-            <!-- 実行 -->
-            <section>
-                <h2>実行</h2>
-                <ul style="font-size: 0.9em;">
-                    <li>TopicやActionで軌跡(JointTrajectory)を送信することで実行</li>
-                    <li><strong>Topicで送った場合：</strong>即時反映される</li>
-                    <li><strong>Actionで送った場合：</strong>目標到達までの状態や、過負荷などで目標のTrajectoiryからずれていないかを確認できる</li>
-                </ul>
-                <img src="media/image10.jpg" alt="実行方法" style="width: 60%;">
-                <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
-            </section>
-
-            <!-- JTCの実装例 -->
-            <section>
-                <h2>JTCの実装例</h2>
-                <table style="font-size: 0.8em; margin: auto;">
-                    <tr>
-                        <td>目標姿勢の決定</td>
-                        <td>：Scipy Rotation Module</td>
-                    </tr>
-                    <tr>
-                        <td>逆運動学</td>
-                        <td>：TrackIK</td>
-                    </tr>
-                    <tr>
-                        <td>軌道生成</td>
-                        <td>：JointTrajectoryController</td>
-                    </tr>
-                    <tr>
-                        <td>軌跡生成</td>
-                        <td>：JointTrajectoryController</td>
-                    </tr>
-                    <tr>
-                        <td>実行</td>
-                        <td>：JointTrajectoryController</td>
-                    </tr>
-                </table>
             </section>
 
             <!-- 終了スライド -->

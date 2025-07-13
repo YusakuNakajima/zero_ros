@@ -8,43 +8,48 @@
 - URDF/XACROを理解したい開発者
 - RVizやGazeboを使いたい方
 
-## スライド構成（スライド1-12）
+## スライド構成（スライド1-7）
+
+**注意**: 黒背景テーマを使用
 
 1. **タイトル・導入**
    - ゼロからのROS入門 - ロボットモデルの表示
-2. **ROSでのロボットモデル表示の仕組み**
-   - システム全体の概要図
-3. **詳細フロー図**
-   - ロボットモデル変更時の書き換えポイント
-4. **TF（Transformation）機能1：座標変換**
-   - ROS標準搭載のシステム（実際はTF2を使用）
-   - エンドエフェクタのベース座標系・ツール座標系計算
-5. **TF機能2：座標管理**
-   - 座標をツリー構造で管理（開ループのみ、閉ループ不可）
-   - 時系列座標データの管理
-   - TF完全理解資料の紹介
-6. **ロボットモデル = ロボットアームの構造**
-   - ジョイント（関節）：モーターが入って動く
-   - リンク：ジョイントを繋ぐ、剛性が重要
-   - エンドエフェクタ（手先効果器）：作業用、付け替え可能
-7. **URDF（Unified Robot Description Format）**
-   - ジョイントとリンクの定義
-   - Joint：自由度、親リンクと子リンク
-   - Link：Visual、Collision、Inertial
-8. **XACRO（XML Macros for Robots）**
-   - URDFの効率化（マクロ機能追加）
-   - 変数渡し、関数での繰り返し構造簡素化
-9. **エンドエフェクタを追加したい場合**
-   - XACROのinclude機能活用
-   - 実装例コード付き
-10. **URのロボットモデル表示デモ**
-    - Launchファイルの作成と起動
-    - RVizでの表示方法
-    - joint_state_publisher_guiでの操作
-11. **おまけ：ノードの確認**
-    - RQTのNodeGraphでシステム確認
-12. **おまけ：TFの確認**
-    - RQTのTF Treeでの構造確認
+2. **本スライドのゴール**
+   - ロボットモデルをRviz上に表示できるようになる
+3. **Rvizとは？**
+   - ロボットのモデルやセンサ情報などを3次元で可視化するためのツール
+   - デバッグや動作確認で使用
+   - RVizなしでもROS自体は動作可能
+4. **表示をするまでの全体像**
+   - ①URDFでロボットモデルを書く
+   - ②URDFを読み込ませて表示
+5. **ステップ1：URDFの書き方（縦階層構造）**
+   - 5.1 **そもそもロボットの構造（復習）** - image5を引用
+   - 5.2 **ロボットモデル = ロボットアームの構造** - image6を引用
+     - ジョイント（関節）：モーターが入って動く
+     - リンク：ジョイントを繋ぐ、剛性が重要
+     - エンドエフェクタ（手先効果器）：作業用、付け替え可能
+   - 5.3 **URDF（Unified Robot Description Format）**
+     - Joint：自由度、親リンクと子リンク
+     - Link：Visual、Collision、Inertial
+   - 5.4 **XACRO（XML Macros for Robots）** - image8を引用
+     - URDFの効率化（マクロ機能追加）
+     - 変数渡し、関数での繰り返し構造簡素化
+   - 5.5 **エンドエフェクタを追加したい場合**
+     - XACROのinclude機能活用
+     - 実装例コード付き
+6. **ステップ2：URDFの表示launchコード例（縦階層構造）**
+   - launchファイルの実装例
+   - 6.1 **URDFの表示デモ** - image8を引用
+     - TFを見るとURDFで記述したjointとlinkが動いているのが見える
+7. **RVizで表示を確認したTFとは何か？（縦階層構造）**
+   - 7.1 **TF（Transformation）機能1：座標変換** - image9を引用
+     - ROS標準搭載のシステム（実際はTF2を使用）
+     - エンドエフェクタのベース座標系・ツール座標系計算
+   - 7.2 **TF機能2：座標管理**
+     - 座標をツリー構造で管理（開ループのみ、閉ループ不可）
+     - 時系列座標データの管理
+     - TF完全理解資料の紹介
 
 ## 主要な学習ポイント
 
@@ -96,9 +101,10 @@
 #### Launchファイル
 ```xml
 <launch>
+  <arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/>
   <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
   <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 </launch>
 ```
 
@@ -172,12 +178,14 @@ ros-model-display/
 ├── index.html          # メインスライドファイル
 ├── media/              # 画像・動画ファイル
 │   ├── image1.png     # タイトル背景
-│   ├── image2.png     # システム概要図
-│   ├── image3.png     # 詳細フロー図
-│   ├── image4.png     # 座標変換例
-│   ├── image6.png     # ロボット構造図
-│   ├── image8.png     # XACRO例
-│   └── image9.png     # ノードグラフ
+│   ├── image2.png     # （未使用）
+│   ├── image3.png     # （未使用）
+│   ├── image4.png     # 座標変換例（TFスライドで使用）
+│   ├── image5.png     # ロボット構造復習（URDFスライドで使用）
+│   ├── image6.png     # ロボットアーム構造図（URDFスライドで使用）
+│   ├── image7.png     # （未使用）
+│   ├── image8.png     # XACRO例・表示デモ（URDFスライドで使用）
+│   └── image9.png     # （未使用）
 └── CLAUDE.md          # このドキュメント
 ```
 

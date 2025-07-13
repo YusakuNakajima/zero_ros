@@ -35,12 +35,6 @@
                                 <li>モノを掴んで運ぶなど簡単な動きを作ることを目的としています</li>
                             </ul>
                         </li>
-                        <li>本講義でやらないこと</li>
-                    </ul>
-                    <h3>目次</h3>
-                    <ul>
-                        <li>ロボットアームの操作</li>
-                        <li>ロボットアームの選定</li>
                     </ul>
                 </section>
                 <section>
@@ -51,7 +45,7 @@
                     <h2>目的に応じたロボット制御方法</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <h3>手先位置・姿勢の制御</h3>
+                            <h4>手先位置・姿勢の制御</h4>
                             <img src="media/end_effector_position_control.jpg">
                             <p>本スライド</p>
                             <ul>
@@ -60,9 +54,9 @@
                             </ul>
                         </div>
                         <div style="flex: 1;">
-                            <h3>関節角度の制御</h3>
+                            <h4>関節角度の制御</h4>
                             <img src="media/joint_angle_control.jpg">
-                            <p>ROS入門へ(別スライド)</p>
+                            <p><a href="../ros-introduction/index.html">ROS入門へ(別スライド)</a></p>
                             <ul>
                                 <li>複雑な動きや制御を作りたい</li>
                                 <li>様々なメーカーのロボットやセンサを統合したシステムを作りたい</li>
@@ -72,35 +66,32 @@
                 </section>
                 <section>
                     <h2>オススメ参考資料</h2>
-                    <ul>
-                        <li>ロボット制御学ハンドブック</li>
-                        <li>ROSロボットプログラミング</li>
-                    </ul>
-                    <h3>産業用ロボットTheビギニング</h3>
-                    <p>ここの資料で説明しているような産業用ロボットの基礎的な情報を網羅</p>
-                    <h3>イラストで学ぶロボット工学</h3>
-                    <p>初歩的な内容を網羅的に扱っていて<br>最初に読むのにちょうど良い<br>まずは8章まで読むのがよい<br>最も基本の位置制御まで扱っている</p>
-                </section>
-                <section>
-                    <h2>ロボットを動かす方法</h2>
-                    <ul>
-                        <li>順運動学</li>
-                        <li>逆運動学</li>
-                        <li>ティーチングペンダント(TP)</li>
-                        <li>プログラミング</li>
-                    </ul>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/産業用ロボットtheビギニング.png" style="width: 60%; margin-bottom: 20px;">
+                            <h3>産業用ロボットTheビギニング</h3>
+                            <p>ここの資料で説明しているような産業用ロボットの基礎的な情報を網羅</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/イラストで学ぶロボット工学.png" style="width: 60%; margin-bottom: 20px;">
+                            <h3>イラストで学ぶロボット工学</h3>
+                            <p>初歩的な内容を網羅的に扱っていて<br>最初に読むのにちょうど良い<br>まずは8章まで読むのがよい<br>最も基本の位置制御まで扱っている</p>
+                        </div>
+                    </div>
                 </section>
                 <section>
                     <h2>ティーチングペンダントとプログラミング</h2>
                     <div style="display: flex;">
-                        <div style="flex: 1;">
+                        <div style="flex: 1;" class="fragment" data-fragment-index="1">
+                            <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
                             <h3>ティーチングペンダント(TP)</h3>
                             <ul>
                                 <li>タブレット端末で操作</li>
                                 <li>設定や動作テストで使用</li>
                             </ul>
                         </div>
-                        <div style="flex: 1;">
+                        <div style="flex: 1;" class="fragment" data-fragment-index="2">
+                            <img src="media/programing_image.jpg" style="width: 80%; margin-bottom: 20px;">
                             <h3>プログラミング</h3>
                             <ul>
                                 <li>研究で使うのは基本こっち</li>
@@ -109,18 +100,43 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="fragment" data-fragment-index="3">
+                        <p style="margin-top: 30px; text-align: center; font-size: 1.2em;">
+                            <strong>→ 研究では主にプログラミングによる制御を行います</strong>
+                        </p>
+                    </div>
                 </section>
                 <section>
-                    <h2>基本的な動かし方</h2>
-                    <ul>
-                        <li>Tool Center Point(TCP)を登録</li>
-                        <li>座標をプログラムで指定</li>
-                        <li>モーションの種類を選択</li>
-                        <li>ROSやPythonで外部制御</li>
-                    </ul>
-                </section>
+                    <section>
+                        <h2>ティーチングペンダント(TP)から動かす場合</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
+                                <ul>
+                                    <li>直感的なGUI操作</li>
+                                    <li>ロボットの状態確認や手動操作</li>
+                                    <li>動作プログラムの作成・編集</li>
+                                    <li>安全機能の設定</li>
+                                </ul>
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>TP操作の基本手順</h3>
+                                <ol>
+                                    <li><strong>TCP設定</strong><br>
+                                    ツールの座標系を登録</li>
+                                    <li><strong>位置ティーチング</strong><br>
+                                    waypointを手動で記録</li>
+                                    <li><strong>動作プログラム作成</strong><br>
+                                    モーションの種類を指定</li>
+                                    <li><strong>実行・テスト</strong><br>
+                                    低速で動作確認</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <p>産業現場での標準的な操作方法</p>
+                    </section>
                 <section>
-                    <h2>ロボットアームの手先(TCP)</h2>
+                    <h2>ステップ①ロボットアームの手先(TCP)</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/robot_arm_tcp_example1.png">
@@ -135,76 +151,134 @@
                     <p>TCPは複数登録/切り替え可能<br>2つ以上ツールを持たせる場合に便利</p>
                 </section>
                 <section>
-                    <h2>ロボットアームの構造</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>ジョイント(関節)</h3>
-                            <p>モーターが入っている関節部</p>
-                            <h3>リンク</h3>
-                            <p>ジョイントを繋ぐ部分</p>
-                            <h3>エンドエフェクタ</h3>
-                            <p>作業をする手先・付け替え可能</p>
-                        </div>
-                    </div>
+                    <h2>プログラムから動かす場合</h2>
+                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
+                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
+                    <ul>
+                        <li>PTP = moveJ</li>
+                        <li>LIN = moveL</li>
+                        <li>CIRC = moveC</li>
+                    </ul>
+                    <pre><code class="language-python">
+import rtde_control
+import rtde_receive
+import time
+robot_ip = "URロボットのIPアドレス" 
+rtde_c = rtde_control.RTDEControlInterface(robot_ip)
+rtde_r = rtde_receive.RTDEReceiveInterface(robot_ip)
+try:
+    # PTP動作 (関節空間)
+    # 関節角度をラジアンで指定
+    target_joints = [0.1, -1.2, 2.3, -1.5, 0.5, 0.0] #ラジアン表記
+    rtde_c.moveJ(target_joints, 1.0, 0.5) # 速度1.0rad/s, 加速度0.5rad/s^2
+    time.sleep(5)
+
+    # LIN動作 (ベース座標系)
+    # ベース座標系での目標TCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
+    target_pose_base = [0.3, 0.4, 0.5, 0.0, 0.0, 0.0]
+    rtde_c.moveL(target_pose_base, 0.5, 0.3) # 速度0.5m/s, 加速度0.3m/s^2
+    time.sleep(5)
+
+    # CIRC動作 (ツール座標系)
+    # ツール座標系での中間点と目標点のTCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
+    via_pose_tool = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0]
+    to_pose_tool = [0.2, 0.0, 0.0, 0.0, 0.0, 0.0]
+    rtde_c.moveC(via_pose_tool, to_pose_tool, 0.5, 0.3, pose_tool=True) # 速度0.5m/s, 加速度0.3m/s^2
+    time.sleep(5)
+
+finally:
+    rtde_r.disconnect()
+                    </code></pre>
+                    <p>安全確認してから実行してください</p>
                 </section>
-                <section>
-                    <h2>ロボットの座標(pose)</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_pose_position.png">
-                            <h3>関節座標系</h3>
-                            <p>6軸(or 7軸)それぞれの角度を指定</p>
-                            <p>図はhttps://www.mirai-lab.co.jp/all/1101より引用</p>
+                    <section>
+                        <h2>ステップ②ロボットの座標指定</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/robot_arm_structure.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <ul>
+                                    <li><strong>ジョイント(関節)</strong>
+                                        <ul>
+                                            <li>モーターが入っている関節部</li>
+                                            <li>各軸の回転・動作を制御</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>リンク</strong>
+                                        <ul>
+                                            <li>ジョイントを繋ぐ部分</li>
+                                            <li>ロボットの腕の骨格</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>エンドエフェクタ</strong>
+                                        <ul>
+                                            <li>作業をする手先・付け替え可能</li>
+                                            <li>グリッパ、工具など用途に応じて交換</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_pose_orientation.png">
-                            <h3>ベース座標系</h3>
-                            <p>ロボットの根本を基準に直交座標系で指定</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_pose_example.png">
-                            <h3>ツール座標系</h3>
-                            <p>ロボットの手先を基準に直交座標系で指定</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>姿勢=位置+向き</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/pose_definition.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>位置(position)</h3>
-                            <p>XYZ座標</p>
-                            <h3>向き(orientation)</h3>
-                            <p>オイラー角(XYZ軸回転)</p>
-                            <p>姿勢 = 位置 + 向き</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>ロボットアームの軸の数はなぜ6が多い</h2>
-					<p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元			3次元		6次元</p>
-                    <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
-                    <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_6axis_example1.png">
-                            <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_6axis_example2.png">
-                            <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
-                        </div>
-                    </div>
+                    </section>
                 </section>
                 <section>
                     <section>
-                        <h2>ロボットのモーションの種類</h2>
+                        <h2>ロボットの座標(pose)</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/robot_pose_position.png">
+                                <h3>関節座標系</h3>
+                                <p>6軸(or 7軸)それぞれの角度を指定</p>
+                                <p>図はhttps://www.mirai-lab.co.jp/all/1101より引用</p>
+                            </div>
+                            <div style="flex: 1;">
+                                <img src="media/robot_pose_orientation.png">
+                                <h3>ベース座標系</h3>
+                                <p>ロボットの根本を基準に直交座標系で指定</p>
+                            </div>
+                            <div style="flex: 1;">
+                                <img src="media/robot_pose_example.png">
+                                <h3>ツール座標系</h3>
+                                <p>ロボットの手先を基準に直交座標系で指定</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h2>姿勢=位置+向き</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/pose_definition.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>位置(position)</h3>
+                                <p>XYZ座標</p>
+                                <h3>向き(orientation)</h3>
+                                <p>オイラー角(XYZ軸回転)</p>
+                                <p>姿勢 = 位置 + 向き</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h2>ロボットアームの軸の数はなぜ6が多い</h2>
+                        <p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元			3次元		6次元</p>
+                        <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
+                        <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/robot_arm_6axis_example1.png">
+                                <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6</p>
+                            </div>
+                            <div style="flex: 1;">
+                                <img src="media/robot_arm_6axis_example2.png">
+                                <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <h2>ステップ③ロボットモーションの種類指定</h2>
                         <p>大きく分けて<strong>PTP（Point to Point）</strong>、<strong>LIN（Linear）</strong>、<strong>CIRC（Circular）</strong>の3種類</p>
                         <div style="display: flex;">
                             <div style="flex: 1;">
@@ -272,44 +346,53 @@
                             </div>
                         </div>
                     </section>
-                </section>
-                <section>
-                    <h2>連続的なロボットモーション</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/continuous_robot_motion.jpg">
+                    <section>
+                        <h2>連続的なロボットモーション</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/continuous_robot_motion.jpg">
+                            </div>
+                            <div style="flex: 1;">
+                                <ul>
+                                    <li>複数のwaypoints指定で連続動作</li>
+                                    <li>通常は各点で停止する動作のため、動きがガタつく</li>
+                                    <li>滑らかなモーションを作りたい場合↓</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>複数のwaypoints指定で連続動作</li>
-                                <li>通常は各点で停止する動作のため、動きがガタつく</li>
-                                <li>滑らかなモーションを作りたい場合↓</li>
-                            </ul>
-                            <h3>滑らかなモーションの作り方</h3>
-                            <ul>
-                                <li>厳密にwaypointsを通らずにショートカットすることで滑らかな動作を実現</li>
-                                <li>左の図のようなやり方でショートカットを行う</li>
-                                <li>メーカーごとにこの機能の呼び方は異なる 例)Denso(パス動作)、UR(ブレンド半径)</li>
-                            </ul>
+                    </section>
+                    <section>
+                        <h2>滑らかなモーションの作り方</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/continuous_robot_motion.jpg">
+                            </div>
+                            <div style="flex: 1;">
+                                <ul>
+                                    <li>厳密にwaypointsを通らずにショートカットすることで滑らかな動作を実現</li>
+                                    <li>左の図のようなやり方でショートカットを行う</li>
+                                    <li>メーカーごとにこの機能の呼び方は異なる 例)Denso(パス動作)、UR(ブレンド半径)</li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>ショートカットモーションの詳細</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <iframe data-src="interactive_app/ur_blend_radius.html" width="100%" height="400px" frameborder="0"></iframe>
+                    </section>
+                    <section>
+                        <h2>ショートカットモーションの詳細</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <iframe data-src="interactive_app/ur_blend_radius.html" width="100%" height="400px" frameborder="0"></iframe>
+                            </div>
+                            <div style="flex: 1;">
+                                <ul>
+                                    <li>スプライン補間、最小躍度軌道を使用</li>
+                                    <li>厳密にwaypointsを通らない処理</li>
+                                    <li>左図のインタラクティブアプリで確認可能</li>
+                                    <li>メーカーごとに呼び方が異なる</li>
+                                    <li>例：Denso(パス動作)、UR(ブレンド半径)</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>スプライン補間、最小躍度軌道を使用</li>
-                                <li>厳密にwaypointsを通らない処理</li>
-                                <li>左図のインタラクティブアプリで確認可能</li>
-                                <li>メーカーごとに呼び方が異なる</li>
-                                <li>例：Denso(パス動作)、UR(ブレンド半径)</li>
-                            </ul>
-                        </div>
-                    </div>
+                    </section>
                 </section>
                 <section>
                     <h2>ロボットアームの精度について</h2>
@@ -328,155 +411,116 @@
                     </div>
                 </section>
                 <section>
-                    <h2>URのプログラム例</h2>
-                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
-                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
-                    <ul>
-                        <li>PTP = moveJ</li>
-                        <li>LIN = moveL</li>
-                        <li>CIRC = moveC</li>
-                    </ul>
-                    <pre><code class="language-python">
-import rtde_control
-import rtde_receive
-import time
-robot_ip = "URロボットのIPアドレス" 
-rtde_c = rtde_control.RTDEControlInterface(robot_ip)
-rtde_r = rtde_receive.RTDEReceiveInterface(robot_ip)
-try:
-    # PTP動作 (関節空間)
-    # 関節角度をラジアンで指定
-    target_joints = [0.1, -1.2, 2.3, -1.5, 0.5, 0.0] #ラジアン表記
-    rtde_c.moveJ(target_joints, 1.0, 0.5) # 速度1.0rad/s, 加速度0.5rad/s^2
-    time.sleep(5)
-
-    # LIN動作 (ベース座標系)
-    # ベース座標系での目標TCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    target_pose_base = [0.3, 0.4, 0.5, 0.0, 0.0, 0.0]
-    rtde_c.moveL(target_pose_base, 0.5, 0.3) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
-
-    # CIRC動作 (ツール座標系)
-    # ツール座標系での中間点と目標点のTCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    via_pose_tool = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0]
-    to_pose_tool = [0.2, 0.0, 0.0, 0.0, 0.0, 0.0]
-    rtde_c.moveC(via_pose_tool, to_pose_tool, 0.5, 0.3, pose_tool=True) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
-
-finally:
-    rtde_r.disconnect()
-                    </code></pre>
-                    <p>安全確認してから実行してください</p>
-                </section>
-                <section>
                     <h2>以上でロボットの基本動作はできるはず</h2>
                     <p>Let’s enjoy robot!</p>
                     <p>もっと複雑な制御やセンサの統合をやりたい方は、<br>「ゼロからのROS入門」へ</p>
                     <p>粉体粉砕をしたい方は<br>「粉体粉砕パッケージの解説」へ</p>
                 </section>
                 <section>
-                    <h2>ロボットアーム選定</h2>
-                    <p>ロボットアームの選び方</p>
-                    <p>ここでは協働ロボットを対象にしています</p>
-                </section>
-                <section>
-                    <h2>ざっくり４種類</h2>
-                    <p>高価格<br>多機能<br>(≠多用途)</p>
-                    <p>低価格<br>単機能</p>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <h3>垂直多関節ロボット</h3>
-                            <img src="media/vertical_multi_joint_robot.png">
+                    <section>
+                        <h2>ロボットアーム選定</h2>
+                        <p>ロボットアームの選び方</p>
+                        <p>ここでは協働ロボットを対象にしています</p>
+                    </section>
+                    <section>
+                        <h2>ざっくり４種類</h2>
+                        <p>高価格<br>多機能<br>(≠多用途)</p>
+                        <p>低価格<br>単機能</p>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <h3>垂直多関節ロボット</h3>
+                                <img src="media/vertical_multi_joint_robot.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>水平多関節ロボット(SCARA)</h3>
+                                <img src="media/horizontal_multi_joint_robot.png">
+                            </div>
                         </div>
-                        <div style="flex: 1;">
-                            <h3>水平多関節ロボット(SCARA)</h3>
-                            <img src="media/horizontal_multi_joint_robot.png">
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <h3>パラレルリンクロボット</h3>
+                                <img src="media/parallel_link_robot.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>双腕ロボット</h3>
+                                <img src="media/dual_arm_robot.png">
+                            </div>
                         </div>
-                    </div>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <h3>パラレルリンクロボット</h3>
-                            <img src="media/parallel_link_robot.png">
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <h3>協働ロボット</h3>
+                                <img src="media/collaborative_robot.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>人型ロボット</h3>
+                                <img src="media/humanoid_robot.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>移動ロボット</h3>
+                                <img src="media/mobile_robot.png">
+                            </div>
                         </div>
-                        <div style="flex: 1;">
-                            <h3>双腕ロボット</h3>
-                            <img src="media/dual_arm_robot.png">
+                    </section>
+                    <section>
+                        <h2>産業用ロボット系列</h2>
+                        <ul>
+                            <li>FANUC、Yaskawa、Kawasaki、Denso、UR</li>
+                            <li>ハードウェアがしっかりしている</li>
+                            <li>産業用ロボット+安全機能</li>
+                            <li>FAベースで使いにくい場合も</li>
+                            <li>外部制御が限定的</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>高機能協働ロボット</h2>
+                        <ul>
+                            <li>UR、Franka Emika、DOBOT</li>
+                            <li>機能を妥協していない協働ロボット</li>
+                            <li>マニピュレーション研究でよく使用</li>
+                            <li>オープンな外部制御</li>
+                            <li>ROSから全機能制御可能</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>中華系ロボット</h2>
+                        <ul>
+                            <li>Unitree、Robosen、Xiaomi</li>
+                            <li>とにかく安価</li>
+                            <li>ハードウェア品質は控えめ</li>
+                            <li>用途によっては十分</li>
+                            <li>Pythonからの制御が整備</li>
+                            <li>外部制御性は限定的</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>教育用ロボット</h2>
+                        <ul>
+                            <li>LEGO Mindstorms、mBot、Raspberry Pi</li>
+                            <li>3Dプリンタ使用で低コスト</li>
+                            <li>剛性低く精密制御は困難</li>
+                            <li>原理検証用途</li>
+                            <li>Python制御が整備済み</li>
+                            <li>学習向け(実務には不向き)</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>ダントツのオススメロボット</h2>
+                        <div style="display: flex;">
+                            <div style="flex: 1;">
+                                <img src="media/vertical_multi_joint_robot.png">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3>ユニバーサルロボット</h3>
+                                <ul>
+                                    <li>研究者からユーザまでオススメ</li>
+                                    <li>圧倒的に使いやすい</li>
+                                    <li>ロボットが置物になりにくい</li>
+                                    <li>値段がボトルネック</li>
+                                    <li>2025年時点で400万円~</li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <h3>協働ロボット</h3>
-                            <img src="media/collaborative_robot.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>人型ロボット</h3>
-                            <img src="media/humanoid_robot.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>移動ロボット</h3>
-                            <img src="media/mobile_robot.png">
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>産業用ロボット系列</h2>
-                    <ul>
-                        <li>FANUC、Yaskawa、Kawasaki、Denso、UR</li>
-                        <li>ハードウェアがしっかりしている</li>
-                        <li>産業用ロボット+安全機能</li>
-                        <li>FAベースで使いにくい場合も</li>
-                        <li>外部制御が限定的</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>高機能協働ロボット</h2>
-                    <ul>
-                        <li>UR、Franka Emika、DOBOT</li>
-                        <li>機能を妥協していない協働ロボット</li>
-                        <li>マニピュレーション研究でよく使用</li>
-                        <li>オープンな外部制御</li>
-                        <li>ROSから全機能制御可能</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>中華系ロボット</h2>
-                    <ul>
-                        <li>Unitree、Robosen、Xiaomi</li>
-                        <li>とにかく安価</li>
-                        <li>ハードウェア品質は控えめ</li>
-                        <li>用途によっては十分</li>
-                        <li>Pythonからの制御が整備</li>
-                        <li>外部制御性は限定的</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>教育用ロボット</h2>
-                    <ul>
-                        <li>LEGO Mindstorms、mBot、Raspberry Pi</li>
-                        <li>3Dプリンタ使用で低コスト</li>
-                        <li>剛性低く精密制御は困難</li>
-                        <li>原理検証用途</li>
-                        <li>Python制御が整備済み</li>
-                        <li>学習向け(実務には不向き)</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>ダントツのオススメロボット</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/vertical_multi_joint_robot.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>ユニバーサルロボット</h3>
-                            <ul>
-                                <li>研究者からユーザまでオススメ</li>
-                                <li>圧倒的に使いやすい</li>
-                                <li>ロボットが置物になりにくい</li>
-                                <li>値段がボトルネック</li>
-                                <li>2025年時点で400万円~</li>
-                            </ul>
-                        </div>
-                    </div>
+                    </section>
                 </section>
             </div>
         </div>
@@ -501,6 +545,7 @@ finally:
                 progress: true,   // 進捗バーを表示
                 center: true,     // スライドを中央揃え
                 hash: true,       // URLにスライド番号を反映
+                slideNumber: true, // スライド番号を表示
 
                 // プラグインの有効化
                 plugins: [
