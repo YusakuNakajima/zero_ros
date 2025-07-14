@@ -236,8 +236,7 @@ finally:
                         <div style="flex: 1;">
                             <img src="media/robot_pose_position.png">
                             <h3>関節座標系</h3>
-                            <p>6軸(or 7軸)それぞれの角度を指定</p>
-                            <p>図はhttps://www.mirai-lab.co.jp/all/1101より引用</p>
+                            <p>関節それぞれの角度を指定</p>
                         </div>
                         <div style="flex: 1;">
                             <img src="media/robot_pose_orientation.png">
@@ -291,15 +290,13 @@ finally:
                             Point）</strong>、<strong>LIN（Linear）</strong>、<strong>CIRC（Circular）</strong>の3種類</p>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_motion_types.jpg">
+                            <iframe data-src="interactive_app/motion_viewer.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
-                            <h3>PTP</h3>
-                            <p>関節空間で最短・高速</p>
-                            <h3>LIN</h3>
-                            <p>直線動作・動きに制限</p>
-                            <h3>CIRC</h3>
-                            <p>円弧動作・障害物回避</p>
+                            <li>PTP:関節空間で最短,高速</li>
+                            <li>LIN:直線動作,動きに制限</li>
+                            <li>CIRC:円弧動作,障害物回避</li>
                         </div>
                     </div>
                 </section>
