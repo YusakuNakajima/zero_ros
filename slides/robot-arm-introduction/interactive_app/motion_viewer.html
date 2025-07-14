@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボット動作シミュレーター (Z-up)</title>
+    <title>ロボット動作軌跡 比較シミュレーター (Z-up)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
@@ -13,6 +19,7 @@
             background-color: #111827;
             color: #f3f4f6;
         }
+
         #canvas-container {
             width: 100%;
             height: 100vh;
@@ -21,6 +28,7 @@
             left: 0;
             z-index: 1;
         }
+
         #ui-container {
             position: absolute;
             top: 1rem;
@@ -28,6 +36,7 @@
             z-index: 10;
             pointer-events: none;
         }
+
         .control-panel {
             background-color: rgba(31, 41, 55, 0.8);
             backdrop-filter: blur(10px);
@@ -38,83 +47,101 @@
             width: 500px;
             max-width: 90vw;
         }
+
         .control-panel button {
             transition: all 0.2s ease-in-out;
         }
-        .control-panel button.active {
-            background-color: #3b82f6;
-            color: white;
-            transform: scale(1.05);
-        }
+
         .control-panel input[type="number"] {
             -moz-appearance: textfield;
         }
+
         .control-panel input::-webkit-outer-spin-button,
         .control-panel input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
+        .legend-color-box {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            margin-right: 0.5em;
+            vertical-align: middle;
+            border: 1px solid #4b5563;
+        }
     </style>
 </head>
+
 <body>
 
     <div id="canvas-container"></div>
 
     <div id="ui-container">
         <div class="control-panel">
-            <h1 class="text-xl font-bold text-center mb-4 text-white">ロボット動作シミュレーター</h1>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
-                <div>
-                    <p class="text-sm font-bold text-gray-400">動作モード選択</p>
-                    <div class="flex flex-col space-y-2 mt-2">
-                        <button id="ptp-btn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">PTP</button>
-                        <button id="lin-btn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">LIN</button>
-                        <button id="circ-btn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">CIRC</button>
-                    </div>
-                </div>
+            <h1 class="text-xl font-bold text-center mb-4 text-white">ロボット動作軌跡 比較シミュレーター</h1>
+            <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-sm font-bold text-gray-400">コントロール</p>
-                     <div class="flex flex-col space-y-2 mt-2">
-                        <button id="start-btn" class="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg">アニメーション開始</button>
-                        <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 rounded-lg">リセット</button>
+                    <div class="flex flex-col space-y-2 mt-2">
+                        <button id="start-btn"
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">軌跡を比較</button>
+                        <button id="reset-btn"
+                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">リセット</button>
                     </div>
                 </div>
-                <div class="col-span-2 bg-transparent shadow-none p-0">
-                    <p class="text-sm font-bold text-gray-400 text-left">説明</p>
-                    <div id="info-box" class="mt-2 text-left bg-gray-800 p-3 rounded-lg h-full text-sm">
-                        動作モードを選択してください。
+                <div>
+                    <p class="text-sm font-bold text-gray-400">軌跡の凡例</p>
+                    <div id="info-box" class="mt-2 text-left bg-gray-800 p-3 rounded-lg h-full text-sm space-y-1">
+                        <!-- 凡例はJSで動的に設定 -->
                     </div>
                 </div>
             </div>
 
-            <!-- 座標設定セクション -->
             <div class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">座標設定 (Z-up)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 class="text-lg font-bold text-center mb-2 text-white">座標設定 (Z-up 右手系)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <h3 class="font-semibold text-green-400 mb-2">開始点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
-                            <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
-                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center" value="10">
+                            <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="40">
+                            <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="20">
+                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="50">
                         </div>
                     </div>
                     <div>
                         <h3 class="font-semibold text-red-400 mb-2">終了点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
-                            <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center" value="-20">
-                            <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center" value="50">
+                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="40">
+                            <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="-20">
+                            <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="10">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-yellow-400 mb-2">中間点 (X, Y, Z)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="50">
+                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="0">
+                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="30">
                         </div>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-center">
-                    <button id="update-pos-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg">座標を更新</button>
+                    <button id="update-pos-btn"
+                        class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg">座標を更新</button>
                 </div>
                 <p id="error-message" class="text-yellow-400 text-center mt-2 text-sm h-4"></p>
             </div>
-            
-            <!-- 手先リアルタイム座標セクション -->
+
             <div class="mt-4 pt-4 border-t border-gray-600">
                 <h2 class="text-lg font-bold text-center mb-2 text-white">手先リアルタイム座標 (X, Y, Z)</h2>
                 <div class="grid grid-cols-3 gap-2 text-center bg-gray-900 p-2 rounded-lg">
@@ -134,8 +161,6 @@
         // --- 基本設定 ---
         let scene, camera, renderer, controls;
         let robot, endEffector;
-        let animationFrameId;
-        let currentMode = 'PTP';
         let isAnimating = false;
         let startMarkerGroup, endMarkerGroup, viaMarkerGroup;
 
@@ -144,10 +169,15 @@
         const links = [];
 
         // --- ターゲットと軌跡 ---
-        let startPos = new THREE.Vector3(40, 20, 10);
-        let endPos = new THREE.Vector3(40, -20, 50);
-        const viaPos = new THREE.Vector3(50, 0, 30); // CIRC用の中間点
-        let pathLine;
+        let startPos = new THREE.Vector3(40, 20, 50);
+        let endPos = new THREE.Vector3(40, -20, 10);
+        let viaPos = new THREE.Vector3(50, 0, 30);
+        let pathPTP, pathLIN, pathCIRC;
+        const pathColors = {
+            PTP: 0x3b82f6, // Blue
+            LIN: 0xef4444, // Red
+            CIRC: 0xeab308 // Yellow
+        };
 
         // --- 初期化処理 ---
         function init() {
@@ -157,12 +187,11 @@
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x111827);
 
-            // 座標軸ヘルパーを追加 (X:赤, Y:緑, Z:青)
-            const axesHelper = new THREE.AxesHelper( 50 ); // 軸の長さ
-            scene.add( axesHelper );
+            const axesHelper = new THREE.AxesHelper(50);
+            scene.add(axesHelper);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(60, -60, 60);
+            camera.position.set(60, -60, 80);
 
             const container = document.getElementById('canvas-container');
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -174,14 +203,13 @@
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(40, -40, 100);
+            directionalLight.position.set(50, -50, 100);
             directionalLight.castShadow = true;
             scene.add(directionalLight);
 
-            // 床 (XY平面)
             const ground = new THREE.Mesh(
                 new THREE.PlaneGeometry(200, 200),
-                new THREE.MeshStandardMaterial({ color: 0x27374D })
+                new THREE.MeshStandardMaterial({ color: 0x1f2937 })
             );
             ground.receiveShadow = true;
             scene.add(ground);
@@ -192,82 +220,102 @@
             createRobot();
             createMarkers();
             setupUI();
-            
-            resetRobot();
-            updateInfoBox();
-            updateButtonState();
-            viaMarkerGroup.visible = (currentMode === 'CIRC');
 
+            resetScene();
             animate();
         }
 
+        // ロボットモデルの作成（親子関係を修正済み）
         function createRobot() {
             robot = new THREE.Group();
-            // Y-upで作成したロボットモデルを、ワールドのZ-upに合わせるために回転
-            robot.rotation.x = -Math.PI / 2;
             scene.add(robot);
 
             const linkMaterial = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.5, metalness: 0.5 });
-            const jointMaterial = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.4, metalness: 0.6 });
+            const jointMaterial = new THREE.MeshStandardMaterial({ color: 0x60a5fa, roughness: 0.4, metalness: 0.6 });
 
-            const base = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 4, 32), new THREE.MeshStandardMaterial({color: 0x4b5563}));
+            // J0: ベース
+            const baseHeight = 4;
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, baseHeight, 32), new THREE.MeshStandardMaterial({ color: 0x4b5563 }));
+            base.rotation.x = Math.PI / 2;
+            base.position.z = baseHeight / 2;
             base.castShadow = true;
             robot.add(base);
 
+            // J1: 旋回軸 (Z軸周り)
             const j1 = new THREE.Group();
-            j1.position.y = 5;
-            base.add(j1);
+            j1.position.z = baseHeight;
+            robot.add(j1);
             joints.push(j1);
-            const j1Visual = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 6, 32), jointMaterial);
+            const j1VisualHeight = 6;
+            const j1Visual = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, j1VisualHeight, 32), jointMaterial);
+            j1Visual.rotation.x = Math.PI / 2;
+            j1Visual.position.z = j1VisualHeight / 2;
             j1Visual.castShadow = true;
             j1.add(j1Visual);
 
-            const l1 = new THREE.Mesh(new THREE.BoxGeometry(6, 20, 6), linkMaterial);
-            l1.position.y = 10;
-            l1.castShadow = true;
+            // L1: 垂直リンク
+            const l1Height = 20;
+            const l1 = new THREE.Group();
+            l1.position.z = j1VisualHeight;
             j1.add(l1);
-            links.push(l1);
+            const l1Visual = new THREE.Mesh(new THREE.BoxGeometry(6, 6, l1Height), linkMaterial);
+            l1Visual.position.z = l1Height / 2;
+            l1Visual.castShadow = true;
+            l1.add(l1Visual);
+            links.push(l1Visual);
 
+            // J2: 肩 (Y軸周り)
             const j2 = new THREE.Group();
-            j2.position.y = 20;
-            j1.add(j2);
+            j2.position.z = l1Height;
+            l1.add(j2);
             joints.push(j2);
-            const j2Visual = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 8, 32), jointMaterial);
-            j2Visual.rotation.z = Math.PI / 2;
+            const j2VisualWidth = 8;
+            const j2Visual = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, j2VisualWidth, 32), jointMaterial);
             j2Visual.castShadow = true;
             j2.add(j2Visual);
 
-            const l2 = new THREE.Mesh(new THREE.BoxGeometry(40, 5, 5), linkMaterial);
-            l2.position.x = 20;
-            l2.castShadow = true;
+            // L2: 上腕
+            const l2Length = 40;
+            const l2 = new THREE.Group();
             j2.add(l2);
-            links.push(l2);
+            const l2Visual = new THREE.Mesh(new THREE.BoxGeometry(l2Length, 5, 5), linkMaterial);
+            l2Visual.position.x = l2Length / 2;
+            l2Visual.castShadow = true;
+            l2.add(l2Visual);
+            links.push(l2Visual);
 
+            // J3: 肘 (Y軸周り)
             const j3 = new THREE.Group();
-            j3.position.x = 40;
-            j2.add(j3);
+            j3.position.x = l2Length;
+            l2.add(j3);
             joints.push(j3);
-            const j3Visual = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 7, 32), jointMaterial);
-            j3Visual.rotation.z = Math.PI / 2;
+            const j3VisualWidth = 7;
+            const j3Visual = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, j3VisualWidth, 32), jointMaterial);
             j3Visual.castShadow = true;
             j3.add(j3Visual);
 
-            const l3 = new THREE.Mesh(new THREE.BoxGeometry(35, 4, 4), linkMaterial);
-            l3.position.x = 17.5;
-            l3.castShadow = true;
+            // L3: 前腕
+            const l3Length = 29;
+            const l3 = new THREE.Group();
             j3.add(l3);
-            links.push(l3);
+            const l3Visual = new THREE.Mesh(new THREE.BoxGeometry(l3Length, 4, 4), linkMaterial);
+            l3Visual.position.x = l3Length / 2;
+            l3Visual.castShadow = true;
+            l3.add(l3Visual);
+            links.push(l3Visual);
 
+            // エンドエフェクタ
             endEffector = new THREE.Group();
-            endEffector.position.x = 35;
-            j3.add(endEffector);
-            const eeVisual = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 16), new THREE.MeshStandardMaterial({color: 0xfb923c}));
+            const eeVisualLength = 6; // コーンの高さ
+            endEffector.position.x = l3Length+ eeVisualLength / 2; // 前腕の長さ + エンドエフェクタの半分の奥行き
+            l3.add(endEffector);
+            const eeVisual = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c }));
             eeVisual.rotation.z = -Math.PI / 2;
-            eeVisual.position.x = 3;
             eeVisual.castShadow = true;
             endEffector.add(eeVisual);
         }
 
+        // ラベル付きマーカーの作成
         function createLabeledMarker(text, position, color) {
             const group = new THREE.Group();
             group.position.copy(position);
@@ -275,7 +323,7 @@
 
             const markerSphere = new THREE.Mesh(
                 new THREE.SphereGeometry(1.5),
-                new THREE.MeshBasicMaterial({ color: color, transparent: true })
+                new THREE.MeshBasicMaterial({ color: color })
             );
             group.add(markerSphere);
 
@@ -284,10 +332,8 @@
             const fontSize = 48;
             context.font = `bold ${fontSize}px "Noto Sans JP", sans-serif`;
             const textWidth = context.measureText(text).width;
-            
             canvas.width = textWidth + 20;
             canvas.height = fontSize + 10;
-
             context.font = `bold ${fontSize}px "Noto Sans JP", sans-serif`;
             context.fillStyle = 'rgba(255, 255, 255, 0.95)';
             context.textAlign = 'center';
@@ -299,215 +345,291 @@
 
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
             const sprite = new THREE.Sprite(spriteMaterial);
-            
             const spriteScale = 12;
             sprite.scale.set(spriteScale * (canvas.width / canvas.height), spriteScale, 1);
-            sprite.position.z = 5; // ラベルを球の上(Z方向)に配置
+            sprite.position.z = 5;
             group.add(sprite);
 
             return group;
         }
 
+        // 開始・終了・中間点マーカーの作成
         function createMarkers() {
             startMarkerGroup = createLabeledMarker('開始', startPos, 0x22c55e);
             endMarkerGroup = createLabeledMarker('終了', endPos, 0xef4444);
             viaMarkerGroup = createLabeledMarker('中間', viaPos, 0xeab308);
         }
 
+        // UIのセットアップ
         function setupUI() {
-            document.getElementById('ptp-btn').addEventListener('click', () => setMode('PTP'));
-            document.getElementById('lin-btn').addEventListener('click', () => setMode('LIN'));
-            document.getElementById('circ-btn').addEventListener('click', () => setMode('CIRC'));
-            document.getElementById('start-btn').addEventListener('click', startAnimation);
-            document.getElementById('reset-btn').addEventListener('click', resetRobot);
+            document.getElementById('start-btn').addEventListener('click', startComparison);
+            document.getElementById('reset-btn').addEventListener('click', resetScene);
             document.getElementById('update-pos-btn').addEventListener('click', updatePositions);
-        }
-        
-        function setMode(mode) {
-            if (isAnimating) return;
-            currentMode = mode;
             updateInfoBox();
-            updateButtonState();
-            resetRobot();
-            viaMarkerGroup.visible = (currentMode === 'CIRC');
         }
 
+        // 凡例表示の更新
         function updateInfoBox() {
             const infoBox = document.getElementById('info-box');
-            let text = '';
-            switch (currentMode) {
-                case 'PTP': text = '<b>PTP (Point to Point):</b> 各関節が最速で目標角度に到達するように動きます。アームの先端は直線ではなく、予測しにくい曲線軌道を描きます。サイクルタイムを最短にしたい場合に適しています。'; break;
-                case 'LIN': text = '<b>LIN (Linear):</b> アームの先端が、指定された始点と終点を結ぶ直線上を動くように、各関節の速度を協調制御します。加工や組み立てなど、軌道制御が必要な作業で使われます。'; break;
-                case 'CIRC': text = '<b>CIRC (Circular):</b> アームの先端が、始点・中間点・終点を通る円弧上を動くように制御します。角の丸め処理や円形の溶接・塗布作業などに使われます。'; break;
-            }
-            infoBox.innerHTML = text;
+            infoBox.innerHTML = `
+                <div><span class="legend-color-box" style="background-color: #${pathColors.PTP.toString(16).padStart(6, '0')};"></span>PTP (関節補間)</div>
+                <div><span class="legend-color-box" style="background-color: #${pathColors.LIN.toString(16).padStart(6, '0')};"></span>LIN (直線補間)</div>
+                <div><span class="legend-color-box" style="background-color: #${pathColors.CIRC.toString(16).padStart(6, '0')};"></span>CIRC (円弧補間)</div>
+            `;
         }
 
-        function updateButtonState() {
-            ['ptp-btn', 'lin-btn', 'circ-btn'].forEach(id => {
-                document.getElementById(id).classList.remove('active');
-            });
-            document.getElementById(currentMode.toLowerCase() + '-btn').classList.add('active');
-        }
-        
+        // ユーザー入力による座標の更新
         function updatePositions() {
             if (isAnimating) return;
             const errorMessage = document.getElementById('error-message');
             errorMessage.textContent = '';
 
-            const newStartX = parseFloat(document.getElementById('start-x').value);
-            const newStartY = parseFloat(document.getElementById('start-y').value);
-            const newStartZ = parseFloat(document.getElementById('start-z').value);
-            const newEndX = parseFloat(document.getElementById('end-x').value);
-            const newEndY = parseFloat(document.getElementById('end-y').value);
-            const newEndZ = parseFloat(document.getElementById('end-z').value);
-
-            const newStartPos = new THREE.Vector3(newStartX, newStartY, newStartZ);
-            const newEndPos = new THREE.Vector3(newEndX, newEndY, newEndZ);
+            const newStartPos = new THREE.Vector3(
+                parseFloat(document.getElementById('start-x').value),
+                parseFloat(document.getElementById('start-y').value),
+                parseFloat(document.getElementById('start-z').value)
+            );
+            const newEndPos = new THREE.Vector3(
+                parseFloat(document.getElementById('end-x').value),
+                parseFloat(document.getElementById('end-y').value),
+                parseFloat(document.getElementById('end-z').value)
+            );
+            const newViaPos = new THREE.Vector3(
+                parseFloat(document.getElementById('via-x').value),
+                parseFloat(document.getElementById('via-y').value),
+                parseFloat(document.getElementById('via-z').value)
+            );
 
             if (!calculateAnglesFor(newStartPos)) {
-                errorMessage.textContent = '開始点が可動範囲外です。';
-                return;
+                errorMessage.textContent = '開始点が可動範囲外です。'; return;
             }
             if (!calculateAnglesFor(newEndPos)) {
-                errorMessage.textContent = '終了点が可動範囲外です。';
-                return;
+                errorMessage.textContent = '終了点が可動範囲外です。'; return;
+            }
+            if (!calculateAnglesFor(newViaPos)) {
+                errorMessage.textContent = '中間点が可動範囲外です。'; return;
             }
 
             startPos.copy(newStartPos);
             endPos.copy(newEndPos);
+            viaPos.copy(newViaPos);
 
             startMarkerGroup.position.copy(startPos);
             endMarkerGroup.position.copy(endPos);
+            viaMarkerGroup.position.copy(viaPos);
 
-            resetRobot();
+            resetScene();
         }
 
-        function startAnimation() {
+        // 軌跡比較アニメーションの開始
+        function startComparison() {
             if (isAnimating) return;
             isAnimating = true;
-            resetRobot();
+            resetScene();
 
-            if (pathLine) scene.remove(pathLine);
-            const pathMaterial = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 1, gapSize: 0.5 });
-            const pathGeometry = new THREE.BufferGeometry().setFromPoints([]);
-            pathLine = new THREE.Line(pathGeometry, pathMaterial);
-            scene.add(pathLine);
+            // 各軌跡オブジェクトを作成
+            pathPTP = createPathLine(pathColors.PTP);
+            pathLIN = createPathLine(pathColors.LIN);
+            pathCIRC = createPathLine(pathColors.CIRC);
 
+            // ★★★ 変更点: ロボットを常に表示 ★★★
+            robot.visible = true;
+
+            // アニメーションを順番に実行
+            const ptpTween = createMovementTween('PTP', pathPTP);
+            const linTween = createMovementTween('LIN', pathLIN);
+            const circTween = createMovementTween('CIRC', pathCIRC);
+
+            ptpTween.chain(linTween);
+            linTween.chain(circTween);
+
+            circTween.onComplete(() => {
+                isAnimating = false;
+                // アニメーション終了後、ロボットは終了点に残す
+                solveIK(endPos);
+            });
+
+            ptpTween.start();
+        }
+
+        // 軌跡描画用のLineオブジェクトを作成
+        function createPathLine(color) {
+            const material = new THREE.LineBasicMaterial({ color: color, linewidth: 3 });
+            const geometry = new THREE.BufferGeometry();
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            return line;
+        }
+
+        // 指定されたモードのアニメーションTweenを作成
+        function createMovementTween(mode, pathLine) {
+            const duration = 2000;
             let tween;
-            const duration = 3000;
 
-            switch (currentMode) {
+            // ★★★ 変更点: 各アニメーションの開始時にロボットを開始位置にリセット ★★★
+            const onStartCallback = () => {
+                solveIK(startPos);
+                // 軌跡の描画をリセット
+                pathLine.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(), 3));
+            };
+
+            switch (mode) {
                 case 'PTP': {
                     const currentAngles = calculateAnglesFor(startPos);
                     const targetAngles = calculateAnglesFor(endPos);
-                    if (!currentAngles || !targetAngles) { isAnimating = false; return; }
+                    if (!currentAngles || !targetAngles) { return new TWEEN.Tween({}); }
 
-                    tween = new TWEEN.Tween(currentAngles).to(targetAngles, duration).easing(TWEEN.Easing.Quadratic.InOut)
+                    tween = new TWEEN.Tween(currentAngles).to(targetAngles, duration)
+                        .easing(TWEEN.Easing.Quadratic.InOut)
+                        .onStart(onStartCallback)
                         .onUpdate(() => {
-                            joints[0].rotation.y = currentAngles.j1;
-                            joints[1].rotation.z = currentAngles.j2;
-                            joints[2].rotation.z = currentAngles.j3;
-                            updatePath();
+                            setJointAngles(currentAngles);
+                            updatePath(pathLine);
                         });
                     break;
                 }
                 case 'LIN': {
                     const lineCurve = new THREE.Line3(startPos, endPos);
-                    tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
+                    tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
+                        .easing(TWEEN.Easing.Sinusoidal.InOut)
+                        .onStart(onStartCallback)
                         .onUpdate(({ t }) => {
                             const targetPoint = new THREE.Vector3();
                             lineCurve.at(t, targetPoint);
-                            solveIK(targetPoint);
-                            updatePath();
+                            if (solveIK(targetPoint)) {
+                                updatePath(pathLine);
+                            }
                         });
                     break;
                 }
                 case 'CIRC': {
-                    const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
-                    tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
-                        .onUpdate(({ t }) => {
-                            const targetPoint = circleCurve.getPoint(t);
-                            solveIK(targetPoint);
-                            updatePath();
+                    const colinearityCheck = new THREE.Vector3().crossVectors(
+                        new THREE.Vector3().subVectors(viaPos, startPos),
+                        new THREE.Vector3().subVectors(endPos, startPos)
+                    ).length();
+
+                    if (colinearityCheck < 0.01) { // ほぼ直線
+                        const lineCurve = new THREE.Line3(startPos, endPos);
+                        tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration);
+                        tween.onStart(onStartCallback).onUpdate(({ t }) => {
+                            const targetPoint = new THREE.Vector3();
+                            lineCurve.at(t, targetPoint);
+                            if (solveIK(targetPoint)) updatePath(pathLine);
                         });
+                    } else {
+                        const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos], false, 'catmullrom', 0.5);
+                        tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
+                            .easing(TWEEN.Easing.Sinusoidal.InOut)
+                            .onStart(onStartCallback)
+                            .onUpdate(({ t }) => {
+                                const targetPoint = circleCurve.getPoint(t);
+                                if (solveIK(targetPoint)) {
+                                    updatePath(pathLine);
+                                }
+                            });
+                    }
                     break;
                 }
             }
-            tween.onComplete(() => { isAnimating = false; }).start();
+            return tween;
         }
 
-        function resetRobot() {
+        // シーン全体のリセット
+        function resetScene() {
             if (isAnimating) {
                 TWEEN.removeAll();
                 isAnimating = false;
             }
-            if (pathLine) scene.remove(pathLine);
+            robot.visible = true;
+            resetPaths();
             solveIK(startPos);
         }
 
+        // 全ての軌跡を削除
+        function resetPaths() {
+            [pathPTP, pathLIN, pathCIRC].forEach(path => {
+                if (path) {
+                    scene.remove(path);
+                    path.geometry.dispose();
+                    path.material.dispose();
+                }
+            });
+            pathPTP = pathLIN = pathCIRC = null;
+        }
+
+        // 逆運動学(IK)を解いて関節角度を設定
         function solveIK(target) {
             const angles = calculateAnglesFor(target);
             if (angles) {
-                joints[0].rotation.y = angles.j1;
-                joints[1].rotation.z = angles.j2;
-                joints[2].rotation.z = angles.j3;
+                setJointAngles(angles);
+                return true;
             }
+            return false;
         }
-        
-        function calculateAnglesFor(targetWorldPos) {
-            const L2 = 40;
-            const L3 = 35;
-            const j2PivotZ = 25; // ロボットの肩の回転軸の高さ (Z座標)
 
-            // J1 (ベース) の回転角 (Z軸周り)
+        // 関節角度を設定
+        function setJointAngles(angles) {
+            joints[0].rotation.z = angles.j1;
+            joints[1].rotation.y = -angles.j2;
+            joints[2].rotation.y = angles.j3;
+        }
+
+        // 逆運動学の計算（ロボット構造に合わせて修正済み）
+        function calculateAnglesFor(targetWorldPos) {
+            const L2 = 40; // 上腕の長さ
+            const L3 = 35; // 前腕の長さ
+            const j2PivotZ = 30; // 肩の回転中心のZ座標 (ベース高4 + J1高6 + L1高20)
+
             const theta1 = Math.atan2(targetWorldPos.y, targetWorldPos.x);
-            
-            // アーム平面上での計算
-            const r = Math.sqrt(targetWorldPos.x**2 + targetWorldPos.y**2); // XY平面での半径
-            const h = targetWorldPos.z - j2PivotZ; // 肩の回転軸からの高さ
-            const distSq = r**2 + h**2;
+
+            const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2);
+            const h = targetWorldPos.z - j2PivotZ;
+            const distSq = r ** 2 + h ** 2;
             const dist = Math.sqrt(distSq);
 
+            // リーチチェック
             if (dist > L2 + L3 || dist < Math.abs(L2 - L3)) { return null; }
 
-            // J3 (肘) の角度
-            const cos_val_theta3 = (distSq - L2**2 - L3**2) / (2 * L2 * L3);
-            const theta3 = -Math.acos(Math.max(-1.0, Math.min(1.0, cos_val_theta3)));
-            
-            // J2 (肩) の角度
-            const k1 = L2 + L3 * Math.cos(theta3);
-            const k2 = L3 * Math.sin(theta3);
-            const theta2 = Math.atan2(h, r) - Math.atan2(k2, k1);
+            const cos_val_theta3 = (distSq - L2 ** 2 - L3 ** 2) / (2 * L2 * L3);
+            const theta3 = Math.acos(Math.max(-1.0, Math.min(1.0, cos_val_theta3))); // ★エルボーアップ解
+
+            // 肩からターゲットへの角度(alpha)を計算
+            const alpha = Math.atan2(h, r);
+            // 余弦定理で、肩の内角(beta)を計算
+            const beta_cos_val = (L2 ** 2 + distSq - L3 ** 2) / (2 * L2 * dist);
+            const beta = Math.acos(Math.max(-1.0, Math.min(1.0, beta_cos_val)));
+
+            // エルボーアップの姿勢なので、alphaからbetaを引いて肩の最終角度を決定
+            const theta2 = alpha + beta;
 
             return { j1: theta1, j2: theta2, j3: theta3 };
         }
 
-        function updatePath() {
-            if(!pathLine) return;
-            const currentPoints = pathLine.geometry.attributes.position.array;
+        // 軌跡の描画を更新
+        function updatePath(pathLine) {
+            if (!pathLine) return;
+            const currentPoints = pathLine.geometry.getAttribute('position')?.array || [];
             const newPoint = new THREE.Vector3();
             endEffector.getWorldPosition(newPoint);
-            
+
             const newPoints = new Float32Array(currentPoints.length + 3);
             newPoints.set(currentPoints);
             newPoints.set([newPoint.x, newPoint.y, newPoint.z], currentPoints.length);
 
             pathLine.geometry.setAttribute('position', new THREE.BufferAttribute(newPoints, 3));
             pathLine.geometry.attributes.position.needsUpdate = true;
-            pathLine.geometry.computeBoundingSphere();
-            pathLine.computeLineDistances();
         }
 
+        // リアルタイム座標表示の更新
         function updateRealtimeCoords() {
             const pos = new THREE.Vector3();
             endEffector.getWorldPosition(pos);
-
             document.getElementById('realtime-x').textContent = pos.x.toFixed(2);
             document.getElementById('realtime-y').textContent = pos.y.toFixed(2);
             document.getElementById('realtime-z').textContent = pos.z.toFixed(2);
         }
 
+        // メインアニメーションループ
         function animate() {
             requestAnimationFrame(animate);
             TWEEN.update();
@@ -516,13 +638,16 @@
             renderer.render(scene, camera);
         }
 
+        // ウィンドウリサイズ時の処理
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }, false);
 
+        // 初期化実行
         init();
     </script>
 </body>
+
 </html>
