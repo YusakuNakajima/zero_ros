@@ -84,70 +84,36 @@
             </section>
             <section>
                 <section>
-                    <h2>ティーチングペンダントとプログラミング</h2>
+                    <h2>ロボット動作の方法</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;" class="fragment" data-fragment-index="1">
-                            <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
-                            <h3>ティーチングペンダント(TP)</h3>
+                            <img src="media/TP.png" style="width: 60%; margin-bottom: 20px;">
+                            <p>ティーチングペンダント(TP)</p>
                             <ul>
                                 <li>タブレット端末で操作</li>
-                                <li>設定や動作テストで使用</li>
+                                <li>設定,動作テスト用</li>
                             </ul>
                         </div>
                         <div style="flex: 1;" class="fragment" data-fragment-index="2">
                             <img src="media/programing_image.jpg" style="width: 80%; margin-bottom: 20px;">
-                            <h3>プログラミング</h3>
+                            <p>プログラミング</p>
                             <ul>
-                                <li>研究で使うのは基本こっち</li>
-                                <li>Python等で外部制御</li>
-                                <li>センサ等との統合も可能</li>
+                                <li>Python等で動作</li>
+                                <li>センサ等との統合</li>
                             </ul>
                         </div>
                     </div>
-                    <div class="fragment" data-fragment-index="3">
-                        <p style="margin-top: 30px; text-align: center; font-size: 1.2em;">
-                            <strong>→ 研究では主にプログラミングによる制御を行います</strong>
-                        </p>
-                    </div>
                 </section>
                 <section>
-                    <h2>ティーチングペンダント(TP)から動かす場合</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
-                            <ul>
-                                <li>直感的なGUI操作</li>
-                                <li>ロボットの状態確認や手動操作</li>
-                                <li>動作プログラムの作成・編集</li>
-                                <li>安全機能の設定</li>
-                            </ul>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>TP操作の基本手順</h3>
-                            <ol>
-                                <li><strong>TCP設定</strong><br>
-                                    ツールの座標系を登録</li>
-                                <li><strong>位置ティーチング</strong><br>
-                                    waypointを手動で記録</li>
-                                <li><strong>動作プログラム作成</strong><br>
-                                    モーションの種類を指定</li>
-                                <li><strong>実行・テスト</strong><br>
-                                    低速で動作確認</li>
-                            </ol>
-                        </div>
-                    </div>
-                    <p>産業現場での標準的な操作方法</p>
-                </section>
-                <section>
-                <h2>プログラムから動かす場合</h2>
-                <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
-                <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
-                <ul>
-                    <li>PTP = moveJ</li>
-                    <li>LIN = moveL</li>
-                    <li>CIRC = moveC</li>
-                </ul>
-                <pre><code class="language-python">
+                    <h2>プログラムから動かす場合</h2>
+                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
+                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
+                    <ul>
+                        <li>PTP = moveJ</li>
+                        <li>LIN = moveL</li>
+                        <li>CIRC = moveC</li>
+                    </ul>
+                    <pre><code class="language-python">
 import rtde_control
 import rtde_receive
 import time
@@ -177,31 +143,85 @@ try:
 finally:
     rtde_r.disconnect()
                     </code></pre>
-                <p>安全確認してから実行してください</p>
+                    <p>安全確認してから実行してください</p>
                 </section>
+            </section>
+            <section>
+                <h2>動作手順</h2>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <h3>TP操作の基本手順</h3>
+                        <ol>
+                            <li><strong>TCPの設定</strong><br>
+                            <li><strong>姿勢のティーチング</strong><br>
+                            <li><strong>モーション決定</strong><br>
+                            <li><strong>実行・テスト</strong><br>
+                        </ol>
+                    </div>
+                </div>
             </section>
 
             <section>
-
                 <section>
-                    <h2>ステップ①ロボットアームの手先(TCP)</h2>
+                    <h2>ステップ①TCP(アームの手先)</h2>
+                    <p>TCP = Tool Center Point</p>
+                    <p>ロボットにとっての手先はどこか</p>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_arm_tcp_example1.png">
-                            <p>乳棒とヘラがエンドエフェクタ<br>TCPは乳棒の先端</p>
+                            <img src="media/robot_arm_tcp_example1.png" style="width: 50%;">
+                            <p>TCPは乳棒の先端</p>
                         </div>
                         <div style="flex: 1;">
-                            <img src="media/robot_arm_tcp_example2.png">
-                            <p>グリッパがエンドエフェクタ<br>TCPはグリッパの中央(が多い)</p>
+                            <img src="media/robot_arm_tcp_example2.png" style="width: 50%;">
+                            <p>TCPはグリッパの中央</p>
                         </div>
                     </div>
-                    <p>ロボットの手先の座標をTool Center Point(TCP)と言う</p>
-                    <p>TCPは複数登録/切り替え可能<br>2つ以上ツールを持たせる場合に便利</p>
+                    <p>TCPはどう使うのか？↓</p>
+                </section>    
+                <section>
+                    <h2>TCPを複数登録しておくと便利</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_tcp_example1.png" style="width: 50%;">
+                        </div>
+                        <div style="flex: 1;">
+                                 <ul>
+                                <li>乳棒→ヘラをそれぞれTCPで登録</li>
+                                    <li>動作時にTCPを切り替える</li>
+                                    <li>同じ動作プログラムで乳棒もヘラも扱える</li>
+                                 </ul>
+
+                        </div>
+                    </div>
                 </section>
             </section>
             <section>
-                <section>
-                    <h2>ステップ②ロボットの座標指定</h2>
+                       <section>
+                    <h2>ステップ②ロボットの座標系</h2>
+                    
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_pose_position.png">
+                            <h3>関節座標系</h3>
+                            <p>関節それぞれの角度を指定</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/robot_pose_orientation.png">
+                            <h3>ベース座標系</h3>
+                            <p>ロボットの根本を基準に直交座標系で指定</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/robot_pose_example.png">
+                            <h3>ツール座標系</h3>
+                            <p>ロボットの手先を基準に直交座標系で指定</p>
+                        </div>
+                    </div>
+                </section>
+                     <section>
+                    <h2>ロボットの座標指定</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/robot_arm_structure.png">
@@ -230,26 +250,7 @@ finally:
                         </div>
                     </div>
                 </section>
-                <section>
-                    <h2>ロボットの座標(pose)</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_pose_position.png">
-                            <h3>関節座標系</h3>
-                            <p>関節それぞれの角度を指定</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_pose_orientation.png">
-                            <h3>ベース座標系</h3>
-                            <p>ロボットの根本を基準に直交座標系で指定</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_pose_example.png">
-                            <h3>ツール座標系</h3>
-                            <p>ロボットの手先を基準に直交座標系で指定</p>
-                        </div>
-                    </div>
-                </section>
+    
                 <section>
                     <h2>姿勢=位置+向き</h2>
                     <div style="display: flex;">
@@ -289,7 +290,8 @@ finally:
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/motion_viewer.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">モーション可視化</a></strong>
+                                <strong>→ <a href="interactive_app/motion_viewer.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">モーション可視化</a></strong>
                             </p>
                             <iframe data-src="interactive_app/motion_viewer.html" width="100%" height="200px"
                                 frameborder="0"></iframe>
