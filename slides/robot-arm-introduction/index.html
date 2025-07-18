@@ -66,14 +66,12 @@
                 <h2>オススメ参考資料</h2>
                 <div style="display: flex;">
                     <div style="flex: 1;">
-                        <img src="media/産業用ロボットtheビギニング.jpg" style="width: 60%; margin-bottom: 20px;">
-                        <h3>産業用ロボットTheビギニング</h3>
-                        <p>ここの資料で説明しているような産業用ロボットの基礎的な情報を網羅</p>
+                        <img src="media/産業用ロボットtheビギニング.jpg" style="width: 40%; margin-bottom: 10px;">
+                        <p>産業用ロボットの基礎的な情報を網羅</p>
                     </div>
                     <div style="flex: 1;">
-                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 60%; margin-bottom: 20px;">
-                        <h3>イラストで学ぶロボット工学</h3>
-                        <p>初歩的な内容を網羅的に扱っていて<br>最初に読むのにちょうど良い<br>まずは8章まで読むのがよい<br>最も基本の位置制御まで扱っている</p>
+                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 40%; margin-bottom: 10px;">
+                        <p>ロボットアームの初歩を網羅しつつも、数式もでくるので本格的。<br>最も基本の位置制御まで扱っている</p>
                     </div>
                 </div>
             </section>
@@ -350,6 +348,8 @@ finally:
                         </div>
                     </div>
                 </section>
+            </section>
+            <section>
                 <section>
                     <h2>連続的なロボットモーション</h2>
                     <div style="display: flex;">
@@ -358,18 +358,19 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>複数のwaypoints指定で連続動作</li>
-                                <li>通常は各点で停止する動作のため、動きがガタつく</li>
-                                <li>滑らかなモーションを作りたい場合↓</li>
+                                <li>複数の姿勢(waypoints)を指定</li>
+                                <li>ただし、通常は各点で停止する動作のため、動きがガタつく</li>
                             </ul>
                         </div>
                     </div>
+                    <p>滑らかなモーションを作りたい場合↓</p>
                 </section>
                 <section>
                     <h2>滑らかなモーションの作り方</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/continuous_robot_motion.jpg">
+                            <iframe data-src="interactive_app/ur_blend_radius.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -380,25 +381,7 @@ finally:
                         </div>
                     </div>
                 </section>
-                <section>
-                    <h2>ショートカットモーションの詳細</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <iframe data-src="interactive_app/ur_blend_radius.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>スプライン補間、最小躍度軌道を使用</li>
-                                <li>厳密にwaypointsを通らない処理</li>
-                                <li>左図のインタラクティブアプリで確認可能</li>
-                                <li>メーカーごとに呼び方が異なる</li>
-                                <li>例：Denso(パス動作)、UR(ブレンド半径)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-            </section>
+           </section>
             <section>
                 <h2>ロボットアームの精度について</h2>
                 <div style="display: flex;">
@@ -407,19 +390,12 @@ finally:
                     </div>
                     <div style="flex: 1;">
                         <ul>
-                            <li>仕様書の精度≠位置決め精度</li>
-                            <li>繰り返し精度のみ保証</li>
-                            <li>電源を切ると位置がリセット</li>
-                            <li>高精度には電源をつけたまま運用</li>
+                            <li>仕様書の精度は位置決め精度ではない！</li>
+                            <li>同じ動作を繰り返したときの精度を記載</li>
+                            <li>例えば、電源を入れなおすと位置が微妙にずれるので、毎回同じ位置決めを行いたい場合は電源をつけたままにしておくと良い</li>
                         </ul>
                     </div>
                 </div>
-            </section>
-            <section>
-                <h2>以上でロボットの基本動作はできるはず</h2>
-                <p>Let’s enjoy robot!</p>
-                <p>もっと複雑な制御やセンサの統合をやりたい方は、<br>「ゼロからのROS入門」へ</p>
-                <p>粉体粉砕をしたい方は<br>「粉体粉砕パッケージの解説」へ</p>
             </section>
             <section>
                 <section>
@@ -527,6 +503,12 @@ finally:
                     </div>
                 </section>
             </section>
+                        <section>
+                <h2>以上でロボットの基本動作はできるはず</h2>
+                <p>Let’s enjoy robot!</p>
+                <p>もっと複雑な制御やセンサの統合をやりたい方は、<br>「ゼロからのROS入門」へ</p>
+            </section>
+
         </div>
     </div>
 
