@@ -29,20 +29,17 @@
             <section>
                 <h2>本スライドの目標</h2>
                 <ul>
-                        <ul>
-                            <li>この資料はロボットの中でもロボットアームに特化した内容です</li>
-                            <li>AVRなどの移動ロボットは対象外です</li>
-                            <li>モノを掴んで運ぶなど簡単な動きを作ることを目的としています</li>
-                        </ul>
-                    
+                    <ul>
+                        <li>この資料はロボットの中でもロボットアームに特化した内容です</li>
+                        <li>AVRなどの移動ロボットは対象外です</li>
+                        <li>モノを掴んで運ぶなど簡単な動きを作ることを目的としています</li>
+                    </ul>
+
                 </ul>
             </section>
             <section>
-                <h2>ロボットアームの操作</h2>
-                <p>ロボットアームを動かすための基礎知識</p>
-            </section>
-            <section>
                 <h2>目的に応じたロボット制御方法</h2>
+                <p><strong>メーカー制御での動作作成は本スライド、ROSでの動作作成は別スライドで詳しく説明します</strong></p>
                 <div style="display: flex;">
                     <div style="flex: 1;">
                         <h4>メーカー提供の動作生成</h4>
@@ -50,6 +47,7 @@
                         <ul>
                             <li>↑モノの移動で十分</li>
                             <li>複雑な動きは必要ない</li>
+                            <li><strong>→ このスライドで詳しく説明</strong></li>
                         </ul>
                     </div>
                     <div style="flex: 1;">
@@ -58,22 +56,27 @@
                         <ul>
                             <li>↑複雑な動きが必要</li>
                             <li>様々なメーカーのロボットやセンサを統合したシステムを作りたい</li>
+                            <li><strong>→ <a href="../ros-introduction/index.html">別スライド</a>で詳しく説明</strong></li>
                         </ul>
                     </div>
                 </div>
             </section>
             <section>
                 <h2>オススメ参考資料</h2>
-                <div style="display: flex;">
-                    <div style="flex: 1;">
-                        <img src="media/産業用ロボットtheビギニング.jpg" style="width: 40%; margin-bottom: 10px;">
-                        <p>産業用ロボットの基礎的な情報を網羅</p>
+                <ol>
+
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <img src="media/産業用ロボットtheビギニング.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>産業用ロボットtheビギニング - 産業用ロボットの基礎的な情報を網羅</p>
                     </div>
-                    <div style="flex: 1;">
-                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 40%; margin-bottom: 10px;">
-                        <p>ロボットアームの初歩を網羅しつつも、数式もでくるので本格的。<br>最も基本の位置制御まで扱っている</p>
+
+
+                    <div style="display: flex; align-items: center;">
+                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>イラストで学ぶロボット工学 - ロボットアームの初歩を網羅しつつも、数式もでくるので本格的。<br>最も基本の位置制御まで扱っている</p>
                     </div>
-                </div>
+
+                </ol>
             </section>
             <section>
                 <section>
@@ -140,17 +143,17 @@ finally:
                 </section>
             </section>
             <section>
-                <h2>動作手順</h2>
+                <h2>動作作成の基本手順</h2>
                 <div style="display: flex;">
                     <div style="flex: 1;">
                         <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
                     </div>
                     <div style="flex: 1;">
-                        <h3>TP操作の基本手順</h3>
+                        <h3>動作作成の基本手順</h3>
                         <ol>
                             <li><strong>TCPの設定</strong><br>
-                            <li><strong>姿勢のティーチング</strong><br>
-                            <li><strong>モーション決定</strong><br>
+                            <li><strong>座標系の指定</strong><br>
+                            <li><strong>モーション種類の決定</strong><br>
                             <li><strong>実行・テスト</strong><br>
                         </ol>
                     </div>
@@ -173,7 +176,7 @@ finally:
                         </div>
                     </div>
                     <p>TCPはどう使うのか？↓</p>
-                </section>    
+                </section>
                 <section>
                     <h2>TCPを複数登録しておくと便利</h2>
                     <div style="display: flex;">
@@ -181,20 +184,20 @@ finally:
                             <img src="media/robot_arm_tcp_example1.png" style="width: 50%;">
                         </div>
                         <div style="flex: 1;">
-                                 <ul>
+                            <ul>
                                 <li>乳棒→ヘラをそれぞれTCPで登録</li>
-                                    <li>動作時にTCPを切り替える</li>
-                                    <li>同じ動作プログラムで乳棒もヘラも扱える</li>
-                                 </ul>
+                                <li>動作時にTCPを切り替える</li>
+                                <li>同じ動作プログラムで乳棒もヘラも扱える</li>
+                            </ul>
 
                         </div>
                     </div>
                 </section>
             </section>
             <section>
-                       <section>
+                <section>
                     <h2>ステップ②ロボットの座標系</h2>
-                    
+
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/robot_pose_position.png">
@@ -213,7 +216,7 @@ finally:
                         </div>
                     </div>
                 </section>
-                     <section>
+                <section>
                     <h2>ロボットの座標指定</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
@@ -240,10 +243,16 @@ finally:
                                     </ul>
                                 </li>
                             </ul>
+                            <p><strong>座標系の指定方法：</strong></p>
+                            <ul>
+                                <li>関節座標系：各関節の角度を直接指定</li>
+                                <li>ベース座標系：ロボット基準の直交座標で指定</li>
+                                <li>ツール座標系：手先基準の座標で相対動作</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
-    
+
                 <section>
                     <h2>姿勢=位置+向き</h2>
                     <div style="display: flex;">
@@ -260,18 +269,18 @@ finally:
                     </div>
                 </section>
                 <section>
-                    <h2>ロボットアームの軸の数はなぜ6が多い</h2>
+                    <h2>余談：ロボットアームの軸の数はなぜ6が多い</h2>
                     <p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元 3次元 6次元</p>
                     <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
                     <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
                     <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_6axis_example1.png">
+                        <div style="flex: 1; text-align: center;">
+                            <img src="media/robot_arm_6axis_example1.png" style="width: 80%; margin-bottom: 20px;">
                             <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6
                             </p>
                         </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_6axis_example2.png">
+                        <div style="flex: 1; text-align: center;">
+                            <img src="media/robot_arm_6axis_example2.png" style="width: 80%; margin-bottom: 20px;">
                             <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
                         </div>
                     </div>
@@ -381,7 +390,7 @@ finally:
                         </div>
                     </div>
                 </section>
-           </section>
+            </section>
             <section>
                 <h2>ロボットアームの精度について</h2>
                 <div style="display: flex;">
@@ -503,10 +512,24 @@ finally:
                     </div>
                 </section>
             </section>
-                        <section>
+            <section>
                 <h2>以上でロボットの基本動作はできるはず</h2>
-                <p>Let’s enjoy robot!</p>
-                <p>もっと複雑な制御やセンサの統合をやりたい方は、<br>「ゼロからのROS入門」へ</p>
+                <p>Let's enjoy robot!</p>
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h3 style="color: #343a40;">次のステップ</h3>
+                    <p style="margin-bottom: 15px;"><strong>もっと複雑な制御やセンサの統合をやりたい方は：</strong></p>
+                    <ul style="text-align: left; display: inline-block;">
+                        <li><a href="../ros-introduction/index.html"
+                                style="color: #007bff; text-decoration: underline;">ゼロからのROS入門</a> - ROSの基礎概念と学習リソース
+                        </li>
+                        <li><a href="../ros-arm-position-control/index.html"
+                                style="color: #007bff; text-decoration: underline;">アーム位置制御とモーションプランニング</a> -
+                            MoveItとJTCによる制御実装</li>
+                        <li><a href="../ros-simulator-connection/index.html"
+                                style="color: #007bff; text-decoration: underline;">シミュレータや実機との接続</a> -
+                            ros_controlとBringupパッケージ</li>
+                    </ul>
+                </div>
             </section>
 
         </div>

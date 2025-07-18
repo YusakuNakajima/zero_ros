@@ -11,56 +11,16 @@
 またテキストはtxtに書いてあるので、スライドの文章に使ってください
 
 
-
-
-robot-arm-introductionのスライドを修正して、最後にアップデートにあわせてclaude.mdも更新
+スライドを修正して、最後にアップデートにあわせてclaude.mdも更新
 番号はスライドの番号を表していて、階層構造がある場合は番号をネストしてあります
 空白は修正点なし
-1. 
-2. 
-3. 
-4. メーカーの場合はこのスライド、 ROSの場合は別スライドに移動することを強調
-5. orderd listにして
+アニメーションを全て除いて
+1. 背景画像を変更(joint_state_publisher_on_rviz.png.png)
+2. ロボットモデルとは？画像追加(arm_and_end_effector)、メーカーからコードが提供されている、などでロボットモデルがすでに表示されている場合はとばしてokを追記
+3. 画像追加(image2.png)、あくまで可視化ツールなので、これがなくてもロボットの動作は可能
+4. タイトル「ロボットモデルを表示するまでの流れ」、1,2はステップ1,2に変更
+5. 
+   1. robot_structureに画像差し替え
 6. 
-7. TP操作というより、動作作成の基本手順にして
-8.  
-9. 8ページ目を参考に、↓座標系をどう指定するのか、を追記
-   1.  
-   2.  ↓余談：ロボットアームが6軸の理由を追記
-   3.  画像が上、文字が下に修正
-10. 
-11. 
-12. 
-13. 
-14. 別スライドへのリンクを追加、もう少し見やすいように調整
-
-スライドを修正して、最後にアップデートにあわせてclaude.mdも更新
-番号はスライドの番号を表しています
-階層構造がある場合は2層目を縦にスライドを作って
-空白は修正点なし
-まず、黒背景に変更して
-1. a
-2. a
-3. a
-4. aa
-5. ステップ1：URDFの書き方
-6. ステップ2：URDFの表示launchコード例
-<pre class="fragment"><code data-trim>
-&lt;launch&gt;
-  &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
-  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
-  &lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;
-  &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
-&lt;/launch&gt;
-                </code></pre>
-   1. URDFの表示デモ、ここで図8を引用
-7.
-1. 
-2. 7の縦スライドに移動
-
-
-ros-arm-controlのスライドを修正して、最後にアップデートにあわせてclaude.mdも更新
-5. 6枚目を5枚目に移動して「ロボットの関節は何で制御されているのか？」に名前を変更
-6. アーム制御は組合せ→ROSの標準制御システム「ros_control」、様々な制御ができるように対応できるようになっている
-7. 直交座標系に対して位置/力制御したいを削除
-8. ROSのアームコントローラの命名規則を削除
+   1. joint_state_publisher_on_rviz.pngに差し替え
+7. TFとは何か?に変更

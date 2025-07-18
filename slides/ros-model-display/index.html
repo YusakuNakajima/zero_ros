@@ -29,13 +29,31 @@
             border: none;
             box-shadow: none;
         }
+        .slide-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .slide-image {
+            flex: 0 0 45%;
+            margin-right: 5%;
+        }
+        .slide-content {
+            flex: 0 0 50%;
+            text-align: left;
+        }
+        .slide-image img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <div class="reveal">
         <div class="slides">
             <!-- タイトルスライド -->
-            <section data-background-image="media/image2.png" data-background-opacity="0.3">
+            <section data-background-image="media/joint_state_publisher_on_rviz.png" data-background-opacity="0.3">
                 <h1>ゼロからのROS入門</h1>
                 <h2>ロボットモデルの表示</h2>
                 <p>大阪大学 中島優作</p>
@@ -49,22 +67,45 @@
                 <p>ロボットモデルをRviz上に表示できるようになる</p>
             </section>
 
+            <!-- ロボットモデルとは？ -->
+            <section>
+                <h2>ロボットモデルとは？</h2>
+                <div class="slide-layout">
+                    <div class="slide-image">
+                        <img src="media/arm_and_end_effector.png" alt="アームとエンドエフェクタ">
+                    </div>
+                    <div class="slide-content">
+                        <ul>
+                            <li>メーカーからコードが提供されている</li>
+                            <li>ロボットモデルがすでに表示されている場合はとばしてok</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
             <!-- Rvizとは？ -->
             <section>
                 <h2>Rvizとは？</h2>
-                <ul>
-                    <li class="fragment">ロボットのモデルやセンサ情報などを3次元で可視化するためのツール</li>
-                    <li class="fragment">デバッグや動作確認で使う</li>
-                    <li class="fragment">RVizなしでもROS自体は動作可能</li>
-                </ul>
+                <div class="slide-layout">
+                    <div class="slide-image">
+                        <img src="media/robot_on_rviz.png" alt="Rviz画面">
+                    </div>
+                    <div class="slide-content">
+                        <ul>
+                            <li>ロボットのモデルやセンサ情報などを3次元で可視化するためのツール</li>
+                            <li>デバッグや動作確認で使う</li>
+                            <li>あくまで可視化ツールなので、これがなくてもロボットの動作は可能</li>
+                        </ul>
+                    </div>
+                </div>
             </section>
 
-            <!-- 表示をするまでの全体像 -->
+            <!-- ロボットモデルを表示するまでの流れ -->
             <section>
-                <h2>表示をするまでの全体像</h2>
+                <h2>ロボットモデルを表示するまでの流れ</h2>
                 <ol>
-                    <li class="fragment">URDFでロボットモデルを書く</li>
-                    <li class="fragment">URDFを読み込ませて表示</li>
+                    <li>ステップ1：URDFでロボットモデルを書く</li>
+                    <li>ステップ2：URDFを読み込ませて表示</li>
                 </ol>
             </section>
 
@@ -74,18 +115,31 @@
                 <section>
                     <h2>ステップ1：URDFの書き方</h2>
                     <h3>そもそもロボットの構造（復習）</h3>
-                    <img src="media/image5.png" alt="ロボット構造図" style="width: 70%;">
+                    <div class="slide-layout">
+                        <div class="slide-image">
+                            <img src="media/robot_structure.png" alt="ロボット構造図">
+                        </div>
+                        <div class="slide-content">
+                            <p>ロボットの基本構造を理解することが重要</p>
+                        </div>
+                    </div>
                 </section>
                 
                 <!-- ロボットモデル構造 -->
                 <section>
                     <h2>ロボットモデル = ロボットアームの構造</h2>
-                    <img src="media/image6.png" alt="ロボットアーム構造図" style="width: 70%;">
-                    <ul>
-                        <li class="fragment">ジョイント(関節): モーターが入っていて動く</li>
-                        <li class="fragment">リンク: ジョイントを繋ぐ。剛性が高い方がロボット動作の精度が良くなる</li>
-                        <li class="fragment">エンドエフェクタ(手先効果器): 作業をする手先。作業に応じて付け替える</li>
-                    </ul>
+                    <div class="slide-layout">
+                        <div class="slide-image">
+                            <img src="media/arm_and_end_effector.png" alt="ロボットアーム構造図">
+                        </div>
+                        <div class="slide-content">
+                            <ul>
+                                <li>ジョイント(関節): モーターが入っていて動く</li>
+                                <li>リンク: ジョイントを繋ぐ。剛性が高い方がロボット動作の精度が良くなる</li>
+                                <li>エンドエフェクタ(手先効果器): 作業をする手先。作業に応じて付け替える</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- URDF -->
@@ -93,8 +147,8 @@
                     <h2>URDF（Unified Robot Description Format）</h2>
                     <ul>
                         <li>ジョイントとリンクの定義が書いてあり、以下が主な要素</li>
-                        <li class="fragment"><strong>Joint</strong>: 自由度(回転か並進か等), 親リンクと子リンク</li>
-                        <li class="fragment"><strong>Link</strong>:
+                        <li><strong>Joint</strong>: 自由度(回転か並進か等), 親リンクと子リンク</li>
+                        <li><strong>Link</strong>:
                             <ul>
                                 <li>Visual: JointとLinkは骨組みしか定義していない。ここでstlファイルなどを定義して肉付け</li>
                                 <li>Collision: 干渉計算用の肉付け(通常は計算量を減らすためにSTLではなく円柱などシンプルな形状)</li>
@@ -107,13 +161,19 @@
                 <!-- XACRO -->
                 <section>
                     <h2>XACRO（XML Macros for Robots）</h2>
-                    <ul>
-                        <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
-                        <li class="fragment">URDFにマクロ(関数等)を追加したのがXACRO</li>
-                        <li class="fragment">XACRO読み込み時に変数を渡す</li>
-                        <li class="fragment">関数で繰り返し構造の定義を簡素化する</li>
-                    </ul>
-                    <img src="media/image8.png" alt="XACRO例" style="width: 70%;" class="fragment">
+                    <div class="slide-layout">
+                        <div class="slide-image">
+                            <img src="media/urdf_example.png" alt="XACRO例">
+                        </div>
+                        <div class="slide-content">
+                            <ul>
+                                <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
+                                <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
+                                <li>XACRO読み込み時に変数を渡す</li>
+                                <li>関数で繰り返し構造の定義を簡素化する</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- エンドエフェクタ追加 -->
@@ -121,9 +181,9 @@
                     <h2>エンドエフェクタを追加したい場合</h2>
                     <ul>
                         <li>XACROのinclude機能が便利です</li>
-                        <li class="fragment">既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよいです</li>
+                        <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよいです</li>
                     </ul>
-                    <pre class="fragment"><code data-trim>
+                    <pre><code data-trim>
 &lt;?xml version="1.0"?&gt;
 &lt;robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot_with_end_effector"&gt;
   &lt;xacro:include filename="$(find my_robot_arm)/urdf/arm.xacro"/&gt;
@@ -139,7 +199,7 @@
             <section>
                 <section>
                     <h2>ステップ2：URDFの表示launchコード例</h2>
-                    <pre class="fragment"><code data-trim data-line-numbers class="xml">
+                    <pre><code data-trim data-line-numbers class="xml">
 &lt;launch&gt;
   &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
   &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
@@ -152,8 +212,14 @@
                 <!-- URDFの表示デモ -->
                 <section>
                     <h3>URDFの表示デモ</h3>
-                    <img src="media/image8.png" alt="URDF表示デモ" style="width: 70%;">
-                    <p class="fragment">TFを見るとURDFで記述したjointとlinkが動いているのが見える</p>
+                    <div class="slide-layout">
+                        <div class="slide-image">
+                            <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
+                        </div>
+                        <div class="slide-content">
+                            <p>TFを見るとURDFで記述したjointとlinkが動いているのが見える</p>
+                        </div>
+                    </div>
                 </section>
             </section>
 
@@ -161,13 +227,19 @@
             <section>
                 <!-- TF（Transformation）の説明 -->
                 <section>
-                    <h2>RVizで表示を確認したTFとは何か？</h2>
-                    <ul>
-                        <li class="fragment">ROS標準搭載のシステムの1つ、実際はTFの改良版のTF2を使う</li>
-                        <li class="fragment">機能1：座標変換</li>
-                        <li class="fragment">エンドエフェクタのベース座標系やツール座標系の計算</li>
-                    </ul>
-                    <img src="media/image9.png" alt="座標変換の例" style="width: 60%;" class="fragment">
+                    <h2>TFとは何か？</h2>
+                    <div class="slide-layout">
+                        <div class="slide-image">
+                            <img src="media/tf_viewer.png" alt="座標変換の例">
+                        </div>
+                        <div class="slide-content">
+                            <ul>
+                                <li>ROS標準搭載のシステムの1つ、実際はTFの改良版のTF2を使う</li>
+                                <li>機能1：座標変換</li>
+                                <li>エンドエフェクタのベース座標系やツール座標系の計算</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- TF機能2 -->
@@ -175,10 +247,10 @@
                     <h2>TF（Transformation）</h2>
                     <ul>
                         <li>機能2：座標管理</li>
-                        <li class="fragment">座標をツリー構造で管理(使えるのは開ループのみ、閉ループは使えないので注意)</li>
-                        <li class="fragment">座標データは時系列。例えば1秒前の座標で計算すると現実と計算で座標がずれる</li>
-                        <li class="fragment">そういう不都合が生じないように「n秒以内に取得した座標しか計算に使わない」などの管理をTFが行ってくれる</li>
-                        <li class="fragment">詳細な解説はTF完全理解という資料が分かりやすい</li>
+                        <li>座標をツリー構造で管理(使えるのは開ループのみ、閉ループは使えないので注意)</li>
+                        <li>座標データは時系列。例えば1秒前の座標で計算すると現実と計算で座標がずれる</li>
+                        <li>そういう不都合が生じないように「n秒以内に取得した座標しか計算に使わない」などの管理をTFが行ってくれる</li>
+                        <li>詳細な解説はTF完全理解という資料が分かりやすい</li>
                     </ul>
                 </section>
             </section>

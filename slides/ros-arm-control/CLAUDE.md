@@ -194,7 +194,7 @@ traj.points.append(point)
 ## ファイル構成
 
 ```
-ros-arm-control/
+ros-arm-position-control/
 ├── index.html          # メインスライドファイル
 ├── media/              # 画像・動画ファイル
 │   ├── image1.jpg     # タイトル背景

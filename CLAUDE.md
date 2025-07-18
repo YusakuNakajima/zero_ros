@@ -136,7 +136,7 @@ Reveal.initialize({
 1. **[ゼロからのロボットアーム入門](slides/robot-arm-introduction/)** - ロボットアームの基礎知識と選定方法
 2. **[ゼロからのROS入門](slides/ros-introduction/)** - ROSの基礎概念と学習リソース
 3. **[ロボットモデルの表示](slides/ros-model-display/)** - URDFとTFを使ったロボット可視化
-4. **[アーム位置制御とモーションプランニング](slides/ros-arm-control/)** - MoveItとJTCによる制御実装
+4. **[アーム位置制御とモーションプランニング](slides/ros-arm-position-control/)** - MoveItとJTCによる制御実装
 5. **[シミュレータや実機との接続](slides/ros-simulator-connection/)** - ros_controlとBringupパッケージ
 
 ### 学習順序

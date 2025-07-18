@@ -8,45 +8,48 @@
 - URDF/XACROを理解したい開発者
 - RVizやGazeboを使いたい方
 
-## スライド構成（スライド1-7）
+## スライド構成（スライド1-8）
 
-**注意**: 黒背景テーマを使用
+**注意**: 黒背景テーマを使用、アニメーション効果なし、左画像・右テキストレイアウト
 
-1. **タイトル・導入**
+1. **タイトル・導入** - joint_state_publisher_on_rviz.pngを背景に使用
    - ゼロからのROS入門 - ロボットモデルの表示
 2. **本スライドのゴール**
    - ロボットモデルをRviz上に表示できるようになる
-3. **Rvizとは？**
+3. **ロボットモデルとは？** - arm_and_end_effector.pngを使用（左右レイアウト）
+   - メーカーからコードが提供されている
+   - ロボットモデルがすでに表示されている場合はとばしてok
+4. **Rvizとは？** - robot_on_rviz.pngを使用（左右レイアウト）
    - ロボットのモデルやセンサ情報などを3次元で可視化するためのツール
    - デバッグや動作確認で使用
-   - RVizなしでもROS自体は動作可能
-4. **表示をするまでの全体像**
-   - ①URDFでロボットモデルを書く
-   - ②URDFを読み込ませて表示
-5. **ステップ1：URDFの書き方（縦階層構造）**
-   - 5.1 **そもそもロボットの構造（復習）** - image5を引用
-   - 5.2 **ロボットモデル = ロボットアームの構造** - image6を引用
+   - あくまで可視化ツールなので、これがなくてもロボットの動作は可能
+5. **ロボットモデルを表示するまでの流れ**
+   - ステップ1：URDFでロボットモデルを書く
+   - ステップ2：URDFを読み込ませて表示
+6. **ステップ1：URDFの書き方（縦階層構造）**
+   - 6.1 **そもそもロボットの構造（復習）** - robot_structure.pngを使用（左右レイアウト）
+   - 6.2 **ロボットモデル = ロボットアームの構造** - arm_and_end_effector.pngを使用（左右レイアウト）
      - ジョイント（関節）：モーターが入って動く
      - リンク：ジョイントを繋ぐ、剛性が重要
      - エンドエフェクタ（手先効果器）：作業用、付け替え可能
-   - 5.3 **URDF（Unified Robot Description Format）**
+   - 6.3 **URDF（Unified Robot Description Format）**
      - Joint：自由度、親リンクと子リンク
      - Link：Visual、Collision、Inertial
-   - 5.4 **XACRO（XML Macros for Robots）** - image8を引用
+   - 6.4 **XACRO（XML Macros for Robots）** - urdf_example.pngを使用（左右レイアウト）
      - URDFの効率化（マクロ機能追加）
      - 変数渡し、関数での繰り返し構造簡素化
-   - 5.5 **エンドエフェクタを追加したい場合**
+   - 6.5 **エンドエフェクタを追加したい場合**
      - XACROのinclude機能活用
      - 実装例コード付き
-6. **ステップ2：URDFの表示launchコード例（縦階層構造）**
+7. **ステップ2：URDFの表示launchコード例（縦階層構造）**
    - launchファイルの実装例
-   - 6.1 **URDFの表示デモ** - image8を引用
+   - 7.1 **URDFの表示デモ** - joint_state_publisher_on_rviz.pngを使用（左右レイアウト）
      - TFを見るとURDFで記述したjointとlinkが動いているのが見える
-7. **RVizで表示を確認したTFとは何か？（縦階層構造）**
-   - 7.1 **TF（Transformation）機能1：座標変換** - image9を引用
+8. **TFとは何か？（縦階層構造）**
+   - 8.1 **TF（Transformation）機能1：座標変換** - tf_viewer.pngを使用（左右レイアウト）
      - ROS標準搭載のシステム（実際はTF2を使用）
      - エンドエフェクタのベース座標系・ツール座標系計算
-   - 7.2 **TF機能2：座標管理**
+   - 8.2 **TF機能2：座標管理**
      - 座標をツリー構造で管理（開ループのみ、閉ループ不可）
      - 時系列座標データの管理
      - TF完全理解資料の紹介
@@ -175,20 +178,21 @@
 
 ```
 ros-model-display/
-├── index.html          # メインスライドファイル
-├── media/              # 画像・動画ファイル
-│   ├── image1.png     # タイトル背景
-│   ├── image2.png     # （未使用）
-│   ├── image3.png     # （未使用）
-│   ├── image4.png     # 座標変換例（TFスライドで使用）
-│   ├── image5.png     # ロボット構造復習（URDFスライドで使用）
-│   ├── image6.png     # ロボットアーム構造図（URDFスライドで使用）
-│   ├── image7.png     # （未使用）
-│   ├── image8.png     # XACRO例・表示デモ（URDFスライドで使用）
-│   └── image9.png     # （未使用）
-└── CLAUDE.md          # このドキュメント
+├── index.html                          # メインスライドファイル（左右レイアウト対応）
+├── media/                              # 画像・動画ファイル
+│   ├── joint_state_publisher_on_rviz.png  # タイトル背景・表示デモ（スライド1,7.1で使用）
+│   ├── arm_and_end_effector.png        # ロボットモデル説明（スライド3,6.2で使用）
+│   ├── robot_on_rviz.png               # Rviz画面（スライド4で使用）
+│   ├── robot_structure.png             # ロボット構造復習（スライド6.1で使用）
+│   ├── urdf_example.png                # XACRO例（スライド6.4で使用）
+│   ├── tf_viewer.png                   # TF座標変換例（スライド8.1で使用）
+│   ├── Rviz_logo.png                   # （未使用）
+│   ├── joint_states_workflow.png       # （未使用）
+│   ├── pestle_tip.png                  # （未使用）
+│   └── spatula_tip.png                 # （未使用）
+└── CLAUDE.md                           # このドキュメント
 ```
 
 ## シリーズ内での位置づけ
 
-このスライドは「ゼロからのROS入門シリーズ」の中核部分で、ロボットの3D表現とROSでの扱い方を学びます。制御（ros-arm-control）やシミュレーション（ros-simulator-connection）の基礎となる重要な内容です。
+このスライドは「ゼロからのROS入門シリーズ」の中核部分で、ロボットの3D表現とROSでの扱い方を学びます。制御（ros-arm-position-control）やシミュレーション（ros-simulator-connection）の基礎となる重要な内容です。
