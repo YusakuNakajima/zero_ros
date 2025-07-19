@@ -45,148 +45,217 @@
             <!-- ロボット制御の書籍 -->
             <section>
                 <h2>ロボット制御の書籍</h2>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 2em;">
+                    <div style="display: flex; align-items: center; gap: 2em; width: 100%;">
+                        <div style="flex: 1;">
+                            <img src="media/イラストで学ぶロボット工学.jpg" alt="イラストで学ぶロボット工学" style="width: 100%;">
+                        </div>
+                        <div style="flex: 2;">
+                            <h3>イラストで学ぶロボット工学</h3>
+                            <p>初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 2em; width: 100%;">
+                        <div style="flex: 1;">
+                            <img src="media/実践ロボット制御.jpg" alt="実践ロボット制御" style="width: 100%;">
+                        </div>
+                        <div style="flex: 2;">
+                            <h3>実践ロボット制御</h3>
+                            <p>名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍<br>
+                            理論的な詳しさと実装面までの手引きが充実している</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- このスライドの目的 -->
+            <section>
+                <h2>このスライドの目的</h2>
+                <p>メーカーが用意した制御では難しいロボットアームの軌道制御をするための資料になります</p>
+            </section>
+
+            <!-- アームの軌道制御とは -->
+            <section>
+                <h2>アームの軌道制御とは、位置制御との違い</h2>
                 <div style="display: flex; align-items: center; gap: 2em;">
                     <div style="flex: 1;">
-                        <h3>イラストで学ぶロボット工学</h3>
-                        <p>初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</p>
-                        <img src="media/image4.png" alt="イラストで学ぶロボット工学" style="width: 100%;">
+                        <img src="media/Robotic_powder_grinding.gif" alt="軌道制御の例" style="width: 100%;">
                     </div>
                     <div style="flex: 1;">
-                        <h3>実践ロボット制御</h3>
-                        <p>名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍<br>
-                        理論的な詳しさと実装面までの手引きが充実している</p>
-                        <img src="media/image2.png" alt="実践ロボット制御" style="width: 100%;">
+                        <h3>位置制御（メーカー制御）</h3>
+                        <p>基本的にwaypointsごとに動きを止める<br>
+                        連続的に動こうとするとガタガタした動きになる</p>
+                        
+                        <h3>軌道制御</h3>
+                        <p>動きを止めないので、非常に滑らかな動きができる<br>
+                        粉体粉砕などの連続的なタスクに有効</p>
                     </div>
                 </div>
             </section>
 
             <!-- アーム制御の前提知識 -->
             <section>
-                <h2>アーム制御の前提知識</h2>
-            </section>
+                <section>
+                    <h2>ROSにおけるアーム制御の前提知識(読み飛ばしてもok)</h2>
+                </section>
 
-            <!-- ロボットアームの構造 -->
-            <section>
-                <h2>ロボットアームの構造</h2>
-                <div style="display: flex; align-items: center; gap: 2em;">
-                    <div style="flex: 1;">
-                        <img src="media/image13.png" alt="ロボットアーム構造図" style="width: 100%;">
-                        <p style="font-size: 0.6em;">FAプロダクツより引用(https://jss1.jp/column/column_162/)</p>
+                <!-- ロボットアームの構造 -->
+                <section>
+                    <h2>ロボットアームの構造</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/image13.png" alt="ロボットアーム構造図" style="width: 100%;">
+                            <p style="font-size: 0.6em;">FAプロダクツより引用(https://jss1.jp/column/column_162/)</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>ジョイント(関節)</strong> - モーターが入っていて動く</li>
+                                <li><strong>リンク</strong> - ジョイントを繋ぐ<br>
+                                    剛性が高い方がロボット動作の精度が良くなる</li>
+                                <li><strong>エンドエフェクタ(手先効果器)</strong> - 作業をする手先<br>
+                                    作業に応じて付け替える2本指や5本指のハンド吸盤</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div style="flex: 1;">
+                </section>
+
+                <!-- アーム制御は組合せ -->
+                <section>
+                    <h2>アーム制御は組合せ</h2>
+                    <style>
+                      .custom-table {
+                        margin: auto;
+                        border-collapse: collapse;
+                        font-weight: bold;
+                      }
+                      .custom-table th, .custom-table td {
+                        border: 1px solid #ccc;
+                        padding: 16px;
+                        text-align: center;
+                        vertical-align: middle; /* 上下中央揃え */
+                      }
+                      .custom-table th {
+                        background-color: #f0f0f0;
+                      }
+                      /* 各列の背景色 */
+                      .col-control { background-color: #e7eff9; }
+                      .col-coords { background-color: #fce8e6; }
+                      .col-action { background-color: #e6f4ea; }
+
+                      .caption {
+                        margin-top: 20px;
+                        font-size: 0.8em;
+                        text-align: left;
+                      }
+                    </style>
+
+                    <table class="custom-table">
+                      <thead>
+                        <tr>
+                          <th>ロボットが可能な制御</th>
+                          <th>指定したい座標系</th>
+                          <th>やりたい制御</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="col-control">位置</td>
+                          <td class="col-coords">関節座標系<br>(ジョイント座標系)</td>
+                          <td class="col-action">位置</td>
+                        </tr>
+                        <tr>
+                          <td class="col-control">速度</td>
+                          <td class="col-coords" rowspan="2">直交座標系<br>(デカルト座標系)</td>
+                          <td class="col-action">速度</td>
+                        </tr>
+                        <tr>
+                          <td class="col-control">トルク</td>
+                          <td class="col-action">力(トルク)</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="caption">
+                      <p>
+                        例) 位置制御ロボットで直交座標系(XYZ空間)に対して位置制御したい<br>
+                        → XYZで座標を指定してロボットアームをうごかせる
+                      </p>
+                    </div>
+                </section>
+
+                <!-- ロボットの制御種類 -->
+                <section>
+                    <h2>多くのロボットは位置/速度制御</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; margin: 2em 0;">
+                        <div style="text-align: center;">
+                            <img src="media/image2.png" alt="UR" style="width: 80%;">
+                            <p>Universal Robot</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="media/image5.png" alt="DENSO" style="width: 80%;">
+                            <p>DENSO</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="media/image8.png" alt="Dobot" style="width: 80%;">
+                            <p>Dobot</p>
+                        </div>
+                    </div>
+                    <h3 style="margin-top: 2em;">一部のロボットはトルク制御可能</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em; margin: 1em 0;">
+                        <div style="text-align: center;">
+                            <img src="media/image12.png" alt="Franka" style="width: 80%;">
+                            <p>Franka Robotics</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="media/image15.png" alt="KUKA" style="width: 80%;">
+                            <p>KUKA</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- よく使うROSのアームコントローラ -->
+                <section>
+                    <h2>よく使うROSのアームコントローラ</h2>
+                    <div style="margin-bottom: 2em;">
+                        <h3>関節座標系に対して位置制御したい</h3>
+                        <p><strong>JointTrajectoryController</strong><br>
+                        ROS標準のアームコントローラ<br>
+                        位置 or 速度 or トルク制御ロボットに対応</p>
+                    </div>
+                    <div>
+                        <h3>直交座標系に対して位置/力制御したい</h3>
+                        <p><strong>CartesianControllers</strong><br>
+                        位置 or 速度制御ロボットの手先に力覚センサを取り付けて位置/力制御を実現するROSパッケージ</p>
+                    </div>
+                </section>
+
+                <!-- ROSのアームコントローラの命名規則 -->
+                <section>
+                    <h2>ROSのアームコントローラの命名規則</h2>
+                    <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
+                        position_controllers/JointTrajectoryController
+                    </p>
+                </section>
+
+                <!-- 本編の内容 -->
+                <section>
+                    <h2>本編の内容</h2>
+                    <p>ここでは直交/関節座標系に対して位置制御したい場合の実装を扱います<br>
+                    ROSの標準的なコントローラで最もよく使われます</p>
+                    
+                    <div style="margin-top: 2em;">
+                        <h3>具体的な実装を2つ紹介</h3>
                         <ul>
-                            <li><strong>ジョイント(関節)</strong> - モーターが入っていて動く</li>
-                            <li><strong>リンク</strong> - ジョイントを繋ぐ<br>
-                                剛性が高い方がロボット動作の精度が良くなる</li>
-                            <li><strong>エンドエフェクタ(手先効果器)</strong> - 作業をする手先<br>
-                                作業に応じて付け替える2本指や5本指のハンド吸盤</li>
+                            <li><strong>①MoveIt</strong><br>
+                                障害物回避ありのモーションプランニング<br>
+                                ピッキングなど一瞬しか接触しないタスクで使う</li>
+                            <li><strong>②JointTrajectoryController</strong><br>
+                                障害物回避なしのモーションプランニング<br>
+                                粉体粉砕など常に接触するタスクで使う</li>
                         </ul>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- アーム制御は組合せ -->
-            <section>
-                <h2>アーム制御は組合せ</h2>
-                <p>例)位置制御ロボットで直交座標系(XYZ空間)に対して位置制御したい<br>
-                → XYZで座標を指定してロボットアームを動かせる</p>
-                <table style="font-size: 0.8em; margin: auto;">
-                    <tr>
-                        <th>ロボットが可能な制御</th>
-                        <th>指定したい座標系</th>
-                        <th>やりたい制御</th>
-                    </tr>
-                    <tr>
-                        <td rowspan="3">位置</td>
-                        <td>関節座標系(ジョイント座標系)</td>
-                        <td>位置</td>
-                    </tr>
-                    <tr>
-                        <td rowspan="2">直交座標系(デカルト座標系)</td>
-                        <td>速度</td>
-                    </tr>
-                    <tr>
-                        <td>速度</td>
-                    </tr>
-                    <tr>
-                        <td>トルク</td>
-                        <td></td>
-                        <td>力(トルク)</td>
-                    </tr>
-                </table>
-            </section>
-
-            <!-- ロボットの制御種類 -->
-            <section>
-                <h2>多くのロボットは位置/速度制御</h2>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; margin: 2em 0;">
-                    <div style="text-align: center;">
-                        <img src="media/image2.png" alt="UR" style="width: 80%;">
-                        <p>Universal Robot</p>
-                    </div>
-                    <div style="text-align: center;">
-                        <img src="media/image5.png" alt="DENSO" style="width: 80%;">
-                        <p>DENSO</p>
-                    </div>
-                    <div style="text-align: center;">
-                        <img src="media/image8.png" alt="Dobot" style="width: 80%;">
-                        <p>Dobot</p>
-                    </div>
-                </div>
-                <h3 style="margin-top: 2em;">一部のロボットはトルク制御可能</h3>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em; margin: 1em 0;">
-                    <div style="text-align: center;">
-                        <img src="media/image12.png" alt="Franka" style="width: 80%;">
-                        <p>Franka Robotics</p>
-                    </div>
-                    <div style="text-align: center;">
-                        <img src="media/image15.png" alt="KUKA" style="width: 80%;">
-                        <p>KUKA</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- よく使うROSのアームコントローラ -->
-            <section>
-                <h2>よく使うROSのアームコントローラ</h2>
-                <div style="margin-bottom: 2em;">
-                    <h3>関節座標系に対して位置制御したい</h3>
-                    <p><strong>JointTrajectoryController</strong><br>
-                    ROS標準のアームコントローラ<br>
-                    位置 or 速度 or トルク制御ロボットに対応</p>
-                </div>
-                <div>
-                    <h3>直交座標系に対して位置/力制御したい</h3>
-                    <p><strong>CartesianControllers</strong><br>
-                    位置 or 速度制御ロボットの手先に力覚センサを取り付けて位置/力制御を実現するROSパッケージ</p>
-                </div>
-            </section>
-
-            <!-- ROSのアームコントローラの命名規則 -->
-            <section>
-                <h2>ROSのアームコントローラの命名規則</h2>
-                <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
-                    position_controllers/JointTrajectoryController
-                </p>
-            </section>
-
-            <!-- 本編の内容 -->
-            <section>
-                <h2>本編の内容</h2>
-                <p>ここでは直交/関節座標系に対して位置制御したい場合の実装を扱います<br>
-                ROSの標準的なコントローラで最もよく使われます</p>
-                
-                <div style="margin-top: 2em;">
-                    <h3>具体的な実装を2つ紹介</h3>
-                    <ul>
-                        <li><strong>①MoveIt</strong><br>
-                            障害物回避ありのモーションプランニング<br>
-                            ピッキングなど一瞬しか接触しないタスクで使う</li>
-                        <li><strong>②JointTrajectoryController</strong><br>
-                            障害物回避なしのモーションプランニング<br>
-                            粉体粉砕など常に接触するタスクで使う</li>
-                    </ul>
-                </div>
             </section>
 
             <!-- MoveItによるアーム制御 (スライド10) -->

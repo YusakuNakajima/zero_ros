@@ -35,7 +35,7 @@
    - 6.3 **URDF（Unified Robot Description Format）**
      - Joint：自由度、親リンクと子リンク
      - Link：Visual、Collision、Inertial
-   - 6.4 **XACRO（XML Macros for Robots）** - urdf_example.pngを使用（左右レイアウト）
+   - 6.4 **XACRO（XML Macros for Robots）** - xacro_example.pngを使用（左右レイアウト）
      - URDFの効率化（マクロ機能追加）
      - 変数渡し、関数での繰り返し構造簡素化
    - 6.5 **エンドエフェクタを追加したい場合**
@@ -184,7 +184,7 @@ ros-model-display/
 │   ├── arm_and_end_effector.png        # ロボットモデル説明（スライド3,6.2で使用）
 │   ├── robot_on_rviz.png               # Rviz画面（スライド4で使用）
 │   ├── robot_structure.png             # ロボット構造復習（スライド6.1で使用）
-│   ├── urdf_example.png                # XACRO例（スライド6.4で使用）
+│   ├── xacro_example.png                # XACRO例（スライド6.4で使用）
 │   ├── tf_viewer.png                   # TF座標変換例（スライド8.1で使用）
 │   ├── Rviz_logo.png                   # （未使用）
 │   ├── joint_states_workflow.png       # （未使用）
