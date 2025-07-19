@@ -359,6 +359,89 @@
                     </div>
                 </section>
 
+                <!-- オイラー角による表現 (縦スライド) -->
+                <section>
+                    <h2>オイラー角による表現</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe src="interactive_app/gimbal_lock.html" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>利点</strong>
+                                    <ul>
+                                        <li>直観的でわかりやすい</li>
+                                        <li>3つの角度（Roll, Pitch, Yaw）で表現</li>
+                                    </ul>
+                                </li>
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>ジンバルロック現象が発生</li>
+                                        <li>軌道補間で不自然な動きになることがある</li>
+                                        <li>特異点付近で制御が不安定</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- クォータニオンによる表現 (縦スライド) -->
+                <section>
+                    <h2>クォータニオンによる表現</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/quaternion_representation.png" alt="クォータニオン表現" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>利点</strong>
+                                    <ul>
+                                        <li>ジンバルロックが発生しない</li>
+                                        <li>回転軸と回転角で表現</li>
+                                        <li>数値的に安定</li>
+                                    </ul>
+                                </li>
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>直観的理解が困難</li>
+                                        <li>4つの要素（w, x, y, z）で表現</li>
+                                        <li>正規化が必要</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- クォータニオン補間の利点 (縦スライド) -->
+                <section>
+                    <h2>クォータニオン補間の利点</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe src="interactive_app/euler_quat.html" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>SLERP (Spherical Linear Interpolation)</strong>
+                                    <ul>
+                                        <li>球面上の最短経路で補間</li>
+                                        <li>角速度が一定</li>
+                                        <li>滑らかな軌道生成</li>
+                                    </ul>
+                                </li>
+                                <li><strong>オイラー角補間との比較</strong>
+                                    <ul>
+                                        <li>より自然な回転軌道</li>
+                                        <li>ジンバルロック回避</li>
+                                        <li>計算効率が良い</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
 
 
                 <!-- MoveIt2で使えるパスプランニング (縦スライド) -->
