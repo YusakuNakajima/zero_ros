@@ -104,7 +104,7 @@
                     <h2>ロボットアームの構造</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/image13.png" alt="ロボットアーム構造図" style="width: 100%;">
+                            <img src="media/robot_arm_structure.png" alt="ロボットアーム構造図" style="width: 100%;">
                             <p style="font-size: 0.6em;">FAプロダクツより引用(https://jss1.jp/column/column_162/)</p>
                         </div>
                         <div style="flex: 1;">
@@ -188,26 +188,26 @@
                     <h2>多くのロボットは位置/速度制御</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; margin: 2em 0;">
                         <div style="text-align: center;">
-                            <img src="media/image2.png" alt="UR" style="width: 80%;">
+                            <img src="media/universal_robot.png" alt="UR" style="width: 80%;">
                             <p>Universal Robot</p>
                         </div>
                         <div style="text-align: center;">
-                            <img src="media/image5.png" alt="DENSO" style="width: 80%;">
+                            <img src="media/denso_robot.png" alt="DENSO" style="width: 80%;">
                             <p>DENSO</p>
                         </div>
                         <div style="text-align: center;">
-                            <img src="media/image8.png" alt="Dobot" style="width: 80%;">
+                            <img src="media/dobot_robot.png" alt="Dobot" style="width: 80%;">
                             <p>Dobot</p>
                         </div>
                     </div>
                     <h3 style="margin-top: 2em;">一部のロボットはトルク制御可能</h3>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em; margin: 1em 0;">
                         <div style="text-align: center;">
-                            <img src="media/image12.png" alt="Franka" style="width: 80%;">
+                            <img src="media/franka_robot.png" alt="Franka" style="width: 80%;">
                             <p>Franka Robotics</p>
                         </div>
                         <div style="text-align: center;">
-                            <img src="media/image15.png" alt="KUKA" style="width: 80%;">
+                            <img src="media/kuka_robot.png" alt="KUKA" style="width: 80%;">
                             <p>KUKA</p>
                         </div>
                     </div>
@@ -276,7 +276,7 @@
                             <li>実行！</li>
                         </ol>
                     </div>
-                    <img src="media/image11.png" alt="MoveIt概要" style="width: 60%;">
+                    <img src="media/moveit_overview.png" alt="MoveIt概要" style="width: 60%;">
                 </section>
 
                 <!-- MoveItのモーションプランニングの手順 (縦スライド) -->
@@ -293,7 +293,7 @@
                         </li>
                         <li><strong>実行：</strong>パスをJointTrajectoryControllerで実行</li>
                     </ol>
-                    <img src="media/image12.png" alt="プランニング手順" style="width: 50%;">
+                    <img src="media/franka_robot.png" alt="プランニング手順" style="width: 50%;">
                 </section>
 
                 <!-- 手先の姿勢の表現 (縦スライド) -->
@@ -309,7 +309,7 @@
                             </ul>
                         </li>
                     </ul>
-                    <img src="media/image13.png" alt="姿勢表現" style="width: 30%;">
+                    <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 30%;">
                 </section>
 
                 <!-- 姿勢の表現 - オススメの実装 (縦スライド) -->
@@ -321,7 +321,7 @@
                         <li><strong>ロボット動作ではオイラー角→クォータニオンに変換</strong><br>
                             pythonだとscipy.Rotation等でオイラー角とクオータニオンの変換を計算可能</li>
                     </ul>
-                    <img src="media/image14.png" alt="実装例" style="width: 60%;">
+                    <img src="media/implementation_example.png" alt="実装例" style="width: 60%;">
                 </section>
 
                 <!-- 逆運動学の必要性 (縦スライド) -->
@@ -330,7 +330,7 @@
                     <p>XYZでロボットの手先姿勢を指定したい<br>
                     ただ、動かせるのはロボットの関節<br>
                     そこで手先姿勢→ロボットの関節をする必要があり、これを逆運動学という</p>
-                    <img src="media/image15.png" alt="逆運動学説明" style="width: 70%;">
+                    <img src="media/kuka_robot.png" alt="逆運動学説明" style="width: 70%;">
                     <p style="font-size: 0.6em;">https://rt-net.jp/humanoid/archives/2652</p>
                 </section>
 
@@ -400,7 +400,7 @@
                             <ul><li>CHOMP</li><li>STOMP</li></ul>
                         </li>
                     </ul>
-                    <img src="media/image1.jpg" alt="パスプランニング手法" style="width: 60%;">
+                    <img src="media/path_planning_methods.jpg" alt="パスプランニング手法" style="width: 60%;">
                     <p style="font-size: 0.6em;">https://opensource-robotics.tokyo.jp/?p=4313</p>
                 </section>
 
@@ -413,7 +413,7 @@
                         <li>単純なRRTだとジグザグなので、実際は後処理をかけてスムーズにする</li>
                         <li>MoveItのデフォルトではスタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
                     </ul>
-                    <img src="media/image2.png" alt="RRT説明" style="width: 50%;">
+                    <img src="media/universal_robot.png" alt="RRT説明" style="width: 50%;">
                 </section>
 
                 <!-- 最適化ベースの手法(CHOMP) (縦スライド) -->
@@ -425,7 +425,7 @@
                         <li>コストの設計と初期軌道の引きの良さによって収束時間や得られた軌道の良しあしが決まる</li>
                         <li>障害物が多い実用場面では正直使いにくい</li>
                     </ul>
-                    <img src="media/image3.png" alt="CHOMP説明" style="width: 60%;">
+                    <img src="media/chomp_explanation.png" alt="CHOMP説明" style="width: 60%;">
                 </section>
 
                 <!-- 最適化ベースの手法(STOMP) (縦スライド) -->
@@ -446,7 +446,6 @@
             <section>
                 <section>
                     <h2>JointTrajectoryControllerによるアーム制御</h2>
-                    <p>略してJTC</p>
                 </section>
 
                 <!-- JTCでの実装の流れ (縦スライド) -->
@@ -458,7 +457,7 @@
                         <li>軌道・軌跡生成</li>
                         <li>実行</li>
                     </ol>
-                    <img src="media/image6.jpg" alt="JTC実装フロー" style="width: 70%;">
+                    <img src="media/jtc_implementation_flow.jpg" alt="JTC実装フロー" style="width: 70%;">
                 </section>
 
                 <!-- 目標姿勢の計算 (縦スライド) -->
@@ -469,7 +468,7 @@
                         <li>1つの姿勢ではなく、連続的な姿勢の変化を計算</li>
                         <li>連続的な姿勢の集まりをwaypointsと呼ぶ(図の赤点のこと)</li>
                     </ul>
-                    <img src="media/image7.jpg" alt="目標姿勢計算" style="width: 60%;">
+                    <img src="media/target_pose_calculation.jpg" alt="目標姿勢計算" style="width: 60%;">
                 </section>
 
                 <!-- 軌跡・軌道生成 (縦スライド) -->
@@ -482,7 +481,7 @@
                         <li>JointTrajectoryControllerでは軌道計算を自動的に行ってくれる</li>
                         <li>ユーザーが渡すのはPositionとTimeFromStartだけ</li>
                     </ul>
-                    <img src="media/image9.png" alt="軌跡軌道生成" style="width: 50%;">
+                    <img src="media/trajectory_generation.png" alt="軌跡軌道生成" style="width: 50%;">
                     <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
                 </section>
 
@@ -494,7 +493,7 @@
                         <li><strong>Topicで送った場合：</strong>即時反映される</li>
                         <li><strong>Actionで送った場合：</strong>目標到達までの状態や、過負荷などで目標のTrajectoiryからずれていないかを確認できる</li>
                     </ul>
-                    <img src="media/image10.jpg" alt="実行方法" style="width: 60%;">
+                    <img src="media/execution_method.jpg" alt="実行方法" style="width: 60%;">
                     <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
                 </section>
 
