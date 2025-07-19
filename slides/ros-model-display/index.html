@@ -1,54 +1,65 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ゼロからのROS入門 - ロボットモデルの表示</title>
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
-    
+
     <style>
         .reveal {
             font-family: 'Noto Sans JP', sans-serif;
             font-size: 42px;
             font-weight: normal;
         }
-        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+
+        .reveal h1,
+        .reveal h2,
+        .reveal h3,
+        .reveal h4 {
             text-transform: none;
             font-family: 'Noto Sans JP', sans-serif;
         }
+
         .reveal img {
             border: none;
             box-shadow: none;
         }
+
         .slide-layout {
             display: flex;
             align-items: center;
             justify-content: space-between;
             height: 100%;
         }
+
         .slide-image {
             flex: 0 0 45%;
             margin-right: 5%;
         }
+
         .slide-content {
             flex: 0 0 50%;
             text-align: left;
         }
+
         .slide-image img {
             width: 100%;
             height: auto;
         }
     </style>
 </head>
+
 <body>
     <div class="reveal">
         <div class="slides">
@@ -64,24 +75,20 @@
             <!-- 本スライドのゴール -->
             <section>
                 <h2>本スライドのゴール</h2>
-                <p>ロボットモデルをRviz上に表示できるようになる</p>
-            </section>
-
-            <!-- ロボットモデルとは？ -->
-            <section>
-                <h2>ロボットモデルとは？</h2>
                 <div class="slide-layout">
                     <div class="slide-image">
-                        <img src="media/arm_and_end_effector.png" alt="アームとエンドエフェクタ">
+                        <img src="media/joint_state_publisher_on_rviz.png" alt="アームとエンドエフェクタ">
                     </div>
-                    <div class="slide-content">
-                        <ul>
-                            <li>メーカーからコードが提供されている</li>
-                            <li>ロボットモデルがすでに表示されている場合はとばしてok</li>
-                        </ul>
-                    </div>
+                    <ul>
+                        <li>左にようにロボットモデルをRviz上に表示できるようになる</li>
+                        <li>モデルがすでにある人、先に動作生成をやりたい人→<a href="../ros-arm-position-control/index.html"
+                                style="color: #007bff; text-decoration: underline;">アーム位置制御とモーションプランニング</a></li>
+
+
+                    </ul>
                 </div>
             </section>
+
 
             <!-- Rvizとは？ -->
             <section>
@@ -102,41 +109,40 @@
 
             <!-- ロボットモデルを表示するまでの流れ -->
             <section>
-            <section>
                 <h2>ロボットモデルを表示するまでの流れ</h2>
                 <ol>
                     <li>ステップ1：URDFでロボットモデルを書く</li>
                     <li>ステップ2：URDFを読み込ませて表示</li>
                 </ol>
-                <p>↓ROSノードのワークフロー</p>
             </section>
             <section>
-                <h2>ロボットモデル表示のワークフロー</h2>
+                <h2>ロボットモデル表示の全体像</h2>
                 <div class="slide-image">
-                            <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー">
-                        </div>
-                        <div class="slide-content">
-                            <p>データの流れを理解することが大切</p>
-                        </div>
+                    <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー">
+                </div>
+                <div class="slide-content">
+                    <p>データの流れを理解することが大切</p>
+                </div>
             </section>
-            
-</section>
             <!-- ステップ1：URDFの書き方 -->
             <section>
                 <!-- そもそもロボットの構造(復習) -->
                 <section>
                     <h2>ステップ1：URDFの書き方</h2>
-                    <h3>そもそもロボットの構造（復習）</h3>
-                    <div class="slide-layout">
-                        <div class="slide-image">
-                            <img src="media/robot_structure.png" alt="ロボット構造図">
-                        </div>
-                        <div class="slide-content">
-                            <p>ロボットの基本構造を理解することが重要</p>
-                        </div>
+                    <div style="position: relative; display: inline-block;">
+                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                            style="display: block; max-width: 100%;">
+                        <div style="position: absolute; 
+                                    top: 0; 
+                                    left: 0; 
+                                    width: 33.33%; 
+                                    height: 100%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
                     </div>
                 </section>
-                
+
                 <!-- ロボットモデル構造 -->
                 <section>
                     <h2>ロボットモデル = ロボットアームの構造</h2>
@@ -210,7 +216,22 @@
             <!-- ステップ2：URDFの表示launchコード例 -->
             <section>
                 <section>
-                    <h2>ステップ2：URDFの表示launchコード例</h2>
+                    <h2>ステップ2：URDFの表示のlaunchファイル</h2>
+                    <div style="position: relative; display: inline-block;">
+                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                            style="display: block; max-width: 100%;">
+                        <div style="position: absolute; 
+                                    top: 0; 
+                                    right: 0; 
+                                    width: 66.66%; 
+                                    height: 100%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
+                    </div>
+                </section>
+                <section>
+                    <h2>launchファイルの例</h2>
                     <pre><code data-trim data-line-numbers class="xml">
 &lt;launch&gt;
   &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
@@ -219,8 +240,9 @@
   &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
 &lt;/launch&gt;
                     </code></pre>
+                    <p>必要に応じて、自分で作成したURDFファイルを使ってください</p>
                 </section>
-                
+
                 <!-- URDFの表示デモ -->
                 <section>
                     <h3>URDFの表示デモ</h3>
@@ -235,30 +257,38 @@
                 </section>
             </section>
 
-            <!-- RVizで表示を確認したTFとは何か？ -->
+            <!-- TFとは何か？ -->
             <section>
-                <!-- TF（Transformation）の説明 -->
+                <!-- TFとは？ -->
                 <section>
-                    <h2>TFとは何か？</h2>
+                    <h2>TFとは？</h2>
+                    <ul>
+                        <li>TF = Transformの略</li>
+                        <li>ROS標準搭載のシステムの1つ</li>
+                        <li>実際はTFの改良版のTF2を使う</li>
+                    </ul>
+                </section>
+
+                <!-- 機能1：座標変換 -->
+                <section>
+                    <h2>機能1：座標変換</h2>
                     <div class="slide-layout">
                         <div class="slide-image">
                             <img src="media/tf_viewer.png" alt="座標変換の例">
                         </div>
                         <div class="slide-content">
                             <ul>
-                                <li>ROS標準搭載のシステムの1つ、実際はTFの改良版のTF2を使う</li>
-                                <li>機能1：座標変換</li>
                                 <li>エンドエフェクタのベース座標系やツール座標系の計算</li>
+                                <li>複数の座標系間での位置・姿勢変換</li>
                             </ul>
                         </div>
                     </div>
                 </section>
 
-                <!-- TF機能2 -->
+                <!-- 機能2：座標管理 -->
                 <section>
-                    <h2>TF（Transformation）</h2>
+                    <h2>機能2：座標管理</h2>
                     <ul>
-                        <li>機能2：座標管理</li>
                         <li>座標をツリー構造で管理(使えるのは開ループのみ、閉ループは使えないので注意)</li>
                         <li>座標データは時系列。例えば1秒前の座標で計算すると現実と計算で座標がずれる</li>
                         <li>そういう不都合が生じないように「n秒以内に取得した座標しか計算に使わない」などの管理をTFが行ってくれる</li>
@@ -273,7 +303,7 @@
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/zoom/zoom.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
-    
+
     <script>
         Reveal.initialize({
             // 基本的な表示設定
@@ -304,11 +334,12 @@
 
             // キーボードショートカットのカスタマイズ
             keyboard: {
-                'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
 
                 // その他のChalkboardショートカットはデフォルトで有効
             }
         });
     </script>
 </body>
+
 </html>
