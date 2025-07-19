@@ -52,25 +52,17 @@
             <!-- ロボット制御の書籍 -->
             <section>
                 <h2>ロボット制御の書籍</h2>
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 2em;">
-                    <div style="display: flex; align-items: center; gap: 2em; width: 100%;">
-                        <div style="flex: 1;">
-                            <img src="media/イラストで学ぶロボット工学.jpg" alt="イラストで学ぶロボット工学" style="width: 100%;">
-                        </div>
-                        <div style="flex: 2;">
-                            <h3>イラストで学ぶロボット工学</h3>
-                            <p>初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</p>
-                        </div>
+                <div style="display: flex; align-items: center; gap: 2em;">
+                    <div style="flex: 1;">
+                        <img src="media/実践ロボット制御.jpg" alt="実践ロボット制御" style="width: 100%;">
                     </div>
-                    <div style="display: flex; align-items: center; gap: 2em; width: 100%;">
-                        <div style="flex: 1;">
-                            <img src="media/実践ロボット制御.jpg" alt="実践ロボット制御" style="width: 100%;">
-                        </div>
-                        <div style="flex: 2;">
-                            <h3>実践ロボット制御</h3>
-                            <p>名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍<br>
-                                理論的な詳しさと実装面までの手引きが充実している</p>
-                        </div>
+                    <div style="flex: 1;">
+                        <h3>実践ロボット制御</h3>
+                        <p>名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍<br>
+                            理論的な詳しさと実装面までの手引きが充実している</p>
+                        <br>
+                        <h3>イラストで学ぶロボット工学</h3>
+                        <p>初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</p>
                     </div>
                 </div>
             </section>
@@ -206,29 +198,23 @@
                 <!-- ロボットの制御種類 -->
                 <section>
                     <h2>多くのロボットは位置/速度制御</h2>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; margin: 2em 0;">
-                        <div style="text-align: center;">
-                            <img src="media/ur_robot.png" alt="UR" style="width: 80%;">
-                            <p>Universal Robot</p>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_robot.png" alt="代表的なロボット" style="width: 100%;">
                         </div>
-                        <div style="text-align: center;">
-                            <img src="media/denso_robot.png" alt="DENSO" style="width: 80%;">
-                            <p>DENSO</p>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="media/dobot_robot.png" alt="Dobot" style="width: 80%;">
-                            <p>Dobot</p>
-                        </div>
-                    </div>
-                    <h3 style="margin-top: 2em;">一部のロボットはトルク制御可能</h3>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em; margin: 1em 0;">
-                        <div style="text-align: center;">
-                            <img src="media/franka_robot.png" alt="Franka" style="width: 80%;">
-                            <p>Franka Robotics</p>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="media/kuka_robot.png" alt="KUKA" style="width: 80%;">
-                            <p>KUKA</p>
+                        <div style="flex: 1;">
+                            <h3>位置/速度制御対応ロボット</h3>
+                            <ul>
+                                <li>Universal Robot</li>
+                                <li>DENSO</li>
+                                <li>Dobot</li>
+                                <li>その他多数のロボット</li>
+                            </ul>
+                            <h3>トルク制御対応ロボット</h3>
+                            <ul>
+                                <li>Franka Robotics</li>
+                                <li>KUKA</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -551,24 +537,36 @@
                 <!-- JTCでの実装の流れ (縦スライド) -->
                 <section>
                     <h2>JTCでの実装の流れは5ステップ</h2>
-                    <ol>
-                        <li>ロボット手先の目標姿勢決定(XYZ座標で指定)</li>
-                        <li>逆運動学(手先目標姿勢に対応するロボット関節角度計算)</li>
-                        <li>軌道・軌跡生成</li>
-                        <li>実行</li>
-                    </ol>
-                    <img src="media/jtc_implementation_flow.jpg" alt="JTC実装フロー" style="width: 70%;">
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/jtc_implementation_flow.jpg" alt="JTC実装フロー" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ol>
+                                <li>ロボット手先の目標姿勢決定(XYZ座標で指定)</li>
+                                <li>逆運動学(手先目標姿勢に対応するロボット関節角度計算)</li>
+                                <li>軌道・軌跡生成</li>
+                                <li>実行</li>
+                            </ol>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- 目標姿勢の計算 (縦スライド) -->
                 <section>
                     <h2>目標姿勢の計算</h2>
-                    <ul>
-                        <li>powder_grindingパッケージだとmotion_generatorが行う</li>
-                        <li>1つの姿勢ではなく、連続的な姿勢の変化を計算</li>
-                        <li>連続的な姿勢の集まりをwaypointsと呼ぶ(図の赤点のこと)</li>
-                    </ul>
-                    <img src="media/trajectory_generation.png" alt="目標姿勢計算" style="width: 60%;">
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/trajectory_generation.png" alt="目標姿勢計算" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>powder_grindingパッケージだとmotion_generatorが行う</li>
+                                <li>1つの姿勢ではなく、連続的な姿勢の変化を計算</li>
+                                <li>連続的な姿勢の集まりをwaypointsと呼ぶ(図の赤点のこと)</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- 逆運動学の必要性 (縦スライド) -->
@@ -589,18 +587,28 @@
                 <!-- 逆運動学の解き方 (縦スライド) -->
                 <section>
                     <h2>逆運動学の解き方(IKソルバー)</h2>
-                    <div style="margin-bottom: 1.5em;">
-                        <h3>解析解</h3>
-                        <p style="font-size: 0.8em;">ロボットの構造に基づいて導出された式を用いて、関節角度を直接計算する方法<br>
-                            数値解より計算が早くロバスト性も高い<br>
-                            普通のロボットアームは解析解が存在するような機械的構造をしている</p>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe src="interactive_app/IK.html" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>解析解</strong>
+                                    <ul>
+                                        <li>特定のロボット構造に基づいた数式</li>
+                                        <li>関節角度を直接計算</li>
+                                    </ul>
+                                </li>
+                                <li><strong>数値解</strong>
+                                    <ul>
+                                        <li>最適化計算による近似解法</li>
+                                        <li>左のアプリのように徐々に近づける</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <div>
-                        <h3>数値解</h3>
-                        <p style="font-size: 0.8em;">反復計算(最適化計算)によってロボットアームの関節角度を近似的に求める手法<br>
-                            反復計算が必要なので解析解より計算時間がかかる<br>
-                            現在は計算機の速度も上がっているので数値解を使うことが多い</p>
-                    </div>
+                    <p>現在は汎用性が高く速度も精度も十分になったので数値解を使うことが多い</p>
                 </section>
 
                 <!-- MoveIt2で使えるIKソルバー (縦スライド) -->
@@ -641,27 +649,39 @@
                 <!-- 軌跡・軌道生成 (縦スライド) -->
                 <section>
                     <h2>軌跡・軌道生成</h2>
-                    <ul style="font-size: 0.9em;">
-                        <li><strong>軌跡：</strong>逆運動学で得た解(JointTrajectory)を並べたもの<br>
-                            どこを通るのかという空間的な情報を列挙したもの</li>
-                        <li><strong>軌道：</strong>時間的な情報を加えたもの</li>
-                        <li>JointTrajectoryControllerでは軌道計算を自動的に行ってくれる</li>
-                        <li>ユーザーが渡すのはPositionとTimeFromStartだけ</li>
-                    </ul>
-                    <img src="media/trajectory_generation.png" alt="軌跡軌道生成" style="width: 50%;">
-                    <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/trajectory_generation.png" alt="軌跡軌道生成" style="width: 100%;">
+                            <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>軌跡：</strong>逆運動学で得た解(JointTrajectory)を並べたもの<br>
+                                    どこを通るのかという空間的な情報を列挙したもの</li>
+                                <li><strong>軌道：</strong>時間的な情報を加えたもの</li>
+                                <li>JointTrajectoryControllerでは軌道計算を自動的に行ってくれる</li>
+                                <li>ユーザーが渡すのはPositionとTimeFromStartだけ</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- 実行 (縦スライド) -->
                 <section>
                     <h2>実行</h2>
-                    <ul style="font-size: 0.9em;">
-                        <li>TopicやActionで軌跡(JointTrajectory)を送信することで実行</li>
-                        <li><strong>Topicで送った場合：</strong>即時反映される</li>
-                        <li><strong>Actionで送った場合：</strong>目標到達までの状態や、過負荷などで目標のTrajectoiryからずれていないかを確認できる</li>
-                    </ul>
-                    <img src="media/trajectory_generation.png" alt="実行方法" style="width: 60%;">
-                    <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/trajectory_generation.png" alt="実行方法" style="width: 100%;">
+                            <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li>TopicやActionで軌跡(JointTrajectory)を送信することで実行</li>
+                                <li><strong>Topicで送った場合：</strong>即時反映される</li>
+                                <li><strong>Actionで送った場合：</strong>目標到達までの状態や、過負荷などで目標のTrajectoiryからずれていないかを確認できる</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- JTCの実装例 (縦スライド) -->
@@ -689,6 +709,144 @@
                             <td>：JointTrajectoryController</td>
                         </tr>
                     </table>
+                </section>
+
+            </section>
+
+            <!-- JointTrajectoryControllerによるアームの速度制御 (9枚目) -->
+            <section>
+                <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
+                    <h2>JointTrajectoryControllerによるアームの速度制御</h2>
+                </section>
+
+                <!-- 手先の速度制御はなぜ必要か？ (縦スライド) -->
+                <section>
+                    <h2>手先の速度制御はなぜ必要か？</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/hand_velocity_control.png" alt="手先速度制御の必要性" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <p>「JointTrajectoryControllerによるアーム制御」では手先の速度は厳密に考えていない</p>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>手先の速度が一定でない</li>
+                                        <li>動作の滑らかさが保証されない</li>
+                                        <li>作業効率に影響</li>
+                                    </ul>
+                                </li>
+                                <li><strong>解決方法</strong>
+                                    <ul>
+                                        <li>ヤコビアンを用いた速度制御</li>
+                                        <li>手先速度と関節速度の関係を考慮</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ヤコビアン関節速度と手先速度の関係 (縦スライド) -->
+                <section>
+                    <h2>ヤコビアン関節速度と手先速度の関係</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe src="interactive_app/jacobian.html" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>ヤコビアンとは</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>関節角度変化と手先位置変化の関係を表す行列</li>
+                                <li>微分の連鎖律から導出</li>
+                                <li>速度の関係式：<strong>v = J * q̇</strong></li>
+                            </ul>
+                            <h3>物理的意味</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>v: 手先速度ベクトル（6次元）</li>
+                                <li>J: ヤコビアン行列（6×n）</li>
+                                <li>q̇: 関節角速度ベクトル（n次元）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 逆ヤコビアンによる手先速度の計算 (縦スライド) -->
+                <section>
+                    <h2>逆ヤコビアンによる手先速度の計算</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe src="interactive_app/jacobian.html" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>逆ヤコビアンの計算</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>目標</strong>：手先速度 → 関節速度</li>
+                                <li><strong>式</strong>：q̇ = J⁻¹ * v</li>
+                                <li><strong>問題</strong>：Jが正方行列でない場合</li>
+                            </ul>
+                            <h3>解決方法</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>疑似逆行列</strong>：J⁺ = Jᵀ(JJᵀ)⁻¹</li>
+                                <li><strong>特異点対策</strong>：Damped Least Squares</li>
+                                <li><strong>冗長性解決</strong>：Null Space制御</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- JointTrajectoryControllerのvelocityとaccelerationに追加 (縦スライド) -->
+                <section>
+                    <h2>JointTrajectoryControllerのvelocityとaccelerationに追加</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/jtc_velocity_accel.png" alt="速度・加速度制御" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>拡張されたJointTrajectoryPoint</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>positions</strong>：関節角度</li>
+                                <li><strong>velocities</strong>：関節角速度</li>
+                                <li><strong>accelerations</strong>：関節角加速度</li>
+                                <li><strong>time_from_start</strong>：時間</li>
+                            </ul>
+                            <h3>制御の利点</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>より滑らかな動作</li>
+                                <li>手先速度の制御</li>
+                                <li>振動の抑制</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 速度と加速度、モーションの滑らかさの関係 (縦スライド) -->
+                <section>
+                    <h2>速度と加速度、モーションの滑らかさの関係</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/spline_comparison.png" alt="スプライン比較" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>3次スプライン vs 5次スプライン</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>3次スプライン</strong>
+                                    <ul>
+                                        <li>位置と速度の連続性</li>
+                                        <li>計算コストが低い</li>
+                                        <li>加速度不連続で振動発生</li>
+                                    </ul>
+                                </li>
+                                <li><strong>5次スプライン</strong>
+                                    <ul>
+                                        <li>位置、速度、加速度の連続性</li>
+                                        <li>より滑らかな動作</li>
+                                        <li>手先の振動抑制</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
             </section>
