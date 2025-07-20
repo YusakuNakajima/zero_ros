@@ -142,7 +142,7 @@
             </div>
             
             <div class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">手先リアルタイム速度 (mm/s)</h2>
+                <h2 class="text-lg font-bold text-center mb-2 text-white">各関節のリアルタイム角速度 (rad/s)</h2>
                 <div class="bg-gray-900 p-2 rounded-lg">
                     <canvas id="velocity-chart"></canvas>
                 </div>
@@ -179,7 +179,9 @@
         
         // --- 速度プロット用 ---
         let velocityChart;
-        let lastPosition = new THREE.Vector3();
+        // ★★★ 修正点: 状態管理用の変数を追加・変更 ★★★
+        let currentJointAngles = { j1: 0, j2: 0, j3: 0 }; // 現在の角度を確実に保持する
+        let lastAngles = { j1: 0, j2: 0, j3: 0 };       // 前フレームの角度を保持する
         let lastTime = 0;
         let animationStartTime = 0;
 
@@ -215,7 +217,7 @@
             createRobot();
             createMarkers();
             setupUI();
-            createVelocityChart();
+            createJointVelocityChart();
             resetScene();
             animate();
         }
@@ -283,28 +285,19 @@
             l3Visual.castShadow = true;
             l3.add(l3Visual);
             links.push(l3Visual);
-
-            // ロボットのフランジ、ツール、TCPを分離して定義
-            // 1. ロボットアームの終端（フランジ）を定義
             const flange = new THREE.Group();
             flange.position.x = l3Length;
             l3.add(flange);
-
-            // 2. ツール（三角錐）をフランジに取り付ける
-            const eeVisualLength = 6; // ツールの長さ
+            const eeVisualLength = 6;
             const eeVisual = new THREE.Mesh(new THREE.ConeGeometry(3, eeVisualLength, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c }));
             eeVisual.rotation.z = -Math.PI / 2;
-            eeVisual.position.x = eeVisualLength / 2; // 三角錐の根本がフランジに来るように配置
+            eeVisual.position.x = eeVisualLength / 2;
             eeVisual.castShadow = true;
             flange.add(eeVisual);
-
-            // 3. TCP（endEffector）をツールの先端に定義
             endEffector = new THREE.Group();
-            endEffector.position.x = eeVisualLength; // フランジからツールの長さ分だけ離れた位置
+            endEffector.position.x = eeVisualLength;
             flange.add(endEffector);
-
-            // 4. TCPに視覚的なマーカー（座標軸）を追加
-            const tcpMarker = new THREE.AxesHelper(5); // 長さ5のXYZ軸
+            const tcpMarker = new THREE.AxesHelper(5);
             endEffector.add(tcpMarker);
         }
 
@@ -400,8 +393,13 @@
             robot.visible = true;
             resetVelocityChart();
             animationStartTime = performance.now();
+            
+            // 速度計算の初期値を設定
+            const startAngles = calculateAnglesFor(startPos) || { j1: 0, j2: 0, j3: 0 };
+            currentJointAngles = { ...startAngles };
+            lastAngles = { ...startAngles };
             lastTime = animationStartTime;
-            endEffector.getWorldPosition(lastPosition);
+
             const ptpTween = createMovementTween('PTP', pathPTP);
             const linTween = createMovementTween('LIN', pathLIN);
             const circTween = createMovementTween('CIRC', pathCIRC);
@@ -428,19 +426,23 @@
             const onStartCallback = () => {
                 solveIK(startPos);
                 pathLine.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(), 3));
+                
+                // 各動作の開始時に、前のフレームの角度をリセット
+                const startAngles = calculateAnglesFor(startPos) || { j1: 0, j2: 0, j3: 0 };
+                currentJointAngles = { ...startAngles };
+                lastAngles = { ...startAngles };
                 lastTime = performance.now();
-                endEffector.getWorldPosition(lastPosition);
             };
             switch (mode) {
                 case 'PTP': {
-                    const currentAngles = calculateAnglesFor(startPos);
+                    const anglesObj = calculateAnglesFor(startPos);
                     const targetAngles = calculateAnglesFor(endPos);
-                    if (!currentAngles || !targetAngles) { return new TWEEN.Tween({}); }
-                    tween = new TWEEN.Tween(currentAngles).to(targetAngles, duration)
+                    if (!anglesObj || !targetAngles) { return new TWEEN.Tween({}); }
+                    tween = new TWEEN.Tween(anglesObj).to(targetAngles, duration)
                         .easing(TWEEN.Easing.Quadratic.InOut)
                         .onStart(onStartCallback)
                         .onUpdate(() => {
-                            setJointAngles(currentAngles);
+                            setJointAngles(anglesObj);
                             updatePath(pathLine);
                         });
                     break;
@@ -518,16 +520,20 @@
             return false;
         }
 
+        // ★★★ 修正点: 角度を更新する際に、必ずグローバル変数にも保存する ★★★
         function setJointAngles(angles) {
+            // 3Dモデルの角度を更新
             joints[0].rotation.z = angles.j1;
             joints[1].rotation.y = -angles.j2;
             joints[2].rotation.y = angles.j3;
+            // 状態管理用の変数も確実に更新
+            currentJointAngles = { ...angles };
         }
         
         function calculateAnglesFor(targetWorldPos) {
-            const L2 = 40; // 上腕の長さ
-            const L3 = 35; // 前腕(29) + ツール(6) = 35
-            const j2PivotZ = 30; // 肩の回転中心のZ座標
+            const L2 = 40;
+            const L3 = 35; 
+            const j2PivotZ = 30;
             const theta1 = Math.atan2(targetWorldPos.y, targetWorldPos.x);
             const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2);
             const h = targetWorldPos.z - j2PivotZ;
@@ -555,26 +561,26 @@
             pathLine.geometry.attributes.position.needsUpdate = true;
         }
         
-        function createVelocityChart() {
+        function createJointVelocityChart() {
             const ctx = document.getElementById('velocity-chart').getContext('2d');
             velocityChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Vx',
+                        label: 'J1 (θ1)',
                         data: [],
                         borderColor: '#ef4444',
                         borderWidth: 1.5,
                         pointRadius: 0
                     }, {
-                        label: 'Vy',
+                        label: 'J2 (θ2)',
                         data: [],
                         borderColor: '#22c55e',
                         borderWidth: 1.5,
                         pointRadius: 0
                     }, {
-                        label: 'Vz',
+                        label: 'J3 (θ3)',
                         data: [],
                         borderColor: '#3b82f6',
                         borderWidth: 1.5,
@@ -591,7 +597,7 @@
                             grid: { color: 'rgba(75, 85, 99, 0.5)' }
                         },
                         y: {
-                            title: { display: true, text: 'Velocity (mm/s)', color: '#9ca3af' },
+                            title: { display: true, text: 'Angular Velocity (rad/s)', color: '#9ca3af' },
                             ticks: { color: '#9ca3af' },
                             grid: { color: 'rgba(75, 85, 99, 0.5)' }
                         }
@@ -603,21 +609,31 @@
             });
         }
         
-        function updateVelocityPlot() {
+        // ★★★ 修正点: 状態変数を使って計算するように変更 ★★★
+        function updateJointVelocityPlot() {
             if (!isAnimating) return;
+
             const currentTime = performance.now();
             const deltaTime = (currentTime - lastTime) / 1000.0;
+
             if (deltaTime < 1e-5) return;
-            const currentPosition = new THREE.Vector3();
-            endEffector.getWorldPosition(currentPosition);
-            const velocity = new THREE.Vector3().subVectors(currentPosition, lastPosition).divideScalar(deltaTime);
+
+            // 信頼できる状態変数から角速度を計算
+            const angularVelocities = {
+                j1: (currentJointAngles.j1 - lastAngles.j1) / deltaTime,
+                j2: (currentJointAngles.j2 - lastAngles.j2) / deltaTime,
+                j3: (currentJointAngles.j3 - lastAngles.j3) / deltaTime,
+            };
+
             const chartTime = (currentTime - animationStartTime) / 1000.0;
             velocityChart.data.labels.push(chartTime.toFixed(2));
-            velocityChart.data.datasets[0].data.push(velocity.x);
-            velocityChart.data.datasets[1].data.push(velocity.y);
-            velocityChart.data.datasets[2].data.push(velocity.z);
+            velocityChart.data.datasets[0].data.push(angularVelocities.j1);
+            velocityChart.data.datasets[1].data.push(angularVelocities.j2);
+            velocityChart.data.datasets[2].data.push(angularVelocities.j3);
             velocityChart.update();
-            lastPosition.copy(currentPosition);
+
+            // 次のフレームのために値を更新
+            lastAngles = { ...currentJointAngles };
             lastTime = currentTime;
         }
         
@@ -635,7 +651,7 @@
             requestAnimationFrame(animate);
             TWEEN.update();
             controls.update();
-            updateVelocityPlot();
+            updateJointVelocityPlot();
             renderer.render(scene, camera);
         }
 

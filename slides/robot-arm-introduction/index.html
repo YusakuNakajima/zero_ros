@@ -27,36 +27,32 @@
                 <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
             <section>
-                <h2>本スライドの目標</h2>
+                <h2>本スライドの内容</h2>
                 <ul>
                     <ul>
-                        <li>この資料はロボットの中でもロボットアームに特化した内容です</li>
-                        <li>AVRなどの移動ロボットは対象外です</li>
-                        <li>モノを掴んで運ぶなど簡単な動きを作ることを目的としています</li>
+                        <li>この資料はロボットの中でもロボットアームに特化した内容で、AVRなどの移動ロボットは対象外です</li>
+                        <li>ROSと通常のロボット制御の使い分けを意識して作られています</li>
                     </ul>
 
                 </ul>
             </section>
             <section>
-                <h2>目的に応じたロボット制御方法</h2>
-                <p><strong>メーカー制御での動作作成は本スライド、ROSでの動作作成は別スライドで詳しく説明します</strong></p>
+                <h2>ROSを使う？使わない？</h2>
                 <div style="display: flex;">
                     <div style="flex: 1;">
                         <h4>メーカー提供の動作生成</h4>
                         <img src="media/TM_Collaborative_Robots_Tutorial_6_Pick_and_Place_Using_Vision.gif">
                         <ul>
-                            <li>↑モノの移動で十分</li>
-                            <li>複雑な動きは必要ない</li>
-                            <li><strong>→ このスライドで詳しく説明</strong></li>
+                            <li>直線などの動きの組合せで十分</li>
+                            <li>本スライドで紹介</li>
                         </ul>
                     </div>
                     <div style="flex: 1;">
                         <h4><a href="../ros-introduction/index.html">ROSによる動作生成</a></h4>
                         <img src="media/Robotic_powder_grinding.gif">
                         <ul>
-                            <li>↑複雑な動きが必要</li>
-                            <li>様々なメーカーのロボットやセンサを統合したシステムを作りたい</li>
-                            <li><strong>→ <a href="../ros-introduction/index.html">別スライド</a>で詳しく説明</strong></li>
+                            <li>複雑で滑らかな動きが必要</li>
+                            <li>様々なロボットやセンサを統合したい</li>
                         </ul>
                     </div>
                 </div>
@@ -84,18 +80,18 @@
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/TP.png" style="width: 60%; margin-bottom: 20px;">
-                            <p>ティーチングペンダント(TP)</p>
+                            <p>ティーチングペンダント</p>
                             <ul>
-                                <li>タブレット端末で操作</li>
-                                <li>設定,動作テスト用</li>
+                                <li>各種設定や動作を記録、再生</li>
+                                <li>最近はLANを介してソフトウェアで行うものも多い</li>
                             </ul>
                         </div>
                         <div style="flex: 1;">
                             <img src="media/programing_image.jpg" style="width: 80%; margin-bottom: 20px;">
                             <p>プログラミング</p>
                             <ul>
-                                <li>Python等で動作</li>
-                                <li>センサ等との統合</li>
+                                <li>Python等で動作コードを作成</li>
+                                <li>TPでは対応していない機能が使える</li>
                             </ul>
                         </div>
                     </div>
@@ -363,7 +359,8 @@ finally:
                     <h2>連続的なロボットモーション</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/continuous_robot_motion.jpg">
+                            <iframe data-src="interactive_app/waypoints_viewer.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -383,9 +380,13 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>厳密にwaypointsを通らずにショートカットすることで滑らかな動作を実現</li>
-                                <li>左の図のようなやり方でショートカットを行う</li>
-                                <li>メーカーごとにこの機能の呼び方は異なる 例)Denso(パス動作)、UR(ブレンド半径)</li>
+                                <li>waypointsをショートカットすることで滑らかな動作を実現</li>
+                                <li>メーカーごとにこの機能の呼び方は異なる
+                                    <ul>
+                                        <li>Denso:パス動作</li>
+                                        <li>UR:ブレンド半径</li>
+                                    </ul>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -396,15 +397,93 @@ finally:
                 <div style="display: flex;">
                     <div style="flex: 1;">
                         <img src="media/robot_accuracy_example1.png">
+                        <div style="position: absolute; 
+                                    top: 74%; 
+                                    left: 4%; 
+                                    width: 20%; 
+                                    height: 5%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
                     </div>
                     <div style="flex: 1;">
                         <ul>
-                            <li>仕様書の精度は位置決め精度ではない！</li>
-                            <li>同じ動作を繰り返したときの精度を記載</li>
-                            <li>例えば、電源を入れなおすと位置が微妙にずれるので、毎回同じ位置決めを行いたい場合は電源をつけたままにしておくと良い</li>
+                            <li>仕様書は絶対位置決め精度ではない！</li>
+                            <li>ISO9283は同じ動作の繰り返し精度を測定する</li>
+                            <li>例えば、電源を入れなおすと絶対位置は前回とずれる</li>
                         </ul>
                     </div>
                 </div>
+            </section>
+            <section>
+                <section>
+                    <h2>オフラインシミュレーション</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_studio.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <p>導入前のレイアウト確認や動作のシミュレーションはとても重要</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>シミュレーションなしで取り組んだ場合にありがちなトラブル</h2>
+                    <ul>
+                        <li><strong>1. レイアウト設計</strong><br>
+                            実際に設置するとロボットの可動範囲が思ったより狭く手先が届かなかったので配置を考え直す</li>
+                        <li><strong>2. 動作速度</strong><br>
+                            スループットの向上を期待したが実際に動かすと思ったより遅かった</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>協働ロボのシミュレーションの現状</h2>
+                    <ul>
+                        <li>産業用ロボットメーカーは自社でシミュレータを提供</li>
+                        <li>協働ロボットメーカーはあまりシミュレーションを提供していない<br>
+                            （企業として大きくないのでハードウェアに注力する場合が多い）</li>
+                        <li>協働ロボ最大手のUniversalRobotがシミュレーションツールUR Studioを2025年にようやく発表した</li>
+                        <li>他の協働ロボメーカーはシミュレータがない</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>協働ロボシミュレータの選択肢</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                src="https://www.youtube.com/embed/9PcugSpyN14?si=P9G5nNSEM7OaS5Hs"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>シミュレータを専門としているメーカーから購入するのがよさそう</li>
+                                <li>個人的にはカナダのRoboDKがすごい</li>
+                                <li>CADを取り込んでエッジ検出してロボットのウェイポイントを自動作成できる</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>※著者はシミュレータをまったく使ったことがないので参考程度にとどめてください</p>
+                </section>
+                <section>
+                    <h2>ROSでもシミュレーションできるのでは？</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                src="https://www.youtube.com/embed/fCORKVYsdDI?si=eSNNfyysZDFQ9fQ_"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>ROSのMoveItを使えば近いこともできるが、GUIだけで完結するものではない</li>
+                                <li>まだまだ専門的な開発知識が求められる</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
             </section>
             <section>
                 <section>
