@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>姿勢・位置 可視化ツール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.156.1/examples/jsm/"
+        }
+    }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-200 */
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* bg-blue-500 */
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider-thumb::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row h-screen overflow-hidden">
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container" class="flex-grow w-full lg:w-2/3 h-1/2 lg:h-full bg-black"></div>
+
+    <!-- Controls Panel -->
+    <div class="w-full lg:w-1/3 h-1/2 lg:h-full p-4 md:p-6 overflow-y-auto bg-gray-800 shadow-lg">
+        <h1 class="text-2xl font-bold text-white mb-4">姿勢・位置 可視化ツール</h1>
+        
+        <!-- Rotation Controls -->
+        <div class="bg-gray-700 p-4 rounded-lg mb-4">
+            <h2 class="text-lg font-semibold text-blue-300 mb-3">姿勢 (オイラー角) 操作</h2>
+            
+            <!-- Yaw Slider -->
+            <div class="mb-3">
+                <label for="yaw" class="block text-sm font-medium text-gray-300">ヨー (Yaw / Y軸回転)</label>
+                <div class="flex items-center space-x-3">
+                    <input id="yaw" type="range" min="-180" max="180" value="0" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <span id="yaw-value" class="text-sm font-mono bg-gray-600 px-2 py-1 rounded w-20 text-center">0°</span>
+                </div>
+            </div>
+
+            <!-- Pitch Slider -->
+            <div class="mb-3">
+                <label for="pitch" class="block text-sm font-medium text-gray-300">ピッチ (Pitch / X軸回転)</label>
+                <div class="flex items-center space-x-3">
+                    <input id="pitch" type="range" min="-90" max="90" value="0" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <span id="pitch-value" class="text-sm font-mono bg-gray-600 px-2 py-1 rounded w-20 text-center">0°</span>
+                </div>
+            </div>
+
+            <!-- Roll Slider -->
+            <div class="mb-3">
+                <label for="roll" class="block text-sm font-medium text-gray-300">ロール (Roll / Z軸回転)</label>
+                <div class="flex items-center space-x-3">
+                    <input id="roll" type="range" min="-180" max="180" value="0" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <span id="roll-value" class="text-sm font-mono bg-gray-600 px-2 py-1 rounded w-20 text-center">0°</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Position Controls -->
+        <div class="bg-gray-700 p-4 rounded-lg">
+            <h2 class="text-lg font-semibold text-green-300 mb-3">位置 (Position) 操作</h2>
+            
+            <!-- X Slider -->
+            <div class="mb-3">
+                <label for="pos-x" class="block text-sm font-medium text-gray-300">X 座標</label>
+                <div class="flex items-center space-x-3">
+                    <input id="pos-x" type="range" min="-5" max="5" value="0" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <span id="pos-x-value" class="text-sm font-mono bg-gray-600 px-2 py-1 rounded w-20 text-center">0.0</span>
+                </div>
+            </div>
+
+            <!-- Y Slider -->
+            <div class="mb-3">
+                <label for="pos-y" class="block text-sm font-medium text-gray-300">Y 座標</label>
+                <div class="flex items-center space-x-3">
+                    <input id="pos-y" type="range" min="-5" max="5" value="0" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <span id="pos-y-value" class="text-sm font-mono bg-gray-600 px-2 py-1 rounded w-20 text-center">0.0</span>
+                </div>
+            </div>
+
+            <!-- Z Slider -->
+            <div class="mb-3">
+                <label for="pos-z" class="block text-sm font-medium text-gray-300">Z 座標</label>
+                <div class="flex items-center space-x-3">
+                    <input id="pos-z" type="range" min="-5" max="5" value="0" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    <span id="pos-z-value" class="text-sm font-mono bg-gray-600 px-2 py-1 rounded w-20 text-center">0.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- DOM Elements ---
+        const canvasContainer = document.getElementById('canvas-container');
+        // Rotation
+        const yawSlider = document.getElementById('yaw');
+        const pitchSlider = document.getElementById('pitch');
+        const rollSlider = document.getElementById('roll');
+        const yawValue = document.getElementById('yaw-value');
+        const pitchValue = document.getElementById('pitch-value');
+        const rollValue = document.getElementById('roll-value');
+        // Position
+        const xSlider = document.getElementById('pos-x');
+        const ySlider = document.getElementById('pos-y');
+        const zSlider = document.getElementById('pos-z');
+        const xValue = document.getElementById('pos-x-value');
+        const yValue = document.getElementById('pos-y-value');
+        const zValue = document.getElementById('pos-z-value');
+
+        // --- Scene Setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111827);
+
+        const camera = new THREE.PerspectiveCamera(75, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+        camera.position.set(5, 6, 8);
+        camera.lookAt(scene.position);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        canvasContainer.appendChild(renderer.domElement);
+
+        // --- Controls ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // --- Helpers ---
+        const axesHelper = new THREE.AxesHelper(5); // X:red, Y:green, Z:blue
+        scene.add(axesHelper);
+        const gridHelper = new THREE.GridHelper(20, 20);
+        gridHelper.material.opacity = 0.25;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        // --- Model and Gimbals ---
+        const objectRoot = new THREE.Group(); // This group will handle position
+        scene.add(objectRoot);
+
+        const gimbalYaw = new THREE.Group();   // Rotates around Y (Yaw)
+        const gimbalPitch = new THREE.Group(); // Rotates around X (Pitch)
+        const gimbalRoll = new THREE.Group();  // Rotates around Z (Roll)
+        
+        const gimbalMaterialYaw = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+        const gimbalMaterialPitch = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+        const gimbalMaterialRoll = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+
+        const gimbalRingYaw = new THREE.Mesh(new THREE.TorusGeometry(2, 0.05, 16, 100), gimbalMaterialYaw);
+        gimbalRingYaw.rotation.x = Math.PI / 2;
+
+        const gimbalRingPitch = new THREE.Mesh(new THREE.TorusGeometry(1.7, 0.05, 16, 100), gimbalMaterialPitch);
+        
+        const gimbalRingRoll = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.05, 16, 100), gimbalMaterialRoll);
+        gimbalRingRoll.rotation.x = Math.PI / 2;
+        gimbalRingRoll.rotation.y = Math.PI / 2;
+
+        const airplane = new THREE.Group();
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0, 0.1, 0.8, 8), bodyMat);
+        body.rotation.x = Math.PI / 2;
+        const wing = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.3), bodyMat);
+        wing.position.z = -0.1;
+        const tail = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.2), bodyMat);
+        tail.position.z = -0.5;
+        tail.position.y = 0.15;
+        airplane.add(body, wing, tail);
+        airplane.scale.set(1.5, 1.5, 1.5);
+
+        // Assemble hierarchy: Position (objectRoot) -> Yaw -> Pitch -> Roll -> Airplane
+        objectRoot.add(gimbalYaw);
+        gimbalYaw.add(gimbalRingYaw);
+        gimbalYaw.add(gimbalPitch);
+        gimbalPitch.add(gimbalRingPitch);
+        gimbalPitch.add(gimbalRoll);
+        gimbalRoll.add(gimbalRingRoll);
+        gimbalRoll.add(airplane);
+
+        // --- Functions ---
+        function updateTransform() {
+            // Update Rotation
+            const yaw = THREE.MathUtils.degToRad(parseFloat(yawSlider.value));
+            const pitch = THREE.MathUtils.degToRad(parseFloat(pitchSlider.value));
+            const roll = THREE.MathUtils.degToRad(parseFloat(rollSlider.value));
+            gimbalYaw.rotation.y = yaw;
+            gimbalPitch.rotation.x = pitch;
+            gimbalRoll.rotation.z = roll;
+
+            // Update Position
+            const x = parseFloat(xSlider.value);
+            const y = parseFloat(ySlider.value);
+            const z = parseFloat(zSlider.value);
+            objectRoot.position.set(x, y, z);
+
+            updateUI();
+        }
+        
+        function updateUI() {
+            // Rotation values
+            yawValue.textContent = `${parseFloat(yawSlider.value).toFixed(1)}°`;
+            pitchValue.textContent = `${parseFloat(pitchSlider.value).toFixed(1)}°`;
+            rollValue.textContent = `${parseFloat(rollSlider.value).toFixed(1)}°`;
+            // Position values
+            xValue.textContent = parseFloat(xSlider.value).toFixed(1);
+            yValue.textContent = parseFloat(ySlider.value).toFixed(1);
+            zValue.textContent = parseFloat(zSlider.value).toFixed(1);
+        }
+
+        // --- Event Listeners ---
+        const allSliders = [yawSlider, pitchSlider, rollSlider, xSlider, ySlider, zSlider];
+        allSliders.forEach(slider => {
+            slider.addEventListener('input', updateTransform);
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        });
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- Initial State ---
+        updateTransform();
+        animate();
+
+    </script>
+</body>
+</html>

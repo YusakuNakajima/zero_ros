@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボット動作軌跡 比較シミュレーター (Z-up)</title>
+    <title>ロボット動作軌跡 比較シミュレーター (ジョグ機能追加)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,25 @@
             left: 1rem;
             z-index: 10;
             pointer-events: none;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
         }
+        /* For Webkit browsers */
+        #ui-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #ui-container::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 10px;
+        }
+        #ui-container::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 10px;
+        }
+        #ui-container::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
 
         .control-panel {
             background-color: rgba(31, 41, 55, 0.8);
@@ -72,6 +90,10 @@
         }
         input[type="radio"]:checked + .radio-label {
             background-color: #3b82f6;
+        }
+        .jog-panel-container.disabled {
+            opacity: 0.6;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -113,47 +135,114 @@
             </div>
 
             <div class="mt-4 pt-4 border-t border-gray-600">
+                <h2 class="text-lg font-bold text-center mb-2 text-white">エンドエフェクタ選択</h2>
+                <div id="end-effector-selector" class="flex justify-center space-x-4 bg-gray-800 p-2 rounded-lg">
+                     <div>
+                        <input type="radio" name="end-effector-type" value="A" id="ee-type-a" class="hidden" checked>
+                        <label for="ee-type-a" class="radio-label text-sm">タイプA (コーン)</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="end-effector-type" value="B" id="ee-type-b" class="hidden">
+                        <label for="ee-type-b" class="radio-label text-sm">タイプB (グリッパー)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-600">
                 <h2 class="text-lg font-bold text-center mb-2 text-white">座標設定 (Z-up 右手系)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <h3 class="font-semibold text-green-400 mb-2">開始点 (X, Y, Z)</h3>
+                        <h3 class="font-semibold text-pink-400 mb-2">開始点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="40">
-                            <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="20">
-                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="50">
+                            <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
+                            <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
+                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center" value="50">
                         </div>
                     </div>
                      <div>
-                        <h3 class="font-semibold text-yellow-400 mb-2">中間点 (X, Y, Z)</h3>
+                        <h3 class="font-semibold text-teal-400 mb-2">中間点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="50">
-                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="0">
-                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="30">
+                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center" value="60">
+                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center" value="0">
+                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center" value="30">
                         </div>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-red-400 mb-2">終了点 (X, Y, Z)</h3>
+                        <h3 class="font-semibold text-orange-400 mb-2">終了点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="40">
-                            <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="-20">
-                            <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="10">
+                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
+                            <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center" value="-20">
+                            <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center" value="10">
                         </div>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-center">
-                    <button id="update-pos-btn"
-                        class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg">座標を更新</button>
+                    <button id="update-pos-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg">座標を更新</button>
                 </div>
                 <p id="error-message" class="text-yellow-400 text-center mt-2 text-sm h-4"></p>
+            </div>
+
+            <!-- ジョグ操作パネル -->
+            <div id="jog-panel-container" class="mt-4 pt-4 border-t border-gray-600">
+                <h2 class="text-lg font-bold text-center mb-2 text-white">ジョグ操作</h2>
+                <div id="jog-mode-selector" class="flex justify-center space-x-2 bg-gray-800 p-2 rounded-lg mb-4">
+                    <div>
+                        <input type="radio" name="jog-mode" value="joint" id="jog-mode-joint" class="hidden" checked>
+                        <label for="jog-mode-joint" class="radio-label text-sm">関節</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="jog-mode" value="base" id="jog-mode-base" class="hidden">
+                        <label for="jog-mode-base" class="radio-label text-sm">ベース</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="jog-mode" value="tool" id="jog-mode-tool" class="hidden">
+                        <label for="jog-mode-tool" class="radio-label text-sm">ツール</label>
+                    </div>
+                </div>
+                <div id="jog-controls">
+                    <!-- 関節ジョグ -->
+                    <div id="joint-jog-panel">
+                        <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
+                            <span class="font-bold w-16 text-center">J1 (deg)</span>
+                            <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="0" data-dir="-1">-</button>
+                            <input type="text" id="j1-angle-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
+                            <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="0" data-dir="1">+</button>
+                        </div>
+                        <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
+                            <span class="font-bold w-16 text-center">J2 (deg)</span>
+                            <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="1" data-dir="-1">-</button>
+                            <input type="text" id="j2-angle-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
+                            <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="1" data-dir="1">+</button>
+                        </div>
+                        <div class="flex items-center justify-between p-1 bg-gray-900/50 rounded-md">
+                            <span class="font-bold w-16 text-center">J3 (deg)</span>
+                            <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="2" data-dir="-1">-</button>
+                            <input type="text" id="j3-angle-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
+                            <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="2" data-dir="1">+</button>
+                        </div>
+                    </div>
+                    <!-- 直交座標ジョグ (ベース/ツール) -->
+                    <div id="cartesian-jog-panel" class="hidden">
+                        <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
+                            <span class="font-bold w-16 text-center text-red-400">X (mm)</span>
+                            <button class="jog-btn bg-red-600 hover:bg-red-500 w-10 h-8 rounded" data-type="cartesian" data-axis="x" data-dir="-1">-</button>
+                            <input type="text" id="x-pos-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
+                            <button class="jog-btn bg-red-600 hover:bg-red-500 w-10 h-8 rounded" data-type="cartesian" data-axis="x" data-dir="1">+</button>
+                        </div>
+                        <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
+                            <span class="font-bold w-16 text-center text-green-400">Y (mm)</span>
+                            <button class="jog-btn bg-green-600 hover:bg-green-500 w-10 h-8 rounded" data-type="cartesian" data-axis="y" data-dir="-1">-</button>
+                            <input type="text" id="y-pos-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
+                            <button class="jog-btn bg-green-600 hover:bg-green-500 w-10 h-8 rounded" data-type="cartesian" data-axis="y" data-dir="1">+</button>
+                        </div>
+                        <div class="flex items-center justify-between p-1 bg-gray-900/50 rounded-md">
+                            <span class="font-bold w-16 text-center text-blue-400">Z (mm)</span>
+                            <button class="jog-btn bg-blue-600 hover:bg-blue-500 w-10 h-8 rounded" data-type="cartesian" data-axis="z" data-dir="-1">-</button>
+                            <input type="text" id="z-pos-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
+                            <button class="jog-btn bg-blue-600 hover:bg-blue-500 w-10 h-8 rounded" data-type="cartesian" data-axis="z" data-dir="1">+</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="mt-4 pt-4 border-t border-gray-600">
@@ -173,7 +262,7 @@
     <script type="module">
         // --- 基本設定 ---
         let scene, camera, renderer, controls;
-        let robot, endEffector;
+        let robot, flange;
         let isAnimating = false;
         let startMarkerGroup, endMarkerGroup, viaMarkerGroup;
         let pathLine;
@@ -181,16 +270,39 @@
         // --- ロボットの関節とリンク ---
         const joints = [];
 
+        // --- エンドエフェクタ関連 ---
+        let endEffector;
+        let endEffectorGroupA, endEffectorGroupB;
+        let currentEndEffectorType = 'A';
+        const endEffectorDefs = {
+            'A': { tcpOffset: 6 },
+            'B': { tcpOffset: 12 }
+        };
+
+        // --- ジョグ関連 ---
+        let currentJogMode = 'joint';
+        const jogStep = {
+            joint: THREE.MathUtils.degToRad(1.0), // 1度ずつ
+            cartesian: 2.0 // 2mmずつ
+        };
+
         // --- ターゲット ---
         let startPos = new THREE.Vector3(40, 20, 50);
         let endPos = new THREE.Vector3(40, -20, 10);
-        let viaPos = new THREE.Vector3(50, 0, 30);
+        let viaPos = new THREE.Vector3(60, 0, 30);
         
         // --- 速度プロット用 ---
         let velocityChart;
         let lastAngles = { j1: 0, j2: 0, j3: 0 };
         let lastTime = 0;
         let animationStartTime = 0;
+
+        // --- 色定義 ---
+        const markerColors = {
+            start: 0xf472b6,
+            end: 0xfb923c,
+            via: 0x2dd4bf
+        };
 
         // --- 初期化処理 ---
         function init() {
@@ -213,15 +325,13 @@
             directionalLight.position.set(50, -50, 100);
             directionalLight.castShadow = true;
             scene.add(directionalLight);
-            const ground = new THREE.Mesh(
-                new THREE.PlaneGeometry(200, 200),
-                new THREE.MeshStandardMaterial({ color: 0x1f2937 })
-            );
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x1f2937 }));
             ground.receiveShadow = true;
             scene.add(ground);
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             createRobot();
+            switchEndEffector(currentEndEffectorType);
             createMarkers();
             setupUI();
             createJointVelocityChart();
@@ -289,20 +399,53 @@
             l3Visual.position.x = l3Length / 2;
             l3Visual.castShadow = true;
             l3.add(l3Visual);
-            const flange = new THREE.Group();
+            flange = new THREE.Group();
             flange.position.x = l3Length;
             l3.add(flange);
-            const eeVisualLength = 6;
-            const eeVisual = new THREE.Mesh(new THREE.ConeGeometry(3, eeVisualLength, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c }));
-            eeVisual.rotation.z = -Math.PI / 2;
-            eeVisual.position.x = eeVisualLength / 2;
-            eeVisual.castShadow = true;
-            flange.add(eeVisual);
-            endEffector = new THREE.Group();
-            endEffector.position.x = eeVisualLength;
-            flange.add(endEffector);
-            const tcpMarker = new THREE.AxesHelper(5);
-            endEffector.add(tcpMarker);
+
+            // エンドエフェクタA (コーン)
+            endEffectorGroupA = new THREE.Group();
+            const eeA_visual = new THREE.Mesh(new THREE.ConeGeometry(3, endEffectorDefs.A.tcpOffset, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c }));
+            eeA_visual.rotation.z = -Math.PI / 2;
+            eeA_visual.position.x = endEffectorDefs.A.tcpOffset / 2;
+            eeA_visual.castShadow = true;
+            endEffectorGroupA.add(eeA_visual);
+            const tcpA = new THREE.Group();
+            tcpA.position.x = endEffectorDefs.A.tcpOffset;
+            endEffectorGroupA.add(tcpA);
+            tcpA.add(new THREE.AxesHelper(5));
+            endEffectorGroupA.tcp = tcpA;
+
+            // エンドエフェクタB (グリッパー)
+            endEffectorGroupB = new THREE.Group();
+            const gripperBase = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 5), new THREE.MeshStandardMaterial({ color: 0x6b7280 }));
+            gripperBase.position.x = 2;
+            endEffectorGroupB.add(gripperBase);
+            const finger1 = new THREE.Mesh(new THREE.BoxGeometry(8, 1, 3), new THREE.MeshStandardMaterial({ color: 0x9ca3af }));
+            finger1.position.set(4 + 4, 2, 0);
+            endEffectorGroupB.add(finger1);
+            const finger2 = finger1.clone();
+            finger2.position.y = -2;
+            endEffectorGroupB.add(finger2);
+            const tcpB = new THREE.Group();
+            tcpB.position.x = endEffectorDefs.B.tcpOffset;
+            endEffectorGroupB.add(tcpB);
+            tcpB.add(new THREE.AxesHelper(5));
+            endEffectorGroupB.tcp = tcpB;
+        }
+
+        function switchEndEffector(type) {
+            if (flange.children.length > 0) {
+                flange.remove(flange.children[0]);
+            }
+            if (type === 'A') {
+                flange.add(endEffectorGroupA);
+                endEffector = endEffectorGroupA.tcp;
+            } else {
+                flange.add(endEffectorGroupB);
+                endEffector = endEffectorGroupB.tcp;
+            }
+            currentEndEffectorType = type;
         }
 
         function createLabeledMarker(text, position, color) {
@@ -315,15 +458,33 @@
         }
 
         function createMarkers() {
-            startMarkerGroup = createLabeledMarker('開始', startPos, 0x22c55e);
-            endMarkerGroup = createLabeledMarker('終了', endPos, 0xef4444);
-            viaMarkerGroup = createLabeledMarker('中間', viaPos, 0xeab308);
+            startMarkerGroup = createLabeledMarker('開始', startPos, markerColors.start);
+            endMarkerGroup = createLabeledMarker('終了', endPos, markerColors.end);
+            viaMarkerGroup = createLabeledMarker('中間', viaPos, markerColors.via);
         }
 
         function setupUI() {
             document.getElementById('start-btn').addEventListener('click', startComparison);
             document.getElementById('reset-btn').addEventListener('click', resetScene);
             document.getElementById('update-pos-btn').addEventListener('click', updatePositions);
+            
+            document.querySelectorAll('input[name="end-effector-type"]').forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    if (isAnimating) return;
+                    switchEndEffector(event.target.value);
+                    resetScene();
+                });
+            });
+
+            // ジョグUIのセットアップ
+            document.querySelectorAll('input[name="jog-mode"]').forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    currentJogMode = event.target.value;
+                    document.getElementById('joint-jog-panel').style.display = (currentJogMode === 'joint') ? 'block' : 'none';
+                    document.getElementById('cartesian-jog-panel').style.display = (currentJogMode !== 'joint') ? 'block' : 'none';
+                });
+            });
+            document.getElementById('jog-controls').addEventListener('click', handleJog);
         }
 
         function updatePositions() {
@@ -366,6 +527,7 @@
             
             resetScene();
             isAnimating = true;
+            setJogPanelEnabled(false);
             document.getElementById('start-btn').disabled = true;
             document.getElementById('update-pos-btn').disabled = true;
 
@@ -386,14 +548,12 @@
 
             const duration = 4000;
             let animationTween;
-
             const selectedMode = document.querySelector('input[name="animation-mode"]:checked').value;
-            
-            // Create path line for visualization
             pathLine = createPathLine();
 
             const onComplete = () => {
                 isAnimating = false;
+                setJogPanelEnabled(true);
                 document.getElementById('start-btn').disabled = false;
                 document.getElementById('update-pos-btn').disabled = false;
             };
@@ -403,16 +563,11 @@
                     const endAngles = calculateAnglesFor(endPos);
                     if (!endAngles) {
                         document.getElementById('error-message').textContent = '終了点が可動範囲外です。';
-                        resetScene();
-                        return;
+                        resetScene(); return;
                     }
-                    animationTween = new TWEEN.Tween(startAngles)
-                        .to(endAngles, duration)
+                    animationTween = new TWEEN.Tween(startAngles).to(endAngles, duration)
                         .easing(TWEEN.Easing.Quadratic.InOut)
-                        .onUpdate((angles) => {
-                            setJointAngles(angles);
-                            updatePath(pathLine);
-                        })
+                        .onUpdate((angles) => { setJointAngles(angles); updatePath(pathLine); })
                         .onComplete(onComplete);
                     break;
                 }
@@ -423,50 +578,36 @@
                         .onUpdate(({ t }) => {
                             const targetPoint = new THREE.Vector3();
                             lineCurve.at(t, targetPoint);
-                            if (solveIK(targetPoint)) {
-                                updatePath(pathLine);
-                            }
+                            if (solveIK(targetPoint)) { updatePath(pathLine); }
                         })
                         .onComplete(onComplete);
                     break;
                 }
                 case 'CIRC': {
-                    const colinearityCheck = new THREE.Vector3().crossVectors(
-                        new THREE.Vector3().subVectors(viaPos, startPos),
-                        new THREE.Vector3().subVectors(endPos, startPos)
-                    ).length();
-
+                    const colinearityCheck = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(viaPos, startPos), new THREE.Vector3().subVectors(endPos, startPos)).length();
                     if (colinearityCheck < 0.01) {
-                         document.getElementById('error-message').textContent = 'CIRC: 各点が直線状のためLINで動作します。';
-                         const lineCurve = new THREE.Line3(startPos, endPos);
-                         animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
+                        document.getElementById('error-message').textContent = 'CIRC: 各点が直線状のためLINで動作します。';
+                        const lineCurve = new THREE.Line3(startPos, endPos);
+                        animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
                             .onUpdate(({t}) => {
                                 const targetPoint = new THREE.Vector3();
                                 lineCurve.at(t, targetPoint);
                                 if(solveIK(targetPoint)) updatePath(pathLine);
                             }).onComplete(onComplete);
-
                     } else {
                         const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
                         animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
                             .easing(TWEEN.Easing.Sinusoidal.InOut)
                             .onUpdate(({ t }) => {
                                 const targetPoint = circleCurve.getPoint(t);
-                                if (solveIK(targetPoint)) {
-                                    updatePath(pathLine);
-                                }
+                                if (solveIK(targetPoint)) { updatePath(pathLine); }
                             })
                             .onComplete(onComplete);
                     }
                     break;
                 }
             }
-
-            if (animationTween) {
-                animationTween.start();
-            } else {
-                resetScene();
-            }
+            if (animationTween) animationTween.start(); else resetScene();
         }
 
         function createPathLine() {
@@ -478,7 +619,7 @@
         }
 
         function updatePath(line) {
-            if (!line) return;
+            if (!line || !endEffector) return;
             const currentPoints = line.geometry.getAttribute('position')?.array || [];
             const newPoint = new THREE.Vector3();
             endEffector.getWorldPosition(newPoint);
@@ -500,11 +641,11 @@
                 pathLine.material.dispose();
                 pathLine = null;
             }
+            setJogPanelEnabled(true);
             document.getElementById('start-btn').disabled = false;
             document.getElementById('update-pos-btn').disabled = false;
             document.getElementById('error-message').textContent = '';
             robot.visible = true;
-            
             resetVelocityChart();
             solveIK(startPos);
         }
@@ -523,11 +664,21 @@
             joints[1].rotation.y = -angles.j2;
             joints[2].rotation.y = angles.j3;
         }
+
+        function getJointAngles() {
+            return {
+                j1: joints[0].rotation.z,
+                j2: -joints[1].rotation.y,
+                j3: joints[2].rotation.y
+            };
+        }
         
         function calculateAnglesFor(targetWorldPos) {
             const L2 = 40;
-            const L3 = 35; // l3(29) + ee(6)
-            const j2PivotZ = 30; // baseHeight(4) + j1VisualHeight(6) + l1Height(20)
+            const l3Length = 29;
+            const tcpOffset = endEffectorDefs[currentEndEffectorType].tcpOffset;
+            const L3 = l3Length + tcpOffset;
+            const j2PivotZ = 30;
             const theta1 = Math.atan2(targetWorldPos.y, targetWorldPos.x);
             const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2);
             const h = targetWorldPos.z - j2PivotZ;
@@ -539,88 +690,105 @@
             const theta3 = Math.acos(cos_val_theta3);
             const alpha = Math.atan2(h, r);
             const beta_cos_val = (L2 ** 2 + distSq - L3 ** 2) / (2 * L2 * dist);
-             if (Math.abs(beta_cos_val) > 1) return null;
+            if (Math.abs(beta_cos_val) > 1) return null;
             const beta = Math.acos(beta_cos_val);
             const theta2 = alpha + beta;
             return { j1: theta1, j2: theta2, j3: theta3 };
+        }
+
+        // --- ジョグ関連の関数 ---
+        function handleJog(event) {
+            const btn = event.target.closest('.jog-btn');
+            if (isAnimating || !btn) return;
+
+            const type = btn.dataset.type;
+            const dir = parseInt(btn.dataset.dir);
+
+            if (type === 'joint') {
+                const jointIndex = parseInt(btn.dataset.joint);
+                if (jointIndex === 0) joints[0].rotation.z += jogStep.joint * dir;
+                else if (jointIndex === 1) joints[1].rotation.y -= jogStep.joint * dir;
+                else joints[2].rotation.y += jogStep.joint * dir;
+
+            } else if (type === 'cartesian') {
+                const axis = btn.dataset.axis;
+                const currentPos = new THREE.Vector3();
+                endEffector.getWorldPosition(currentPos);
+                const newTargetPos = currentPos.clone();
+                const delta = new THREE.Vector3();
+                delta[axis] = jogStep.cartesian * dir;
+
+                if (currentJogMode === 'base') {
+                    newTargetPos.add(delta);
+                } else { // 'tool'
+                    const toolQuaternion = new THREE.Quaternion();
+                    endEffector.getWorldQuaternion(toolQuaternion);
+                    delta.applyQuaternion(toolQuaternion);
+                    newTargetPos.add(delta);
+                }
+
+                if (!solveIK(newTargetPos)) {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = '可動範囲外です。';
+                    setTimeout(() => { if(errorMessage.textContent === '可動範囲外です。') errorMessage.textContent = ''; }, 1500);
+                }
+            }
+        }
+
+        function updateJogUI() {
+            const angles = getJointAngles();
+            document.getElementById('j1-angle-display').value = THREE.MathUtils.radToDeg(angles.j1).toFixed(1);
+            document.getElementById('j2-angle-display').value = THREE.MathUtils.radToDeg(angles.j2).toFixed(1);
+            document.getElementById('j3-angle-display').value = THREE.MathUtils.radToDeg(angles.j3).toFixed(1);
+
+            const position = new THREE.Vector3();
+            endEffector.getWorldPosition(position);
+            document.getElementById('x-pos-display').value = position.x.toFixed(1);
+            document.getElementById('y-pos-display').value = position.y.toFixed(1);
+            document.getElementById('z-pos-display').value = position.z.toFixed(1);
+        }
+
+        function setJogPanelEnabled(enabled) {
+            const panel = document.getElementById('jog-panel-container');
+            if (enabled) {
+                panel.classList.remove('disabled');
+            } else {
+                panel.classList.add('disabled');
+            }
         }
         
         function createJointVelocityChart() {
             const ctx = document.getElementById('velocity-chart').getContext('2d');
             velocityChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'J1 (θ1)',
-                        data: [],
-                        borderColor: '#ef4444',
-                        borderWidth: 1.5,
-                        pointRadius: 0
-                    }, {
-                        label: 'J2 (θ2)',
-                        data: [],
-                        borderColor: '#22c55e',
-                        borderWidth: 1.5,
-                        pointRadius: 0
-                    }, {
-                        label: 'J3 (θ3)',
-                        data: [],
-                        borderColor: '#3b82f6',
-                        borderWidth: 1.5,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    animation: false,
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            title: { display: true, text: 'Time (s)', color: '#9ca3af' },
-                            ticks: { color: '#9ca3af', maxRotation: 0, minRotation: 0 },
-                            grid: { color: 'rgba(75, 85, 99, 0.5)' }
-                        },
-                        y: {
-                            title: { display: true, text: 'Angular Velocity (rad/s)', color: '#9ca3af' },
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: 'rgba(75, 85, 99, 0.5)' }
-                        }
-                    },
-                    plugins: {
-                        legend: { labels: { color: '#f3f4f6' } }
-                    }
-                }
+                type: 'line', data: { labels: [], datasets: [
+                    { label: 'J1 (基部回転)', data: [], borderColor: '#ef4444', borderWidth: 1.5, pointRadius: 0 },
+                    { label: 'J2 (根本アーム)', data: [], borderColor: '#22c55e', borderWidth: 1.5, pointRadius: 0 },
+                    { label: 'J3 (先端アーム)', data: [], borderColor: '#3b82f6', borderWidth: 1.5, pointRadius: 0 }
+                ]},
+                options: { animation: false, scales: {
+                    x: { type: 'linear', title: { display: true, text: 'Time (s)', color: '#9ca3af' }, ticks: { color: '#9ca3af', maxRotation: 0, minRotation: 0 }, grid: { color: 'rgba(75, 85, 99, 0.5)' }},
+                    y: { title: { display: true, text: 'Angular Velocity (rad/s)', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(75, 85, 99, 0.5)' }}
+                }, plugins: { legend: { labels: { color: '#f3f4f6' } } } }
             });
         }
         
         function updateJointVelocityPlot() {
             if (!isAnimating) return;
-
             const currentTime = performance.now();
             const deltaTime = (currentTime - lastTime) / 1000.0;
-
             if (deltaTime < 1e-5) return;
-
-            const currentAngles = {
-                j1: joints[0].rotation.z,
-                j2: -joints[1].rotation.y,
-                j3: joints[2].rotation.y,
-            };
-
+            const currentAngles = getJointAngles();
             const angularVelocities = {
                 j1: (currentAngles.j1 - lastAngles.j1) / deltaTime,
                 j2: (currentAngles.j2 - lastAngles.j2) / deltaTime,
                 j3: (currentAngles.j3 - lastAngles.j3) / deltaTime,
             };
-
             const chartTime = (currentTime - animationStartTime) / 1000.0;
             velocityChart.data.labels.push(chartTime.toFixed(2));
             velocityChart.data.datasets[0].data.push(angularVelocities.j1);
             velocityChart.data.datasets[1].data.push(angularVelocities.j2);
             velocityChart.data.datasets[2].data.push(angularVelocities.j3);
-            
             velocityChart.update('none');
-
             lastAngles = { ...currentAngles };
             lastTime = currentTime;
         }
@@ -628,9 +796,7 @@
         function resetVelocityChart() {
             if (velocityChart) {
                 velocityChart.data.labels = [];
-                velocityChart.data.datasets.forEach(dataset => {
-                    dataset.data = [];
-                });
+                velocityChart.data.datasets.forEach(d => { d.data = []; });
                 velocityChart.update();
             }
         }
@@ -639,6 +805,9 @@
             requestAnimationFrame(animate);
             TWEEN.update();
             controls.update();
+            if (!isAnimating) {
+                updateJogUI();
+            }
             updateJointVelocityPlot();
             renderer.render(scene, camera);
         }

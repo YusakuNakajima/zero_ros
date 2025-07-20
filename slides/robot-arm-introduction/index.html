@@ -27,11 +27,11 @@
                 <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
             <section>
-                <h2>本スライドの内容</h2>
+                <h2>本スライドの注意点</h2>
                 <ul>
                     <ul>
-                        <li>この資料はロボットの中でもロボットアームに特化した内容で、AVRなどの移動ロボットは対象外です</li>
-                        <li>ROSと通常のロボット制御の使い分けを意識して作られています</li>
+                        <li>この資料はロボットの中でもロボットアームに特化した内容です。<br>AVRなどの移動ロボットは対象外です</li>
+                        <li>スライド内のアプリは完成度は高そうに見えますが、LLMで生成しており実際のロボット制御に使えるものではありません。</li>
                     </ul>
 
                 </ul>
@@ -155,41 +155,33 @@ finally:
                     </div>
                 </div>
             </section>
-
             <section>
-                <section>
-                    <h2>ステップ①TCP(アームの手先)</h2>
-                    <p>TCP = Tool Center Point</p>
-                    <p>ロボットにとっての手先はどこか</p>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_tcp_example1.png" style="width: 50%;">
-                            <p>TCPは乳棒の先端</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_tcp_example2.png" style="width: 50%;">
-                            <p>TCPはグリッパの中央</p>
-                        </div>
-                    </div>
-                    <p>TCPはどう使うのか？↓</p>
-                </section>
-                <section>
-                    <h2>TCPを複数登録しておくと便利</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_tcp_example1.png" style="width: 50%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>乳棒→ヘラをそれぞれTCPで登録</li>
-                                <li>動作時にTCPを切り替える</li>
-                                <li>同じ動作プログラムで乳棒もヘラも扱える</li>
-                            </ul>
-
-                        </div>
-                    </div>
-                </section>
+                <h2>アプリを開いてください</h2>
+                <p style="text-align: center; margin-bottom: 10px;">
+                    <strong>→ <a href="interactive_app/motion_viewer.html" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                </p>
+                <iframe data-src="interactive_app/motion_viewer.html" width="100%" height="200px"
+                    frameborder="0"></iframe>
+                <p>この後の説明はアプリを見ながら行います</p>
             </section>
+            <section>
+
+                <h2>ステップ①TCP(アームの手先)</h2>
+                <p>TCP = Tool Center Point</p>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <img src="media/Cone_ee.png" style="width: 100%;">
+                        <p>TCPは先端</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <img src="media/Gripper_ee.png" style="width: 100%;">
+                        <p>TCPはグリッパの中央</p>
+                    </div>
+                </div>
+                <p>TCPは複数登録して切り替えて使うのが便利</p>
+            </section>
+
             <section>
                 <section>
                     <h2>ステップ②ロボットの座標系</h2>
@@ -197,89 +189,33 @@ finally:
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/robot_pose_position.png">
-                            <h3>関節座標系</h3>
+                            <h4>関節座標系</h4>
                             <p>関節それぞれの角度を指定</p>
                         </div>
                         <div style="flex: 1;">
                             <img src="media/robot_pose_orientation.png">
-                            <h3>ベース座標系</h3>
-                            <p>ロボットの根本を基準に直交座標系で指定</p>
+                            <h4>ベース座標系</h4>
+                            <p>ロボットの根本を基準にTCPの座標を指定</p>
                         </div>
                         <div style="flex: 1;">
                             <img src="media/robot_pose_example.png">
-                            <h3>ツール座標系</h3>
-                            <p>ロボットの手先を基準に直交座標系で指定</p>
+                            <h4>ツール座標系</h4>
+                            <p>現在のTCPの座標系を基準に次のTCPの座標系を指定</p>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>ロボットの座標指定</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>ジョイント(関節)</strong>
-                                    <ul>
-                                        <li>モーターが入っている関節部</li>
-                                        <li>各軸の回転・動作を制御</li>
-                                    </ul>
-                                </li>
-                                <li><strong>リンク</strong>
-                                    <ul>
-                                        <li>ジョイントを繋ぐ部分</li>
-                                        <li>ロボットの腕の骨格</li>
-                                    </ul>
-                                </li>
-                                <li><strong>エンドエフェクタ</strong>
-                                    <ul>
-                                        <li>作業をする手先・付け替え可能</li>
-                                        <li>グリッパ、工具など用途に応じて交換</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                            <p><strong>座標系の指定方法：</strong></p>
-                            <ul>
-                                <li>関節座標系：各関節の角度を直接指定</li>
-                                <li>ベース座標系：ロボット基準の直交座標で指定</li>
-                                <li>ツール座標系：手先基準の座標で相対動作</li>
-                            </ul>
-                        </div>
+                    <h2>TCPの姿勢表現</h2>
+                    <p>姿勢(pose) = 位置 + 向きで表すことが多い</p>
+                    <div style="flex: 1;">
+                        <p style="text-align: center; margin-bottom: 10px;">
+                            <strong>→ <a href="interactive_app/pose_viewer.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                        </p>
+                        <iframe data-src="interactive_app/pose_viewer.html" width="100%" height="100%"
+                            frameborder="0"></iframe>
                     </div>
-                </section>
 
-                <section>
-                    <h2>姿勢=位置+向き</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/pose_definition.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>位置(position)</h3>
-                            <p>XYZ座標</p>
-                            <h3>向き(orientation)</h3>
-                            <p>オイラー角(XYZ軸回転)</p>
-                            <p>姿勢 = 位置 + 向き</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>余談：ロボットアームの軸の数はなぜ6が多い</h2>
-                    <p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元 3次元 6次元</p>
-                    <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
-                    <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
-                    <div style="display: flex;">
-                        <div style="flex: 1; text-align: center;">
-                            <img src="media/robot_arm_6axis_example1.png" style="width: 80%; margin-bottom: 20px;">
-                            <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6
-                            </p>
-                        </div>
-                        <div style="flex: 1; text-align: center;">
-                            <img src="media/robot_arm_6axis_example2.png" style="width: 80%; margin-bottom: 20px;">
-                            <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
-                        </div>
-                    </div>
                 </section>
             </section>
             <section>
@@ -307,15 +243,22 @@ finally:
                     <h2>PTPの詳細</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_motion_types.jpg">
+                            <img src="media/PTP.png">
+                            <div style="position: absolute; 
+                                    top: 45%; 
+                                    left: 0%; 
+                                    width: 20%; 
+                                    height: 20%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
                         </div>
                         <div style="flex: 1;">
                             <ul>
                                 <li><strong>関節空間での最短経路</strong></li>
-                                <li>各関節が同時に動き、最も速く目標に到達</li>
+                                <li>各関節が最も速く目標に到達するように動く(グラフ)</li>
                                 <li>手先の軌道は予測できない</li>
-                                <li>障害物がない環境で使用</li>
-                                <li>最も一般的な動作モード</li>
+                                <li>障害物がない環境で使用する動作モード</li>
                             </ul>
                         </div>
                     </div>
@@ -324,15 +267,14 @@ finally:
                     <h2>LINの詳細</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_motion_types.jpg">
+                            <img src="media/LIN.png">
                         </div>
                         <div style="flex: 1;">
                             <ul>
                                 <li><strong>直線動作</strong></li>
                                 <li>手先が直線的に移動</li>
-                                <li>姿勢も線形に変化</li>
                                 <li>関節の可動範囲や特異点により動きに制限</li>
-                                <li>精密作業や接触作業で使用</li>
+                                <li>部品挿入や溶接で使用</li>
                                 <li>PTPよりも時間がかかる</li>
                             </ul>
                         </div>
@@ -342,7 +284,7 @@ finally:
                     <h2>CIRCの詳細</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_motion_types.jpg">
+                            <img src="media/CIRC.png">
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -496,10 +438,28 @@ finally:
                 </section>
             </section>
             <section>
+                
                 <section>
                     <h2>ロボットアーム選定</h2>
                     <p>ロボットアームの選び方</p>
                     <p>ここでは協働ロボットを対象にしています</p>
+                </section>
+                 <section>
+                    <h2>ロボットアームの軸の数はなぜ6が多い</h2>
+                    <p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元 3次元 6次元</p>
+                    <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
+                    <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
+                    <div style="display: flex;">
+                        <div style="flex: 1; text-align: center;">
+                            <img src="media/robot_arm_6axis_example1.png" style="width: 80%; margin-bottom: 20px;">
+                            <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6
+                            </p>
+                        </div>
+                        <div style="flex: 1; text-align: center;">
+                            <img src="media/robot_arm_6axis_example2.png" style="width: 80%; margin-bottom: 20px;">
+                            <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
+                        </div>
+                    </div>
                 </section>
                 <section>
                     <h2>ざっくり４種類</h2>
