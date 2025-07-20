@@ -48,8 +48,9 @@
             max-width: 90vw;
         }
 
-        .control-panel button {
-            transition: all 0.2s ease-in-out;
+        .control-panel button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .control-panel input[type="number"] {
@@ -61,14 +62,16 @@
             -webkit-appearance: none;
             margin: 0;
         }
-
-        .legend-color-box {
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            margin-right: 0.5em;
-            vertical-align: middle;
-            border: 1px solid #4b5563;
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        input[type="radio"]:checked + .radio-label {
+            background-color: #3b82f6;
         }
     </style>
 </head>
@@ -85,14 +88,26 @@
                     <p class="text-sm font-bold text-gray-400">コントロール</p>
                     <div class="flex flex-col space-y-2 mt-2">
                         <button id="start-btn"
-                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">軌跡を比較</button>
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">アニメーション開始</button>
                         <button id="reset-btn"
                             class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">リセット</button>
                     </div>
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-gray-400">軌跡の凡例</p>
-                    <div id="info-box" class="mt-2 text-left bg-gray-800 p-3 rounded-lg h-full text-sm space-y-1">
+                    <p class="text-sm font-bold text-gray-400">動作モード選択</p>
+                    <div id="mode-selector" class="mt-2 text-left bg-gray-800 p-2 rounded-lg h-full text-sm space-y-1">
+                        <div>
+                            <input type="radio" name="animation-mode" value="PTP" id="mode-ptp" class="hidden" checked>
+                            <label for="mode-ptp" class="radio-label">PTP (関節補間)</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="animation-mode" value="LIN" id="mode-lin" class="hidden">
+                            <label for="mode-lin" class="radio-label">LIN (直線補間)</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="animation-mode" value="CIRC" id="mode-circ" class="hidden">
+                            <label for="mode-circ" class="radio-label">CIRC (円弧補間)</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -111,6 +126,17 @@
                                 value="50">
                         </div>
                     </div>
+                     <div>
+                        <h3 class="font-semibold text-yellow-400 mb-2">中間点 (X, Y, Z)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="50">
+                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="0">
+                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center"
+                                value="30">
+                        </div>
+                    </div>
                     <div>
                         <h3 class="font-semibold text-red-400 mb-2">終了点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
@@ -120,17 +146,6 @@
                                 value="-20">
                             <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center"
                                 value="10">
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-yellow-400 mb-2">中間点 (X, Y, Z)</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="50">
-                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="0">
-                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center"
-                                value="30">
                         </div>
                     </div>
                 </div>
@@ -161,26 +176,19 @@
         let robot, endEffector;
         let isAnimating = false;
         let startMarkerGroup, endMarkerGroup, viaMarkerGroup;
+        let pathLine;
 
         // --- ロボットの関節とリンク ---
         const joints = [];
-        const links = [];
 
-        // --- ターゲットと軌跡 ---
+        // --- ターゲット ---
         let startPos = new THREE.Vector3(40, 20, 50);
         let endPos = new THREE.Vector3(40, -20, 10);
         let viaPos = new THREE.Vector3(50, 0, 30);
-        let pathPTP, pathLIN, pathCIRC;
-        const pathColors = {
-            PTP: 0x3b82f6, // Blue
-            LIN: 0xef4444, // Red
-            CIRC: 0xeab308 // Yellow
-        };
         
         // --- 速度プロット用 ---
         let velocityChart;
-        // ★★★ 修正点: 状態管理用の変数を変更 ★★★
-        let lastAngles = { j1: 0, j2: 0, j3: 0 }; // 前フレームの角度を保持する変数のみにする
+        let lastAngles = { j1: 0, j2: 0, j3: 0 };
         let lastTime = 0;
         let animationStartTime = 0;
 
@@ -251,7 +259,6 @@
             l1Visual.position.z = l1Height / 2;
             l1Visual.castShadow = true;
             l1.add(l1Visual);
-            links.push(l1Visual);
             const j2 = new THREE.Group();
             j2.position.z = l1Height;
             l1.add(j2);
@@ -267,7 +274,6 @@
             l2Visual.position.x = l2Length / 2;
             l2Visual.castShadow = true;
             l2.add(l2Visual);
-            links.push(l2Visual);
             const j3 = new THREE.Group();
             j3.position.x = l2Length;
             l2.add(j3);
@@ -283,7 +289,6 @@
             l3Visual.position.x = l3Length / 2;
             l3Visual.castShadow = true;
             l3.add(l3Visual);
-            links.push(l3Visual);
             const flange = new THREE.Group();
             flange.position.x = l3Length;
             l3.add(flange);
@@ -306,26 +311,6 @@
             scene.add(group);
             const markerSphere = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshBasicMaterial({ color: color }));
             group.add(markerSphere);
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            const fontSize = 48;
-            context.font = `bold ${fontSize}px "Noto Sans JP", sans-serif`;
-            const textWidth = context.measureText(text).width;
-            canvas.width = textWidth + 20;
-            canvas.height = fontSize + 10;
-            context.font = `bold ${fontSize}px "Noto Sans JP", sans-serif`;
-            context.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(text, canvas.width / 2, canvas.height / 2);
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.needsUpdate = true;
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            const spriteScale = 12;
-            sprite.scale.set(spriteScale * (canvas.width / canvas.height), spriteScale, 1);
-            sprite.position.z = 5;
-            group.add(sprite);
             return group;
         }
 
@@ -339,16 +324,6 @@
             document.getElementById('start-btn').addEventListener('click', startComparison);
             document.getElementById('reset-btn').addEventListener('click', resetScene);
             document.getElementById('update-pos-btn').addEventListener('click', updatePositions);
-            updateInfoBox();
-        }
-
-        function updateInfoBox() {
-            const infoBox = document.getElementById('info-box');
-            infoBox.innerHTML = `
-                <div><span class="legend-color-box" style="background-color: #${pathColors.PTP.toString(16).padStart(6, '0')};"></span>PTP (関節補間)</div>
-                <div><span class="legend-color-box" style="background-color: #${pathColors.LIN.toString(16).padStart(6, '0')};"></span>LIN (直線補間)</div>
-                <div><span class="legend-color-box" style="background-color: #${pathColors.CIRC.toString(16).padStart(6, '0')};"></span>CIRC (円弧補間)</div>
-            `;
         }
 
         function updatePositions() {
@@ -370,91 +345,89 @@
                 parseFloat(document.getElementById('via-y').value),
                 parseFloat(document.getElementById('via-z').value)
             );
+            
             if (!calculateAnglesFor(newStartPos)) { errorMessage.textContent = '開始点が可動範囲外です。'; return; }
             if (!calculateAnglesFor(newEndPos)) { errorMessage.textContent = '終了点が可動範囲外です。'; return; }
             if (!calculateAnglesFor(newViaPos)) { errorMessage.textContent = '中間点が可動範囲外です。'; return; }
+            
             startPos.copy(newStartPos);
             endPos.copy(newEndPos);
             viaPos.copy(newViaPos);
+            
             startMarkerGroup.position.copy(startPos);
             endMarkerGroup.position.copy(endPos);
             viaMarkerGroup.position.copy(viaPos);
+            
             resetScene();
         }
 
         function startComparison() {
             if (isAnimating) return;
-            isAnimating = true;
+            
             resetScene();
-            pathPTP = createPathLine(pathColors.PTP);
-            pathLIN = createPathLine(pathColors.LIN);
-            pathCIRC = createPathLine(pathColors.CIRC);
+            isAnimating = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('update-pos-btn').disabled = true;
+
             robot.visible = true;
             resetVelocityChart();
             animationStartTime = performance.now();
             
-            // 速度計算の初期値を設定
-            const startAngles = calculateAnglesFor(startPos) || { j1: 0, j2: 0, j3: 0 };
-            setJointAngles(startAngles); // 初期姿勢を設定
+            const startAngles = calculateAnglesFor(startPos);
+            if (!startAngles) {
+                document.getElementById('error-message').textContent = '開始点が可動範囲外です。';
+                resetScene();
+                return;
+            }
+
+            setJointAngles(startAngles);
             lastAngles = { ...startAngles };
             lastTime = animationStartTime;
 
-            const ptpTween = createMovementTween('PTP', pathPTP);
-            const linTween = createMovementTween('LIN', pathLIN);
-            const circTween = createMovementTween('CIRC', pathCIRC);
-            ptpTween.chain(linTween);
-            linTween.chain(circTween);
-            circTween.onComplete(() => {
+            const duration = 4000;
+            let animationTween;
+
+            const selectedMode = document.querySelector('input[name="animation-mode"]:checked').value;
+            
+            // Create path line for visualization
+            pathLine = createPathLine();
+
+            const onComplete = () => {
                 isAnimating = false;
-                solveIK(endPos);
-            });
-            ptpTween.start();
-        }
-
-        function createPathLine(color) {
-            const material = new THREE.LineBasicMaterial({ color: color, linewidth: 3 });
-            const geometry = new THREE.BufferGeometry();
-            const line = new THREE.Line(geometry, material);
-            scene.add(line);
-            return line;
-        }
-
-        function createMovementTween(mode, pathLine) {
-            const duration = 2000;
-            let tween;
-            const onStartCallback = () => {
-                solveIK(startPos);
-                pathLine.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(), 3));
-                
-                // 各動作の開始時に、前のフレームの角度と時間をリセット
-                const startAngles = calculateAnglesFor(startPos) || { j1: 0, j2: 0, j3: 0 };
-                lastAngles = { ...startAngles };
-                lastTime = performance.now();
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('update-pos-btn').disabled = false;
             };
-            switch (mode) {
+
+            switch(selectedMode) {
                 case 'PTP': {
-                    const anglesObj = calculateAnglesFor(startPos);
-                    const targetAngles = calculateAnglesFor(endPos);
-                    if (!anglesObj || !targetAngles) { return new TWEEN.Tween({}); }
-                    tween = new TWEEN.Tween(anglesObj).to(targetAngles, duration)
+                    const endAngles = calculateAnglesFor(endPos);
+                    if (!endAngles) {
+                        document.getElementById('error-message').textContent = '終了点が可動範囲外です。';
+                        resetScene();
+                        return;
+                    }
+                    animationTween = new TWEEN.Tween(startAngles)
+                        .to(endAngles, duration)
                         .easing(TWEEN.Easing.Quadratic.InOut)
-                        .onStart(onStartCallback)
-                        .onUpdate(() => {
-                            setJointAngles(anglesObj);
+                        .onUpdate((angles) => {
+                            setJointAngles(angles);
                             updatePath(pathLine);
-                        });
+                        })
+                        .onComplete(onComplete);
                     break;
                 }
                 case 'LIN': {
                     const lineCurve = new THREE.Line3(startPos, endPos);
-                    tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
+                    animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
                         .easing(TWEEN.Easing.Sinusoidal.InOut)
-                        .onStart(onStartCallback)
                         .onUpdate(({ t }) => {
                             const targetPoint = new THREE.Vector3();
                             lineCurve.at(t, targetPoint);
-                            if (solveIK(targetPoint)) { updatePath(pathLine); }
-                        });
+                            if (solveIK(targetPoint)) {
+                                updatePath(pathLine);
+                            }
+                        })
+                        .onComplete(onComplete);
                     break;
                 }
                 case 'CIRC': {
@@ -462,29 +435,58 @@
                         new THREE.Vector3().subVectors(viaPos, startPos),
                         new THREE.Vector3().subVectors(endPos, startPos)
                     ).length();
+
                     if (colinearityCheck < 0.01) {
-                        const lineCurve = new THREE.Line3(startPos, endPos);
-                        tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
-                            .onStart(onStartCallback)
-                            .onUpdate(({ t }) => {
+                         document.getElementById('error-message').textContent = 'CIRC: 各点が直線状のためLINで動作します。';
+                         const lineCurve = new THREE.Line3(startPos, endPos);
+                         animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
+                            .onUpdate(({t}) => {
                                 const targetPoint = new THREE.Vector3();
                                 lineCurve.at(t, targetPoint);
-                                if (solveIK(targetPoint)) updatePath(pathLine);
-                            });
+                                if(solveIK(targetPoint)) updatePath(pathLine);
+                            }).onComplete(onComplete);
+
                     } else {
-                        const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos], false, 'catmullrom', 0.5);
-                        tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
+                        const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
+                        animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
                             .easing(TWEEN.Easing.Sinusoidal.InOut)
-                            .onStart(onStartCallback)
                             .onUpdate(({ t }) => {
                                 const targetPoint = circleCurve.getPoint(t);
-                                if (solveIK(targetPoint)) { updatePath(pathLine); }
-                            });
+                                if (solveIK(targetPoint)) {
+                                    updatePath(pathLine);
+                                }
+                            })
+                            .onComplete(onComplete);
                     }
                     break;
                 }
             }
-            return tween;
+
+            if (animationTween) {
+                animationTween.start();
+            } else {
+                resetScene();
+            }
+        }
+
+        function createPathLine() {
+            const material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 3 });
+            const geometry = new THREE.BufferGeometry();
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            return line;
+        }
+
+        function updatePath(line) {
+            if (!line) return;
+            const currentPoints = line.geometry.getAttribute('position')?.array || [];
+            const newPoint = new THREE.Vector3();
+            endEffector.getWorldPosition(newPoint);
+            const newPoints = new Float32Array(currentPoints.length + 3);
+            newPoints.set(currentPoints);
+            newPoints.set([newPoint.x, newPoint.y, newPoint.z], currentPoints.length);
+            line.geometry.setAttribute('position', new THREE.BufferAttribute(newPoints, 3));
+            line.geometry.attributes.position.needsUpdate = true;
         }
 
         function resetScene() {
@@ -492,21 +494,19 @@
                 TWEEN.removeAll();
                 isAnimating = false;
             }
+            if (pathLine) {
+                scene.remove(pathLine);
+                pathLine.geometry.dispose();
+                pathLine.material.dispose();
+                pathLine = null;
+            }
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('update-pos-btn').disabled = false;
+            document.getElementById('error-message').textContent = '';
             robot.visible = true;
-            resetPaths();
+            
             resetVelocityChart();
             solveIK(startPos);
-        }
-
-        function resetPaths() {
-            [pathPTP, pathLIN, pathCIRC].forEach(path => {
-                if (path) {
-                    scene.remove(path);
-                    path.geometry.dispose();
-                    path.material.dispose();
-                }
-            });
-            pathPTP = pathLIN = pathCIRC = null;
         }
 
         function solveIK(target) {
@@ -518,7 +518,6 @@
             return false;
         }
         
-        // ★★★ 修正点: 3Dモデルの角度更新に専念させる ★★★
         function setJointAngles(angles) {
             joints[0].rotation.z = angles.j1;
             joints[1].rotation.y = -angles.j2;
@@ -536,24 +535,14 @@
             const dist = Math.sqrt(distSq);
             if (dist > L2 + L3 || dist < Math.abs(L2 - L3)) { return null; }
             const cos_val_theta3 = (distSq - L2 ** 2 - L3 ** 2) / (2 * L2 * L3);
-            const theta3 = Math.acos(Math.max(-1.0, Math.min(1.0, cos_val_theta3)));
+            if (Math.abs(cos_val_theta3) > 1) return null;
+            const theta3 = Math.acos(cos_val_theta3);
             const alpha = Math.atan2(h, r);
             const beta_cos_val = (L2 ** 2 + distSq - L3 ** 2) / (2 * L2 * dist);
-            const beta = Math.acos(Math.max(-1.0, Math.min(1.0, beta_cos_val)));
+             if (Math.abs(beta_cos_val) > 1) return null;
+            const beta = Math.acos(beta_cos_val);
             const theta2 = alpha + beta;
             return { j1: theta1, j2: theta2, j3: theta3 };
-        }
-
-        function updatePath(pathLine) {
-            if (!pathLine) return;
-            const currentPoints = pathLine.geometry.getAttribute('position')?.array || [];
-            const newPoint = new THREE.Vector3();
-            endEffector.getWorldPosition(newPoint);
-            const newPoints = new Float32Array(currentPoints.length + 3);
-            newPoints.set(currentPoints);
-            newPoints.set([newPoint.x, newPoint.y, newPoint.z], currentPoints.length);
-            pathLine.geometry.setAttribute('position', new THREE.BufferAttribute(newPoints, 3));
-            pathLine.geometry.attributes.position.needsUpdate = true;
         }
         
         function createJointVelocityChart() {
@@ -604,7 +593,6 @@
             });
         }
         
-        // ★★★ 修正点: 3Dモデルから直接角度を読み取って計算するように変更 ★★★
         function updateJointVelocityPlot() {
             if (!isAnimating) return;
 
@@ -613,14 +601,12 @@
 
             if (deltaTime < 1e-5) return;
 
-            // 3Dモデルのjointsオブジェクトから直接、現在の角度を取得
             const currentAngles = {
                 j1: joints[0].rotation.z,
-                j2: -joints[1].rotation.y, // モデル作成時の回転方向を考慮
+                j2: -joints[1].rotation.y,
                 j3: joints[2].rotation.y,
             };
 
-            // 取得した現在の角度と、前フレームの角度から角速度を計算
             const angularVelocities = {
                 j1: (currentAngles.j1 - lastAngles.j1) / deltaTime,
                 j2: (currentAngles.j2 - lastAngles.j2) / deltaTime,
@@ -633,22 +619,8 @@
             velocityChart.data.datasets[1].data.push(angularVelocities.j2);
             velocityChart.data.datasets[2].data.push(angularVelocities.j3);
             
-            // Y軸の範囲を動的に調整
-            const allData = [
-                ...velocityChart.data.datasets[0].data,
-                ...velocityChart.data.datasets[1].data,
-                ...velocityChart.data.datasets[2].data
-            ].filter(v => isFinite(v));
-            
-            if(allData.length > 0) {
-                const maxV = Math.max(...allData.map(Math.abs));
-                velocityChart.options.scales.y.min = -maxV * 1.1;
-                velocityChart.options.scales.y.max = maxV * 1.1;
-            }
+            velocityChart.update('none');
 
-            velocityChart.update();
-
-            // 次のフレームのために、現在の角度を「前フレームの角度」として保存
             lastAngles = { ...currentAngles };
             lastTime = currentTime;
         }
@@ -659,8 +631,6 @@
                 velocityChart.data.datasets.forEach(dataset => {
                     dataset.data = [];
                 });
-                velocityChart.options.scales.y.min = undefined;
-                velocityChart.options.scales.y.max = undefined;
                 velocityChart.update();
             }
         }
