@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボット動作軌跡 比較シミュレーター (ジョグ機能追加)</title>
+    <title>ロボット動作軌跡 比較シミュレーター (全軌道比較モード追加)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,6 +129,10 @@
                         <div>
                             <input type="radio" name="animation-mode" value="CIRC" id="mode-circ" class="hidden">
                             <label for="mode-circ" class="radio-label">CIRC (円弧補間)</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="animation-mode" value="COMP" id="mode-comp" class="hidden">
+                            <label for="mode-comp" class="radio-label font-bold text-yellow-300">全軌道比較</label>
                         </div>
                     </div>
                 </div>
@@ -265,7 +269,7 @@
         let robot, flange;
         let isAnimating = false;
         let startMarkerGroup, endMarkerGroup, viaMarkerGroup;
-        let pathLine;
+        let pathLines = [];
 
         // --- ロボットの関節とリンク ---
         const joints = [];
@@ -282,8 +286,8 @@
         // --- ジョグ関連 ---
         let currentJogMode = 'joint';
         const jogStep = {
-            joint: THREE.MathUtils.degToRad(1.0), // 1度ずつ
-            cartesian: 2.0 // 2mmずつ
+            joint: THREE.MathUtils.degToRad(1.0),
+            cartesian: 2.0
         };
 
         // --- ターゲット ---
@@ -302,6 +306,12 @@
             start: 0xf472b6,
             end: 0xfb923c,
             via: 0x2dd4bf
+        };
+        const pathColors = {
+            ptp: 0xf472b6, // Pink
+            lin: 0xfb923c, // Orange
+            circ: 0x2dd4bf, // Teal
+            default: 0xffffff
         };
 
         // --- 初期化処理 ---
@@ -402,8 +412,6 @@
             flange = new THREE.Group();
             flange.position.x = l3Length;
             l3.add(flange);
-
-            // エンドエフェクタA (コーン)
             endEffectorGroupA = new THREE.Group();
             const eeA_visual = new THREE.Mesh(new THREE.ConeGeometry(3, endEffectorDefs.A.tcpOffset, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c }));
             eeA_visual.rotation.z = -Math.PI / 2;
@@ -412,11 +420,10 @@
             endEffectorGroupA.add(eeA_visual);
             const tcpA = new THREE.Group();
             tcpA.position.x = endEffectorDefs.A.tcpOffset;
+            tcpA.rotation.y = -Math.PI / 2;
             endEffectorGroupA.add(tcpA);
             tcpA.add(new THREE.AxesHelper(5));
             endEffectorGroupA.tcp = tcpA;
-
-            // エンドエフェクタB (グリッパー)
             endEffectorGroupB = new THREE.Group();
             const gripperBase = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 5), new THREE.MeshStandardMaterial({ color: 0x6b7280 }));
             gripperBase.position.x = 2;
@@ -429,15 +436,14 @@
             endEffectorGroupB.add(finger2);
             const tcpB = new THREE.Group();
             tcpB.position.x = endEffectorDefs.B.tcpOffset;
+            tcpB.rotation.y = -Math.PI / 2;
             endEffectorGroupB.add(tcpB);
             tcpB.add(new THREE.AxesHelper(5));
             endEffectorGroupB.tcp = tcpB;
         }
 
         function switchEndEffector(type) {
-            if (flange.children.length > 0) {
-                flange.remove(flange.children[0]);
-            }
+            if (flange.children.length > 0) flange.remove(flange.children[0]);
             if (type === 'A') {
                 flange.add(endEffectorGroupA);
                 endEffector = endEffectorGroupA.tcp;
@@ -467,7 +473,6 @@
             document.getElementById('start-btn').addEventListener('click', startComparison);
             document.getElementById('reset-btn').addEventListener('click', resetScene);
             document.getElementById('update-pos-btn').addEventListener('click', updatePositions);
-            
             document.querySelectorAll('input[name="end-effector-type"]').forEach(radio => {
                 radio.addEventListener('change', (event) => {
                     if (isAnimating) return;
@@ -475,8 +480,6 @@
                     resetScene();
                 });
             });
-
-            // ジョグUIのセットアップ
             document.querySelectorAll('input[name="jog-mode"]').forEach(radio => {
                 radio.addEventListener('change', (event) => {
                     currentJogMode = event.target.value;
@@ -491,34 +494,18 @@
             if (isAnimating) return;
             const errorMessage = document.getElementById('error-message');
             errorMessage.textContent = '';
-            const newStartPos = new THREE.Vector3(
-                parseFloat(document.getElementById('start-x').value),
-                parseFloat(document.getElementById('start-y').value),
-                parseFloat(document.getElementById('start-z').value)
-            );
-            const newEndPos = new THREE.Vector3(
-                parseFloat(document.getElementById('end-x').value),
-                parseFloat(document.getElementById('end-y').value),
-                parseFloat(document.getElementById('end-z').value)
-            );
-            const newViaPos = new THREE.Vector3(
-                parseFloat(document.getElementById('via-x').value),
-                parseFloat(document.getElementById('via-y').value),
-                parseFloat(document.getElementById('via-z').value)
-            );
-            
+            const newStartPos = new THREE.Vector3( parseFloat(document.getElementById('start-x').value), parseFloat(document.getElementById('start-y').value), parseFloat(document.getElementById('start-z').value) );
+            const newEndPos = new THREE.Vector3( parseFloat(document.getElementById('end-x').value), parseFloat(document.getElementById('end-y').value), parseFloat(document.getElementById('end-z').value) );
+            const newViaPos = new THREE.Vector3( parseFloat(document.getElementById('via-x').value), parseFloat(document.getElementById('via-y').value), parseFloat(document.getElementById('via-z').value) );
             if (!calculateAnglesFor(newStartPos)) { errorMessage.textContent = '開始点が可動範囲外です。'; return; }
             if (!calculateAnglesFor(newEndPos)) { errorMessage.textContent = '終了点が可動範囲外です。'; return; }
             if (!calculateAnglesFor(newViaPos)) { errorMessage.textContent = '中間点が可動範囲外です。'; return; }
-            
             startPos.copy(newStartPos);
             endPos.copy(newEndPos);
             viaPos.copy(newViaPos);
-            
             startMarkerGroup.position.copy(startPos);
             endMarkerGroup.position.copy(endPos);
             viaMarkerGroup.position.copy(viaPos);
-            
             resetScene();
         }
 
@@ -538,19 +525,16 @@
             const startAngles = calculateAnglesFor(startPos);
             if (!startAngles) {
                 document.getElementById('error-message').textContent = '開始点が可動範囲外です。';
-                resetScene();
-                return;
+                resetScene(); return;
             }
 
             setJointAngles(startAngles);
             lastAngles = { ...startAngles };
             lastTime = animationStartTime;
 
-            const duration = 4000;
-            let animationTween;
+            const duration = 2500;
             const selectedMode = document.querySelector('input[name="animation-mode"]:checked').value;
-            pathLine = createPathLine();
-
+            
             const onComplete = () => {
                 isAnimating = false;
                 setJogPanelEnabled(true);
@@ -560,61 +544,83 @@
 
             switch(selectedMode) {
                 case 'PTP': {
+                    const pathLine = createPathLine(pathColors.ptp);
                     const endAngles = calculateAnglesFor(endPos);
-                    if (!endAngles) {
-                        document.getElementById('error-message').textContent = '終了点が可動範囲外です。';
-                        resetScene(); return;
-                    }
-                    animationTween = new TWEEN.Tween(startAngles).to(endAngles, duration)
-                        .easing(TWEEN.Easing.Quadratic.InOut)
-                        .onUpdate((angles) => { setJointAngles(angles); updatePath(pathLine); })
-                        .onComplete(onComplete);
+                    if (!endAngles) { document.getElementById('error-message').textContent = '終了点が可動範囲外です。'; resetScene(); return; }
+                    new TWEEN.Tween(startAngles).to(endAngles, duration).easing(TWEEN.Easing.Quadratic.InOut)
+                        .onUpdate((angles) => { setJointAngles(angles); updatePath(pathLine); }).onComplete(onComplete).start();
                     break;
                 }
                 case 'LIN': {
+                    const pathLine = createPathLine(pathColors.lin);
                     const lineCurve = new THREE.Line3(startPos, endPos);
-                    animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
-                        .easing(TWEEN.Easing.Sinusoidal.InOut)
+                    new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
                         .onUpdate(({ t }) => {
                             const targetPoint = new THREE.Vector3();
                             lineCurve.at(t, targetPoint);
                             if (solveIK(targetPoint)) { updatePath(pathLine); }
-                        })
-                        .onComplete(onComplete);
+                        }).onComplete(onComplete).start();
                     break;
                 }
                 case 'CIRC': {
+                    const pathLine = createPathLine(pathColors.circ);
                     const colinearityCheck = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(viaPos, startPos), new THREE.Vector3().subVectors(endPos, startPos)).length();
                     if (colinearityCheck < 0.01) {
                         document.getElementById('error-message').textContent = 'CIRC: 各点が直線状のためLINで動作します。';
                         const lineCurve = new THREE.Line3(startPos, endPos);
-                        animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
-                            .onUpdate(({t}) => {
-                                const targetPoint = new THREE.Vector3();
-                                lineCurve.at(t, targetPoint);
-                                if(solveIK(targetPoint)) updatePath(pathLine);
-                            }).onComplete(onComplete);
+                        new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).onUpdate(({t}) => {
+                            const targetPoint = new THREE.Vector3(); lineCurve.at(t, targetPoint);
+                            if(solveIK(targetPoint)) updatePath(pathLine);
+                        }).onComplete(onComplete).start();
                     } else {
                         const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
-                        animationTween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration)
-                            .easing(TWEEN.Easing.Sinusoidal.InOut)
+                        new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
                             .onUpdate(({ t }) => {
                                 const targetPoint = circleCurve.getPoint(t);
                                 if (solveIK(targetPoint)) { updatePath(pathLine); }
-                            })
-                            .onComplete(onComplete);
+                            }).onComplete(onComplete).start();
                     }
                     break;
                 }
+                case 'COMP': {
+                    const ptpPath = createPathLine(pathColors.ptp);
+                    const linPath = createPathLine(pathColors.lin);
+                    const circPath = createPathLine(pathColors.circ);
+                    
+                    const endAngles = calculateAnglesFor(endPos);
+                    if (!startAngles || !endAngles) { document.getElementById('error-message').textContent = '開始点または終了点が可動範囲外です。'; resetScene(); return; }
+
+                    const circTween = new TWEEN.Tween({t: 0}).to({t: 1}, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
+                        .onStart(() => solveIK(startPos))
+                        .onUpdate(({t}) => {
+                            const curve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
+                            if (solveIK(curve.getPoint(t))) updatePath(circPath);
+                        }).onComplete(onComplete);
+
+                    const linTween = new TWEEN.Tween({t: 0}).to({t: 1}, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
+                        .onStart(() => solveIK(startPos))
+                        .onUpdate(({t}) => {
+                            const curve = new THREE.Line3(startPos, endPos);
+                            if (solveIK(curve.at(t, new THREE.Vector3()))) updatePath(linPath);
+                        }).chain(circTween);
+                    
+                    const ptpTween = new TWEEN.Tween(startAngles).to(endAngles, duration).easing(TWEEN.Easing.Quadratic.InOut)
+                        .onStart(() => setJointAngles(startAngles))
+                        .onUpdate((angles) => { setJointAngles(angles); updatePath(ptpPath); })
+                        .chain(linTween);
+
+                    ptpTween.start();
+                    break;
+                }
             }
-            if (animationTween) animationTween.start(); else resetScene();
         }
 
-        function createPathLine() {
-            const material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 3 });
+        function createPathLine(color = pathColors.default) {
+            const material = new THREE.LineBasicMaterial({ color: color, linewidth: 3 });
             const geometry = new THREE.BufferGeometry();
             const line = new THREE.Line(geometry, material);
             scene.add(line);
+            pathLines.push(line);
             return line;
         }
 
@@ -631,16 +637,13 @@
         }
 
         function resetScene() {
-            if (isAnimating) {
-                TWEEN.removeAll();
-                isAnimating = false;
-            }
-            if (pathLine) {
-                scene.remove(pathLine);
-                pathLine.geometry.dispose();
-                pathLine.material.dispose();
-                pathLine = null;
-            }
+            if (isAnimating) { TWEEN.removeAll(); isAnimating = false; }
+            pathLines.forEach(line => {
+                scene.remove(line);
+                line.geometry.dispose();
+                line.material.dispose();
+            });
+            pathLines = [];
             setJogPanelEnabled(true);
             document.getElementById('start-btn').disabled = false;
             document.getElementById('update-pos-btn').disabled = false;
@@ -652,10 +655,7 @@
 
         function solveIK(target) {
             const angles = calculateAnglesFor(target);
-            if (angles) {
-                setJointAngles(angles);
-                return true;
-            }
+            if (angles) { setJointAngles(angles); return true; }
             return false;
         }
         
@@ -666,67 +666,45 @@
         }
 
         function getJointAngles() {
-            return {
-                j1: joints[0].rotation.z,
-                j2: -joints[1].rotation.y,
-                j3: joints[2].rotation.y
-            };
+            return { j1: joints[0].rotation.z, j2: -joints[1].rotation.y, j3: joints[2].rotation.y };
         }
         
         function calculateAnglesFor(targetWorldPos) {
-            const L2 = 40;
-            const l3Length = 29;
-            const tcpOffset = endEffectorDefs[currentEndEffectorType].tcpOffset;
-            const L3 = l3Length + tcpOffset;
-            const j2PivotZ = 30;
+            const L2 = 40, l3Length = 29, tcpOffset = endEffectorDefs[currentEndEffectorType].tcpOffset, L3 = l3Length + tcpOffset, j2PivotZ = 30;
             const theta1 = Math.atan2(targetWorldPos.y, targetWorldPos.x);
-            const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2);
-            const h = targetWorldPos.z - j2PivotZ;
-            const distSq = r ** 2 + h ** 2;
-            const dist = Math.sqrt(distSq);
-            if (dist > L2 + L3 || dist < Math.abs(L2 - L3)) { return null; }
+            const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2), h = targetWorldPos.z - j2PivotZ, distSq = r ** 2 + h ** 2, dist = Math.sqrt(distSq);
+            if (dist > L2 + L3 || dist < Math.abs(L2 - L3)) return null;
             const cos_val_theta3 = (distSq - L2 ** 2 - L3 ** 2) / (2 * L2 * L3);
             if (Math.abs(cos_val_theta3) > 1) return null;
-            const theta3 = Math.acos(cos_val_theta3);
-            const alpha = Math.atan2(h, r);
+            const theta3 = Math.acos(cos_val_theta3), alpha = Math.atan2(h, r);
             const beta_cos_val = (L2 ** 2 + distSq - L3 ** 2) / (2 * L2 * dist);
             if (Math.abs(beta_cos_val) > 1) return null;
             const beta = Math.acos(beta_cos_val);
-            const theta2 = alpha + beta;
-            return { j1: theta1, j2: theta2, j3: theta3 };
+            return { j1: theta1, j2: alpha + beta, j3: theta3 };
         }
 
-        // --- ジョグ関連の関数 ---
         function handleJog(event) {
             const btn = event.target.closest('.jog-btn');
             if (isAnimating || !btn) return;
-
-            const type = btn.dataset.type;
-            const dir = parseInt(btn.dataset.dir);
-
+            const type = btn.dataset.type, dir = parseInt(btn.dataset.dir);
             if (type === 'joint') {
                 const jointIndex = parseInt(btn.dataset.joint);
                 if (jointIndex === 0) joints[0].rotation.z += jogStep.joint * dir;
                 else if (jointIndex === 1) joints[1].rotation.y -= jogStep.joint * dir;
                 else joints[2].rotation.y += jogStep.joint * dir;
-
             } else if (type === 'cartesian') {
-                const axis = btn.dataset.axis;
-                const currentPos = new THREE.Vector3();
+                const axis = btn.dataset.axis, currentPos = new THREE.Vector3(), newTargetPos = currentPos.clone();
                 endEffector.getWorldPosition(currentPos);
-                const newTargetPos = currentPos.clone();
-                const delta = new THREE.Vector3();
-                delta[axis] = jogStep.cartesian * dir;
-
                 if (currentJogMode === 'base') {
+                    const delta = new THREE.Vector3(); delta[axis] = jogStep.cartesian * dir;
                     newTargetPos.add(delta);
-                } else { // 'tool'
-                    const toolQuaternion = new THREE.Quaternion();
+                } else {
+                    const toolQuaternion = new THREE.Quaternion(), moveVector = new THREE.Vector3();
                     endEffector.getWorldQuaternion(toolQuaternion);
-                    delta.applyQuaternion(toolQuaternion);
-                    newTargetPos.add(delta);
+                    moveVector[axis] = 1;
+                    moveVector.applyQuaternion(toolQuaternion).multiplyScalar(jogStep.cartesian * dir);
+                    newTargetPos.add(moveVector);
                 }
-
                 if (!solveIK(newTargetPos)) {
                     const errorMessage = document.getElementById('error-message');
                     errorMessage.textContent = '可動範囲外です。';
@@ -740,7 +718,6 @@
             document.getElementById('j1-angle-display').value = THREE.MathUtils.radToDeg(angles.j1).toFixed(1);
             document.getElementById('j2-angle-display').value = THREE.MathUtils.radToDeg(angles.j2).toFixed(1);
             document.getElementById('j3-angle-display').value = THREE.MathUtils.radToDeg(angles.j3).toFixed(1);
-
             const position = new THREE.Vector3();
             endEffector.getWorldPosition(position);
             document.getElementById('x-pos-display').value = position.x.toFixed(1);
@@ -750,11 +727,7 @@
 
         function setJogPanelEnabled(enabled) {
             const panel = document.getElementById('jog-panel-container');
-            if (enabled) {
-                panel.classList.remove('disabled');
-            } else {
-                panel.classList.add('disabled');
-            }
+            if (enabled) panel.classList.remove('disabled'); else panel.classList.add('disabled');
         }
         
         function createJointVelocityChart() {
@@ -805,9 +778,7 @@
             requestAnimationFrame(animate);
             TWEEN.update();
             controls.update();
-            if (!isAnimating) {
-                updateJogUI();
-            }
+            if (!isAnimating) updateJogUI();
             updateJointVelocityPlot();
             renderer.render(scene, camera);
         }
