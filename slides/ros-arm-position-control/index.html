@@ -43,7 +43,7 @@
             <!-- タイトルスライド -->
             <section data-background-image="media/moveit.png" data-background-opacity="0.5">
                 <h1>ゼロからのROS入門</h1>
-                <h2>~アーム位置制御とモーションプランニング~</h2>
+                <h2>位置制御とモーションプランニング</h2>
                 <p>大阪大学 中島優作</p>
                 <br>
                 <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
@@ -51,26 +51,30 @@
 
             <!-- ロボット制御の書籍 -->
             <section>
-                <h2>ロボット制御の書籍</h2>
-                <div style="display: flex; align-items: center; gap: 2em;">
-                    <div style="flex: 1;">
-                        <img src="media/実践ロボット制御.jpg" alt="実践ロボット制御" style="width: 100%;">
+                <h2>ロボット制御参考資料</h2>
+                <ol>
+                    <div style="display: flex; align-items: center;">
+                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>イラストが豊富で分かりやすいながらも基礎的な数式を扱っていて最初に読むのにちょうど良い<br>最も基本の位置制御まで扱っている</p>
                     </div>
-                    <div style="flex: 1;">
-                        <h3>実践ロボット制御</h3>
-                        <p>教科書「ロボット制御基礎論」を現在版にブラッシュアップ<br>
-                            理論的な詳しさと実装面までの手引きが充実している</p>
-                        <br>
-                        <h3>イラストで学ぶロボット工学</h3>
-                        <p>イラストが豊富で分かりやすいながらも基礎的な数式を扱っていて最初に読むのにちょうど良い</p>
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <img src="media/実践ロボット制御.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>教科書「ロボット制御基礎論」を現在版にブラッシュアップ、理論的な詳しさと実装面までの手引きが充実している</p>
                     </div>
-                </div>
+
+                </ol>
             </section>
 
             <!-- このスライドの目的 -->
-            <section>
-                <h2>このスライドの目的</h2>
-                <p>メーカーが用意した制御では難しいロボットアームの軌道制御をするための資料になります</p>
+             <section>
+                <h2>本スライドの注意点</h2>
+                <ul>
+                    <ul>
+                        <li>メーカーが用意した制御では難しいロボットアームの軌道制御をするための資料です</li>
+                        <li>ここでは位置制御、速度制御の基礎を扱います(実践ロボット制御の第一部に相当)</li>
+                        <li>スライド内のアプリは完成度は高そうに見えますが、LLMで生成しており実際のロボット制御に使えるものではありません。</li>
+                    </ul>
+                </ul>
             </section>
 
             <!-- アームの軌道制御とは -->
@@ -78,14 +82,16 @@
                 <h2>アームの軌道制御とは、位置制御との違い</h2>
                 <div style="display: flex; align-items: center; gap: 2em;">
                     <div style="flex: 1;">
-                        <img src="media/Robotic_powder_grinding.gif" alt="軌道制御の例" style="width: 100%;">
+                        <iframe src="interactive_app/waypoints_and_trajectory.html" width="100%" height="400" frameborder="0"></iframe>
                     </div>
                     <div style="flex: 1;">
-                        <h3>位置制御（メーカー制御）</h3>
-                        <p>基本的にwaypointsごとに動きを止める<br>
-                            連続的に動こうとするとガタガタした動きになる</p>
+                        <h4>位置制御（メーカー制御）</h4>
+                        <ul>
+                            <li>基本的にwaypointsごとに動きを止める</li>
+                            <li>連続的に動こうとするとガタガタした動きになる</li>
+                        </ul>
 
-                        <h3>軌道制御</h3>
+                        <h4>軌道制御</h4>
                         <p>動きを止めないので、非常に滑らかな動きができる<br>
                             粉体粉砕などの連続的なタスクに有効</p>
                     </div>
@@ -349,9 +355,11 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/gimbal_lock.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                                <a href="interactive_app/gimbal_lock.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
-                            <iframe src="interactive_app/gimbal_lock.html" width="100%" height="400" frameborder="0"></iframe>
+                            <iframe src="interactive_app/gimbal_lock.html" width="100%" height="400"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
@@ -406,9 +414,11 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/euler_quat.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                                <a href="interactive_app/euler_quat.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
-                            <iframe src="interactive_app/euler_quat.html" width="100%" height="400" frameborder="0"></iframe>
+                            <iframe src="interactive_app/euler_quat.html" width="100%" height="400"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
@@ -595,7 +605,8 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/IK.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                                <a href="interactive_app/IK.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
                             <iframe src="interactive_app/IK.html" width="100%" height="400" frameborder="0"></iframe>
                         </div>
@@ -761,9 +772,11 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/jacobian.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                                <a href="interactive_app/jacobian.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
-                            <iframe src="interactive_app/jacobian.html" width="100%" height="400" frameborder="0"></iframe>
+                            <iframe src="interactive_app/jacobian.html" width="100%" height="400"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
                             <h3>ヤコビアンとは</h3>
@@ -788,9 +801,11 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/jacobian_inverse_ik.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                                <a href="interactive_app/jacobian_inverse_ik.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
-                            <iframe src="interactive_app/jacobian_inverse_ik.html" width="100%" height="400" frameborder="0"></iframe>
+                            <iframe src="interactive_app/jacobian_inverse_ik.html" width="100%" height="400"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
                             <h3>逆ヤコビアンの計算</h3>
