@@ -93,7 +93,7 @@
                 <div>
                     <p class="text-sm font-bold text-gray-400">軌跡の凡例</p>
                     <div id="info-box" class="mt-2 text-left bg-gray-800 p-3 rounded-lg h-full text-sm space-y-1">
-                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -179,9 +179,8 @@
         
         // --- 速度プロット用 ---
         let velocityChart;
-        // ★★★ 修正点: 状態管理用の変数を追加・変更 ★★★
-        let currentJointAngles = { j1: 0, j2: 0, j3: 0 }; // 現在の角度を確実に保持する
-        let lastAngles = { j1: 0, j2: 0, j3: 0 };       // 前フレームの角度を保持する
+        // ★★★ 修正点: 状態管理用の変数を変更 ★★★
+        let lastAngles = { j1: 0, j2: 0, j3: 0 }; // 前フレームの角度を保持する変数のみにする
         let lastTime = 0;
         let animationStartTime = 0;
 
@@ -396,7 +395,7 @@
             
             // 速度計算の初期値を設定
             const startAngles = calculateAnglesFor(startPos) || { j1: 0, j2: 0, j3: 0 };
-            currentJointAngles = { ...startAngles };
+            setJointAngles(startAngles); // 初期姿勢を設定
             lastAngles = { ...startAngles };
             lastTime = animationStartTime;
 
@@ -427,9 +426,8 @@
                 solveIK(startPos);
                 pathLine.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(), 3));
                 
-                // 各動作の開始時に、前のフレームの角度をリセット
+                // 各動作の開始時に、前のフレームの角度と時間をリセット
                 const startAngles = calculateAnglesFor(startPos) || { j1: 0, j2: 0, j3: 0 };
-                currentJointAngles = { ...startAngles };
                 lastAngles = { ...startAngles };
                 lastTime = performance.now();
             };
@@ -519,21 +517,18 @@
             }
             return false;
         }
-
-        // ★★★ 修正点: 角度を更新する際に、必ずグローバル変数にも保存する ★★★
+        
+        // ★★★ 修正点: 3Dモデルの角度更新に専念させる ★★★
         function setJointAngles(angles) {
-            // 3Dモデルの角度を更新
             joints[0].rotation.z = angles.j1;
             joints[1].rotation.y = -angles.j2;
             joints[2].rotation.y = angles.j3;
-            // 状態管理用の変数も確実に更新
-            currentJointAngles = { ...angles };
         }
         
         function calculateAnglesFor(targetWorldPos) {
             const L2 = 40;
-            const L3 = 35; 
-            const j2PivotZ = 30;
+            const L3 = 35; // l3(29) + ee(6)
+            const j2PivotZ = 30; // baseHeight(4) + j1VisualHeight(6) + l1Height(20)
             const theta1 = Math.atan2(targetWorldPos.y, targetWorldPos.x);
             const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2);
             const h = targetWorldPos.z - j2PivotZ;
@@ -609,7 +604,7 @@
             });
         }
         
-        // ★★★ 修正点: 状態変数を使って計算するように変更 ★★★
+        // ★★★ 修正点: 3Dモデルから直接角度を読み取って計算するように変更 ★★★
         function updateJointVelocityPlot() {
             if (!isAnimating) return;
 
@@ -618,11 +613,18 @@
 
             if (deltaTime < 1e-5) return;
 
-            // 信頼できる状態変数から角速度を計算
+            // 3Dモデルのjointsオブジェクトから直接、現在の角度を取得
+            const currentAngles = {
+                j1: joints[0].rotation.z,
+                j2: -joints[1].rotation.y, // モデル作成時の回転方向を考慮
+                j3: joints[2].rotation.y,
+            };
+
+            // 取得した現在の角度と、前フレームの角度から角速度を計算
             const angularVelocities = {
-                j1: (currentJointAngles.j1 - lastAngles.j1) / deltaTime,
-                j2: (currentJointAngles.j2 - lastAngles.j2) / deltaTime,
-                j3: (currentJointAngles.j3 - lastAngles.j3) / deltaTime,
+                j1: (currentAngles.j1 - lastAngles.j1) / deltaTime,
+                j2: (currentAngles.j2 - lastAngles.j2) / deltaTime,
+                j3: (currentAngles.j3 - lastAngles.j3) / deltaTime,
             };
 
             const chartTime = (currentTime - animationStartTime) / 1000.0;
@@ -630,10 +632,24 @@
             velocityChart.data.datasets[0].data.push(angularVelocities.j1);
             velocityChart.data.datasets[1].data.push(angularVelocities.j2);
             velocityChart.data.datasets[2].data.push(angularVelocities.j3);
+            
+            // Y軸の範囲を動的に調整
+            const allData = [
+                ...velocityChart.data.datasets[0].data,
+                ...velocityChart.data.datasets[1].data,
+                ...velocityChart.data.datasets[2].data
+            ].filter(v => isFinite(v));
+            
+            if(allData.length > 0) {
+                const maxV = Math.max(...allData.map(Math.abs));
+                velocityChart.options.scales.y.min = -maxV * 1.1;
+                velocityChart.options.scales.y.max = maxV * 1.1;
+            }
+
             velocityChart.update();
 
-            // 次のフレームのために値を更新
-            lastAngles = { ...currentJointAngles };
+            // 次のフレームのために、現在の角度を「前フレームの角度」として保存
+            lastAngles = { ...currentAngles };
             lastTime = currentTime;
         }
         
@@ -643,6 +659,8 @@
                 velocityChart.data.datasets.forEach(dataset => {
                     dataset.data = [];
                 });
+                velocityChart.options.scales.y.min = undefined;
+                velocityChart.options.scales.y.max = undefined;
                 velocityChart.update();
             }
         }
