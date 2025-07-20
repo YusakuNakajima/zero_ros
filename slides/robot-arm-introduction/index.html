@@ -166,26 +166,40 @@ finally:
                 <p>この後の説明はアプリを見ながら行います</p>
             </section>
             <section>
+                <section>
 
-                <h2>ステップ①TCP(アームの手先)</h2>
-                <p>TCP = Tool Center Point</p>
-                <div style="display: flex;">
-                    <div style="flex: 1;">
-                        <img src="media/Cone_ee.png" style="width: 100%;">
-                        <p>TCPは先端</p>
+                    <h2>ステップ①TCP(アームの手先)</h2>
+                    <p>TCP = Tool Center Point,複数登録して使うのが便利 </p>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/Cone_ee.png" style="width: 100%;">
+                            <p>TCPは先端</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/Gripper_ee.png" style="width: 100%;">
+                            <p>TCPはグリッパの中央</p>
+                        </div>
                     </div>
+                    <p>TCPの座標系の表現↓</p>
+                </section>
+                <section>
+                    <h2>TCPの姿勢表現</h2>
+                    <p>姿勢(pose) = 位置 + 向きで表すことが多い</p>
+                    <p>基本はXYZの座標系に対する位置と向きを考える</p>
                     <div style="flex: 1;">
-                        <img src="media/Gripper_ee.png" style="width: 100%;">
-                        <p>TCPはグリッパの中央</p>
+                        <p style="text-align: center; margin-bottom: 10px;">
+                            <strong>→ <a href="interactive_app/pose_viewer.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                        </p>
+                        <iframe data-src="interactive_app/pose_viewer.html" width="100%" height="100%"
+                            frameborder="0"></iframe>
                     </div>
-                </div>
-                <p>TCPは複数登録して切り替えて使うのが便利</p>
+                </section>
             </section>
 
             <section>
                 <section>
                     <h2>ステップ②ロボットの座標系</h2>
-
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/robot_pose_position.png">
@@ -203,38 +217,30 @@ finally:
                             <p>現在のTCPの座標系を基準に次のTCPの座標系を指定</p>
                         </div>
                     </div>
+                    <p>アプリで確認↓</p>
                 </section>
                 <section>
-                    <h2>TCPの姿勢表現</h2>
-                    <p>姿勢(pose) = 位置 + 向きで表すことが多い</p>
-                    <div style="flex: 1;">
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/pose_viewer.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/pose_viewer.html" width="100%" height="100%"
-                            frameborder="0"></iframe>
+                    <h2>ジョグ動作</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/jog.gif">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>関節や手先を少しずつ動かす動作を<strong>ジョグ動作</strong>という</li>
+                                <li>アプリのジョグ機能を使うと、関節座標系、ベース座標系、ツール座標系での動きの違いが確認できる</li>
+                            </ul>
+                        </div>
                     </div>
-
                 </section>
             </section>
             <section>
                 <section>
                     <h2>ステップ③ロボットモーションは3種類</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/motion_viewer.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/motion_viewer.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <li>PTP:最短,高速</li>
-                            <li>LIN:直線動作,動作制限</li>
-                            <li>CIRC:円弧動作,障害物回避</li>
-                        </div>
+                    <div style="flex: 1;">
+                        <li>PTP:最短,高速</li>
+                        <li>LIN:直線動作,動作制限</li>
+                        <li>CIRC:円弧動作,障害物回避</li>
                     </div>
                     <p>詳細は以下↓</p>
 
@@ -438,13 +444,13 @@ finally:
                 </section>
             </section>
             <section>
-                
+
                 <section>
                     <h2>ロボットアーム選定</h2>
                     <p>ロボットアームの選び方</p>
                     <p>ここでは協働ロボットを対象にしています</p>
                 </section>
-                 <section>
+                <section>
                     <h2>ロボットアームの軸の数はなぜ6が多い</h2>
                     <p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元 3次元 6次元</p>
                     <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
