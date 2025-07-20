@@ -323,7 +323,7 @@ finally:
                             </ul>
                         </div>
                     </div>
-                    <p>滑らかなモーションを作りたい場合↓</p>
+                    <p>ガタツキの少ないモーションを作りたい場合↓</p>
                 </section>
                 <section>
                     <h2>滑らかなモーションの作り方</h2>
@@ -381,28 +381,46 @@ finally:
                             <img src="media/ur_studio.png">
                         </div>
                         <div style="flex: 1;">
-                            <p>導入前のレイアウト確認や動作のシミュレーションはとても重要</p>
+                            <ul>
+                                <li>オフライン(実機なし)のシミュレーション</li>
+                                <li>動作前の事前検討が可能</li>
+                            </ul>
                         </div>
                     </div>
+                <p>シミュレーションはなぜ重要か↓</p>                          
                 </section>
                 <section>
-                    <h2>シミュレーションなしで取り組んだ場合にありがちなトラブル</h2>
+                    <h2>シミュレーションを使わなかった場合にありがちなトラブル</h2>
                     <ul>
                         <li><strong>1. レイアウト設計</strong><br>
-                            実際に設置するとロボットの可動範囲が思ったより狭く手先が届かなかったので配置を考え直す</li>
+                            実際に設置するとロボットの可動範囲が思ったより狭く手先が届かなかった→配置の再検討</li>
                         <li><strong>2. 動作速度</strong><br>
                             スループットの向上を期待したが実際に動かすと思ったより遅かった</li>
                     </ul>
+                    <p>シミュレーションで未然に防げる</p>    
                 </section>
                 <section>
-                    <h2>協働ロボのシミュレーションの現状</h2>
-                    <ul>
-                        <li>産業用ロボットメーカーは自社でシミュレータを提供</li>
-                        <li>協働ロボットメーカーはあまりシミュレーションを提供していない<br>
-                            （企業として大きくないのでハードウェアに注力する場合が多い）</li>
-                        <li>協働ロボ最大手のUniversalRobotがシミュレーションツールUR Studioを2025年にようやく発表した</li>
-                        <li>他の協働ロボメーカーはシミュレータがない</li>
-                    </ul>
+                    <h2>シミュレーションの現状</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/denso_simulator.png" style="width: 100%;">
+                            <h4>産業用ロボット</h4>
+                            <ul>
+                                <li>自社で提供</li>
+                                <li>動作プログラムの作成・検証が可能</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <img src="media/ur_teaching.png" style="width: 80%;">
+                            <h4>協働ロボット</h4>
+                            <ul>
+                                <li>直接ティーチング</li>
+                                <li>動かすまで分からない</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                    <p>2025年にUniversalRobotからURStudioが登場、今後は協働ロボにも増える可能性もあります</p>
                 </section>
                 <section>
                     <h2>協働ロボシミュレータの選択肢</h2>
@@ -416,8 +434,7 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>シミュレータを専門としているメーカーから購入するのがよさそう</li>
-                                <li>個人的にはカナダのRoboDKがすごい</li>
+                                <li>個人的にはカナダのRoboDKがよさそう</li>
                                 <li>CADを取り込んでエッジ検出してロボットのウェイポイントを自動作成できる</li>
                             </ul>
                         </div>
@@ -436,8 +453,8 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>ROSのMoveItを使えば近いこともできるが、GUIだけで完結するものではない</li>
-                                <li>まだまだ専門的な開発知識が求められる</li>
+                                <li>ROSのMoveItを使えば近いこともできるが、専門的な開発知識が求められる</li>
+                                <li>ROSの習得コストは大きいので、専門のシミュレーションツールがあるなら活用したほうが良い</li>
                             </ul>
                         </div>
                     </div>
@@ -451,19 +468,16 @@ finally:
                     <p>ここでは協働ロボットを対象にしています</p>
                 </section>
                 <section>
-                    <h2>ロボットアームの軸の数はなぜ6が多い</h2>
-                    <p>位置(XYZ) + 向き(XYZ) → 姿勢<br>3次元 3次元 6次元</p>
-                    <p>つまり6次元の姿勢を作るには最低限6軸(6次元)のロボットが必要</p>
-                    <p>目的のタスクに合わせて適切な軸数を選ぶ必要がある</p>
+                    <h2>ロボットアームの軸の数</h2>
+                    <p>位置(3次元) + 向き(3次元) → 姿勢(6次元) = 6軸が必要</p>
                     <div style="display: flex;">
                         <div style="flex: 1; text-align: center;">
-                            <img src="media/robot_arm_6axis_example1.png" style="width: 80%; margin-bottom: 20px;">
-                            <p>4軸ロボットの例<br>常に下向きという姿勢制限がある<br>例)モノの移動はできるが向きを変えられない<br>Dobot MG400<br>Dobot Magician E6
-                            </p>
+                            <img src="media/dobot_4axis_robot.png" style="width: 50%; margin-bottom: 0px;">
+                            <p>4軸ロボットの例<br>常に下向きという制限</p>
                         </div>
                         <div style="flex: 1; text-align: center;">
-                            <img src="media/robot_arm_6axis_example2.png" style="width: 80%; margin-bottom: 20px;">
-                            <p>6軸ロボットの例<br>位置も向き自由に動かせる</p>
+                            <img src="media/dobot_robot.png" style="width: 50%; margin-bottom: 0px;">
+                            <p>6軸ロボットの例<br>位置も向き自由</p>
                         </div>
                     </div>
                 </section>
