@@ -50,7 +50,6 @@
 生成された`reveal.js`スライドのレイアウトや内容を、以下のプロンプトで修正します。
 
 **プロンプト例 (Claude Code):**
-
 ```prompt
 既存のreveal.jsスライドを、以下の指示通りに修正してください。
 終わったらclaude.mdをスライドの内容に合わて修正してください。
@@ -60,12 +59,16 @@
 - 背景画像を除き、レイアウトは原則として「左に画像、右にテキスト」で統一する。
 
 # 具体的な変更点
-- **スライド2**: 画像を上段に「イラストで学ぶロボット工学」、下段に「実践ロボット制御」の書影へ変更。
-- **新規スライド (3番目に追加)**:
-    - **タイトル**: この資料の目的
-    - **内容**: メーカー製のコントローラでは実現が難しい、滑らかなロボットアームの軌道制御を実現するための技術資料です。
+番号はスライドのページ数を表しています
+ネストした番号はスライドの縦方向へのネストを表しています
+「」内はスライドタイトルを表しています
+12.  「オフラインシミュレーション」スライドを追加、画像は左にur_studio.pngを参照、右に：導入前のレイアウト確認や動作のシミュレーションはとても重要です
+     1.  「シミュレーションなしで取り組んだ場合にありがちなトラブル」、1.レイアウト設計 実際に設置するとロボットの可動範囲が思ったより狭く手先が届かなかったので配置を考え直す、 2. 動作速度 スループットの向上を期待したが実際に動かすと思ったより遅かった
+     2.  「協働ロボのシミュレーションの現状」、産業用ロボットメーカーは自社でシミュレータを提供、協働ロボットメーカーはあまりシミュレーションを提供していない(企業として大きくにないのでハードウェアに注力する場合が多い)、共同ロボ最大手のUniversalRobotがシミュレーションツールUR Studioを2025年にようやく発表した、他の協働ロボメーカはシミュレータがない
+     3.  「協働ロボシミュレータの選択肢」シミュレータを専門としているメーカから購入するのがよさそう、個人的にはカナダのRoboDKがすごい、CADを取り込んでエッジ検出してロボットのウェイポイントを自動作成できる<iframe width="560" height="315" src="https://www.youtube.com/embed/9PcugSpyN14?si=P9G5nNSEM7OaS5Hs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+     ※著者はシミュレータをまったく使ったことがないので参考程度にとどめてください
+     4.  「ROSでもシミュレーションできるのでは？」ROSのMoveItを使えば近いこともできるが、GUIだけで完結するものではなくまだまだ専門的な開発知識が求められる<iframe width="560" height="315" src="https://www.youtube.com/embed/fCORKVYsdDI?si=eSNNfyysZDFQ9fQ_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 ```
-
 -----
 
 ## 2. フローチャート作成の手順
