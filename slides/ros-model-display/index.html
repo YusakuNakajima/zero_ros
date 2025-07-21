@@ -197,18 +197,18 @@
                 </div>
             </section>
 
-                 <!-- URDFの表示デモ -->
-                <section>
-                    <h3>このような画面になればok</h3>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
-                        </div>
-                        <div class="text-section">
-                            <p>右下のGUIで関節を動かせます</p>
-                        </div>
+            <!-- URDFの表示デモ -->
+            <section>
+                <h3>このような画面になればok</h3>
+                <div class="slide-layout-image">
+                    <div class="image-section">
+                        <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
                     </div>
-                </section>
+                    <div class="text-section">
+                        <p>右下のGUIで関節を動かせます</p>
+                    </div>
+                </div>
+            </section>
             </section>
 
 
@@ -241,8 +241,8 @@
                                     left: 0; 
                                     width: 33.33%; 
                                     height: 100%; 
-                                    border: 5px solid red; /* 赤い枠線 */
-                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    border: 5px solid red; 
+                                    box-sizing: border-box; 
                                     "></div>
                     </div>
                 </section>
@@ -509,8 +509,8 @@
                                     right: 0; 
                                     width: 66.66%; 
                                     height: 100%; 
-                                    border: 5px solid red; /* 赤い枠線 */
-                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    border: 5px solid red; 
+                                    box-sizing: border-box; 
                                     "></div>
                     </div>
                 </section>
@@ -519,6 +519,30 @@
                     <div class="slide-layout-image-code">
                         <div class="image-section">
                             <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
+                            <div style="position: absolute; 
+                                    top: 30%; 
+                                    left: 0; 
+                                    width: 30%; 
+                                    height: 70%; 
+                                    border: 5px solid rgb(0, 0, 255); 
+                                    box-sizing: border-box; 
+                                    "></div>
+                            <div style="position: absolute; 
+                                    top: 30%; 
+                                    left: 31%; 
+                                    width: 15%; 
+                                    height: 17%; 
+                                    border: 5px solid rgb(255, 0, 0); 
+                                    box-sizing: border-box; 
+                                    "></div>
+                            <div style="position: absolute; 
+                                    top: 47%; 
+                                    left: 31%; 
+                                    width: 15%; 
+                                    height: 18%; 
+                                    border: 5px solid rgb(0, 255, 0); 
+                                    box-sizing: border-box; 
+                                    "></div>
                         </div>
                         <div class="code-section">
                             <pre><code class="language-xml external-launch-code" data-trim>
@@ -633,7 +657,7 @@
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
-                
+
                 // LAUNCHコードの読み込み
                 const launchResponse = await fetch('launch_example.xml');
                 const launchText = await launchResponse.text();
@@ -657,7 +681,7 @@
                     element.innerHTML = escapedXacro;
                     hljs.highlightElement(element);
                 });
-                
+
                 // LAUNCHコード要素に挿入
                 const launchElements = document.querySelectorAll('.external-launch-code');
                 launchElements.forEach(element => {
