@@ -38,29 +38,29 @@
             box-shadow: none;
         }
 
-        .slide-layout {
+        .slide-layout-image {
             display: flex;
             align-items: center;
             justify-content: space-between;
             height: 100%;
         }
 
-        .slide-image {
+        .image-section {
             flex: 0 0 50%;
             margin-right: 0%;
         }
 
-        .slide-content {
+        .text-section {
             flex: 0 0 50%;
             text-align: left;
         }
 
-        .slide-image img {
+        .image-section img {
             width: 100%;
             height: auto;
         }
 
-        .code-layout {
+        .slide-layout-code {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
@@ -93,7 +93,6 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
-
     </style>
 </head>
 
@@ -112,7 +111,7 @@
             <!-- 本スライドのゴール -->
             <section>
                 <h2>本スライドのゴール</h2>
-                <div class="slide-layout">
+                <div class="slide-layout-image">
                     <div class="slide-image">
                         <img src="media/joint_state_publisher_on_rviz.png" alt="アームとエンドエフェクタ">
                     </div>
@@ -130,7 +129,7 @@
             <!-- Rvizとは？ -->
             <section>
                 <h2>Rvizとは？</h2>
-                <div class="slide-layout">
+                <div class="slide-layout-image">
                     <div class="slide-image">
                         <img src="media/robot_on_rviz.png" alt="Rviz画面">
                     </div>
@@ -140,6 +139,25 @@
                             <li>デバッグや動作確認で使う</li>
                             <li>あくまで可視化ツールなので、これがなくてもロボットの動作は可能</li>
                         </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>まずはURDFを表示</h2>
+                <div class="slide-layout-code">
+                    <div class="code-section">
+                        <pre><code data-trim data-line-numbers class="xml">
+&lt;launch&gt;
+  &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
+  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
+  &lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;
+  &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
+&lt;/launch&gt;
+                    </code></pre>
+                    </div>
+                    <div class="text-section">
+                        <p>この後の説明を見ながらURDFを書き換えてみてください</p>
                     </div>
                 </div>
             </section>
@@ -182,11 +200,11 @@
                 <!-- ロボットモデル構造 -->
                 <section>
                     <h2>ロボットアームの構造</h2>
-                    <div class="slide-layout">
-                        <div class="slide-image">
+                    <div class="slide-layout-image">
+                        <div class="image-section">
                             <img src="media/robot_structure.png" alt="ロボットアーム構造図">
                         </div>
-                        <div class="slide-content">
+                        <div class="text-section">
                             <ul>
                                 <li>ジョイント(関節):<br>モーターが動く部分</li>
                                 <li>リンク: <br>ジョイントを繋ぐ部分</li>
@@ -201,9 +219,9 @@
                 <section>
                     <h2>URDF（Unified Robot Description Format）</h2>
                     <p>3リンクロボットの例</p>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -218,9 +236,9 @@
                 <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~type(動作の種類)~</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -237,9 +255,9 @@
                 </section> <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~リンクとのつながりと制限~</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -257,9 +275,9 @@
                 <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~visual(表示用)~</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -278,9 +296,9 @@
                 </section> <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~collision(干渉計算用)~</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -299,9 +317,9 @@
                 <section>
                     <h2>関節の物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -323,9 +341,9 @@
                 <section>
                     <h2>リンクの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -343,13 +361,13 @@
                         </div>
                     </div>
                 </section>
-<!-- 物理属性 -->
+                <!-- 物理属性 -->
                 <section>
                     <h2>リンク間相互作用</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml urdf-code" data-trim>
+                            <pre><code class="language-xml external-urdf-code" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -371,9 +389,9 @@
                 <!-- XACRO -->
                 <section>
                     <h2>XACRO（XML Macros for Robots）</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml xacro-code" data-trim>
+                            <pre><code class="language-xml external-xacro-code" data-trim>
 <!-- XACROコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -391,7 +409,7 @@
                 <!-- エンドエフェクタ追加 -->
                 <section>
                     <h2>エンドエフェクタを追加したい場合</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code class="language-xml" data-trim>
 &lt;?xml version="1.0"?&gt;
@@ -434,7 +452,7 @@
                 </section>
                 <section>
                     <h2>launchファイルの例</h2>
-                    <div class="code-layout">
+                    <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code data-trim data-line-numbers class="xml">
 &lt;launch&gt;
@@ -454,11 +472,11 @@
                 <!-- URDFの表示デモ -->
                 <section>
                     <h3>URDFの表示デモ</h3>
-                    <div class="slide-layout">
-                        <div class="slide-image">
+                    <div class="slide-layout-image">
+                        <div class="image-section">
                             <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
                         </div>
-                        <div class="slide-content">
+                        <div class="text-section">
                             <p>TFを見るとURDFで記述したjointとlinkが動いているのが見える</p>
                         </div>
                     </div>
@@ -480,11 +498,11 @@
                 <!-- 機能1：座標変換 -->
                 <section>
                     <h2>機能1：座標変換</h2>
-                    <div class="slide-layout">
-                        <div class="slide-image">
+                    <div class="slide-layout-image">
+                        <div class="image-section">
                             <img src="media/tf_viewer.png" alt="座標変換の例">
                         </div>
-                        <div class="slide-content">
+                        <div class="text-section">
                             <ul>
                                 <li>エンドエフェクタのベース座標系やツール座標系の計算</li>
                                 <li>複数の座標系間での位置・姿勢変換</li>
@@ -567,23 +585,23 @@
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
-                
+
                 // URDFコード要素に挿入
-                const urdfElements = document.querySelectorAll('.urdf-code');
+                const urdfElements = document.querySelectorAll('.external-urdf-code');
                 urdfElements.forEach(element => {
                     element.className = element.className.replace(/hljs[^\s]*/g, '');
                     element.innerHTML = escapedUrdf;
                     hljs.highlightElement(element);
                 });
-                
+
                 // XACROコード要素に挿入
-                const xacroElements = document.querySelectorAll('.xacro-code');
+                const xacroElements = document.querySelectorAll('.external-xacro-code');
                 xacroElements.forEach(element => {
                     element.className = element.className.replace(/hljs[^\s]*/g, '');
                     element.innerHTML = escapedXacro;
                     hljs.highlightElement(element);
                 });
-                
+
             } catch (error) {
                 console.error('外部ファイルの読み込みに失敗しました:', error);
             }
