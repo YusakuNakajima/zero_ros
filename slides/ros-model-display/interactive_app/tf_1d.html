@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROS TF 時系列管理ビジュアライザー (1D版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .control-panel-bg {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .info-box {
+            background-color: #1f2937; /* bg-gray-800 */
+        }
+        .track::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            background-color: #4b5563; /* bg-gray-600 */
+            transform: translateY(-50%);
+        }
+        .marker {
+            transition: left 0.1s linear;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-cyan-400">ROS TF 時系列管理ビジュアライザー (1D版)</h1>
+            <p class="text-gray-400 mt-2">
+                TFが1次元の動きをどのように記録し、指定時刻の座標を補間するかをシミュレートします。<br>
+                このシミュレータでは、TFバッファは最大<span class="font-bold text-cyan-300">1秒</span>前までの座標データを保持します。
+            </p>
+        </header>
+
+        <!-- Visualization Area -->
+        <div class="w-full h-32 bg-gray-800 rounded-lg p-8 relative shadow-2xl border border-gray-700 mb-6">
+            <div id="visualization-area" class="w-full h-full relative track">
+                 <!-- Labels for the track -->
+                <span class="absolute -left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">-1.0</span>
+                <span class="absolute left-1/2 top-1/2 -translate-y-8 text-sm text-gray-400">0.0</span>
+                <span class="absolute -right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">+1.0</span>
+
+                <!-- Queried Robot Position -->
+                <div id="queried-robot-marker" class="marker absolute w-6 h-6 rounded-full bg-pink-500/70 border-2 border-dashed border-white shadow-lg top-1/2 -translate-y-1/2 -translate-x-1/2" style="left: 50%;">
+                    <div class="absolute -bottom-6 text-xs text-pink-400 whitespace-nowrap">TFで取得した座標</div>
+                </div>
+                <!-- Latest Robot Position -->
+                <div id="robot-marker" class="marker absolute w-6 h-6 rounded-full bg-cyan-500 border-2 border-white shadow-lg top-1/2 -translate-y-1/2 -translate-x-1/2" style="left: 50%;">
+                    <div class="absolute -top-6 text-xs text-cyan-400 whitespace-nowrap">ロボットの現在の座標</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control & Info Panel -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="control-panel-bg p-4 rounded-lg border border-gray-700">
+                <h2 class="text-lg font-semibold mb-3 text-cyan-400">コントロール</h2>
+                <div class="flex space-x-2 mb-4">
+                    <button id="start-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">開始</button>
+                    <button id="stop-button" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">停止</button>
+                    <button id="reset-button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">リセット</button>
+                </div>
+                <div>
+                    <div class="mb-3">
+                        <span class="font-medium text-gray-300">シミュレーション現在時刻: </span>
+                        <span id="simulation-time-display" class="font-bold text-white text-lg">0.00</span> s
+                    </div>
+                    <label for="time-slider" class="block mb-2 font-medium text-gray-300">座標取得の時刻を指定: <span id="current-time-display" class="font-bold text-cyan-400">0.00</span> s</label>
+                    <input id="time-slider" type="range" min="0" max="10" value="0" step="0.01" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+
+            <div class="info-box p-4 rounded-lg flex-grow border border-gray-700">
+                <h2 class="text-lg font-semibold mb-3 text-cyan-400">情報</h2>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <h3 class="font-semibold text-gray-400">取得した座標 (Lookup Transform)</h3>
+                        <p id="queried-transform" class="font-mono bg-gray-900 p-2 rounded">x: 0.00</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-400">TFバッファの内容 (最新5件)</h3>
+                        <div id="buffer-content" class="font-mono bg-gray-900 p-2 rounded h-24 overflow-y-auto text-xs">
+                            バッファは空です
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM要素の取得
+            const startButton = document.getElementById('start-button');
+            const stopButton = document.getElementById('stop-button');
+            const resetButton = document.getElementById('reset-button');
+            const timeSlider = document.getElementById('time-slider');
+            const currentTimeDisplay = document.getElementById('current-time-display');
+            const simulationTimeDisplay = document.getElementById('simulation-time-display');
+            const robotMarker = document.getElementById('robot-marker');
+            const queriedRobotMarker = document.getElementById('queried-robot-marker');
+            const queriedTransformDisplay = document.getElementById('queried-transform');
+            const bufferContentDisplay = document.getElementById('buffer-content');
+
+            // シミュレーションの状態を管理する変数
+            let tfBuffer = []; // {time, x} の配列
+            let simulationTime = 0;
+            let simulationInterval = null;
+            const MAX_BUFFER_SIZE = 10; 
+
+            // シミュレーションのメインループ
+            function runSimulationStep() {
+                simulationTime += 0.1; // 100msごとに時間を進める
+                simulationTimeDisplay.textContent = simulationTime.toFixed(2);
+
+                // ロボットが往復運動するように座標を計算
+                const speed = 1.5;
+                const x = Math.sin(simulationTime * speed);
+
+                // 新しい座標変換データをバッファに追加
+                const newTransform = { time: simulationTime, x };
+                tfBuffer.push(newTransform);
+
+                // バッファが最大サイズを超えたら古いものから削除
+                if (tfBuffer.length > MAX_BUFFER_SIZE) {
+                    tfBuffer.shift();
+                }
+
+                // スライダーの最大値を更新
+                timeSlider.max = simulationTime.toFixed(2);
+                
+                updateLatestRobotPosition(newTransform);
+                updateBufferDisplay();
+                updateUI(); // スライダーの位置に応じて表示を更新
+            }
+
+            // TFバッファから指定時刻の座標を取得する関数 (ROSのlookupTransformの簡易版)
+            function lookupTransform(targetTime) {
+                if (tfBuffer.length < 2) {
+                    return tfBuffer.length === 1 ? { ...tfBuffer[0], interpolated: false } : null;
+                }
+
+                let before = null;
+                let after = null;
+
+                for (const transform of tfBuffer) {
+                    if (transform.time <= targetTime) {
+                        before = transform;
+                    }
+                    if (transform.time > targetTime) {
+                        after = transform;
+                        break;
+                    }
+                }
+
+                if (before && after) {
+                    const timeDiff = after.time - before.time;
+                    if (timeDiff === 0) return before;
+
+                    const ratio = (targetTime - before.time) / timeDiff;
+                    const interpolatedX = before.x + (after.x - before.x) * ratio;
+                    return { time: targetTime, x: interpolatedX, interpolated: true };
+                } else if (before) {
+                    return { ...before, interpolated: false };
+                } else if (after) {
+                    // 指定時刻がバッファの最古データより前の場合
+                    return null;
+                }
+                
+                return null;
+            }
+
+            // UIの更新
+            function updateUI() {
+                const targetTime = parseFloat(timeSlider.value);
+                currentTimeDisplay.textContent = targetTime.toFixed(2);
+
+                const transform = lookupTransform(targetTime);
+
+                if (transform) {
+                    queriedTransformDisplay.textContent = `x: ${transform.x.toFixed(2)} ${transform.interpolated ? '(補間)' : ''}`;
+                    updateQueriedRobotPosition(transform);
+                } else {
+                    queriedTransformDisplay.textContent = 'データがありません';
+                    queriedRobotMarker.style.opacity = '0';
+                }
+            }
+            
+            // x座標 (-1.0 ~ +1.0) を表示上のパーセンテージ (0% ~ 100%) に変換
+            const toPercentage = (x) => ((x + 1) / 2) * 100;
+
+            // 最新のロボットの位置をビジュアルに反映
+            function updateLatestRobotPosition(transform) {
+                robotMarker.style.left = `${toPercentage(transform.x)}%`;
+            }
+            
+            // 取得した(補間された)ロボットの位置をビジュアルに反映
+            function updateQueriedRobotPosition(transform) {
+                queriedRobotMarker.style.opacity = '1';
+                queriedRobotMarker.style.left = `${toPercentage(transform.x)}%`;
+            }
+
+            // TFバッファ表示を更新
+            function updateBufferDisplay() {
+                if (tfBuffer.length === 0) {
+                    bufferContentDisplay.innerHTML = 'バッファは空です';
+                    return;
+                }
+                const latestFive = tfBuffer.slice(-5).reverse();
+                bufferContentDisplay.innerHTML = latestFive.map(t =>
+                    `t: ${t.time.toFixed(2)}s, x: ${t.x.toFixed(2)}`
+                ).join('<br>');
+            }
+
+            // リセット処理
+            function reset() {
+                stop();
+                tfBuffer = [];
+                simulationTime = 0;
+                simulationTimeDisplay.textContent = '0.00';
+                timeSlider.value = 0;
+                timeSlider.max = 10;
+                updateBufferDisplay();
+                updateLatestRobotPosition({ x: 0 });
+                updateUI();
+            }
+            
+            function stop() {
+                 if (simulationInterval) {
+                    clearInterval(simulationInterval);
+                    simulationInterval = null;
+                }
+            }
+
+            // イベントリスナーの設定
+            startButton.addEventListener('click', () => {
+                if (!simulationInterval) {
+                    simulationInterval = setInterval(runSimulationStep, 100);
+                }
+            });
+
+            stopButton.addEventListener('click', stop);
+            resetButton.addEventListener('click', reset);
+            timeSlider.addEventListener('input', updateUI);
+
+            // 初期化
+            reset();
+        });
+    </script>
+</body>
+</html>

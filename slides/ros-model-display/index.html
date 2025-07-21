@@ -103,6 +103,58 @@
             align-items: center;
         }
 
+        mark.code-highlight-blue {
+            background-color: rgba(0, 123, 255, 0.4);
+            color: inherit;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        mark.code-highlight-red {
+            background-color: rgba(220, 53, 69, 0.4);
+            color: inherit;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        mark.code-highlight-green {
+            background-color: rgba(40, 167, 69, 0.4);
+            color: inherit;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .image-section.dual-images {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 15px;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .image-section.dual-images img {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 60vh !important;
+            object-fit: contain !important;
+        }
+
+        .image-with-caption {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            margin: 0;
+        }
+
+        .image-caption {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+            font-style: italic;
+        }
+
         .code-section {
             flex: 0 0 45%;
         }
@@ -520,36 +572,42 @@
                         <div class="image-section">
                             <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
                             <div style="position: absolute; 
-                                    top: 30%; 
+                                    top: 25%; 
                                     left: 0; 
                                     width: 30%; 
-                                    height: 70%; 
+                                    height: 50%; 
                                     border: 5px solid rgb(0, 0, 255); 
                                     box-sizing: border-box; 
                                     "></div>
                             <div style="position: absolute; 
-                                    top: 30%; 
+                                    top: 25%; 
                                     left: 31%; 
                                     width: 15%; 
-                                    height: 17%; 
+                                    height: 12%; 
                                     border: 5px solid rgb(255, 0, 0); 
                                     box-sizing: border-box; 
                                     "></div>
                             <div style="position: absolute; 
-                                    top: 47%; 
+                                    top: 37%; 
                                     left: 31%; 
                                     width: 15%; 
-                                    height: 18%; 
+                                    height: 15%; 
                                     border: 5px solid rgb(0, 255, 0); 
                                     box-sizing: border-box; 
                                     "></div>
                         </div>
                         <div class="code-section">
-                            <pre><code class="language-xml external-launch-code" data-trim>
-<!-- LAUNCHコードが外部ファイルから読み込まれます -->
+                            <pre><code class="nohighlight" data-trim>
+&lt;launch&gt;
+  <mark class="code-highlight-blue">&lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
+  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;</mark>
+  <mark class="code-highlight-red">&lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;</mark>
+  <mark class="code-highlight-green">&lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;</mark>
+&lt;/launch&gt;
 </code></pre>
                         </div>
                     </div>
+                    <p>このような対応関係になっている</p>
                 </section>
 
 
@@ -557,12 +615,28 @@
 
             <!-- TFとは何か？ -->
             <section>
+                <section>
+                    <h2>TF</h2>
+                    <div style="position: relative; display: inline-block;">
+                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                            style="display: block; max-width: 100%;">
+                        <div style="position: absolute; 
+                                    top: 40%; 
+                                    right: 0%; 
+                                    width: 40%; 
+                                    height: 60%; 
+                                    border: 5px solid red; 
+                                    box-sizing: border-box; 
+                                    "></div>
+                    </div>
+                    <p>Rvizで表示しているTFとは？↓</p>
+                </section>
                 <!-- TFとは？ -->
                 <section>
                     <h2>TFとは？</h2>
                     <ul>
                         <li>TF = Transformの略</li>
-                        <li>ROS標準搭載のシステムの1つ</li>
+                        <li>ROS標準搭載のシステムで、座標変換と座標管理の2つの機能がある</li>
                         <li>実際はTFの改良版のTF2を使う</li>
                     </ul>
                 </section>
@@ -571,13 +645,33 @@
                 <section>
                     <h2>機能1：座標変換</h2>
                     <div class="slide-layout-image">
+                        <div class="image-section dual-images">
+                            <div class="image-with-caption">
+                                <img src="media/pestle_tip.png" alt="乳棒座標変換の例">
+                                <div class="image-caption">baseから見た乳棒手先</div>
+                            </div>
+                            <div class="image-with-caption">
+                                <img src="media/spatula_tip.png" alt="ヘラ座標変換の例">
+                                <div class="image-caption">baseから見たヘラの手先</div>
+                            </div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>ここではTCPの座標変換を示したが、TFで管理された座標系であれば任意の座標変換が可能</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>座標変換の仕組み</h2>
+                    <div class="slide-layout-image">
                         <div class="image-section">
                             <img src="media/tf_viewer.png" alt="座標変換の例">
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>エンドエフェクタのベース座標系やツール座標系の計算</li>
-                                <li>複数の座標系間での位置・姿勢変換</li>
+                                <li>TFはツリー構造になっている</li>
+                                <li>同姿変換行列で順々にツリーを辿って座標変換を計算</li>
                             </ul>
                         </div>
                     </div>
@@ -586,12 +680,40 @@
                 <!-- 機能2：座標管理 -->
                 <section>
                     <h2>機能2：座標管理</h2>
-                    <ul>
-                        <li>座標をツリー構造で管理(使えるのは開ループのみ、閉ループは使えないので注意)</li>
-                        <li>座標データは時系列。例えば1秒前の座標で計算すると現実と計算で座標がずれる</li>
-                        <li>そういう不都合が生じないように「n秒以内に取得した座標しか計算に使わない」などの管理をTFが行ってくれる</li>
-                        <li>詳細な解説はTF完全理解という資料が分かりやすい</li>
-                    </ul>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/tf_1d.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/tf_1d.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>TFは最新の座標を使わない、指定した時間 or 少しだけ前の座標を使うことで、座標系間での同期をとっている。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section><section>
+                    <h2>同期の仕組み<br>~TFの気持ちになろう~</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/tf_6d.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/tf_6d.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>6軸アームであれば6個の軸で同期をとる必要があるので、難しさを体験してみよう！</li>
+                                <li>アプリは雰囲気で正確ではありません</li>
+                                <li>実際の同期の仕組みは<a href="https://www.slideshare.net/slideshow/tftf2/46875007" target="_blank" style="color: #3b82f6; text-decoration: underline;">TF完全理解</a>を参照</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
             </section>
         </div>
@@ -682,13 +804,6 @@
                     hljs.highlightElement(element);
                 });
 
-                // LAUNCHコード要素に挿入
-                const launchElements = document.querySelectorAll('.external-launch-code');
-                launchElements.forEach(element => {
-                    element.className = element.className.replace(/hljs[^\s]*/g, '');
-                    element.innerHTML = escapedLaunch;
-                    hljs.highlightElement(element);
-                });
 
             } catch (error) {
                 console.error('外部ファイルの読み込みに失敗しました:', error);
