@@ -1,137 +1,236 @@
-<?xml version="1.0"?>
-<!-- Xacroの名前空間を定義 -->
-<robot name="three_link_robot_xacro" xmlns:xacro="http://ros.org/xacro">
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="ur5e_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- ===================================================================== -->
-  <!-- グローバルプロパティの定義 -->
-  <!-- ===================================================================== -->
-  <xacro:property name="M_PI" value="3.1415926535897931"/>
+  <xacro:property name="M_PI" value="3.14159265359"/>
+  <xacro:property name="mesh_rpy_shoulder" value="1.570796327 0 0"/>
+  <xacro:property name="mesh_rpy_forearm_wrist" value="1.57079632679 0 -1.57079632679"/>
+  <xacro:property name="mesh_rpy_wrist_offset" value="1.57079632679 0 0"/>
+  <xacro:property name="light_grey_rgba" value="0.7 0.7 0.7 1.0"/>
+  <xacro:property name="joint_effort_shoulder_elbow" value="150.0"/>
+  <xacro:property name="joint_velocity_shoulder_elbow" value="3.14"/>
+  <xacro:property name="joint_effort_wrist" value="28.0"/>
+  <xacro:property name="joint_velocity_wrist" value="6.28"/>
+  <xacro:property name="joint_lower_limit" value="-${M_PI}"/>
+  <xacro:property name="joint_upper_limit" value="${M_PI}"/>
 
-  <!-- リンクの寸法 -->
-  <xacro:property name="base_size" value="0.1"/>
-  <xacro:property name="link_radius" value="0.02"/>
-  <xacro:property name="link_length" value="0.5"/>
-
-  <!-- リンクの質量 -->
-  <xacro:property name="base_mass" value="0.5"/>
-  <xacro:property name="link_mass" value="0.1"/>
-
-  <!-- 慣性モーメントの一般的な値 (簡略化のため、ここでは全て同じ値を使用) -->
-  <xacro:property name="link_inertia_ixx" value="0.001"/>
-  <xacro:property name="link_inertia_ixy" value="0.0"/>
-  <xacro:property name="link_inertia_ixz" value="0.0"/>
-  <xacro:property name="link_inertia_iyy" value="0.001"/>
-  <xacro:property name="link_inertia_iyz" value="0.0"/>
-  <xacro:property name="link_inertia_izz" value="0.001"/>
-
-  <!-- 接触係数 -->
-  <xacro:property name="contact_mu" value="0.5"/>
-  <xacro:property name="contact_kp" value="1000.0"/>
-  <xacro:property name="contact_kd" value="1.0"/>
-
-  <!-- ジョイントの制限 -->
-  <xacro:property name="joint_limit_lower" value="-${M_PI}"/>
-  <xacro:property name="joint_limit_upper" value="${M_PI}"/>
-  <xacro:property name="joint_effort" value="100"/>
-  <xacro:property name="joint_velocity" value="100"/>
-
-  <!-- ===================================================================== -->
-  <!-- マクロの定義 -->
-  <!-- ===================================================================== -->
-
-  <!-- 汎用的なシリンダーリンクのマクロ -->
-  <xacro:macro name="cylinder_link" params="name length radius mass color_rgba">
+  <xacro:macro name="standard_link" params="name visual_mesh_filename collision_mesh_filename mass_value ixx iyy izz *visual_origin *collision_origin *inertial_origin">
     <link name="${name}">
       <visual>
+        <xacro:insert_block name="visual_origin" />
         <geometry>
-          <cylinder radius="${radius}" length="${length}"/>
+          <mesh filename="package://ur_description/meshes/ur5e/visual/${visual_mesh_filename}"/>
         </geometry>
-        <!-- シリンダーの中心をリンクの原点からZ軸方向にlength/2だけオフセット -->
-        <origin xyz="0 0 ${length/2}" rpy="0 0 0"/>
-        <material name="${name}_material">
-          <color rgba="${color_rgba}"/>
+        <material name="LightGrey">
+          <color rgba="${light_grey_rgba}"/>
         </material>
       </visual>
       <collision>
+        <xacro:insert_block name="collision_origin" />
         <geometry>
-          <cylinder radius="${radius}" length="${length}"/>
+          <mesh filename="package://ur_description/meshes/ur5e/collision/${collision_mesh_filename}"/>
         </geometry>
-        <origin xyz="0 0 ${length/2}" rpy="0 0 0"/>
-        <contact_coefficients mu="${contact_mu}" kp="${contact_kp}" kd="${contact_kd}"/>
       </collision>
       <inertial>
-        <mass value="${mass}"/>
-        <inertia ixx="${link_inertia_ixx}" ixy="${link_inertia_ixy}" ixz="${link_inertia_ixz}"
-                 iyy="${link_inertia_iyy}" iyz="${link_inertia_iyz}"
-                 izz="${link_inertia_izz}"/>
+        <mass value="${mass_value}"/>
+        <xacro:insert_block name="inertial_origin" />
+        <inertia ixx="${ixx}" ixy="0.0" ixz="0.0" iyy="${iyy}" iyz="0.0" izz="${izz}"/>
       </inertial>
     </link>
   </xacro:macro>
 
-  <!-- 汎用的な回転ジョイントのマクロ -->
-  <xacro:macro name="revolute_joint" params="name parent_link child_link origin_xyz origin_rpy axis_xyz">
+  <xacro:macro name="standard_revolute_joint" params="name parent_link child_link origin_xyz origin_rpy axis_xyz effort lower upper velocity">
     <joint name="${name}" type="revolute">
       <parent link="${parent_link}"/>
       <child link="${child_link}"/>
-      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+      <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/>
       <axis xyz="${axis_xyz}"/>
-      <limit lower="${joint_limit_lower}" upper="${joint_limit_upper}"
-             effort="${joint_effort}" velocity="${joint_velocity}"/>
+      <limit effort="${effort}" lower="${lower}" upper="${upper}" velocity="${velocity}"/>
+      <dynamics damping="0.0" friction="0.0"/>
     </joint>
   </xacro:macro>
 
-  <!-- ===================================================================== -->
-  <!-- ロボットの構造定義 -->
-  <!-- ===================================================================== -->
+  <xacro:standard_link
+    name="base_link"
+    visual_mesh_filename="base.dae"
+    collision_mesh_filename="base.stl"
+    mass_value="4.0"
+    ixx="0.00443333156" iyy="0.00443333156" izz="0.0072">
+    <visual_origin rpy="0 0 ${M_PI}" xyz="0 0 0"/>
+    <collision_origin rpy="0 0 ${M_PI}" xyz="0 0 0"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
 
-  <!-- ベースリンク -->
-  <link name="base_link">
-    <visual>
-      <geometry>
-        <box size="${base_size} ${base_size} ${base_size}"/>
-      </geometry>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <material name="blue">
-        <color rgba="0 0 1 1"/>
-      </material>
-    </visual>
+  <xacro:standard_revolute_joint
+    name="shoulder_pan_joint"
+    parent_link="base_link"
+    child_link="shoulder_link"
+    origin_xyz="0 0 0.1625"
+    origin_rpy="0 0 ${M_PI}"
+    axis_xyz="0 0 1"
+    effort="${joint_effort_shoulder_elbow}"
+    lower="${joint_lower_limit}"
+    upper="${joint_upper_limit}"
+    velocity="${joint_velocity_shoulder_elbow}"/>
+
+  <xacro:standard_link
+    name="shoulder_link"
+    visual_mesh_filename="shoulder.dae"
+    collision_mesh_filename="shoulder.stl"
+    mass_value="3.7"
+    ixx="0.010267495893" iyy="0.010267495893" izz="0.00666">
+    <visual_origin rpy="0 0 ${M_PI}" xyz="0 0 0"/>
+    <collision_origin rpy="0 0 ${M_PI}" xyz="0 0 0"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_revolute_joint
+    name="shoulder_lift_joint"
+    parent_link="shoulder_link"
+    child_link="upper_arm_link"
+    origin_xyz="0 0 0"
+    origin_rpy="${mesh_rpy_shoulder}"
+    axis_xyz="0 0 1"
+    effort="${joint_effort_shoulder_elbow}"
+    lower="${joint_lower_limit}"
+    upper="${joint_upper_limit}"
+    velocity="${joint_velocity_shoulder_elbow}"/>
+
+  <xacro:standard_link
+    name="upper_arm_link"
+    visual_mesh_filename="upperarm.dae"
+    collision_mesh_filename="upperarm.stl"
+    mass_value="8.393"
+    ixx="0.138134736413" iyy="0.138134736413" izz="0.0236053125">
+    <visual_origin rpy="${mesh_rpy_forearm_wrist}" xyz="0 0 0.138"/>
+    <collision_origin rpy="${mesh_rpy_forearm_wrist}" xyz="0 0 0.138"/>
+    <inertial_origin rpy="0 ${M_PI/2} 0" xyz="-0.2125 0.0 0.138"/>
+  </xacro:standard_link>
+
+  <xacro:standard_revolute_joint
+    name="elbow_joint"
+    parent_link="upper_arm_link"
+    child_link="forearm_link"
+    origin_xyz="-0.425 0 0"
+    origin_rpy="0 0 0"
+    axis_xyz="0 0 1"
+    effort="${joint_effort_shoulder_elbow}"
+    lower="${joint_lower_limit}"
+    upper="${joint_upper_limit}"
+    velocity="${joint_velocity_shoulder_elbow}"/>
+
+  <xacro:standard_link
+    name="forearm_link"
+    visual_mesh_filename="forearm.dae"
+    collision_mesh_filename="forearm.stl"
+    mass_value="2.275"
+    ixx="0.0323610733889" iyy="0.0323610733889" izz="0.0063984375">
+    <visual_origin rpy="${mesh_rpy_forearm_wrist}" xyz="0 0 0.007"/>
+    <collision_origin rpy="${mesh_rpy_forearm_wrist}" xyz="0 0 0.007"/>
+    <inertial_origin rpy="0 ${M_PI/2} 0" xyz="-0.2125 0.0 0.007"/>
+  </xacro:standard_link>
+
+  <xacro:standard_revolute_joint
+    name="wrist_1_joint"
+    parent_link="forearm_link"
+    child_link="wrist_1_link"
+    origin_xyz="-0.3922 0 0.1333"
+    origin_rpy="0 0 0"
+    axis_xyz="0 0 1"
+    effort="${joint_effort_wrist}"
+    lower="${joint_lower_limit}"
+    upper="${joint_upper_limit}"
+    velocity="${joint_velocity_wrist}"/>
+
+  <xacro:standard_link
+    name="wrist_1_link"
+    visual_mesh_filename="wrist1.dae"
+    collision_mesh_filename="wrist1.stl"
+    mass_value="1.219"
+    ixx="0.00272396513625" iyy="0.00272396513625" izz="0.0034284375">
+    <visual_origin rpy="${mesh_rpy_wrist_offset}" xyz="0 0 -0.127"/>
+    <collision_origin rpy="${mesh_rpy_wrist_offset}" xyz="0 0 -0.127"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_revolute_joint
+    name="wrist_2_joint"
+    parent_link="wrist_1_link"
+    child_link="wrist_2_link"
+    origin_xyz="0 -0.0997 -2.0448811823e-11"
+    origin_rpy="${mesh_rpy_shoulder}"
+    axis_xyz="0 0 1"
+    effort="${joint_effort_wrist}"
+    lower="${joint_lower_limit}"
+    upper="${joint_upper_limit}"
+    velocity="${joint_velocity_wrist}"/>
+
+  <xacro:standard_link
+    name="wrist_2_link"
+    visual_mesh_filename="wrist2.dae"
+    collision_mesh_filename="wrist2.stl"
+    mass_value="1.219"
+    ixx="0.00272194058122" iyy="0.00272194058122" izz="0.0034284375">
+    <visual_origin rpy="0 0 0" xyz="0 0 -0.0997"/>
+    <collision_origin rpy="0 0 0" xyz="0 0 -0.0997"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_revolute_joint
+    name="wrist_3_joint"
+    parent_link="wrist_2_link"
+    child_link="wrist_3_link"
+    origin_xyz="0 0.0996 -2.04283014801e-11"
+    origin_rpy="${mesh_rpy_shoulder} ${M_PI} ${M_PI}"
+    axis_xyz="0 0 1"
+    effort="${joint_effort_wrist}"
+    lower="${joint_lower_limit}"
+    upper="${joint_upper_limit}"
+    velocity="${joint_velocity_wrist}"/>
+
+  <xacro:standard_link
+    name="wrist_3_link"
+    visual_mesh_filename="wrist3.dae"
+    collision_mesh_filename="wrist3.stl"
+    mass_value="0.1879"
+    ixx="0.000134270154625" iyy="0.000134270154625" izz="0.00019024875">
+    <visual_origin rpy="${mesh_rpy_wrist_offset}" xyz="0 0 -0.0989"/>
+    <collision_origin rpy="${mesh_rpy_wrist_offset}" xyz="0 0 -0.0989"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 -0.025"/>
+  </xacro:standard_link>
+
+  <joint name="ee_fixed_joint" type="fixed">
+    <parent link="wrist_3_link"/>
+    <child link="ee_link"/>
+    <origin rpy="0.0 -${M_PI/2} ${M_PI/2}" xyz="0.0 0.0 0.0"/>
+  </joint>
+  <link name="ee_link">
     <collision>
       <geometry>
-        <box size="${base_size} ${base_size} ${base_size}"/>
+        <box size="0.01 0.01 0.01"/>
       </geometry>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <contact_coefficients mu="${contact_mu}" kp="${contact_kp}" kd="${contact_kd}"/>
+      <origin rpy="0 0 0" xyz="-0.01 0 0"/>
     </collision>
-    <inertial>
-      <mass value="${base_mass}"/>
-      <inertia ixx="${link_inertia_ixx}" ixy="${link_inertia_ixy}" ixz="${link_inertia_ixz}"
-               iyy="${link_inertia_iyy}" iyz="${link_inertia_iyz}"
-               izz="${link_inertia_izz}"/>
-    </inertial>
   </link>
 
-  <!-- リンク1のインスタンス化 -->
-  <xacro:cylinder_link name="link1" length="${link_length}" radius="${link_radius}"
-                       mass="${link_mass}" color_rgba="1 0 0 1"/>
+  <link name="base"/>
+  <joint name="base_link-base_fixed_joint" type="fixed">
+    <origin rpy="0 0 -${M_PI}" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="base"/>
+  </joint>
 
-  <!-- ジョイント1のインスタンス化 (base_linkとlink1を接続) -->
-  <xacro:revolute_joint name="joint1" parent_link="base_link" child_link="link1"
-                        origin_xyz="0 0 ${base_size/2}" origin_rpy="0 0 0" axis_xyz="0 0 1"/>
+  <link name="tool0"/>
+  <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="wrist_3_link"/>
+    <child link="tool0"/>
+  </joint>
 
-  <!-- リンク2のインスタンス化 -->
-  <xacro:cylinder_link name="link2" length="${link_length}" radius="${link_radius}"
-                       mass="${link_mass}" color_rgba="0 1 0 1"/>
-
-  <!-- ジョイント2のインスタンス化 (link1とlink2を接続) -->
-  <xacro:revolute_joint name="joint2" parent_link="link1" child_link="link2"
-                        origin_xyz="0 0 ${link_length}" origin_rpy="0 0 0" axis_xyz="0 0 1"/>
-
-  <!-- リンク3のインスタンス化 -->
-  <xacro:cylinder_link name="link3" length="${link_length}" radius="${link_radius}"
-                       mass="${link_mass}" color_rgba="1 1 0 1"/>
-
-  <!-- ジョイント3のインスタンス化 (link2とlink3を接続) -->
-  <xacro:revolute_joint name="joint3" parent_link="link3" child_link="link3"
-                        origin_xyz="0 0 ${link_length}" origin_rpy="0 0 0" axis_xyz="0 0 1"/>
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </joint>
 
 </robot>

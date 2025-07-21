@@ -68,6 +68,41 @@
             gap: 2%;
         }
 
+        .slide-layout-code-image {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            height: 100%;
+            gap: 2%;
+        }
+
+        .slide-layout-image-code {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            height: 100%;
+            gap: 2%;
+        }
+
+        .slide-layout-image-code .image-section {
+            flex: 0 0 48%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-layout-image-code .code-section {
+            flex: 0 0 48%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-layout-image-code .code-section pre {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
         .code-section {
             flex: 0 0 45%;
         }
@@ -157,10 +192,25 @@
                     </code></pre>
                     </div>
                     <div class="text-section">
-                        <p>この後の説明を見ながらURDFを書き換えてみてください</p>
+                        <p>このlaunchを実行してください</p>
                     </div>
                 </div>
             </section>
+
+                 <!-- URDFの表示デモ -->
+                <section>
+                    <h3>このような画面になればok</h3>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
+                        </div>
+                        <div class="text-section">
+                            <p>右下のGUIで関節を動かせます</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
 
             <!-- ロボットモデルを表示するまでの流れ -->
             <section>
@@ -215,10 +265,10 @@
                     <p>この構造をファイルに落とし込んだのがURDF↓</p>
                 </section>
 
-                <!-- URDF -->
+
                 <section>
                     <h2>URDF（Unified Robot Description Format）</h2>
-                    <p>3リンクロボットの例</p>
+                    <p>Ur5eの例</p>
                     <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code class="language-xml external-urdf-code" data-trim>
@@ -227,8 +277,22 @@
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>←よくよく見ると、ジョイントとリンクの定義が並んでいるだけ</li>
+                                <li>一見長くて分かりにくいが。。。</li>
                             </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- URDF -->
+                <section>
+                    <h2>URDF（Unified Robot Description Format）</h2>
+                    <p>VS Codeで折りたたんだ</p>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/urdf_folding.png" alt="URDF folding">
+                        </div>
+                        <div class="text-section">
+                            <p>←よく見るとlinkとjointが並んでいるだけ</p>
                         </div>
                     </div>
                 </section>
@@ -315,7 +379,7 @@
 
                 <!-- 物理属性 -->
                 <section>
-                    <h2>関節の物理属性</h2>
+                    <h2>ジョイントの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
                     <div class="slide-layout-code">
                         <div class="code-section">
@@ -451,36 +515,20 @@
                     </div>
                 </section>
                 <section>
-                    <h2>launchファイルの例</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code data-trim data-line-numbers class="xml">
-&lt;launch&gt;
-  &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
-  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
-  &lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;
-  &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
-&lt;/launch&gt;
-                    </code></pre>
+                    <h2>launchファイルの解説</h2>
+                    <div class="slide-layout-image-code">
+                        <div class="image-section">
+                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
                         </div>
-                        <div class="text-section">
-                            <p>必要に応じて、自分で作成したURDFファイルを使ってください</p>
+                        <div class="code-section">
+                            <pre><code class="language-xml external-launch-code" data-trim>
+<!-- LAUNCHコードが外部ファイルから読み込まれます -->
+</code></pre>
                         </div>
                     </div>
                 </section>
 
-                <!-- URDFの表示デモ -->
-                <section>
-                    <h3>URDFの表示デモ</h3>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
-                        </div>
-                        <div class="text-section">
-                            <p>TFを見るとURDFで記述したjointとlinkが動いているのが見える</p>
-                        </div>
-                    </div>
-                </section>
+
             </section>
 
             <!-- TFとは何か？ -->
@@ -585,6 +633,14 @@
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
+                
+                // LAUNCHコードの読み込み
+                const launchResponse = await fetch('launch_example.xml');
+                const launchText = await launchResponse.text();
+                const escapedLaunch = launchText
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
 
                 // URDFコード要素に挿入
                 const urdfElements = document.querySelectorAll('.external-urdf-code');
@@ -599,6 +655,14 @@
                 xacroElements.forEach(element => {
                     element.className = element.className.replace(/hljs[^\s]*/g, '');
                     element.innerHTML = escapedXacro;
+                    hljs.highlightElement(element);
+                });
+                
+                // LAUNCHコード要素に挿入
+                const launchElements = document.querySelectorAll('.external-launch-code');
+                launchElements.forEach(element => {
+                    element.className = element.className.replace(/hljs[^\s]*/g, '');
+                    element.innerHTML = escapedLaunch;
                     hljs.highlightElement(element);
                 });
 
