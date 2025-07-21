@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<robot name="three_link_robot_full">
+
+  <!-- ロボットのベースリンク定義 -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- 接触係数の定義 -->
+      <contact_coefficients mu="0.5" kp="1000.0" kd="1.0"/>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- リンク1の定義 -->
+  <link name="link1">
+    <visual>
+      <geometry>
+        <cylinder radius="0.02" length="0.5"/>
+      </geometry>
+      <!-- リンクの原点からの形状の相対的な位置と向き (シリンダーの中心をリンクの原点から0.25m上に配置) -->
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.02" length="0.5"/>
+      </geometry>
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <!-- 接触係数の定義 -->
+      <contact_coefficients mu="0.5" kp="1000.0" kd="1.0"/>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ジョイント1の定義 (base_linkとlink1を接続) -->
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link1"/>
+    <!-- base_linkの原点から見たジョイントの原点 (base_linkの上面中央に接続) -->
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <!-- Z軸周りの回転 -->
+    <axis xyz="0 0 1"/>
+    <!-- 回転の物理的な制限 -->
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="100"/>
+  </joint>
+
+  <!-- リンク2の定義 -->
+  <link name="link2">
+    <visual>
+      <geometry>
+        <cylinder radius="0.02" length="0.5"/>
+      </geometry>
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <material name="green">
+        <color rgba="0 1 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.02" length="0.5"/>
+      </geometry>
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <!-- 接触係数の定義 -->
+      <contact_coefficients mu="0.5" kp="1000.0" kd="1.0"/>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ジョイント2の定義 (link1とlink2を接続) -->
+  <joint name="joint2" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+    <!-- link1の原点から見たジョイントの原点 (link1の先端に接続) -->
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="100"/>
+  </joint>
+
+  <!-- リンク3の定義 -->
+  <link name="link3">
+    <visual>
+      <geometry>
+        <cylinder radius="0.02" length="0.5"/>
+      </geometry>
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <material name="yellow">
+        <color rgba="1 1 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.02" length="0.5"/>
+      </geometry>
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <!-- 接触係数の定義 -->
+      <contact_coefficients mu="0.5" kp="1000.0" kd="1.0"/>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ジョイント3の定義 (link2とlink3を接続) -->
+  <joint name="joint3" type="revolute">
+    <parent link="link2"/>
+    <child link="link3"/>
+    <!-- link2の原点から見たジョイントの原点 (link2の先端に接続) -->
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="100"/>
+  </joint>
+
+</robot>
