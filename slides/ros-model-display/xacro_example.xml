@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!-- Xacroの名前空間を定義 -->
+<robot name="three_link_robot_xacro" xmlns:xacro="http://ros.org/xacro">
+
+  <!-- ===================================================================== -->
+  <!-- グローバルプロパティの定義 -->
+  <!-- ===================================================================== -->
+  <xacro:property name="M_PI" value="3.1415926535897931"/>
+
+  <!-- リンクの寸法 -->
+  <xacro:property name="base_size" value="0.1"/>
+  <xacro:property name="link_radius" value="0.02"/>
+  <xacro:property name="link_length" value="0.5"/>
+
+  <!-- リンクの質量 -->
+  <xacro:property name="base_mass" value="0.5"/>
+  <xacro:property name="link_mass" value="0.1"/>
+
+  <!-- 慣性モーメントの一般的な値 (簡略化のため、ここでは全て同じ値を使用) -->
+  <xacro:property name="link_inertia_ixx" value="0.001"/>
+  <xacro:property name="link_inertia_ixy" value="0.0"/>
+  <xacro:property name="link_inertia_ixz" value="0.0"/>
+  <xacro:property name="link_inertia_iyy" value="0.001"/>
+  <xacro:property name="link_inertia_iyz" value="0.0"/>
+  <xacro:property name="link_inertia_izz" value="0.001"/>
+
+  <!-- 接触係数 -->
+  <xacro:property name="contact_mu" value="0.5"/>
+  <xacro:property name="contact_kp" value="1000.0"/>
+  <xacro:property name="contact_kd" value="1.0"/>
+
+  <!-- ジョイントの制限 -->
+  <xacro:property name="joint_limit_lower" value="-${M_PI}"/>
+  <xacro:property name="joint_limit_upper" value="${M_PI}"/>
+  <xacro:property name="joint_effort" value="100"/>
+  <xacro:property name="joint_velocity" value="100"/>
+
+  <!-- ===================================================================== -->
+  <!-- マクロの定義 -->
+  <!-- ===================================================================== -->
+
+  <!-- 汎用的なシリンダーリンクのマクロ -->
+  <xacro:macro name="cylinder_link" params="name length radius mass color_rgba">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+        <!-- シリンダーの中心をリンクの原点からZ軸方向にlength/2だけオフセット -->
+        <origin xyz="0 0 ${length/2}" rpy="0 0 0"/>
+        <material name="${name}_material">
+          <color rgba="${color_rgba}"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+        <origin xyz="0 0 ${length/2}" rpy="0 0 0"/>
+        <contact_coefficients mu="${contact_mu}" kp="${contact_kp}" kd="${contact_kd}"/>
+      </collision>
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="${link_inertia_ixx}" ixy="${link_inertia_ixy}" ixz="${link_inertia_ixz}"
+                 iyy="${link_inertia_iyy}" iyz="${link_inertia_iyz}"
+                 izz="${link_inertia_izz}"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- 汎用的な回転ジョイントのマクロ -->
+  <xacro:macro name="revolute_joint" params="name parent_link child_link origin_xyz origin_rpy axis_xyz">
+    <joint name="${name}" type="revolute">
+      <parent link="${parent_link}"/>
+      <child link="${child_link}"/>
+      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+      <axis xyz="${axis_xyz}"/>
+      <limit lower="${joint_limit_lower}" upper="${joint_limit_upper}"
+             effort="${joint_effort}" velocity="${joint_velocity}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ===================================================================== -->
+  <!-- ロボットの構造定義 -->
+  <!-- ===================================================================== -->
+
+  <!-- ベースリンク -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${base_size} ${base_size} ${base_size}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${base_size} ${base_size} ${base_size}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <contact_coefficients mu="${contact_mu}" kp="${contact_kp}" kd="${contact_kd}"/>
+    </collision>
+    <inertial>
+      <mass value="${base_mass}"/>
+      <inertia ixx="${link_inertia_ixx}" ixy="${link_inertia_ixy}" ixz="${link_inertia_ixz}"
+               iyy="${link_inertia_iyy}" iyz="${link_inertia_iyz}"
+               izz="${link_inertia_izz}"/>
+    </inertial>
+  </link>
+
+  <!-- リンク1のインスタンス化 -->
+  <xacro:cylinder_link name="link1" length="${link_length}" radius="${link_radius}"
+                       mass="${link_mass}" color_rgba="1 0 0 1"/>
+
+  <!-- ジョイント1のインスタンス化 (base_linkとlink1を接続) -->
+  <xacro:revolute_joint name="joint1" parent_link="base_link" child_link="link1"
+                        origin_xyz="0 0 ${base_size/2}" origin_rpy="0 0 0" axis_xyz="0 0 1"/>
+
+  <!-- リンク2のインスタンス化 -->
+  <xacro:cylinder_link name="link2" length="${link_length}" radius="${link_radius}"
+                       mass="${link_mass}" color_rgba="0 1 0 1"/>
+
+  <!-- ジョイント2のインスタンス化 (link1とlink2を接続) -->
+  <xacro:revolute_joint name="joint2" parent_link="link1" child_link="link2"
+                        origin_xyz="0 0 ${link_length}" origin_rpy="0 0 0" axis_xyz="0 0 1"/>
+
+  <!-- リンク3のインスタンス化 -->
+  <xacro:cylinder_link name="link3" length="${link_length}" radius="${link_radius}"
+                       mass="${link_mass}" color_rgba="1 1 0 1"/>
+
+  <!-- ジョイント3のインスタンス化 (link2とlink3を接続) -->
+  <xacro:revolute_joint name="joint3" parent_link="link3" child_link="link3"
+                        origin_xyz="0 0 ${link_length}" origin_rpy="0 0 0" axis_xyz="0 0 1"/>
+
+</robot>

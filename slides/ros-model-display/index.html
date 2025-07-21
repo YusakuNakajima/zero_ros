@@ -84,11 +84,16 @@
             margin: 0;
             max-height: 65vh;
             overflow-y: auto;
+            overflow-x: auto;
+            white-space: pre-wrap;
         }
 
-        .urdf-code {
-            /* URDFコード専用のスタイル */
+        .code-section code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
+
     </style>
 </head>
 
@@ -366,13 +371,20 @@
                 <!-- XACRO -->
                 <section>
                     <h2>XACRO（XML Macros for Robots）</h2>
-                    <div class="slide-content">
-                        <ul>
-                            <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
-                            <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
-                            <li>XACRO読み込み時に変数を渡す</li>
-                            <li>関数で繰り返し構造の定義を簡素化する</li>
-                        </ul>
+                    <div class="code-layout">
+                        <div class="code-section">
+                            <pre><code class="language-xml xacro-code" data-trim>
+<!-- XACROコードが外部ファイルから読み込まれます -->
+</code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
+                                <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
+                                <li>XACRO読み込み時に変数を渡す</li>
+                                <li>関数で繰り返し構造の定義を簡素化する</li>
+                            </ul>
+                        </div>
                     </div>
                 </section>
 
@@ -381,7 +393,7 @@
                     <h2>エンドエフェクタを追加したい場合</h2>
                     <div class="code-layout">
                         <div class="code-section">
-                            <pre><code data-trim>
+                            <pre><code class="language-xml" data-trim>
 &lt;?xml version="1.0"?&gt;
 &lt;robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot_with_end_effector"&gt;
   &lt;xacro:include filename="$(find my_robot_arm)/urdf/arm.xacro"/&gt;
@@ -389,12 +401,14 @@
   &lt;joint name="arm_to_ee" type="fixed" /&gt;
   &lt;link name="end_effector_1"/&gt;
 &lt;/robot&gt;
-                    </code></pre>
+</code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
                                 <li>XACROのinclude機能が便利です</li>
                                 <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよいです</li>
+                                <li>固定ジョイント（type="fixed"）でアームの先端に接続</li>
+                                <li>エンドエフェクタは用途に応じて付け替え可能</li>
                             </ul>
                         </div>
                     </div>
@@ -534,8 +548,8 @@
                 // その他のChalkboardショートカットはデフォルトで有効
             }
         });
-        // URDF外部ファイル読み込み関数
-        async function loadURDFCode() {
+        // 外部ファイル読み込み関数
+        async function loadExternalCode() {
             try {
                 const response = await fetch('urdf_example.xml');
                 const urdfText = await response.text();
@@ -546,24 +560,38 @@
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
 
-                // すべてのURDFコード要素に挿入
+                // XACROコードの読み込み
+                const xacroResponse = await fetch('xacro_example.xml');
+                const xacroText = await xacroResponse.text();
+                const escapedXacro = xacroText
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                
+                // URDFコード要素に挿入
                 const urdfElements = document.querySelectorAll('.urdf-code');
                 urdfElements.forEach(element => {
-                    // 既存のハイライトクラスを削除
                     element.className = element.className.replace(/hljs[^\s]*/g, '');
                     element.innerHTML = escapedUrdf;
-
-                    // 個別に各要素をハイライト
                     hljs.highlightElement(element);
                 });
+                
+                // XACROコード要素に挿入
+                const xacroElements = document.querySelectorAll('.xacro-code');
+                xacroElements.forEach(element => {
+                    element.className = element.className.replace(/hljs[^\s]*/g, '');
+                    element.innerHTML = escapedXacro;
+                    hljs.highlightElement(element);
+                });
+                
             } catch (error) {
-                console.error('URDFファイルの読み込みに失敗しました:', error);
+                console.error('外部ファイルの読み込みに失敗しました:', error);
             }
         }
 
-        // Reveal.js初期化とURDF読み込みを調整
+        // Reveal.js初期化と外部ファイル読み込みを調整
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadURDFCode();
+            await loadExternalCode();
             // URDFコード読み込み完了後にHighlight.jsを実行
             hljs.highlightAll();
         });
