@@ -83,7 +83,7 @@
 添付したフローチャートの画像を解析し、draw.ioで再編集可能なXML形式のコードを出力してください。
 
 ```
-![alt text](image.png)
+![alt text](rviz_flow.png)
 
 -----
 

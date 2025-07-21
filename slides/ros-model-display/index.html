@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,8 +46,8 @@
         }
 
         .slide-image {
-            flex: 0 0 45%;
-            margin-right: 5%;
+            flex: 0 0 50%;
+            margin-right: 0%;
         }
 
         .slide-content {
@@ -56,6 +58,32 @@
         .slide-image img {
             width: 100%;
             height: auto;
+        }
+
+        .code-layout {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            height: 100%;
+            gap: 2%;
+        }
+
+        .code-section {
+            flex: 0 0 45%;
+        }
+
+        .text-section {
+            flex: 0 0 50%;
+            text-align: left;
+        }
+
+        .code-section pre {
+            width: 100%;
+            font-size: 0.35em;
+            line-height: 1.0em;
+            margin: 0;
+            max-height: 65vh;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -121,7 +149,6 @@
                     <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー">
                 </div>
                 <div class="slide-content">
-                    <p>データの流れを理解することが大切</p>
                 </div>
             </section>
             <!-- ステップ1：URDFの書き方 -->
@@ -145,63 +172,176 @@
 
                 <!-- ロボットモデル構造 -->
                 <section>
-                    <h2>ロボットモデル = ロボットアームの構造</h2>
+                    <h2>ロボットアームの構造</h2>
                     <div class="slide-layout">
                         <div class="slide-image">
-                            <img src="media/arm_and_end_effector.png" alt="ロボットアーム構造図">
+                            <img src="media/robot_structure.png" alt="ロボットアーム構造図">
                         </div>
                         <div class="slide-content">
                             <ul>
-                                <li>ジョイント(関節): モーターが入っていて動く</li>
-                                <li>リンク: ジョイントを繋ぐ。剛性が高い方がロボット動作の精度が良くなる</li>
-                                <li>エンドエフェクタ(手先効果器): 作業をする手先。作業に応じて付け替える</li>
+                                <li>ジョイント(関節):<br>モーターが動く部分</li>
+                                <li>リンク: <br>ジョイントを繋ぐ部分</li>
+                                <li>エンドエフェクタ(手先効果器):<br>作業をする手先</li>
                             </ul>
                         </div>
                     </div>
+                    <p>この構造をファイルに落とし込んだのがURDF↓</p>
                 </section>
 
                 <!-- URDF -->
                 <section>
                     <h2>URDF（Unified Robot Description Format）</h2>
-                    <ul>
-                        <li>ジョイントとリンクの定義が書いてあり、以下が主な要素</li>
-                        <li><strong>Joint</strong>: 自由度(回転か並進か等), 親リンクと子リンク</li>
-                        <li><strong>Link</strong>:
+                    <p>3リンクロボットの例</p>
+                    <div class="code-layout">
+                        <div class="code-section">
+                            <pre><code class="language-xml" data-trim>
+&lt;?xml version="1.0"?&gt;
+&lt;robot name="three_link_robot"&gt;
+
+  &lt;!-- ベースリンク --&gt;
+  &lt;link name="base_link"&gt;
+    &lt;visual&gt;
+      &lt;geometry&gt;
+        &lt;box size="0.1 0.1 0.1"/&gt;
+      &lt;/geometry&gt;
+      &lt;material name="blue"&gt;
+        &lt;color rgba="0 0 1 1"/&gt;
+      &lt;/material&gt;
+    &lt;/visual&gt;
+  &lt;/link&gt;
+
+  &lt;!-- リンク1 --&gt;
+  &lt;link name="link1"&gt;
+    &lt;visual&gt;
+      &lt;geometry&gt;  
+        &lt;cylinder radius="0.02" length="0.5"/&gt;
+      &lt;/geometry&gt;
+      &lt;origin xyz="0 0 0.25" rpy="0 0 0"/&gt;
+      &lt;material name="red"&gt;
+        &lt;color rgba="1 0 0 1"/&gt;
+      &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;collision&gt;
+      &lt;geometry&gt;
+        &lt;cylinder radius="0.02" length="0.5"/&gt;
+      &lt;/geometry&gt;
+      &lt;origin xyz="0 0 0.25" rpy="0 0 0"/&gt;
+    &lt;/collision&gt;
+    &lt;inertial&gt;
+      &lt;mass value="0.1"/&gt;
+      &lt;inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/&gt;
+    &lt;/inertial&gt;
+  &lt;/link&gt;
+
+  &lt;!-- ジョイント1 --&gt;
+  &lt;joint name="joint1" type="revolute"&gt;
+    &lt;parent link="base_link"/&gt;
+    &lt;child link="link1"/&gt;
+    &lt;origin xyz="0 0 0.05" rpy="0 0 0"/&gt; &lt;!-- base_linkの上部に接続 --&gt;
+    &lt;axis xyz="0 0 1"/&gt; &lt;!-- Z軸周りの回転 --&gt;
+    &lt;limit lower="-3.14" upper="3.14" effort="100" velocity="100"/&gt;
+  &lt;/joint&gt;
+
+  &lt;!-- リンク2 --&gt;
+  &lt;link name="link2"&gt;
+    &lt;visual&gt;
+      &lt;geometry&gt;
+        &lt;cylinder radius="0.02" length="0.5"/&gt;
+      &lt;/geometry&gt;
+      &lt;origin xyz="0 0 0.25" rpy="0 0 0"/&gt;
+      &lt;material name="green"&gt;
+        &lt;color rgba="0 1 0 1"/&gt;
+      &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;collision&gt;
+      &lt;geometry&gt;
+        &lt;cylinder radius="0.02" length="0.5"/&gt;
+      &lt;/geometry&gt;
+      &lt;origin xyz="0 0 0.25" rpy="0 0 0"/&gt;
+    &lt;/collision&gt;
+    &lt;inertial&gt;
+      &lt;mass value="0.1"/&gt;
+      &lt;inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/&gt;
+    &lt;/inertial&gt;
+  &lt;/link&gt;
+
+  &lt;!-- ジョイント2 --&gt;
+  &lt;joint name="joint2" type="revolute"&gt;
+    &lt;parent link="link1"/&gt;
+    &lt;child link="link2"/&gt;
+    &lt;origin xyz="0 0 0.5" rpy="0 0 0"/&gt; &lt;!-- link1の端に接続 --&gt;
+    &lt;axis xyz="0 0 1"/&gt;
+    &lt;limit lower="-3.14" upper="3.14" effort="100" velocity="100"/&gt;
+  &lt;/joint&gt;
+
+  &lt;!-- リンク3 --&gt;
+  &lt;link name="link3"&gt;
+    &lt;visual&gt;
+      &lt;geometry&gt;
+        &lt;cylinder radius="0.02" length="0.5"/&gt;
+      &lt;/geometry&gt;
+      &lt;origin xyz="0 0 0.25" rpy="0 0 0"/&gt;
+      &lt;material name="yellow"&gt;
+        &lt;color rgba="1 1 0 1"/&gt;
+      &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;collision&gt;
+      &lt;geometry&gt;
+        &lt;cylinder radius="0.02" length="0.5"/&gt;
+      &lt;/geometry&gt;
+      &lt;origin xyz="0 0 0.25" rpy="0 0 0"/&gt;
+    &lt;/collision&gt;
+    &lt;inertial&gt;
+      &lt;mass value="0.1"/&gt;
+      &lt;inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/&gt;
+    &lt;/inertial&gt;
+  &lt;/link&gt;
+
+  &lt;!-- ジョイント3 --&gt;
+  &lt;joint name="joint3" type="revolute"&gt;
+    &lt;parent link="link2"/&gt;
+    &lt;child link="link3"/&gt;
+    &lt;origin xyz="0 0 0.5" rpy="0 0 0"/&gt; &lt;!-- link2の端に接続 --&gt;
+    &lt;axis xyz="0 0 1"/&gt;
+    &lt;limit lower="-3.14" upper="3.14" effort="100" velocity="100"/&gt;
+  &lt;/joint&gt;
+
+&lt;/robot&gt;
+</code></pre>
+                        </div>
+                        <div class="text-section">
                             <ul>
-                                <li>Visual: JointとLinkは骨組みしか定義していない。ここでstlファイルなどを定義して肉付け</li>
-                                <li>Collision: 干渉計算用の肉付け(通常は計算量を減らすためにSTLではなく円柱などシンプルな形状)</li>
-                                <li>Inertial: 物理計算用の質量や慣性テンソルの定義</li>
+                                <li>←よくよく見ると、ジョイントとリンクの定義が並んでいるだけ</li>
                             </ul>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- XACRO -->
                 <section>
                     <h2>XACRO（XML Macros for Robots）</h2>
-                    <div class="slide-layout">
-                        <div class="slide-image">
-                            <img src="media/xacro_example.png" alt="XACRO例">
-                        </div>
-                        <div class="slide-content">
-                            <ul>
-                                <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
-                                <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
-                                <li>XACRO読み込み時に変数を渡す</li>
-                                <li>関数で繰り返し構造の定義を簡素化する</li>
-                            </ul>
-                        </div>
+                    <div class="slide-content">
+                        <ul>
+                            <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
+                            <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
+                            <li>XACRO読み込み時に変数を渡す</li>
+                            <li>関数で繰り返し構造の定義を簡素化する</li>
+                        </ul>
                     </div>
                 </section>
 
                 <!-- エンドエフェクタ追加 -->
                 <section>
                     <h2>エンドエフェクタを追加したい場合</h2>
-                    <ul>
-                        <li>XACROのinclude機能が便利です</li>
-                        <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよいです</li>
-                    </ul>
-                    <pre><code data-trim>
+                    <div class="code-layout">
+                        <div class="code-section">
+                            <pre><code data-trim>
 &lt;?xml version="1.0"?&gt;
 &lt;robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot_with_end_effector"&gt;
   &lt;xacro:include filename="$(find my_robot_arm)/urdf/arm.xacro"/&gt;
@@ -210,6 +350,14 @@
   &lt;link name="end_effector_1"/&gt;
 &lt;/robot&gt;
                     </code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>XACROのinclude機能が便利です</li>
+                                <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよいです</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
             </section>
 
@@ -232,7 +380,9 @@
                 </section>
                 <section>
                     <h2>launchファイルの例</h2>
-                    <pre><code data-trim data-line-numbers class="xml">
+                    <div class="code-layout">
+                        <div class="code-section">
+                            <pre><code data-trim data-line-numbers class="xml">
 &lt;launch&gt;
   &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
   &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
@@ -240,7 +390,11 @@
   &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
 &lt;/launch&gt;
                     </code></pre>
-                    <p>必要に応じて、自分で作成したURDFファイルを使ってください</p>
+                        </div>
+                        <div class="text-section">
+                            <p>必要に応じて、自分で作成したURDFファイルを使ってください</p>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- URDFの表示デモ -->
@@ -303,7 +457,8 @@
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/zoom/zoom.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
     <script>
         Reveal.initialize({
             // 基本的な表示設定
@@ -339,6 +494,8 @@
                 // その他のChalkboardショートカットはデフォルトで有効
             }
         });
+        // Highlight.js の初期化
+        hljs.highlightAll();
     </script>
 </body>
 
