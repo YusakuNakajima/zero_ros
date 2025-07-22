@@ -133,7 +133,7 @@ Reveal.initialize({
 
 ### スライド一覧
 
-1. **[ゼロからのロボットアーム入門](slides/robot-arm-introduction/)** - ロボットアームの基礎知識と選定方法
+1. **[ゼロからのロボットアーム入門](slides/robot-arm-operation/)** - ロボットアームの基礎知識と選定方法
 2. **[ゼロからのROS入門](slides/ros-introduction/)** - ROSの基礎概念と学習リソース
 3. **[ロボットモデルの表示](slides/ros-model-display/)** - URDFとTFを使ったロボット可視化
 4. **[アーム位置制御とモーションプランニング](slides/ros-arm-position-control/)** - MoveItとJTCによる制御実装
