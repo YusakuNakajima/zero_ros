@@ -693,8 +693,10 @@
                 else if (jointIndex === 1) joints[1].rotation.y -= jogStep.joint * dir;
                 else joints[2].rotation.y += jogStep.joint * dir;
             } else if (type === 'cartesian') {
-                const axis = btn.dataset.axis, currentPos = new THREE.Vector3(), newTargetPos = currentPos.clone();
+                const axis = btn.dataset.axis;
+                const currentPos = new THREE.Vector3();
                 endEffector.getWorldPosition(currentPos);
+                const newTargetPos = currentPos.clone();
                 if (currentJogMode === 'base') {
                     const delta = new THREE.Vector3(); delta[axis] = jogStep.cartesian * dir;
                     newTargetPos.add(delta);
