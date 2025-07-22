@@ -1,21 +1,30 @@
-<!DOCTYPE html>
-<html lang="ja">
+<!doctype html>
+<html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ロボットアーム入門 - システムインテグレーション</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ロボットアーム入門~システムインテグレーション~</title>
+    
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Chalkboard Plugin CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- Common Styles -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+    
     <style>
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            font-size: 42px;
-            font-weight: normal;
-        }
         .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
             text-transform: none;
             font-family: 'Noto Sans JP', sans-serif;
@@ -252,29 +261,47 @@
         </div>
     </div>
 
+    <!-- Reveal.js Core and Plugins -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/plugin/chalkboard/plugin.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+    
     <script>
         Reveal.initialize({
+            // Basic display settings
             controls: true,
             progress: true,
             center: true,
             hash: true,
+            slideNumber: true,
+
+            // Plugin activation
             plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
                 RevealZoom,
                 RevealMenu,
                 RevealChalkboard
             ],
+
+            // Plugin configurations
             menu: {
                 numbers: true,
                 title: 'プレゼンテーション目次'
             },
             chalkboard: {
-                showControls: true
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
             },
+
+            // Keyboard shortcuts
             keyboard: {
                 'm': function() { RevealMenu.toggle(); }
             }
