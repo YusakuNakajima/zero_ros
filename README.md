@@ -4,6 +4,8 @@
 [![ROS2](https://img.shields.io/badge/ROS2-Humble-green)](https://docs.ros.org/en/humble/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+📋 このスライド資料は2025年7/28~7/31のロボット勉強会用に作成されました。現時点での無断転用・無断転載は禁止させていただきます。使いたい場合はご相談ください。
+
 ロボット工学とROS (Robot Operating System) の基礎を学ぶためのReveal.js製教育スライド集です。
 初心者から中級者まで、段階的にロボットアーム制御の知識とスキルを身につけることができます。
 
