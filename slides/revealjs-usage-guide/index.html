@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RevealJSスライドの使い方</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+    <style>
+        .reveal {
+            font-family: "Noto Sans JP", sans-serif;
+            font-size: 42px;
+            font-weight: normal;
+        }
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            text-transform: none;
+        }
+        .reveal img {
+            border: none;
+            box-shadow: none;
+        }
+        .key-combo {
+            background-color: #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- タイトルスライド -->
+            <section data-background-image="https://images.unsplash.com/photo-1546146830-2cca596142b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" data-background-opacity="0.3">
+                <h1>RevealJSスライドの使い方</h1>
+                <p>パワーポイントとは違う<br>Webベースプレゼンテーションツール</p>
+                <br>
+                <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- スライドの縦横構成 -->
+            <section>
+                <section>
+                    <h2>スライドの縦横構成</h2>
+                    <ul>
+                        <li class="fragment">横に流すとスライドの概要を見れます</li>
+                        <li class="fragment">詳細は縦に深掘りします</li>
+                        <li class="fragment">2次元のスライド構成でより直感的</li>
+                    </ul>
+                </section>
+                
+                <section data-transition="slide-in slide-out">
+                    <h3>横移動：メインストーリー</h3>
+                    <p>←→キーで横に移動</p>
+                    <img src="https://via.placeholder.com/600x300/4CAF50/FFFFFF?text=概要%E2%86%92概要%E2%86%92概要" alt="横移動イメージ" style="max-width: 80%;">
+                    <p>大まかな流れを把握できます</p>
+                </section>
+                
+                <section data-transition="slide-in slide-out">
+                    <h3>縦移動：詳細解説</h3>
+                    <p>↑↓キーで縦に移動</p>
+                    <img src="https://via.placeholder.com/300x400/2196F3/FFFFFF?text=概要%0A%E2%86%93%0A詳細%0A%E2%86%93%0A例" alt="縦移動イメージ" style="max-width: 60%;">
+                    <p>各項目の詳細を学習できます</p>
+                </section>
+            </section>
+
+            <!-- 便利ツール -->
+            <section>
+                <section>
+                    <h2>便利ツール</h2>
+                    <p>キーボードショートカットで<br>プレゼンテーションを強化</p>
+                </section>
+                
+                <section>
+                    <h3><span class="key-combo">ESC</span> キー</h3>
+                    <p>スライドの一覧が見えます</p>
+                    <img src="https://via.placeholder.com/600x400/FF9800/FFFFFF?text=スライド一覧表示" alt="スライド一覧" style="max-width: 70%;">
+                    <p class="fragment">全体構造を俯瞰できます</p>
+                </section>
+                
+                <section>
+                    <h3><span class="key-combo">C</span> キー</h3>
+                    <p>追記できます（描画モード）</p>
+                    <ul>
+                        <li class="fragment">マウスやタッチで描画可能</li>
+                        <li class="fragment">重要なポイントをマーク</li>
+                        <li class="fragment">プレゼン中の補足説明に最適</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3><span class="key-combo">B</span> キー</h3>
+                    <p>黒板モードになります</p>
+                    <ul>
+                        <li class="fragment">黒い背景で自由に描画</li>
+                        <li class="fragment">数式や図解の説明に便利</li>
+                        <li class="fragment">ホワイトボード感覚で使用</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3><span class="key-combo">D</span> キー</h3>
+                    <p>追記した内容はダウンロードできます</p>
+                    <ul>
+                        <li class="fragment">描画内容をPDFで保存</li>
+                        <li class="fragment">プレゼン記録の保持</li>
+                        <li class="fragment">後で見返すことが可能</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- ロボット工学の構成 -->
+            <section>
+                <section>
+                    <h2>ロボット工学の構成</h2>
+                    <p>教科書との併用をおススメします</p>
+                </section>
+                
+                <section>
+                    <h3>このスライドの特徴</h3>
+                    <ul>
+                        <li class="fragment">ロボットを動かした時の直感的な理解を重視</li>
+                        <li class="fragment">実践的なシステム構築にフォーカス</li>
+                        <li class="fragment">図やイラストを多用した視覚的説明</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3>教科書との補完関係</h3>
+                    <img src="https://via.placeholder.com/600x300/9C27B0/FFFFFF?text=教科書+スライド=理解" alt="補完関係" style="max-width: 80%;">
+                    <ul>
+                        <li class="fragment">数式できっちり表現した教科書</li>
+                        <li class="fragment">直感的理解を促すスライド</li>
+                        <li class="fragment">両方で完全な理解を目指す</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- ROSの構成 -->
+            <section>
+                <section>
+                    <h2>ROSの構成</h2>
+                    <p>ROSのチュートリアルとの併用をおススメします</p>
+                </section>
+                
+                <section>
+                    <h3>このスライドの役割</h3>
+                    <ul>
+                        <li class="fragment">ROSチュートリアルには載っていない内容</li>
+                        <li class="fragment">「んでどうやってシステムを構築するの？」</li>
+                        <li class="fragment">実際のシステム構築手法を解説</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3>チュートリアルとの違い</h3>
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="width: 45%;">
+                            <h4>ROSチュートリアル</h4>
+                            <ul>
+                                <li class="fragment">基本的な機能説明</li>
+                                <li class="fragment">個別パッケージの使い方</li>
+                                <li class="fragment">理論的な背景</li>
+                            </ul>
+                        </div>
+                        <div style="width: 45%;">
+                            <h4>このスライド</h4>
+                            <ul>
+                                <li class="fragment">システム全体の構築</li>
+                                <li class="fragment">実践的な統合方法</li>
+                                <li class="fragment">現場での課題解決</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- まとめ -->
+            <section>
+                <h2>RevealJS活用のコツ</h2>
+                <ul>
+                    <li class="fragment">キーボードショートカットを覚える</li>
+                    <li class="fragment">縦横の構成を理解する</li>
+                    <li class="fragment">描画機能で対話的に学習</li>
+                    <li class="fragment">教科書・チュートリアルと併用する</li>
+                </ul>
+                <p class="fragment"><strong>効果的な学習体験を楽しんでください！</strong></p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,   // ナビゲーションUIを表示
+            progress: true,   // 進捗バーを表示
+            center: true,     // スライドを中央揃え
+            hash: true,       // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
+
+            // プラグインの有効化
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+    </script>
+</body>
+</html>

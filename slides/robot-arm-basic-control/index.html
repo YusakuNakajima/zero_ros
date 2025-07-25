@@ -37,14 +37,16 @@
                 <h2>このスライドの担当範囲</h2>
                 <ul>
                     <ul>
-                        <li><a href="../robot-arm-basic-control">こちらのスライド</a>でロボットが動く状態になった前提で、ロボットをどう動かしていくのかを扱います</li>
-                        <li>ロボットの手先位置を制御します</li>
+                        <li><a href="../robot-arm-basic-control">こちらのスライド</a>でロボットが動く状態になった前提で、ロボットをどう動かしていくのかを扱います。
+                        </li>
+                        <li>コードなどはUniversalRobotの例を扱います(他のメーカーでも概ね同じ機能があるはずです)。</li>
                     </ul>
 
                 </ul>
             </section>
             <section>
                 <h2>オススメ参考資料</h2>
+                <p>このスライドは数式を省いて実際のロボットでの説明を重視しています。数式がしっかり載っている教科書との併用すると理解が深まるのでおススメします。</p>
                 <ol>
                     <div style="display: flex; align-items: center; margin-bottom: 20px;">
                         <img src="media/産業用ロボットtheビギニング.jpg" style="width: 20%; margin-right: 20px;">
@@ -59,7 +61,7 @@
 
                 </ol>
             </section>
-       
+
             <section>
                 <section>
                     <h2>ロボット動作の方法</h2>
@@ -82,47 +84,7 @@
                         </div>
                     </div>
                 </section>
-                <section>
-                    <h2>プログラムから動かす場合</h2>
-                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
-                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
-                    <ul>
-                        <li>PTP = moveJ</li>
-                        <li>LIN = moveL</li>
-                        <li>CIRC = moveC</li>
-                    </ul>
-                    <pre><code class="language-python">
-import rtde_control
-import rtde_receive
-import time
-robot_ip = "URロボットのIPアドレス" 
-rtde_c = rtde_control.RTDEControlInterface(robot_ip)
-rtde_r = rtde_receive.RTDEReceiveInterface(robot_ip)
-try:
-    # PTP動作 (関節空間)
-    # 関節角度をラジアンで指定
-    target_joints = [0.1, -1.2, 2.3, -1.5, 0.5, 0.0] #ラジアン表記
-    rtde_c.moveJ(target_joints, 1.0, 0.5) # 速度1.0rad/s, 加速度0.5rad/s^2
-    time.sleep(5)
 
-    # LIN動作 (ベース座標系)
-    # ベース座標系での目標TCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    target_pose_base = [0.3, 0.4, 0.5, 0.0, 0.0, 0.0]
-    rtde_c.moveL(target_pose_base, 0.5, 0.3) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
-
-    # CIRC動作 (ツール座標系)
-    # ツール座標系での中間点と目標点のTCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    via_pose_tool = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0]
-    to_pose_tool = [0.2, 0.0, 0.0, 0.0, 0.0, 0.0]
-    rtde_c.moveC(via_pose_tool, to_pose_tool, 0.5, 0.3, pose_tool=True) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
-
-finally:
-    rtde_r.disconnect()
-                    </code></pre>
-                    <p>安全確認してから実行してください</p>
-                </section>
             </section>
             <section>
                 <h2>動作作成の基本手順</h2>
@@ -338,6 +300,162 @@ finally:
                 </section>
             </section>
             <section>
+                <section>
+                    <h2>プログラムの組み方(URの例)</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/waypoints_viewer.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/waypoints_viewer.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>これまで習った内容をプログラムで組むときの例です</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>ガタツキの少ないモーションを作りたい場合↓</p>
+                </section>
+
+
+                <section>
+                    <h2>プログラムから動かす場合</h2>
+                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
+                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
+                    <ul>
+                        <li>PTP = moveJ</li>
+                        <li>LIN = moveL</li>
+                        <li>CIRC = moveC</li>
+                    </ul>
+                    <pre><code class="language-python">
+import rtde_control
+import rtde_receive
+import time
+robot_ip = "URロボットのIPアドレス" 
+rtde_c = rtde_control.RTDEControlInterface(robot_ip)
+rtde_r = rtde_receive.RTDEReceiveInterface(robot_ip)
+try:
+    # PTP動作 (関節空間)
+    # 関節角度をラジアンで指定
+    target_joints = [0.1, -1.2, 2.3, -1.5, 0.5, 0.0] #ラジアン表記
+    rtde_c.moveJ(target_joints, 1.0, 0.5) # 速度1.0rad/s, 加速度0.5rad/s^2
+    time.sleep(5)
+
+    # LIN動作 (ベース座標系)
+    # ベース座標系での目標TCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
+    target_pose_base = [0.3, 0.4, 0.5, 0.0, 0.0, 0.0]
+    rtde_c.moveL(target_pose_base, 0.5, 0.3) # 速度0.5m/s, 加速度0.3m/s^2
+    time.sleep(5)
+
+    # CIRC動作 (ツール座標系)
+    # ツール座標系での中間点と目標点のTCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
+    via_pose_tool = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0]
+    to_pose_tool = [0.2, 0.0, 0.0, 0.0, 0.0, 0.0]
+    rtde_c.moveC(via_pose_tool, to_pose_tool, 0.5, 0.3, pose_tool=True) # 速度0.5m/s, 加速度0.3m/s^2
+    time.sleep(5)
+
+finally:
+    rtde_r.disconnect()
+                    </code></pre>
+                    <p>安全確認してから実行してください</p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>位置制御だけではタスク達成が難しい場合</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_accuracy_example1.png">
+                            <div style="position: absolute; 
+                                    top: 74%; 
+                                    left: 4%; 
+                                    width: 20%; 
+                                    height: 5%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>部品を嵌め合わせるなどの作業は力を制御すると簡単にできます</li>
+                                <li>よく使われる手法を紹介します</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>柔軟な手先：RCC</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_accuracy_example1.png">
+                            <div style="position: absolute; 
+                                    top: 74%; 
+                                    left: 4%; 
+                                    width: 20%; 
+                                    height: 5%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>部品を嵌め合わせるなどの作業は、ロボットの精度の限界で位置制御だけではうまくはめられない場合があります</li>
+                                <li>手先を柔らかくするRCCが有効です</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>フォース制御</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_accuracy_example1.png">
+                            <div style="position: absolute; 
+                                    top: 74%; 
+                                    left: 4%; 
+                                    width: 20%; 
+                                    height: 5%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>任意の軸だけ位置制御/力制御と切り替える機能</li>
+                                <li>研磨など任意の方向に一定の力をかけ続けて動かすことができます</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>コンプライアンス制御</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_accuracy_example1.png">
+                            <div style="position: absolute; 
+                                    top: 74%; 
+                                    left: 4%; 
+                                    width: 20%; 
+                                    height: 5%; 
+                                    border: 5px solid red; /* 赤い枠線 */
+                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
+                                    "></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>多くのロボットには任意の軸だけ位置制御/力制御と切り替える機能があります</li>
+                                <li>手先にフォーストルクセンサを追加する必要があります</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section>
                 <h2>ロボットアームの精度について</h2>
                 <div style="display: flex;">
                     <div style="flex: 1;">
@@ -441,7 +559,7 @@ finally:
                 <section>
                     <h2>シミュレータ UR Studio</h2>
                     <div style="display: flex;">
-                        <div style="flex: 1;">  
+                        <div style="flex: 1;">
                             <img src="media/ur_studio.png">
                         </div>
                         <div style="flex: 1;">
@@ -479,6 +597,7 @@ finally:
                         <div style="flex: 1;">
                             <ul>
                                 <li>特定の軸だけ力制御と位置制御を切り替え可能</li>
+                                <li>個人的にかなり制御の組み方がうまいと思うので便利です</li>
                                 <li>例えば、Z軸は力制御で一定力で押し付けて、位置制御で動かす等で使う</li>
                             </ul>
                         </div>
@@ -488,7 +607,7 @@ finally:
                 </section>
             </section>
 
-                 <section>
+            <section>
                 <section>
                     <h2>ROSを使う？使わない？</h2>
                     <div style="display: flex;">
