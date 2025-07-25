@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +27,7 @@
     <div class="reveal">
         <div class="slides">
             <section data-background-image="media/teaching_image.jpg" data-background-opacity="0.3">
-                <h1>ゼロからのロボットアーム入門</h1>
+                <h1>ロボットアーム入門 - ロボットの基本操作</h1>
                 <p>大阪大学 中島優作</p>
                 <br>
                 <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
@@ -36,7 +37,7 @@
                 <ul>
                     <ul>
                         <li>この資料はロボットの中でもロボットアームに特化した内容です。<br>AVRなどの移動ロボットは対象外です</li>
-                        <li>スライド内のアプリは完成度は高そうに見えますが、LLMで生成しており実際のロボット制御に使えるものではありません。</li>
+                        <li>スライド内のアプリは実際のロボット制御に使えるものではありません。</li>
                     </ul>
 
                 </ul>
@@ -57,28 +58,7 @@
 
                 </ol>
             </section>
-            <section>
-                <h2>ROSを使う？使わない？</h2>
-                <div style="display: flex;">
-                    <div style="flex: 1;">
-                        <h4><a href="../ros-introduction/index.html">ROSによる動作生成</a></h4>
-                        <img src="media/Robotic_powder_grinding.gif">
-                        <ul>
-                            <li>複雑で滑らかな動きが必要</li>
-                            <li>様々なロボットやセンサを統合したい</li>
-                        </ul>
-                    </div>
-                    <div style="flex: 1;">
-                        <h4>メーカー提供の動作生成</h4>
-                        <img src="media/TM_Collaborative_Robots_Tutorial_6_Pick_and_Place_Using_Vision.gif">
-                        <ul>
-                            <li>直線などの動きの組合せで十分</li>
-                            <li>使わない方は続き→</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-            
+       
             <section>
                 <section>
                     <h2>ロボット動作の方法</h2>
@@ -222,7 +202,7 @@ finally:
                             <p>現在のTCPの座標系を基準に次のTCPの座標系を指定</p>
                         </div>
                     </div>
-                    <p>アプリで確認↓</p>
+                    <p>座標系による動きの違いを確認↓</p>
                 </section>
                 <section>
                     <h2>ジョグ動作</h2>
@@ -343,7 +323,8 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>waypointsをショートカットすることで滑らかな動作を実現</li>
+                                <li>waypointsをショートカットし滑らかな動作を実現</li>
+                                <li>振動が抑えられる</li>
                                 <li>メーカーごとにこの機能の呼び方は異なる
                                     <ul>
                                         <li>Denso:パス動作</li>
@@ -392,7 +373,7 @@ finally:
                             </ul>
                         </div>
                     </div>
-                <p>シミュレーションはなぜ重要か↓</p>                          
+                    <p>シミュレーションはなぜ重要か↓</p>
                 </section>
                 <section>
                     <h2>シミュレーションを使わなかった場合にありがちなトラブル</h2>
@@ -402,7 +383,7 @@ finally:
                         <li><strong>2. 動作速度</strong><br>
                             スループットの向上を期待したが実際に動かすと思ったより遅かった</li>
                     </ul>
-                    <p>シミュレーションで未然に防げる</p>    
+                    <p>シミュレーションで未然に防げる</p>
                 </section>
                 <section>
                     <h2>シミュレーションの現状</h2>
@@ -425,7 +406,7 @@ finally:
                             </ul>
                         </div>
                     </div>
-                    <p>2025年にUniversalRobotからURStudioが登場、今後は協働ロボにも増える可能性もあります</p>
+                    <p>※UniversalRobotはUR Studioが利用可能</p>
                 </section>
                 <section>
                     <h2>協働ロボシミュレータの選択肢</h2>
@@ -439,12 +420,93 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>個人的にはカナダのRoboDKがよさそう</li>
-                                <li>CADを取り込んでエッジ検出してロボットのウェイポイントを自動作成できる</li>
+                                <li>個人的にはカナダのRoboDKがおススメ</li>
+                                <li>色々なロボットに使える、直観的なGUI操作</li>
+                                <li>CADのエッジからウェイポイント自動作成など便利機能あり</li>
                             </ul>
                         </div>
                     </div>
-                    <p>※著者はシミュレータをまったく使ったことがないので参考程度にとどめてください</p>
+                </section>
+
+            </section>
+            <section>
+                <section>
+                    <h2>UR Tips</h2>
+                    <ul>
+                        <li>Universal robotを使う上での便利機能の紹介</li>
+                        <li>主にシミュレータとモーションの話</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>シミュレータ UR Studio</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">  
+                            <img src="media/ur_studio.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>オンライン、無料で使える</li>
+                                <li>機能はRoboDKの方が上だが、これで十分な場合も多いのでは</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>モーション ver2</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_motion_ver2.png">
+
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>Polyscope ver5.22から使えるように(今後はこれが標準)</li>
+                                <li>MoveJ(PTP),MoveL(LIN)ので振動が少なくなる</li>
+                                <li>速度と加速度が滑らかに</li>
+                                <li>ブレンド半径が大きすぎる場合は自動調整</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>フォースモード</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_motion_ver2.png">
+
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>特定の軸だけ力制御と位置制御を切り替え可能</li>
+                                <li>例えば、Z軸は力制御で一定力で押し付けて、位置制御で動かす等で使う</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul>
+                    </ul>
+                </section>
+            </section>
+
+                 <section>
+                <section>
+                    <h2>ROSを使う？使わない？</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h4><a href="../ros-introduction/index.html">ROSによる動作生成</a></h4>
+                            <img src="media/Robotic_powder_grinding.gif">
+                            <ul>
+                                <li>滑らかで複雑な動きが必要</li>
+                                <li>様々なロボットやセンサを統合したい</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4>メーカー提供の動作生成</h4>
+                            <img src="media/TM_Collaborative_Robots_Tutorial_6_Pick_and_Place_Using_Vision.gif">
+                            <ul>
+                                <li>直線などの動きの組合せで十分</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
                 <section>
                     <h2>ROSでもシミュレーションできるのでは？</h2>
@@ -458,15 +520,16 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>ROSのMoveItを使えば近いこともできるが、専門的な開発知識が求められる</li>
-                                <li>ROSの習得コストは大きいので、専門のシミュレーションツールがあるなら活用したほうが良い</li>
+                                <li>ROSでも可能だが、目的に応じた使い分けが重要</li>
+                                <li>位置制御 → RoboDK</li>
+                                <li>精密な軌道制御 → ROS</li>
                             </ul>
                         </div>
                     </div>
                 </section>
             </section>
-            <section>
 
+            <section>
                 <section>
                     <h2>ロボットアーム選定</h2>
                     <p>ロボットアームの選び方</p>
@@ -654,7 +717,8 @@ finally:
             <!-- シリーズ一覧に戻る -->
             <section>
                 <h2>ありがとうございました</h2>
-                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
             </section>
 
         </div>
