@@ -1,17 +1,19 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ロボットアーム入門~ハードウェアインテグレーション~</title>
-    
+
     <!-- Reveal.js Core CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-    
+
     <!-- Syntax Highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,54 +25,93 @@
 
     <!-- Common Styles -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
-    
+
     <style>
-        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+        .reveal h1,
+        .reveal h2,
+        .reveal h3,
+        .reveal h4 {
             text-transform: none;
             font-family: 'Noto Sans JP', sans-serif;
         }
+
         .reveal img {
             border: none;
             box-shadow: none;
         }
+
         .two-column {
             display: flex;
             align-items: center;
             gap: 2rem;
         }
+
         .two-column .left {
             flex: 1;
         }
+
         .two-column .right {
             flex: 1;
         }
     </style>
 </head>
+
 <body>
     <div class="reveal">
         <div class="slides">
             <!-- タイトルスライド -->
-            <section data-background-image="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3" data-background-opacity="0.3">
+            <section data-background-image="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3"
+                data-background-opacity="0.3">
                 <h1>ロボットアーム入門</h1>
-                <p>~システムインテグレーション~</p>
+                <p>~ ハードウェアインテグレーション ~</p>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
 
             <!-- 1. はじめに -->
             <section>
                 <h2>はじめに</h2>
                 <ul>
-                    <li>ロボットアームを動かす前に知っておきたいことをまとめておきます</li>
+                    <li>ロボットアームを動かし始める前にやること、知っておきたいことをまとめておきます</li>
                     <li>動かし方は<a href="../robot-arm-operation">別のスライド</a>をご覧ください</li>
                 </ul>
+            </section>
+
+            <section>
+                <h2>ロボットの設置</h2>
+                <div class="two-column">
+                    <div class="left">
+                        <img src="https://images.unsplash.com/photo-1567789884554-0b844b597180?ixlib=rb-4.0.3&w=500"
+                            alt="グリッパ" style="max-width: 100%;">
+                    </div>
+                    <div class="right">
+                        <p>ロボットアームはアルミフレームや定盤に設置する場合がほとんど</p>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h2>エンドエフェクタの取付</h2>
+                <div class="two-column">
+                    <div class="left">
+                        <img src="media/iso_flange.png" alt="グリッパ" style="max-width: 100%;">
+                    </div>
+                    <div class="right">
+                        <p>手先を取り付けるフランジの規格はISO9409-1及びJISB8436で決まっています</p>
+                        <p>寸法は3kg~5kgのロボットであれば番号4(φ50 mm)が一般的です</p>
+
+                    </div>
+                </div>
             </section>
 
             <!-- 2. ロボットアームとの接続方法 -->
             <section>
                 <section>
-                    <h2>ロボットアームとの接続方法</h2>
+                    <h2>ロボットアームとPCの接続方法</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=500" alt="LANケーブル接続図" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=500"
+                                alt="LANケーブル接続図" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <ul>
@@ -84,7 +125,8 @@
                     <h2>ティーチングペンダント</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&w=500" alt="ティーチングペンダント" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&w=500"
+                                alt="ティーチングペンダント" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <ul>
@@ -96,13 +138,15 @@
                 </section>
             </section>
 
+
             <!-- 3. グリッパとの接続方法 -->
             <section>
                 <section>
-                    <h2>グリッパとの接続方法</h2>
+                    <h2>グリッパとPCの接続方法</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1567789884554-0b844b597180?ixlib=rb-4.0.3&w=500" alt="グリッパ" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1567789884554-0b844b597180?ixlib=rb-4.0.3&w=500"
+                                alt="グリッパ" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>グリッパーはロボットメーカとは別</p>
@@ -113,7 +157,8 @@
                     <h2>グリッパの配線</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500" alt="配線図" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500"
+                                alt="配線図" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <ul>
@@ -137,7 +182,8 @@
                     <h2>①IOでオンオフ</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092335878-1d4b1c1ba4b5?ixlib=rb-4.0.3&w=500" alt="IO制御図" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1581092335878-1d4b1c1ba4b5?ixlib=rb-4.0.3&w=500"
+                                alt="IO制御図" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>電磁式など閉じるか開くかだけのグリッパの場合はIOで制御するものがある</p>
@@ -148,7 +194,8 @@
                     <h2>②RS485でコマンド送信</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&w=500" alt="RS485通信" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&w=500"
+                                alt="RS485通信" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>モーター制御のグリッパーはRS485でコマンドを送信して制御する</p>
@@ -166,7 +213,8 @@
                     <h2>データ通信の基本</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500" alt="電気信号図" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500"
+                                alt="電気信号図" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>そもそもデータを電気信号で送る場合、どう送るのか？</p>
@@ -178,7 +226,8 @@
                     <h2>RS232規格</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1621839673705-6617adf9e890?ixlib=rb-4.0.3&w=500" alt="RS232通信" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1621839673705-6617adf9e890?ixlib=rb-4.0.3&w=500"
+                                alt="RS232通信" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <ul>
@@ -193,7 +242,8 @@
                     <h2>RS485の改良点①</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500" alt="4線式通信" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500"
+                                alt="4線式通信" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>RS485はRS232の拡張規格</p>
@@ -206,7 +256,8 @@
                     <h2>RS485の改良点②</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&w=500" alt="1対多通信" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&w=500"
+                                alt="1対多通信" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>変わった点②</p>
@@ -218,7 +269,8 @@
                     <h2>RS485のメリット</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500" alt="複数機器接続" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
+                                alt="複数機器接続" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>RS485を使えば複数台のセンサやモータなどと同時に接続、通信できる</p>
@@ -226,6 +278,19 @@
                     </div>
                 </section>
             </section>
+
+            <section>
+                <h2>非常停止スイッチの増設方法</h2>
+                <div class="two-column">
+                    <div class="left">
+                        <img src="media/iso_flange.png" alt="グリッパ" style="max-width: 100%;">
+                    </div>
+                    <div class="right">
+                        <p>非常停止スイッチが複数ほしい場合、長さを伸ばしたい場合は増設ができます</p>
+                    </div>
+                </div>
+            </section>
+
 
             <!-- 5. ロボットと他の機器との接続 -->
             <section>
@@ -238,7 +303,8 @@
                     <h2>ロボットコントローラのIOでつなぐ</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500" alt="IO接続" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
+                                alt="IO接続" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>電圧のON/offを使って他の機器を制御したり、センサの値を読み取ったりする</p>
@@ -250,7 +316,8 @@
                     <h2>パソコンでつなぐ</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-4.0.3&w=500" alt="USB接続" style="max-width: 100%;">
+                            <img src="https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-4.0.3&w=500"
+                                alt="USB接続" style="max-width: 100%;">
                         </div>
                         <div class="right">
                             <p>カメラや市販のセンサであればUSB接続が多い</p>
@@ -269,7 +336,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
-    
+
     <script>
         Reveal.initialize({
             // Basic display settings
@@ -303,9 +370,10 @@
 
             // Keyboard shortcuts
             keyboard: {
-                'm': function() { RevealMenu.toggle(); }
+                'm': function () { RevealMenu.toggle(); }
             }
         });
     </script>
 </body>
+
 </html>
