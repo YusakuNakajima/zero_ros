@@ -323,14 +323,9 @@
 
                 <section>
                     <h2>プログラムから動かす場合</h2>
-                    <p>URはRTDEを使って外部制御が可能で、Ur_rtdeをpipでインストール可能</p>
-                    <p>例のように、目標の座標とモーションの種類を指定して動作可能</p>
-                    <ul>
-                        <li>PTP = moveJ</li>
-                        <li>LIN = moveL</li>
-                        <li>CIRC = moveC</li>
-                    </ul>
-                    <pre><code class="language-python">
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <pre><code class="language-python">
 import rtde_control
 import rtde_receive
 import time
@@ -360,7 +355,15 @@ try:
 finally:
     rtde_r.disconnect()
                     </code></pre>
-                    <p>安全確認してから実行してください</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>PTP = moveJ</li>
+                                <li>LIN = moveL</li>
+                                <li>CIRC = moveC</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
             </section>
 
@@ -381,30 +384,45 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>部品を嵌め合わせるなどの作業は力を制御すると簡単にできます</li>
-                                <li>よく使われる手法を紹介します</li>
+                                <li>部品の嵌め合わせなどは精度が必要なので位置制御だけだと難しい</li>
+                                <li>ティーチング以外にいくつかの手法を組み合わせることが多いので紹介</li>
                             </ul>
                         </div>
                     </div>
+                    <p>ティーチング以外にできる工夫↓</p>
                 </section>
                 <section>
                     <h2>柔軟な手先：RCC</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_accuracy_example1.png">
-                            <div style="position: absolute; 
-                                    top: 74%; 
-                                    left: 4%; 
-                                    width: 20%; 
-                                    height: 5%; 
-                                    border: 5px solid red; /* 赤い枠線 */
-                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
-                                    "></div>
+                            <iframe width="560" height="315"
+                                src="https://www.youtube.com/embed/roXG3rqu5Fw?si=Q0jjNtlZG_UchMwR"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>部品を嵌め合わせるなどの作業は、ロボットの精度の限界で位置制御だけではうまくはめられない場合があります</li>
-                                <li>手先を柔らかくするRCCが有効です</li>
+                                <li>部品を嵌め合わせるなどの作業のずれを機械的に補償するツール</li>
+                                <li>正直、後述のコンプライアンス制御に置き換わっている印象</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>コンプライアンス制御</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <iframe width="560" height="315"
+                                src="https://www.youtube.com/embed/0INX9IgeaU0?si=dk8U_MYG2i9imcqk&amp;start=18"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>ばねのような制御をセンサでソフトウェア的に実現</li>
+                                <li>手先のフォーストルクセンサを使う場合と使わない場合があります</li>
                             </ul>
                         </div>
                     </div>
@@ -414,45 +432,34 @@ finally:
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/robot_accuracy_example1.png">
-                            <div style="position: absolute; 
-                                    top: 74%; 
-                                    left: 4%; 
-                                    width: 20%; 
-                                    height: 5%; 
-                                    border: 5px solid red; /* 赤い枠線 */
-                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
-                                    "></div>
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>任意の軸だけ位置制御/力制御と切り替える機能</li>
-                                <li>研磨など任意の方向に一定の力をかけ続けて動かすことができます</li>
+                                <li>任意の軸だけ一定の力をかける制御</li>
+                                <li>手先にフォーストルクセンサが必要です</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>コンプライアンス制御</h2>
+                    <h2>フォース制御とコンプライアンス制御の比較</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_accuracy_example1.png">
-                            <div style="position: absolute; 
-                                    top: 74%; 
-                                    left: 4%; 
-                                    width: 20%; 
-                                    height: 5%; 
-                                    border: 5px solid red; /* 赤い枠線 */
-                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
-                                    "></div>
+                        <p style="text-align: center; margin-bottom: 10px;">
+                            <strong>→ <a href="interactive_app/force_control.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                        </p>
+                        <iframe data-src="interactive_app/force_control.html" width="100%" height="180px"
+                            frameborder="0"></iframe>
                         </div>
-                        <div style="flex: 1;">
+                            <div style="flex: 1;">
                             <ul>
-                                <li>多くのロボットには任意の軸だけ位置制御/力制御と切り替える機能があります</li>
-                                <li>手先にフォーストルクセンサを追加する必要があります</li>
+                                <li>比較すると結構違います</li>
                             </ul>
                         </div>
                     </div>
                 </section>
+
             </section>
 
             <section>
@@ -483,7 +490,7 @@ finally:
                     <h2>オフラインシミュレーション</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/ur_studio.png">
+                            <img src="media/robodk.png">
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -495,11 +502,11 @@ finally:
                     <p>シミュレーションはなぜ重要か↓</p>
                 </section>
                 <section>
-                    <h2>シミュレーションを使わなかった場合にありがちなトラブル</h2>
+                    <h2>ロボットでありがちなトラブル</h2>
                     <ul>
-                        <li><strong>1. レイアウト設計</strong><br>
+                        <li><strong>1. ロボットの手先が届かない</strong><br>
                             実際に設置するとロボットの可動範囲が思ったより狭く手先が届かなかった→配置の再検討</li>
-                        <li><strong>2. 動作速度</strong><br>
+                        <li><strong>2. 思ったより遅い</strong><br>
                             スループットの向上を期待したが実際に動かすと思ったより遅かった</li>
                     </ul>
                     <p>シミュレーションで未然に防げる</p>
@@ -525,7 +532,7 @@ finally:
                             </ul>
                         </div>
                     </div>
-                    <p>※UniversalRobotはUR Studioが利用可能</p>
+                    <p>※Universal RobotはUR Studioが利用可能</p>
                 </section>
                 <section>
                     <h2>協働ロボシミュレータの選択肢</h2>
@@ -539,7 +546,7 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>個人的にはカナダのRoboDKがおススメ</li>
+                                <li>個人的にはRoboDKがおススメ</li>
                                 <li>色々なロボットに使える、直観的なGUI操作</li>
                                 <li>CADのエッジからウェイポイント自動作成など便利機能あり</li>
                             </ul>
@@ -552,6 +559,7 @@ finally:
                 <section>
                     <h2>UR Tips</h2>
                     <ul>
+                        <li>参加者にUniversal robotユーザが多いので</li>
                         <li>Universal robotを使う上での便利機能の紹介</li>
                         <li>主にシミュレータとモーションの話</li>
                     </ul>
@@ -581,8 +589,8 @@ finally:
                             <ul>
                                 <li>Polyscope ver5.22から使えるように(今後はこれが標準)</li>
                                 <li>MoveJ(PTP),MoveL(LIN)ので振動が少なくなる</li>
-                                <li>速度と加速度が滑らかに</li>
                                 <li>ブレンド半径が大きすぎる場合は自動調整</li>
+                                <li>調整すればROSレベルで滑らかに動ける</li>
                             </ul>
                         </div>
                     </div>
@@ -591,14 +599,17 @@ finally:
                     <h2>フォースモード</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/ur_motion_ver2.png">
-
+                            <iframe width="560" height="315"
+                                src="https://www.youtube.com/embed/FKR04ZJv-SE?si=9966698GmdDVbwdx"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul>
+                                <li>URにおけるフォース制御</li>
                                 <li>特定の軸だけ力制御と位置制御を切り替え可能</li>
-                                <li>個人的にかなり制御の組み方がうまいと思うので便利です</li>
-                                <li>例えば、Z軸は力制御で一定力で押し付けて、位置制御で動かす等で使う</li>
+                                <li>一定の力で押し付ける作業が得意</li>
                             </ul>
                         </div>
                     </div>
@@ -615,7 +626,8 @@ finally:
                             <h4><a href="../ros-introduction/index.html">ROSによる動作生成</a></h4>
                             <img src="media/Robotic_powder_grinding.gif">
                             <ul>
-                                <li>複雑な動きを滑らかに行いたい</li>
+                                <li>複雑な動きを滑らかに</li>
+                                <li>コンマ1mmが効く</li>
                                 <li>様々なロボットやセンサを統合したい</li>
                             </ul>
                         </div>
@@ -630,7 +642,7 @@ finally:
                     </div>
                 </section>
                 <section>
-                    <h2>ROSでもシミュレーションできるのでは？</h2>
+                    <h2>メーカーとROSの動きの違い</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <iframe width="100%" height="315"
@@ -641,9 +653,9 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>ROSでも可能だが、目的に応じた使い分けが重要</li>
-                                <li>位置制御 → RoboDK</li>
-                                <li>精密な軌道制御 → ROS</li>
+                                <li>目的に応じた使い分けが重要</li>
+                                <li>1mm程度の制御 → メーカー or RoboDK</li>
+                                <li>コンマ1mmの精密な制御 → ROS</li>
                             </ul>
                         </div>
                     </div>
@@ -822,14 +834,8 @@ finally:
                     <p style="margin-bottom: 15px;"><strong>もっと複雑な制御やセンサの統合をやりたい方は：</strong></p>
                     <ul style="text-align: left; display: inline-block;">
                         <li><a href="../ros-introduction/index.html"
-                                style="color: #007bff; text-decoration: underline;">ゼロからのROS入門</a> - ROSの基礎概念と学習リソース
+                                style="color: #007bff; text-decoration: underline;">ゼロからのROS入門</a> - ROSの基礎概念
                         </li>
-                        <li><a href="../ros-arm-position-control/index.html"
-                                style="color: #007bff; text-decoration: underline;">アーム位置制御とモーションプランニング</a> -
-                            MoveItとJTCによる制御実装</li>
-                        <li><a href="../ros-simulator-connection/index.html"
-                                style="color: #007bff; text-decoration: underline;">シミュレータや実機との接続</a> -
-                            ros_controlとBringupパッケージ</li>
                     </ul>
                 </div>
             </section>
