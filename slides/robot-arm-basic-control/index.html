@@ -615,15 +615,16 @@ finally:
                             <h4><a href="../ros-introduction/index.html">ROSによる動作生成</a></h4>
                             <img src="media/Robotic_powder_grinding.gif">
                             <ul>
-                                <li>滑らかで複雑な動きが必要</li>
+                                <li>複雑な動きを滑らかに行いたい</li>
                                 <li>様々なロボットやセンサを統合したい</li>
                             </ul>
                         </div>
                         <div style="flex: 1;">
-                            <h4>メーカー提供の動作生成</h4>
+                            <h4>メーカー提供 or RoboDK</h4>
                             <img src="media/TM_Collaborative_Robots_Tutorial_6_Pick_and_Place_Using_Vision.gif">
                             <ul>
-                                <li>直線などの動きの組合せで十分</li>
+                                <li>直線などの動きの組合せでOK</li>
+                                <li>センサはメーカー対応品</li>
                             </ul>
                         </div>
                     </div>
@@ -657,20 +658,22 @@ finally:
                 </section>
                 <section>
                     <h2>ロボットアームの軸の数</h2>
-                    <p>位置(3次元) + 向き(3次元) → 姿勢(6次元) = 6軸が必要</p>
+                    <p>位置(3次元) + 向き(3次元) → 姿勢(6次元) = 6軸</p>
                     <div style="display: flex;">
                         <div style="flex: 1; text-align: center;">
                             <img src="media/dobot_4axis_robot.png" style="width: 50%; margin-bottom: 0px;">
                             <p>4軸ロボットの例<br>常に下向きという制限</p>
+                            <p>ピックアンドプレースならこれでok</p>
                         </div>
                         <div style="flex: 1; text-align: center;">
                             <img src="media/dobot_robot.png" style="width: 50%; margin-bottom: 0px;">
                             <p>6軸ロボットの例<br>位置も向き自由</p>
+                            <p>色々な作業に</p>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>ざっくり４種類</h2>
+                    <h2>6軸はざっくり4種類</h2>
                     <div style="display: flex;">
                         <div style="flex: 1; text-align: center; margin: 0 5px;">
                             <img src="media/denso_industrial_robot.jpg" style="width: 90%; margin-bottom: 5px;">
@@ -679,12 +682,12 @@ finally:
                         </div>
                         <div style="flex: 1; text-align: center; margin: 0 5px;">
                             <img src="media/ur_robot.png" style="width: 90%; margin-bottom: 5px;">
-                            <h4>協働ロボット</h4>
+                            <h4>大手協働ロボット</h4>
                             <p style="font-size: 0.7em;">人との協働・安全<br>300万円〜</p>
                         </div>
                         <div style="flex: 1; text-align: center; margin: 0 5px;">
                             <img src="media/fair_fr3.png" style="width: 90%; margin-bottom: 5px;">
-                            <h4>格安ロボット</h4>
+                            <h4>格安協働ロボット</h4>
                             <p style="font-size: 0.7em;">コスト重視<br>50万円〜</p>
                         </div>
                         <div style="flex: 1; text-align: center; margin: 0 5px;">
@@ -704,16 +707,16 @@ finally:
                             <h3>特徴</h3>
                             <ul>
                                 <li>FANUC、Yaskawa、Kawasaki、Denso</li>
+                                <li>柵が必要</li>
                                 <li>高精度・高速・高信頼性</li>
                                 <li>製造業での実績豊富</li>
-                                <li>専用コントローラ</li>
-                                <li>メンテナンス体制充実</li>
+                                <li>メンテナンス体制や機能が充実</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>協働ロボット</h2>
+                    <h2>大手協働ロボット</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/ur_robot.png" style="width: 100%;">
@@ -725,14 +728,13 @@ finally:
                                 <li>人との協働作業が可能</li>
                                 <li>安全機能内蔵</li>
                                 <li>直感的なプログラミング</li>
-                                <li>柔軟な外部制御</li>
-                                <li>ROSとの親和性</li>
+                                <li>柔軟な外部制御(メーカーによる)</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>格安ロボット</h2>
+                    <h2>格安協働ロボット</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/fair_fr3.png" style="width: 100%;">
@@ -742,10 +744,9 @@ finally:
                             <ul>
                                 <li>DOBOT、xArm、FairInovation</li>
                                 <li>コストパフォーマンス重視</li>
-                                <li>基本機能は十分</li>
-                                <li>Python制御対応</li>
-                                <li>簡単なタスクに最適</li>
-                                <li>サポート体制は限定的</li>
+                                <li>位置制御くらいなら基本機能は十分</li>
+                                <li>Python制御対応が多い</li>
+                                <li>メーカーによっては故障リスクもある印象</li>
                             </ul>
                         </div>
                     </div>
@@ -759,11 +760,10 @@ finally:
                         <div style="flex: 1;">
                             <h3>特徴</h3>
                             <ul>
-                                <li>学習・研究用途</li>
+                                <li>勉強用途</li>
                                 <li>組み立てから学習可能なものもある</li>
-                                <li>低コスト</li>
-                                <li>Python・Scratch対応</li>
-                                <li>原理理解に最適</li>
+                                <li>低コストに始められる</li>
+                                <li>原理理解に適している</li>
                             </ul>
                         </div>
                     </div>
