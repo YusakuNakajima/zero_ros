@@ -129,20 +129,22 @@ Reveal.initialize({
 
 ## スライド概要
 
-このリポジトリには、ロボット工学とROSの学習に必要な5つのスライドが含まれています。
+このリポジトリには、ロボット工学とROSの学習に必要な6つのスライドが含まれています。
 
 ### スライド一覧
 
-1. **[ゼロからのロボットアーム入門](slides/robot-arm-operation/)** - ロボットアームの基礎知識と選定方法
-2. **[ゼロからのROS入門](slides/ros-introduction/)** - ROSの基礎概念と学習リソース
-3. **[ロボットモデルの表示](slides/ros-model-display/)** - URDFとTFを使ったロボット可視化
-4. **[アーム位置制御とモーションプランニング](slides/ros-arm-position-control/)** - MoveItとJTCによる制御実装
-5. **[シミュレータや実機との接続](slides/ros-simulator-connection/)** - ros_controlとBringupパッケージ
+1. **[ゼロからのロボットアーム入門](slides/robot-arm-operation/)** - ロボットアームの基礎知識、TCP制御、モーション種類、シミュレーション、ロボット選定方法
+2. **[ロボットアーム入門~システムインテグレーション~](slides/robot-arm-hardware-integration/)** - ロボットアームとの接続方法、グリッパ制御、RS485通信、システム統合
+3. **[ゼロからのROS入門](slides/ros-introduction/)** - ROS学習戦略と効果的な学習リソースの選択方法
+4. **[ロボットモデルの表示](slides/ros-model-display/)** - URDF/XACROによるロボットモデリング、TFシステム、RVizでの可視化
+5. **[アーム位置制御とモーションプランニング](slides/ros-arm-position-control/)** - MoveItフレームワーク、IKソルバー、JointTrajectoryController実装
+6. **[シミュレータや実機との接続](slides/ros-simulator-connection/)** - ros_controlフレームワーク、Bringupパッケージ、ハードウェアインターフェース
 
 ### 学習順序
 
-- **初学者**: ロボットアーム入門 → ROS入門
+- **初学者**: ロボットアーム入門 → システムインテグレーション → ROS入門
 - **ROS実践者**: ロボットモデル表示 → シミュレータ接続 → アーム制御 
+- **システム構築者**: ロボットアーム入門 → システムインテグレーション → ロボットモデル表示 → シミュレータ接続
 - **上級者**: 必要な部分を選択的に学習
 
 各スライドディレクトリには詳細な`CLAUDE.md`ファイルがあり、学習内容や構成を確認できます。
