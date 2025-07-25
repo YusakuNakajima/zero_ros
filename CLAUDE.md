@@ -133,7 +133,7 @@ Reveal.initialize({
 
 ### スライド一覧
 
-1. **[ゼロからのロボットアーム入門](slides/robot-arm-operation/)** - ロボットアームの基礎知識、TCP制御、モーション種類、シミュレーション、ロボット選定方法
+1. **[ゼロからのロボットアーム入門](slides/robot-arm-basic-control/)** - ロボットアームの基礎知識、TCP制御、モーション種類、シミュレーション、ロボット選定方法
 2. **[ロボットアーム入門~システムインテグレーション~](slides/robot-arm-hardware-integration/)** - ロボットアームとの接続方法、グリッパ制御、RS485通信、システム統合
 3. **[ゼロからのROS入門](slides/ros-introduction/)** - ROS学習戦略と効果的な学習リソースの選択方法
 4. **[ロボットモデルの表示](slides/ros-model-display/)** - URDF/XACROによるロボットモデリング、TFシステム、RVizでの可視化

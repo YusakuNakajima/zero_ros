@@ -175,7 +175,7 @@
 ## ファイル構成
 
 ```
-robot-arm-operation/
+robot-arm-basic-control/
 ├── index.html          # メインスライドファイル
 ├── media/              # 画像・動画ファイル
 └── CLAUDE.md          # このドキュメント
