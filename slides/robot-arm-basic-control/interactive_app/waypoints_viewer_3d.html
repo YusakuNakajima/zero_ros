@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウェイポイント軌道比較シミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            border: none;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-secondary {
+            background-color: #4b5563;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #374151;
+        }
+        #waypoints-list li {
+            background-color: #374151;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .radio-label:hover {
+            background-color: #374151;
+        }
+        input[type="radio"]:checked + .radio-label {
+            background-color: #3b82f6;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <div id="ui">
+        <h1 class="text-2xl font-bold mb-2">ウェイポイント軌道比較</h1>
+        <p class="text-sm text-gray-400 mb-4">地面を短くクリックしてウェイポイントを追加してください。ドラッグで視点を変更できます。</p>
+        
+        <!-- モード選択UI -->
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold mb-2">動作モード</h2>
+            <div class="space-y-2">
+                <div>
+                    <input type="radio" name="mode" id="mode-stop" value="stop" class="hidden" checked>
+                    <label for="mode-stop" class="radio-label">
+                        <span class="ml-2">ウェイポイントで停止</span>
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" name="mode" id="mode-smooth" value="smooth" class="hidden">
+                    <label for="mode-smooth" class="radio-label">
+                         <span class="ml-2">滑らかな軌道 (スプライン)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <button id="start-animation" class="btn btn-primary">アニメーション開始</button>
+            <button id="reset" class="btn btn-secondary">リセット</button>
+        </div>
+
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold mb-2">ウェイポイント</h2>
+            <ul id="waypoints-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                <!-- Waypoints will be listed here -->
+            </ul>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- グローバル変数 ---
+        let scene, camera, renderer, controls;
+        let robot, ikSolver;
+        let waypoints = [];
+        let waypointMarkers = [];
+        let isAnimating = false;
+        const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+        const raycaster = new THREE.Raycaster();
+        const linkLengths = [1.5, 1.5, 0.85];
+        
+        // --- 新しいグローバル変数 ---
+        let currentMode = 'stop'; // 'stop' or 'smooth'
+        let smoothPath; // CatmullRomCurve3
+        let pathLine; // 可視化用の軌道
+        let animationProgress = 0;
+        const animationSpeed = 0.005; // 滑らかな軌道でのアニメーション速度
+
+        // --- クリック判定用 ---
+        let mouseDownTime = 0;
+        const mouseDownPosition = new THREE.Vector2();
+
+        // --- 軌跡表示用 ---
+        let trajectoryLine;
+        const trajectoryPoints = [];
+        const MAX_TRAJECTORY_POINTS = 2000;
+
+        // --- 初期化処理 ---
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111827);
+            scene.fog = new THREE.Fog(0x111827, 20, 50);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(5, 5, 5);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer
+            const container = document.getElementById('container');
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 3;
+            controls.maxDistance = 30;
+            controls.maxPolarAngle = Math.PI / 2 - 0.05;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
+            directionalLight.position.set(5, 10, 7.5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // Ground & Grid
+            const groundGeo = new THREE.PlaneGeometry(100, 100);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            const grid = new THREE.GridHelper(100, 100, 0x4b5563, 0x374151);
+            scene.add(grid);
+
+            // Robot & IK
+            robot = createRobot();
+            scene.add(robot.base);
+            ikSolver = new IKSolver(robot.joints, robot.endEffector);
+
+            // Event Listeners
+            setupEventListeners();
+
+            animate();
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('start-animation').addEventListener('click', startAnimation);
+            document.getElementById('reset').addEventListener('click', reset);
+            
+            // モード切替のリスナー
+            document.querySelectorAll('input[name="mode"]').forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    currentMode = event.target.value;
+                    updatePathVisuals();
+                });
+            });
+
+            window.addEventListener('resize', onWindowResize);
+            renderer.domElement.addEventListener('mousedown', onMouseDown);
+            renderer.domElement.addEventListener('mouseup', onMouseUp);
+        }
+
+        // --- ロボットモデルの作成 ---
+        function createRobot() {
+            const joints = [];
+            const jointRadius = 0.15;
+            const linkRadius = 0.1;
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x6b7280 });
+            const baseGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 32);
+            const base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 0.1;
+            base.castShadow = true;
+            
+            let currentParent = base;
+
+            for (let i = 0; i < linkLengths.length; i++) {
+                const jointMat = new THREE.MeshStandardMaterial({ color: 0xf9fafb });
+                const jointGeo = new THREE.SphereGeometry(jointRadius, 32, 32);
+                const joint = new THREE.Mesh(jointGeo, jointMat);
+                joint.castShadow = true;
+                
+                if (i === 0) joint.position.y = 0.2;
+                else joint.position.y = linkLengths[i - 1] / 2;
+                
+                currentParent.add(joint);
+                joints.push(joint);
+
+                const linkMat = new THREE.MeshStandardMaterial({ color: 0x4b5563 });
+                const linkGeo = new THREE.CylinderGeometry(linkRadius, linkRadius, linkLengths[i], 32);
+                const link = new THREE.Mesh(linkGeo, linkMat);
+                link.castShadow = true;
+                link.position.y = linkLengths[i] / 2;
+                joint.add(link);
+                
+                currentParent = link;
+            }
+            
+            const coneHeight = 0.3;
+            const coneGeo = new THREE.ConeGeometry(0.15, coneHeight, 32);
+            const coneMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+            const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+            // コーンをリンクの先端から開始するように配置
+            coneMesh.position.y = linkLengths[linkLengths.length - 1] / 2 + coneHeight / 2;
+            currentParent.add(coneMesh);
+
+            // エンドエフェクタ（TCP）はコーンの先端に配置
+            const endEffector = new THREE.Object3D();
+            endEffector.position.y = linkLengths[linkLengths.length - 1] / 2 + coneHeight;
+            currentParent.add(endEffector);
+
+            return { base, joints, endEffector };
+        }
+
+        // --- IKソルバー (CCD) ---
+        class IKSolver {
+            constructor(joints, endEffector) {
+                this.joints = joints;
+                this.endEffector = endEffector;
+                this.iterations = 10;
+                this.tolerance = 0.01;
+            }
+
+            solve(targetPosition) {
+                const endEffectorPosition = new THREE.Vector3();
+                this.endEffector.getWorldPosition(endEffectorPosition);
+
+                for (let i = 0; i < this.iterations; i++) {
+                    if (endEffectorPosition.distanceTo(targetPosition) < this.tolerance) break;
+
+                    for (let j = this.joints.length - 1; j >= 0; j--) {
+                        const joint = this.joints[j];
+                        
+                        const parent = joint.parent;
+                        parent.updateWorldMatrix(true, false);
+                        const parentInverse = new THREE.Matrix4().copy(parent.matrixWorld).invert();
+
+                        const targetLocal = targetPosition.clone().applyMatrix4(parentInverse);
+                        
+                        this.endEffector.getWorldPosition(endEffectorPosition);
+                        const effectorLocal = endEffectorPosition.clone().applyMatrix4(parentInverse);
+                        
+                        const jointLocalPosition = joint.position.clone();
+
+                        const toEffector = new THREE.Vector3().subVectors(effectorLocal, jointLocalPosition).normalize();
+                        const toTarget = new THREE.Vector3().subVectors(targetLocal, jointLocalPosition).normalize();
+
+                        if (toEffector.dot(toTarget) > 0.9999) continue;
+
+                        const angle = Math.acos(toEffector.dot(toTarget));
+                        const axis = new THREE.Vector3().crossVectors(toEffector, toTarget).normalize();
+                        
+                        const quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
+                        joint.quaternion.premultiply(quaternion);
+                    }
+                }
+            }
+        }
+
+        // --- イベントハンドラ ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseDown(event) {
+            mouseDownTime = Date.now();
+            mouseDownPosition.x = event.clientX;
+            mouseDownPosition.y = event.clientY;
+        }
+
+        function onMouseUp(event) {
+            const timeDiff = Date.now() - mouseDownTime;
+            const distance = mouseDownPosition.distanceTo(new THREE.Vector2(event.clientX, event.clientY));
+
+            if (timeDiff < 200 && distance < 5) {
+                if (isAnimating) return;
+                
+                const mouse = new THREE.Vector2(
+                    (event.clientX / window.innerWidth) * 2 - 1,
+                    -(event.clientY / window.innerHeight) * 2 + 1
+                );
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersectPoint = new THREE.Vector3();
+                raycaster.ray.intersectPlane(groundPlane, intersectPoint);
+
+                if (intersectPoint) addWaypoint(intersectPoint);
+            }
+        }
+
+        // --- アプリケーションロジック ---
+        function addWaypoint(position) {
+            position.y = 0.2;
+            waypoints.push(position);
+
+            const markerGeo = new THREE.SphereGeometry(0.1, 16, 16);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.copy(position);
+            scene.add(marker);
+            waypointMarkers.push(marker);
+
+            updateWaypointsList();
+            updateSmoothPath();
+            updatePathVisuals();
+        }
+        
+        // スプライン曲線を生成/更新
+        function updateSmoothPath() {
+            if (pathLine) {
+                scene.remove(pathLine);
+                pathLine.geometry.dispose();
+                pathLine.material.dispose();
+                pathLine = null;
+            }
+
+            if (waypoints.length < 2) {
+                smoothPath = null;
+                return;
+            }
+            
+            // Catmull-Romスプラインは最低2点必要
+            smoothPath = new THREE.CatmullRomCurve3(waypoints, false, 'catmullrom', 0.5);
+
+            const points = smoothPath.getPoints(100);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color: 0x10b981 }); // 緑色
+            pathLine = new THREE.Line(geometry, material);
+            scene.add(pathLine);
+        }
+        
+        // 軌道表示のオン/オフ
+        function updatePathVisuals() {
+            if (pathLine) {
+                pathLine.visible = (currentMode === 'smooth');
+            }
+        }
+
+        function updateWaypointsList() {
+            const list = document.getElementById('waypoints-list');
+            list.innerHTML = '';
+            waypoints.forEach((wp, index) => {
+                const li = document.createElement('li');
+                li.textContent = `P${index + 1}: (${wp.x.toFixed(1)}, ${wp.y.toFixed(1)}, ${wp.z.toFixed(1)})`;
+                list.appendChild(li);
+            });
+        }
+        
+        let animationTarget = new THREE.Vector3();
+        let isInitialized = false;
+        let currentWaypointIndex = 0;
+
+        function startAnimation() {
+            if (waypoints.length === 0 || isAnimating) return;
+            
+            // 過去の軌跡をリセット
+            if (trajectoryLine) scene.remove(trajectoryLine);
+            trajectoryPoints.length = 0;
+
+            const geometry = new THREE.BufferGeometry();
+            const material = new THREE.LineBasicMaterial({ color: 0x3b82f6 });
+            trajectoryLine = new THREE.Line(geometry, material);
+            scene.add(trajectoryLine);
+
+            isAnimating = true;
+            currentWaypointIndex = 0;
+            animationProgress = 0;
+            
+            if (!isInitialized) {
+                robot.endEffector.getWorldPosition(animationTarget);
+                isInitialized = true;
+            }
+        }
+
+        function reset() {
+            isAnimating = false;
+            isInitialized = false;
+            currentWaypointIndex = 0;
+            animationProgress = 0;
+            waypoints = [];
+            waypointMarkers.forEach(marker => scene.remove(marker));
+            waypointMarkers = [];
+            
+            updateWaypointsList();
+            
+            robot.joints.forEach(j => j.quaternion.set(0,0,0,1));
+
+            // 軌跡と経路を削除
+            if (trajectoryLine) {
+                scene.remove(trajectoryLine);
+                trajectoryLine.geometry.dispose();
+                trajectoryLine.material.dispose();
+                trajectoryLine = null;
+            }
+            trajectoryPoints.length = 0;
+
+            if (pathLine) {
+                scene.remove(pathLine);
+                pathLine.geometry.dispose();
+                pathLine.material.dispose();
+                pathLine = null;
+            }
+            smoothPath = null;
+        }
+
+        // --- アニメーションループ ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (isAnimating && waypoints.length > 0) {
+                let targetPosition;
+                
+                // モードに応じてターゲット位置を決定
+                if (currentMode === 'stop') {
+                    targetPosition = waypoints[currentWaypointIndex];
+                    animationTarget.lerp(targetPosition, 0.05);
+
+                    if (animationTarget.distanceTo(targetPosition) < 0.1) {
+                        currentWaypointIndex++;
+                        if (currentWaypointIndex >= waypoints.length) {
+                            isAnimating = false;
+                        }
+                    }
+                } else { // 'smooth' mode
+                    if (smoothPath) {
+                        animationProgress += animationSpeed;
+                        if (animationProgress >= 1) {
+                            animationProgress = 1;
+                            isAnimating = false;
+                        }
+                        targetPosition = smoothPath.getPointAt(animationProgress);
+                        animationTarget.copy(targetPosition);
+                    } else {
+                        isAnimating = false; // パスがない場合は停止
+                    }
+                }
+
+                if(targetPosition) {
+                    ikSolver.solve(animationTarget);
+
+                    // エンドエフェクタの実際の軌跡を記録
+                    const currentPosition = new THREE.Vector3();
+                    robot.endEffector.getWorldPosition(currentPosition);
+                    trajectoryPoints.push(currentPosition.x, currentPosition.y, currentPosition.z);
+                    
+                    if (trajectoryPoints.length / 3 > MAX_TRAJECTORY_POINTS) {
+                        trajectoryPoints.splice(0, 3);
+                    }
+
+                    trajectoryLine.geometry.setAttribute('position', new THREE.Float32BufferAttribute(trajectoryPoints, 3));
+                    trajectoryLine.geometry.computeBoundingSphere();
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>

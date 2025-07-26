@@ -51,18 +51,6 @@
                 </ol>
             </section>
 
-            <!-- このスライドの目的 -->
-             <section>
-                <h2>本スライドの注意点</h2>
-                <ul>
-                    <ul>
-                        <li>メーカーが用意した制御では難しいロボットアームの軌道制御をするための資料です</li>
-                        <li>ここでは位置制御、速度制御の基礎を扱います(実践ロボット制御の第一部に相当)</li>
-                        <li>スライド内のアプリは完成度は高そうに見えますが、LLMで生成しており実際のロボット制御に使えるものではありません。</li>
-                    </ul>
-                </ul>
-            </section>
-
             <!-- アームの軌道制御とは -->
             <section>
                 <h2>アームの軌道制御とは、位置制御との違い</h2>
@@ -238,8 +226,8 @@
 
             </section>
             <section>
-                <p>本スライドではここでは直交/関節座標系に対する軌道制御の実装を扱います</p>
-
+                <p>本スライドでは軌道制御の実装を扱います</p>
+            
                 <div style="margin-top: 2em;">
                     <ul>
                         <li><strong>実装方法1: MoveIt</strong><br>
@@ -247,7 +235,7 @@
                             ピッキングなどで便利</li>
                         <li><strong>実装方法2: JointTrajectoryController</strong><br>
                             障害物回避なしのモーションプランニング<br>
-                            粉体粉砕など常に接触するタスクで便利</li>
+                            常に接触するタスクで便利</li>
                     </ul>
                 </div>
             </section>
@@ -279,14 +267,10 @@
 
                 <!-- MoveItのモーションプランニングの手順 (縦スライド) -->
                 <section>
-                    <h2>MoveItのモーションプランニングの手順</h2>
+                    <h2>MoveIt 3 Steps</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/franka_robot.png" alt="プランニング手順" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
                             <div style="margin-top: 2em;">
-                                <h3>MoveIt 3 Steps</h3>
                                 <ol>
                                     <li>目標姿勢を指定</li>
                                     <li>モーションプランニング</li>
@@ -299,7 +283,7 @@
 
                 <!-- 手先の姿勢の表現 (縦スライド) -->
                 <section>
-                    <h2>手先の姿勢の表現</h2>
+                    <h2>ステップ1:手先の姿勢の表現</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
@@ -371,7 +355,7 @@
                     <h2>クォータニオンによる表現</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/quaternion_representation.png" alt="クォータニオン表現" style="width: 100%;">
+                            <img src="media/quaternion.png" alt="クォータニオン表現" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
@@ -430,8 +414,37 @@
 
 
                 <!-- MoveIt2で使えるパスプランニング (縦スライド) -->
+                          <section>
+                    <h2>Step2:モーションプランニング</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">
+                            <p style="font-size: 0.6em;">https://opensource-robotics.tokyo.jp/?p=4313</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>産業用ロボモーション</strong>
+                                    <ul>
+                                        <li>Pilz Industrial Motion Planner (障害物を考慮しない)</li>
+                                    </ul>
+                                </li>
+                                <li><strong>サンプリングベース</strong>
+                                    <ul>
+                                        <li>OMPL</li>
+                                    </ul>
+                                </li>
+                                <li><strong>最適化ベース</strong>
+                                    <ul>
+                                        <li>CHOMP</li>
+                                        <li>STOMP</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
                 <section>
-                    <h2>MoveIt2で使えるパスプランニング</h2>
+                    <h2>Step2:モーションプランニング</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">

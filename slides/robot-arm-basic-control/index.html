@@ -262,6 +262,15 @@
             <section>
                 <section>
                     <h2>連続的なロボットモーション</h2>
+
+                    <ul>
+                        <li>複数の姿勢(waypoints)を指定して動かしたときに動きがガタつく</li>
+                    </ul>
+
+                    <p>ガタツキの少ないモーションを作るには↓</p>
+                </section>
+                <section>
+                    <h2>滑らかなモーションの作り方</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
@@ -273,15 +282,15 @@
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>複数の姿勢(waypoints)を指定</li>
-                                <li>ただし、通常は各点で停止する動作のため、動きがガタつく</li>
+                                <li>waypointsをショートカットし滑らかな動作を実現</li>
+                                <li>メーカーごとにこの機能の呼び方は異なりますが、ここではURに合わせてブレンド半径と呼びます</li>
                             </ul>
                         </div>
                     </div>
-                    <p>ガタツキの少ないモーションを作るには↓</p>
+                    <p>ブレンド半径の良し悪し↓</p>
                 </section>
                 <section>
-                    <h2>滑らかなモーションの作り方</h2>
+                    <h2>ブレンド半径の良し悪し</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
@@ -293,43 +302,20 @@
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>waypointsをショートカットし滑らかな動作を実現</li>
-                                <li>ちょっとずれるので正確さと滑らかさのトレードオフ</li>
-                                <li>メーカーごとにこの機能の呼び方は異なる
-                                    <ul>
-                                        <li>Denso:パス動作</li>
-                                        <li>UR:ブレンド半径</li>
-                                    </ul>
-                                </li>
+                                <li>二等分線を中心とした円が新しい経路です</li>
+                                <li>点を正確に通過しないので細かい動きはできません</li>
+                                <li>動作精度と動きの滑らかさのトレードオフで調整が必要です</li>
                             </ul>
                         </div>
                     </div>
                 </section>
+
+
             </section>
             <section>
-                <section>
-                    <h2>プログラムの組み方(URの例)</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/waypoints_viewer.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/waypoints_viewer.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>これまで習った内容をプログラムで組むときの例です</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <p>ガタツキの少ないモーションを作りたい場合↓</p>
-                </section>
-
 
                 <section>
-                    <h2>プログラムから動かす場合</h2>
+                    <h2>プログラムから動かす(URの例)</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <pre><code class="language-python">
@@ -569,7 +555,7 @@ finally:
                 <section>
                     <h2>UR Tips</h2>
                     <ul>
-                        <li>参加者にUniversal robotユーザが多いので</li>
+                        <li>Universal robotユーザが多いので</li>
                         <li>Universal robotを使う上での便利機能の紹介</li>
                         <li>主にシミュレータとモーションの話</li>
                     </ul>
@@ -637,7 +623,6 @@ finally:
                             <img src="media/Robotic_powder_grinding.gif">
                             <ul>
                                 <li>複雑な動きを滑らかに</li>
-                                <li>コンマ1mmが効く</li>
                                 <li>様々なロボットやセンサを統合したい</li>
                             </ul>
                         </div>
@@ -645,28 +630,34 @@ finally:
                             <h4>メーカー提供 or RoboDK</h4>
                             <img src="media/TM_Collaborative_Robots_Tutorial_6_Pick_and_Place_Using_Vision.gif">
                             <ul>
-                                <li>直線などの動きの組合せでOK</li>
-                                <li>センサはメーカー対応品</li>
+                                <li>直線などの組合せ</li>
+                                <li>周辺部品はメーカー品</li>
                             </ul>
                         </div>
                     </div>
+                    <p>もう少し詳しく↓</p>
                 </section>
                 <section>
-                    <h2>メーカーとROSの動きの違い</h2>
+                    <h2>ROSを使う利点</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <iframe width="100%" height="315"
-                                src="https://www.youtube.com/embed/fCORKVYsdDI?si=eSNNfyysZDFQ9fQ_"
-                                title="YouTube video player" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            <h4>ROS生成モーション</h4>
+                            <ul>
+                                <li>PC上で完全に動作を計算してロボットに送るので、非常に滑らかに動ける</li>
+                                <li>精密な動作をさせたいときはこっち</li>
+
+                            </ul>
+
+
                         </div>
                         <div style="flex: 1;">
+                            <h4>メーカー提供モーション</h4>
                             <ul>
-                                <li>目的に応じた使い分けが重要</li>
-                                <li>1mm程度の制御 → メーカー or RoboDK</li>
-                                <li>コンマ1mmの精密な制御 → ROS</li>
+                                <li>PTPやLINはリアルタイムにモーションを計算しながら動かすので、繋げてもなかなか滑らかにならない</li>
+                                <li>メーカー提供のモーション(直線とか円とか)は事前計算で滑らかに動くので、それで十分ならこっち</li>
+
                             </ul>
+
                         </div>
                     </div>
                 </section>
@@ -792,53 +783,7 @@ finally:
                 </section>
             </section>
             <section>
-                <h2>本スライドのアプリ一覧</h2>
-                <p>講義中に使用したインタラクティブアプリケーション</p>
-                <div style="display: flex; gap: 20px;">
-                    <div style="flex: 1; text-align: center;">
-                        <h4>ロボット動作軌跡シミュレーター</h4>
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/motion_viewer.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/motion_viewer.html" width="100%" height="180px"
-                            frameborder="0"></iframe>
-                        <p style="font-size: 0.8em;">PTP・LIN・CIRCモーションの比較</p>
-                    </div>
-                    <div style="flex: 1; text-align: center;">
-                        <h4>TCPポーズビューアー</h4>
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/pose_viewer.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/pose_viewer.html" width="100%" height="180px"
-                            frameborder="0"></iframe>
-                        <p style="font-size: 0.8em;">ロボットの姿勢と座標系の理解</p>
-                    </div>
-                    <div style="flex: 1; text-align: center;">
-                        <h4>ウェイポイントビューアー</h4>
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/waypoints_viewer.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/waypoints_viewer.html" width="100%" height="180px"
-                            frameborder="0"></iframe>
-                        <p style="font-size: 0.8em;">連続動作の軌跡表示</p>
-                    </div>
-                    <div style="flex: 1; text-align: center;">
-                        <h4>ブレンド半径デモ</h4>
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/ur_blend_radius.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/ur_blend_radius.html" width="100%" height="180px"
-                            frameborder="0"></iframe>
-                        <p style="font-size: 0.8em;">滑らかなモーションの実現</p>
-                    </div>
-                </div>
-            </section>
-            <section>
-                <h2>以上でロボットの基本動作はできるはず</h2>
+                <h2>ロボットの基本動作は以上！</h2>
                 <p>Let's enjoy robot!</p>
                 <div style="padding: 20px; border-radius: 10px; margin: 20px 0;">
                     <p style="margin-bottom: 15px;"><strong>もっと複雑な制御やセンサの統合をやりたい方は：</strong></p>
