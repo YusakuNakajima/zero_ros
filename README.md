@@ -1,15 +1,15 @@
 # ゼロからのロボットアーム・ROS入門
 
-[![ROS](https://img.shields.io/badge/ROS-Noetic-blue)](http://wiki.ros.org/noetic)
-[![ROS2](https://img.shields.io/badge/ROS2-Humble-green)](https://docs.ros.org/en/humble/)
+## 🌐 オンラインで今すぐ学習開始！
 
-## 📄 ライセンス
+**📖 GitHub Pages で直接アクセス**
 
-[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+🔗 **[https://yusakunakajima.github.io/zero_ros/](https://yusakunakajima.github.io/zero_ros/)**
 
-この作品は[クリエイティブ・コモンズ 表示 - 非営利 - 改変禁止 4.0 国際 ライセンス](http://creativecommons.org/licenses/by-nc-nd/4.0/)の下に提供されています。
-
-このスライド資料は2025年7/28~7/31のロボット勉強会用に作成されました。適切な表示を行い、非営利目的での利用に限り、改変せずにそのままの形での再配布が可能です。
+- ✅ ブラウザですぐにアクセス可能
+- ✅ ローカル環境設定不要
+- ✅ モバイル・タブレット対応
+- ✅ 全スライドを順次学習可能
 
 ロボット工学とROS (Robot Operating System) の基礎を学ぶためのReveal.js製教育スライド集です。
 初心者から中級者まで、段階的にロボットアーム制御の知識とスキルを身につけることができます。
@@ -92,9 +92,11 @@
    open http://localhost:8000
    ```
 
-2. **GitHub Pagesで閲覧**
-   - [メインページ](https://YusakuNakajima.github.io/zero_ros/)
-   - 各スライドに直接アクセス可能
+2. **GitHub Pagesで閲覧（推奨）**
+   
+   最も簡単な方法！ブラウザで直接アクセス：
+   
+   🔗 **[https://yusakunakajima.github.io/zero_ros/](https://yusakunakajima.github.io/zero_ros/)**
 
 ## 📖 主要な学習内容
 
@@ -151,6 +153,16 @@
 | ロボットモデル表示 | 3-4時間 | ROS基礎 | 3D可視化スキル |
 | アーム制御 | 4-6時間 | ROS中級 | 制御システム構築 |
 | シミュレータ接続 | 3-5時間 | ROS中級 | 統合開発環境 |
+
+---
+
+## 📄 ライセンス
+
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+この作品は[クリエイティブ・コモンズ 表示 - 非営利 - 改変禁止 4.0 国際 ライセンス](http://creativecommons.org/licenses/by-nc-nd/4.0/)の下に提供されています。
+
+このスライド資料は2025年7/28~7/31のロボット勉強会用に作成されました。適切な表示を行い、非営利目的での利用に限り、改変せずにそのままの形での再配布が可能です。
 
 ---
 
