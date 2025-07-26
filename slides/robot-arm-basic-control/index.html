@@ -87,13 +87,9 @@
 
             </section>
             <section>
-                <h2>動作作成の基本手順</h2>
+                <h2>動作作成の手順</h2>
                 <div style="display: flex;">
                     <div style="flex: 1;">
-                        <img src="media/TP.png" style="width: 80%; margin-bottom: 20px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <h3>動作作成の基本手順</h3>
                         <ol>
                             <li><strong>TCPの設定</strong><br>
                             <li><strong>座標系の指定</strong><br>
@@ -117,7 +113,7 @@
                 <section>
 
                     <h2>ステップ①TCP(アームの手先)</h2>
-                    <p>TCP = Tool Center Point,複数登録して使うのが便利 </p>
+                    <p>TCP = Tool Center Point<br>複数登録して使うのが便利 </p>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <img src="media/Cone_ee.png" style="width: 100%;">
@@ -128,21 +124,8 @@
                             <p>TCPはグリッパの中央</p>
                         </div>
                     </div>
-                    <p>TCPの座標系の表現↓</p>
                 </section>
-                <section>
-                    <h2>TCPの姿勢表現</h2>
-                    <p>姿勢(pose) = 位置 + 向きで表すことが多い</p>
-                    <p>基本はXYZの座標系に対する位置と向きを考える</p>
-                    <div style="flex: 1;">
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/pose_viewer.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/pose_viewer.html" width="100%" height="100%"
-                            frameborder="0"></iframe>
-                    </div>
-                </section>
+
             </section>
 
             <section>
@@ -167,6 +150,7 @@
                     </div>
                     <p>座標系による動きの違いを確認↓</p>
                 </section>
+
                 <section>
                     <h2>ジョグ動作</h2>
                     <div style="display: flex;">
@@ -180,15 +164,38 @@
                             </ul>
                         </div>
                     </div>
+                    <p>座標系の表現↓</p>
+                </section>
+
+                <section>
+                    <h2>TCPの姿勢表現</h2>
+                    <p>姿勢(pose) = 位置 + 向きで表すことが多い</p>
+                    <p>基本はXYZの座標系に対する位置と向きを考える</p>
+                    <div style="flex: 1;">
+                        <p style="text-align: center; margin-bottom: 10px;">
+                            <strong>→ <a href="interactive_app/pose_viewer.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                        </p>
+                        <iframe data-src="interactive_app/pose_viewer.html" width="100%" height="100%"
+                            frameborder="0"></iframe>
+                    </div>
                 </section>
             </section>
             <section>
                 <section>
                     <h2>ステップ③ロボットモーションは3種類</h2>
-                    <div style="flex: 1;">
-                        <li>PTP:最短,高速</li>
-                        <li>LIN:直線動作,動作制限</li>
-                        <li>CIRC:円弧動作,障害物回避</li>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <video width="100%" autoplay muted loop>
+                                <source src="media/motion_demo.mp4" type="video/mp4">
+                                動画を再生できません。
+                            </video>
+                        </div>
+                        <div style="flex: 1;">
+                            <li>PTP:最短, 高速</li>
+                            <li>LIN:直線, 動作制限</li>
+                            <li>CIRC:円弧, 障害物回避</li>
+                        </div>
                     </div>
                     <p>詳細は以下↓</p>
 
@@ -271,7 +278,7 @@
                             </ul>
                         </div>
                     </div>
-                    <p>ガタツキの少ないモーションを作りたい場合↓</p>
+                    <p>ガタツキの少ないモーションを作るには↓</p>
                 </section>
                 <section>
                     <h2>滑らかなモーションの作り方</h2>
@@ -287,7 +294,7 @@
                         <div style="flex: 1;">
                             <ul>
                                 <li>waypointsをショートカットし滑らかな動作を実現</li>
-                                <li>振動が抑えられる</li>
+                                <li>ちょっとずれるので正確さと滑らかさのトレードオフ</li>
                                 <li>メーカーごとにこの機能の呼び方は異なる
                                     <ul>
                                         <li>Denso:パス動作</li>
@@ -368,12 +375,11 @@ finally:
             </section>
 
             <section>
-                <section>
-                    <h2>位置制御だけではタスク達成が難しい場合</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_accuracy_example1.png">
-                            <div style="position: absolute; 
+                <h2>ロボットアームの精度について</h2>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <img src="media/robot_accuracy_example1.png">
+                        <div style="position: absolute; 
                                     top: 74%; 
                                     left: 4%; 
                                     width: 20%; 
@@ -381,18 +387,34 @@ finally:
                                     border: 5px solid red; /* 赤い枠線 */
                                     box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
                                     "></div>
+                    </div>
+                    <div style="flex: 1;">
+                        <ul>
+                            <li>仕様書は絶対位置決め精度ではない！</li>
+                            <li>ISO9283は同じ動作の繰り返し精度を測定する</li>
+                            <li>例えば、電源を入れなおすと絶対位置は前回とずれる</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <section>
+                    <h2>位置制御だけでは難しいタスク</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/peg_in_hole.png">
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>部品の嵌め合わせなどは精度が必要なので位置制御だけだと難しい</li>
-                                <li>ティーチング以外にいくつかの手法を組み合わせることが多いので紹介</li>
+                                <li>狭い場所に部品を入れる(例:Peg-in-holeタスク)などは位置制御だけだと難しい</li>
                             </ul>
                         </div>
                     </div>
-                    <p>ティーチング以外にできる工夫↓</p>
+                    <p>工夫や手法を紹介↓</p>
                 </section>
                 <section>
-                    <h2>柔軟な手先：RCC</h2>
+                    <h2>RCC(Remote Center Compliance)</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <iframe width="560" height="315"
@@ -404,7 +426,7 @@ finally:
                         <div style="flex: 1;">
                             <ul>
                                 <li>部品を嵌め合わせるなどの作業のずれを機械的に補償するツール</li>
-                                <li>正直、後述のコンプライアンス制御に置き換わっている印象</li>
+                                <li>後述のコンプライアンス制御に置き換わっている印象</li>
                             </ul>
                         </div>
                     </div>
@@ -431,7 +453,11 @@ finally:
                     <h2>フォース制御</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robot_accuracy_example1.png">
+                            <iframe width="560" height="315"
+                                src="https://www.youtube.com/embed/FKR04ZJv-SE?si=JDvABagKXgivwWN_"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -445,16 +471,17 @@ finally:
                     <h2>フォース制御とコンプライアンス制御の比較</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                        <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="interactive_app/force_control.html" target="_blank"
-                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                        </p>
-                        <iframe data-src="interactive_app/force_control.html" width="100%" height="180px"
-                            frameborder="0"></iframe>
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/force_control.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/force_control.html" width="100%" height="180px"
+                                frameborder="0"></iframe>
                         </div>
-                            <div style="flex: 1;">
+                        <div style="flex: 1;">
                             <ul>
-                                <li>比較すると結構違います</li>
+                                <li>フォース制御 → ある力をかける</li>
+                                <li>コンプライアンス制御 → ばねのように柔らかく動く</li>
                             </ul>
                         </div>
                     </div>
@@ -462,35 +489,18 @@ finally:
 
             </section>
 
-            <section>
-                <h2>ロボットアームの精度について</h2>
-                <div style="display: flex;">
-                    <div style="flex: 1;">
-                        <img src="media/robot_accuracy_example1.png">
-                        <div style="position: absolute; 
-                                    top: 74%; 
-                                    left: 4%; 
-                                    width: 20%; 
-                                    height: 5%; 
-                                    border: 5px solid red; /* 赤い枠線 */
-                                    box-sizing: border-box; /* 枠線の幅を要素のサイズに含める */
-                                    "></div>
-                    </div>
-                    <div style="flex: 1;">
-                        <ul>
-                            <li>仕様書は絶対位置決め精度ではない！</li>
-                            <li>ISO9283は同じ動作の繰り返し精度を測定する</li>
-                            <li>例えば、電源を入れなおすと絶対位置は前回とずれる</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
+
             <section>
                 <section>
                     <h2>オフラインシミュレーション</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/robodk.png">
+                            <video width="100%" autoplay muted loop>
+                                <source
+                                    src="https://dh2zq2763s2kl.cloudfront.net/assets/videos/robodk-download-polishing-propeller_1080p.mp4"
+                                    type="video/mp4">
+                                動画を再生できません。
+                            </video>
                         </div>
                         <div style="flex: 1;">
                             <ul>
