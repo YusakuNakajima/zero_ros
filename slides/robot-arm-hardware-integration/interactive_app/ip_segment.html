@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPアドレス セグメント解説</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        .binary-ip span {
+            display: inline-block;
+            margin: 0 1px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .network-part {
+            background-color: #bfdbfe; /* blue-200 */
+        }
+        .host-part {
+            background-color: #fecaca; /* red-200 */
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .input-group input {
+            width: 60px;
+            text-align: center;
+        }
+        @media (max-width: 640px) {
+            .input-group input {
+                width: 50px;
+            }
+            .input-group span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">IPアドレス セグメント解説ツール</h1>
+            <p class="mt-2 text-lg text-gray-600">IPアドレスとサブネットマスクの関係を視覚的に理解しよう</p>
+        </header>
+
+        <main class="bg-white p-6 rounded-2xl shadow-lg">
+            <!-- 入力セクション -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="ip" class="block text-sm font-medium text-gray-700 mb-2">IPアドレス</label>
+                    <div id="ip-inputs" class="input-group">
+                        <input type="number" min="0" max="255" value="192" class="ip-part p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <span class="text-gray-500 font-bold">.</span>
+                        <input type="number" min="0" max="255" value="168" class="ip-part p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <span class="text-gray-500 font-bold">.</span>
+                        <input type="number" min="0" max="255" value="1" class="ip-part p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <span class="text-gray-500 font-bold">.</span>
+                        <input type="number" min="0" max="255" value="10" class="ip-part p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="cidr" class="block text-sm font-medium text-gray-700 mb-2">サブネットマスク</label>
+                    <div class="flex items-center gap-4">
+                        <span class="font-mono text-lg">/</span>
+                        <input type="range" id="cidr" min="0" max="32" value="24" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <span id="cidr-value" class="font-bold text-lg w-8 text-center">24</span>
+                    </div>
+                    <p class="text-right text-gray-600 mt-1 font-mono" id="subnet-mask-notation"></p>
+                </div>
+            </div>
+
+            <!-- 結果表示セクション -->
+            <div id="results" class="space-y-6">
+                <!-- 2進数表示 -->
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-bold mb-2 text-gray-700">2進数での表現</h3>
+                    <div class="space-y-2 text-sm sm:text-base font-mono break-all">
+                        <p><strong>IPアドレス:</strong> <span id="binary-ip" class="binary-ip"></span></p>
+                        <p><strong>サブネットマスク:</strong> <span id="binary-mask" class="binary-ip"></span></p>
+                    </div>
+                     <div class="mt-4 flex items-center gap-4">
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-blue-200"></div><span>ネットワーク部</span></div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-red-200"></div><span>ホスト部</span></div>
+                    </div>
+                </div>
+
+                <!-- 詳細情報 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                        <h4 class="font-semibold text-blue-800">ネットワーク情報</h4>
+                        <p class="font-mono text-blue-900" id="network-address"></p>
+                        <p class="text-sm text-blue-700 mt-1">ネットワークの「住所」全体を示します。同じネットワーク内のデバイスは、この部分が共通になります。</p>
+                    </div>
+                    <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+                        <h4 class="font-semibold text-red-800">ホスト情報</h4>
+                        <p class="font-mono text-red-900" id="host-address-part"></p>
+                        <p class="text-sm text-red-700 mt-1">ネットワーク内の個々のデバイス（PC、ロボットアーム等）を識別する「部屋番号」です。</p>
+                    </div>
+                </div>
+
+                <!-- 範囲情報 -->
+                <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <h4 class="font-semibold text-green-800">利用可能なIPアドレス範囲</h4>
+                    <p class="font-mono text-green-900" id="usable-range"></p>
+                    <p class="text-sm text-green-700 mt-1">この範囲内のアドレスを各デバイスに割り当てることができます。</p>
+                    <hr class="my-2">
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p><strong>ブロードキャストアドレス:</strong> <span id="broadcast-address" class="font-mono"></span><br>(ネットワーク内の全デバイスへの一斉通知用)</p>
+                        <p><strong>利用可能なホスト数:</strong> <span id="host-count" class="font-mono"></span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 解説セクション -->
+        <section class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-gray-900">ロボットアームのネットワーク構築に向けて</h2>
+            <div class="space-y-4 text-gray-700">
+                <p>ロボットアームとそれを制御するコンピューター（PC）を同じネットワークに接続するには、以下の2つのルールを守る必要があります。</p>
+                <ol class="list-decimal list-inside space-y-2 bg-indigo-50 p-4 rounded-lg">
+                    <li>
+                        <strong>同じ「ネットワークアドレス」を持つこと:</strong><br>
+                        これは、両者が同じ「通り」にいることを意味します。上記で <span class="font-semibold text-blue-700">青く</span> 表示されているネットワーク部が、ロボットアームとPCで完全に一致している必要があります。
+                    </li>
+                    <li>
+                        <strong>異なる「ホストアドレス」を持つこと:</strong><br>
+                        これは、同じ通りの中で「家の番号」が重複してはいけないのと同じです。上記で <span class="font-semibold text-red-700">赤く</span> 表示されているホスト部が、ロボットアームとPCで異なる値になるように設定します。
+                    </li>
+                </ol>
+                <p>
+                    例えば、上の分析結果の場合、PCに <code class="bg-gray-200 p-1 rounded">192.168.1.10</code> を、ロボットアームに <code class="bg-gray-200 p-1 rounded">192.168.1.11</code> を設定すれば、両者は同じネットワーク内で通信できるようになります。
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // DOM要素の取得
+        const ipInputs = document.querySelectorAll('.ip-part');
+        const cidrSlider = document.getElementById('cidr');
+        const cidrValue = document.getElementById('cidr-value');
+        const subnetMaskNotationEl = document.getElementById('subnet-mask-notation'); // 追加
+
+        const binaryIpEl = document.getElementById('binary-ip');
+        const binaryMaskEl = document.getElementById('binary-mask');
+        const networkAddressEl = document.getElementById('network-address');
+        const hostAddressPartEl = document.getElementById('host-address-part');
+        const usableRangeEl = document.getElementById('usable-range');
+        const broadcastAddressEl = document.getElementById('broadcast-address');
+        const hostCountEl = document.getElementById('host-count');
+
+        // 10進数を8桁の2進数文字列に変換
+        function decToBin(dec) {
+            return ('00000000' + parseInt(dec, 10).toString(2)).slice(-8);
+        }
+
+        // 2進数文字列を10進数に変換
+        function binToDec(bin) {
+            return parseInt(bin, 2);
+        }
+
+        // IPアドレスの配列を文字列に変換
+        function ipArrayToString(arr) {
+            return arr.join('.');
+        }
+
+        // メインの計算と表示更新処理
+        function update() {
+            // 入力値の取得
+            const ipArray = Array.from(ipInputs).map(input => parseInt(input.value) || 0);
+            const cidr = parseInt(cidrSlider.value);
+            cidrValue.textContent = cidr;
+
+            // IPアドレスの検証
+            if (ipArray.some(part => part < 0 || part > 255)) {
+                // 不正な値があれば処理を中断
+                return;
+            }
+
+            // サブネットマスクの計算
+            const maskBinStr = '1'.repeat(cidr) + '0'.repeat(32 - cidr);
+            const maskArray = [];
+            for (let i = 0; i < 4; i++) {
+                maskArray.push(binToDec(maskBinStr.substring(i * 8, (i + 1) * 8)));
+            }
+            // サブネットマスクの10進数表記を更新
+            subnetMaskNotationEl.textContent = ipArrayToString(maskArray);
+
+
+            // ネットワークアドレスの計算 (IP AND MASK)
+            const networkArray = ipArray.map((ipPart, i) => ipPart & maskArray[i]);
+
+            // ブロードキャストアドレスの計算 (Network OR (NOT MASK))
+            const broadcastArray = networkArray.map((netPart, i) => netPart | (255 - maskArray[i]));
+            
+            // ホスト部の計算
+            const hostArray = ipArray.map((ipPart, i) => ipPart & (255 - maskArray[i]));
+
+
+            // 2進数表示の生成
+            const ipBinStr = ipArray.map(decToBin).join('');
+            let styledIpBin = '';
+            let styledMaskBin = '';
+
+            for (let i = 0; i < 32; i++) {
+                const partClass = i < cidr ? 'network-part' : 'host-part';
+                styledIpBin += `<span class="${partClass}">${ipBinStr[i]}</span>`;
+                styledMaskBin += `<span class="${partClass}">${maskBinStr[i]}</span>`;
+                if ((i + 1) % 8 === 0 && i < 31) {
+                    styledIpBin += '<span class="mx-1">.</span>';
+                    styledMaskBin += '<span class="mx-1">.</span>';
+                }
+            }
+            binaryIpEl.innerHTML = styledIpBin;
+            binaryMaskEl.innerHTML = styledMaskBin;
+
+            // 結果の表示
+            const networkAddrStr = ipArrayToString(networkArray);
+            networkAddressEl.textContent = `${networkAddrStr} /${cidr}`;
+            hostAddressPartEl.textContent = ipArrayToString(hostArray);
+            broadcastAddressEl.textContent = ipArrayToString(broadcastArray);
+
+            // 利用可能ホスト数の計算
+            const hostCount = cidr > 30 ? 0 : Math.pow(2, 32 - cidr) - 2;
+            hostCountEl.textContent = hostCount > 0 ? hostCount.toLocaleString() : '0';
+
+            // 利用可能IP範囲の計算
+            if (hostCount > 0) {
+                const firstUsable = [...networkArray];
+                firstUsable[3]++;
+                const lastUsable = [...broadcastArray];
+                lastUsable[3]--;
+                usableRangeEl.textContent = `${ipArrayToString(firstUsable)} 〜 ${ipArrayToString(lastUsable)}`;
+            } else {
+                usableRangeEl.textContent = 'なし';
+            }
+        }
+
+        // イベントリスナーの設定
+        ipInputs.forEach(input => input.addEventListener('input', update));
+        cidrSlider.addEventListener('input', update);
+
+        // 初期表示
+        window.addEventListener('load', update);
+    </script>
+</body>
+</html>

@@ -81,59 +81,69 @@
             </section>
 
             <section>
-                <h2>ロボットの設置</h2>
-                <div class="two-column">
-                    <div class="left">
-                        <img src="https://images.unsplash.com/photo-1567789884554-0b844b597180?ixlib=rb-4.0.3&w=500"
-                            alt="グリッパ" style="max-width: 100%;">
+                <section>
+                    <h2>ロボットの設置</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <img src="media/robot_on_bread_bourd.JPG" alt="ブレッドボード上のロボット" style="max-width: 45%; border: none; box-shadow: none;">
+                                <img src="media/robot_on_alminum_frame.JPG" alt="アルミフレーム上のロボット" style="max-width: 45%; border: none; box-shadow: none;">
+                            </div>
+                        </div>
+                        <div class="right">
+                            <p>ロボットアームはアルミフレームや定盤に設置する場合がほとんど</p>
+                        </div>
                     </div>
-                    <div class="right">
-                        <p>ロボットアームはアルミフレームや定盤に設置する場合がほとんど</p>
-                    </div>
-                </div>
+                </section>
             </section>
             <section>
                 <h2>エンドエフェクタの取付</h2>
                 <div class="two-column">
                     <div class="left">
-                        <img src="media/iso_flange.png" alt="グリッパ" style="max-width: 100%;">
+                        <img src="media/iso_flange.png" alt="ISOフランジ規格" style="max-width: 100%;">
                     </div>
                     <div class="right">
                         <p>手先を取り付けるフランジの規格はISO9409-1及びJISB8436で決まっています</p>
                         <p>寸法は3kg~5kgのロボットであれば番号4(φ50 mm)が一般的です</p>
-
+                        <p><a href="https://kikakurui.com/b8/B8436-2005-01.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">規格詳細はこちら</a></p>
                     </div>
                 </div>
             </section>
 
-            <!-- 2. ロボットアームとの接続方法 -->
+            <!-- 2. ロボットアームとPCの接続 -->
             <section>
                 <section>
-                    <h2>ロボットアームとPCの接続方法</h2>
+                    <h2>ロボットアームとPCの接続</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=500"
-                                alt="LANケーブル接続図" style="max-width: 100%;">
+                             <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/robot_LAN_setting.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/robot_LAN_setting.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
                         </div>
                         <div class="right">
-                            <ul>
-                                <li>現在のロボットはほぼすべてLANケーブルで接続します</li>
-                                <li>接続の際に、LANのセグメントを合わせる必要があります</li>
-                            </ul>
+                            <p>PCに付属のLANポートかUSB-LAN変換を使用して接続します</p>
+                            <p><strong>IPアドレスの仕組み↓</strong></p>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>ティーチングペンダント</h2>
+                    <h2>IPアドレスのセグメント</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&w=500"
-                                alt="ティーチングペンダント" style="max-width: 100%;">
+                             <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/ip_segment.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/ip_segment.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
                         </div>
                         <div class="right">
                             <ul>
-                                <li>ロボットアーム操作、設定画面はティーチングペンダントと言います</li>
-                                <li>昔はタブレット端末でしたが、今はアプリで代替えすることも多いです</li>
+                                <li>IPアドレスはネットワーク上の機器を識別するための番号</li>
+                                <li>サブネットマスクはIPアドレスのネットワーク部分とホスト部分を分けるためのもの</li>
                             </ul>
                         </div>
                     </div>
@@ -141,17 +151,17 @@
             </section>
 
 
-            <!-- 3. グリッパとの接続方法 -->
+            <!-- 3. グリッパの接続方法 -->
             <section>
                 <section>
-                    <h2>グリッパとPCの接続方法</h2>
+                    <h2>グリッパの接続方法</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1567789884554-0b844b597180?ixlib=rb-4.0.3&w=500"
+                            <img src="media/gripper.png"
                                 alt="グリッパ" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>グリッパーはロボットメーカとは別</p>
+                            <p>メーカー対応品以外は、自分で通信などを実装する必要があります</p>
                         </div>
                     </div>
                 </section>
@@ -159,203 +169,244 @@
                     <h2>グリッパの配線</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500"
-                                alt="配線図" style="max-width: 100%;">
+                            <!-- 配線図 -->
                         </div>
                         <div class="right">
-                            <ul>
-                                <li>電源</li>
-                                <li>グランド</li>
-                                <li>通信</li>
-                            </ul>
-                            <p>の3つが基本</p>
+                            <p>グリッパの接続方法は、電源、グランド、通信の3つを接続します</p>
                         </div>
                     </div>
+                    <p><strong>推奨電源↓</strong></p>
                 </section>
                 <section>
-                    <h2>接続方法の種類</h2>
-                    <p>グリッパーの接続方法は大きく2種類</p>
-                    <ul>
-                        <li>①IOでオンオフ</li>
-                        <li>②RS485でコマンド送信</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>①IOでオンオフ</h2>
+                    <h2>電源の選定</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092335878-1d4b1c1ba4b5?ixlib=rb-4.0.3&w=500"
-                                alt="IO制御図" style="max-width: 100%;">
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <img src="media/swichingAC.png" alt="スイッチング電源" style="max-width: 45%; border: none; box-shadow: none;">
+                                <img src="media/AC_adapter.png" alt="ACアダプタ" style="max-width: 45%; border: none; box-shadow: none;">
+                            </div>
                         </div>
                         <div class="right">
-                            <p>電磁式など閉じるか開くかだけのグリッパの場合はIOで制御するものがある</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>②RS485でコマンド送信</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&w=500"
-                                alt="RS485通信" style="max-width: 100%;">
-                        </div>
-                        <div class="right">
-                            <p>モーター制御のグリッパーはRS485でコマンドを送信して制御する</p>
+                            <p>12V or 24Vの電源を用意することが多いです、電源はスイッチング電源が推奨です</p>
+                            <p>ACアダプタも使えますが、故障リスクがあるので注意してください</p>
                         </div>
                     </div>
                 </section>
             </section>
 
-            <!-- 4. RS485とは？ -->
+            <!-- 4. RS485通信の概要 -->
             <section>
-                <section>
-                    <h2>RS485とは？</h2>
-                    <p>手順を追って丁寧に説明します↓</p>
-                </section>
                 <section>
                     <h2>データ通信の基本</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500"
-                                alt="電気信号図" style="max-width: 100%;">
+                            <img src="media/digital_signal_illustration.svg" alt="デジタル信号図" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>そもそもデータを電気信号で送る場合、どう送るのか？</p>
-                            <p>電気信号のON/OFFをbitの1/0として扱う</p>
+                            <p>電気信号でHigh(1)とLow(0)の2値の情報(ビット)を送ります<br>(これがRS232)</p>
+                            <p>文字は<a href="https://www3.nit.ac.jp/~tamura/ex2/ascii.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">ASCIIコード</a>と呼ばれる表でビットと文字の対応関係で送る</p>
                         </div>
                     </div>
+                    <p><strong>RS232を改良したRS485↓</strong></p>
                 </section>
                 <section>
-                    <h2>RS232規格</h2>
+                    <h2>RS485とは</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1621839673705-6617adf9e890?ixlib=rb-4.0.3&w=500"
-                                alt="RS232通信" style="max-width: 100%;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/RS485.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/RS485.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
                         </div>
                         <div class="right">
-                            <ul>
-                                <li>これを規格化したのがRS232</li>
-                                <li>大体は8bit単位で送る（コンピューターが8bit単位が扱いやすいため）</li>
-                                <li>スタートとストップに特定の信号を入れて、受信側はデータの始まりと終わりを認識</li>
-                            </ul>
+                            <p>RS485はRS232の改良版で、<strong>長距離通信、複数台の機器接続、ノイズ耐性</strong>に優れています</p>
                         </div>
                     </div>
+                    <p><strong>USB-RS485変換アダプタの選定↓</strong></p>
                 </section>
                 <section>
-                    <h2>RS485の改良点①</h2>
+                    <h2>USB-RS485変換アダプタ</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=500"
-                                alt="4線式通信" style="max-width: 100%;">
+                            <img src="media/USB_RS485_converter.png" alt="USB-RS485変換アダプタ" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>RS485はRS232の拡張規格</p>
-                            <p>変わった点①データ通信線が2本から4本に増えた</p>
-                            <p>ノイズ耐性が飛躍的に高まった</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>RS485の改良点②</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&w=500"
-                                alt="1対多通信" style="max-width: 100%;">
-                        </div>
-                        <div class="right">
-                            <p>変わった点②</p>
-                            <p>RS232は1対1の通信しかできなかったが、RS485は1対多の通信が可能になった</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>RS485のメリット</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
-                                alt="複数機器接続" style="max-width: 100%;">
-                        </div>
-                        <div class="right">
-                            <p>RS485を使えば複数台のセンサやモータなどと同時に接続、通信できる</p>
+                            <p>パソコンとの接続においては、USB-RS485変換アダプタを使用することが多い</p>
+                            <p>←<a href="https://amzn.asia/d/fjOfioS" target="_blank" style="color: #3b82f6; text-decoration: underline;">これ</a>など、FTDI社のチップを使ったものがおススメです</p>
                         </div>
                     </div>
                 </section>
             </section>
 
+            <!-- 5. 非常停止スイッチの増設 -->
             <section>
-                <h2>非常停止スイッチの増設方法</h2>
-                <div class="two-column">
-                    <div class="left">
-                        <img src="media/iso_flange.png" alt="グリッパ" style="max-width: 100%;">
+                <section>
+                    <h2>非常停止スイッチの増設</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/swich_types.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/swich_types.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="right">
+                            <p>スイッチの接点構成は大抵のロボットだと2b接点を使用します</p>
+                        </div>
                     </div>
-                    <div class="right">
-                        <p>非常停止スイッチが複数ほしい場合、長さを伸ばしたい場合は増設ができます</p>
+                </section>
+                <section>
+                    <h2>BOX入りスイッチ</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="media/emargency_swich_box.png" alt="非常停止スイッチBOX" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>スイッチ単体でも売っていますが、BOXいりのスイッチを使用すると便利です</p>
+                        </div>
                     </div>
-                </div>
+                </section>
+                <section>
+                    <h2></h2>
+                    <!-- 空のスライド -->
+                </section>
             </section>
 
+            <!-- 6. 治具の作成 -->
             <section>
                 <section>
                     <h2>治具の作成</h2>
-                    <p>手先への固定や、ツールをテーブルに固定する道具を治具と呼ぶ</p>
-                    <p>CADと3Dプリンタを駆使して作るのが便利です↓</p>
-                </section>
-                <section>
-                    <h2>治具の設計 ~CAD~</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
-                                alt="IO接続" style="max-width: 100%;">
+                            <!-- 治具の例 -->
                         </div>
                         <div class="right">
-                            <p>Fusion 360が便利</p>
+                            <p>治具の作成、固定具を治具と言います</p>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>治具の作成 ~3Dプリンタ~</h2>
+                    <h2>治具の設計</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-4.0.3&w=500"
-                                alt="USB接続" style="max-width: 100%;">
+                            <img src="media/fusion360.png" alt="Fusion360" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>10万程度の3Dプリンタで十分</p>
+                            <p>fusion360を使用して設計することが多いです</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>治具の作成</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="media/creality_k1c.png" alt="Creality K1C" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>3Dプリンタを使用して作成することが多いです、現時点だとcrealityK1cはおススメ</p>
                         </div>
                     </div>
                 </section>
             </section>
 
 
-            <!-- 5. ロボットと他の機器との接続 -->
+            <!-- 7. ロボットと他の機器の接続 -->
             <section>
                 <section>
-                    <h2>ロボットと他の機器との接続</h2>
-                    <p>まずはパソコンとロボットコントローラのIOでつなぐのが小回りが利いて便利</p>
-                    <p>PLCや産業用通信での接続は試作ではなく本格稼働の確実性が必要なときで良い</p>
-                </section>
-                <section>
-                    <h2>ロボットコントローラのIOでつなぐ</h2>
+                    <h2>ロボットと他の機器の接続</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
-                                alt="IO接続" style="max-width: 100%;">
+                            <img src="media/robot_integration.png" alt="ロボット統合システム" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>電圧のON/offを使って他の機器を制御したり、センサの値を読み取ったりする</p>
-                            <p>on/offのどちらかしかできない</p>
+                            <p>ロボット単体ではなく色々な装置をつなげる場合</p>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>パソコンでつなぐ</h2>
+                    <h2>ロボットコントローラのIO</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="media/ur_io.png" alt="URロボットIO" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>基本的にON or OFFの信号をやり取りします</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>パソコン接続（USB等）</h2>
                     <div class="two-column">
                         <div class="left">
                             <img src="https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-4.0.3&w=500"
                                 alt="USB接続" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>カメラや市販のセンサであればUSB接続が多い</p>
+                            <p>パソコンとの接続はUSBを使用することが多いです</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>PLC接続</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
+                                alt="PLC接続" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>高信頼性などの産業用途ではPLCを使用し、FA用の通信を使うことが多いですが作るのは大変です</p>
+                            <p>研究などのプロトタイピングの場合はUSBでも十分なことが多いです</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- 8. 便利なデバイスの紹介 -->
+            <section>
+                <section>
+                    <h2>便利なデバイスの紹介</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <!-- デバイス紹介 -->
+                        </div>
+                        <div class="right">
+                            <p>センサ、アクチュエータを紹介します</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>M5stack</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="media/M5stack.png" alt="M5Stack" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>Arduinoのプログラムを書けるマイコンです、はんだ付け不要で様々なセンサを簡単に追加できます</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>Realsense</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="media/Realsense.png" alt="Intel Realsense" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>安価ですが高性能なIntel製の3Dカメラです、ロボットの周囲の環境を認識するために使用できます</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>Dynamixel</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img src="media/Dynamixel.png" alt="Dynamixelモータ" style="max-width: 100%;">
+                        </div>
+                        <div class="right">
+                            <p>ロボットアームの関節等に使われるモータです、位置制御だけでなく電流制御(トルク制御)可能なため研究で重宝します</p>
                         </div>
                     </div>
                 </section>

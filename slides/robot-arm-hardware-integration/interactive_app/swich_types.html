@@ -86,49 +86,53 @@
                 <!-- Circuit Diagram -->
                 <div class="w-full md:w-1/2">
                     <svg id="circuit-svg" viewBox="0 0 250 150" class="w-full h-auto">
-                        <!-- Common Parts -->
+                        <!-- Common Input -->
                         <line x1="10" y1="50" x2="50" y2="50" stroke="#4b5563" stroke-width="2"/>
                         <circle cx="50" cy="50" r="4" fill="#4b5563"/>
                         <text x="5" y="40" font-size="12px" fill="#4b5563">入力</text>
 
-                        <!-- a-contact parts -->
-                        <g id="a-contact-group">
+                        <!-- Single Output (for a/b contact) -->
+                        <g id="single-output-group">
+                            <line x1="100" y1="50" x2="155" y2="50" stroke="#4b5563" stroke-width="2"/>
                             <circle cx="100" cy="50" r="4" fill="#4b5563"/>
-                            <line x1="100" y1="50" x2="150" y2="50" stroke="#4b5563" stroke-width="2"/>
+                            <g transform="translate(170, 0)">
+                                 <circle id="bulb-single" class="light-bulb off" cx="0" cy="50" r="15"/>
+                                 <line x1="-7" y1="43" x2="7" y2="57" stroke="#a1a1aa" stroke-width="1.5"/>
+                                 <line x1="-7" y1="57" x2="7" y2="43" stroke="#a1a1aa" stroke-width="1.5"/>
+                                 <text x="-10" y="75" font-size="12px" fill="#4b5563">出力</text>
+                            </g>
+                        </g>
+                        
+                        <!-- Double Output (for c contact) -->
+                        <g id="double-output-group" class="hidden">
+                            <!-- NO Path (B) -->
+                            <line x1="100" y1="30" x2="155" y2="30" stroke="#4b5563" stroke-width="2"/>
+                            <circle cx="100" cy="30" r="4" fill="#4b5563" />
+                            <g transform="translate(170, 0)">
+                                <circle id="bulb-b" class="light-bulb off" cx="0" cy="30" r="15"/>
+                                <line x1="-7" y1="23" x2="7" y2="37" stroke="#a1a1aa" stroke-width="1.5"/>
+                                <line x1="-7" y1="37" x2="7" y2="23" stroke="#a1a1aa" stroke-width="1.5"/>
+                                <text x="-28" y="15" font-size="12px" fill="#4b5563">B (NO)</text>
+                            </g>
+                            <!-- NC Path (A) -->
+                            <line x1="100" y1="70" x2="155" y2="70" stroke="#4b5563" stroke-width="2"/>
+                            <circle cx="100" cy="70" r="4" fill="#4b5563" />
+                            <g transform="translate(170, 0)">
+                                <circle id="bulb-a" class="light-bulb off" cx="0" cy="70" r="15"/>
+                                <line x1="-7" y1="63" x2="7" y2="77" stroke="#a1a1aa" stroke-width="1.5"/>
+                                <line x1="-7" y1="77" x2="7" y2="63" stroke="#a1a1aa" stroke-width="1.5"/>
+                                <text x="-28" y="90" font-size="12px" fill="#4b5563">A (NC)</text>
+                            </g>
                         </g>
 
-                        <!-- b-contact parts -->
-                        <g id="b-contact-group" class="hidden">
+                        <!-- b-contact 'break' symbol -->
+                        <g id="b-contact-break-symbol" class="hidden">
                              <line x1="80" y1="40" x2="80" y2="25" stroke="#4b5563" stroke-width="2" />
                              <line x1="75" y1="25" x2="85" y2="25" stroke="#4b5563" stroke-width="2" />
                         </g>
 
-                        <!-- c-contact parts -->
-                        <g id="c-contact-group" class="hidden">
-                            <circle cx="100" cy="30" r="4" fill="#4b5563" />
-                            <line x1="100" y1="30" x2="150" y2="30" stroke="#4b5563" stroke-width="2"/>
-                            <text x="105" y="25" font-size="12px" fill="#4b5563">NO (B)</text>
-                             <circle cx="100" cy="70" r="4" fill="#4b5563" />
-                            <line x1="100" y1="70" x2="150" y2="70" stroke="#4b5563" stroke-width="2"/>
-                            <text x="105" y="85" font-size="12px" fill="#4b5563">NC (A)</text>
-                        </g>
-
                         <!-- Switch Lever -->
-                        <line id="switch-lever" class="switch-lever" x1="50" y1="50" x2="100" y2="30" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
-
-                        <!-- Light Bulbs -->
-                        <g id="bulb-a-group" transform="translate(170, 0)">
-                             <circle id="bulb-a" class="light-bulb off" cx="0" cy="50" r="15"/>
-                             <line x1="-7" y1="43" x2="7" y2="57" stroke="#a1a1aa" stroke-width="1.5"/>
-                             <line x1="-7" y1="57" x2="7" y2="43" stroke="#a1a1aa" stroke-width="1.5"/>
-                             <text id="bulb-a-label" x="-5" y="75" font-size="12px" fill="#4b5563">A</text>
-                        </g>
-                         <g id="bulb-b-group" transform="translate(170, 0)" class="hidden">
-                             <circle id="bulb-b" class="light-bulb off" cx="0" cy="30" r="15"/>
-                             <line x1="-7" y1="23" x2="7" y2="37" stroke="#a1a1aa" stroke-width="1.5"/>
-                             <line x1="-7" y1="37" x2="7" y2="23" stroke="#a1a1aa" stroke-width="1.5"/>
-                             <text id="bulb-b-label" x="-5" y="15" font-size="12px" fill="#4b5563">B</text>
-                        </g>
+                        <line id="switch-lever" class="switch-lever" x1="50" y1="50" x2="100" y2="50" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
                     </svg>
                 </div>
 
@@ -152,13 +156,12 @@
         const statusText = document.getElementById('status-text');
         
         const lever = document.getElementById('switch-lever');
-        const aContactGroup = document.getElementById('a-contact-group');
-        const bContactGroup = document.getElementById('b-contact-group');
-        const cContactGroup = document.getElementById('c-contact-group');
-        
-        const bulbAGroup = document.getElementById('bulb-a-group');
+        const singleOutputGroup = document.getElementById('single-output-group');
+        const doubleOutputGroup = document.getElementById('double-output-group');
+        const bContactBreakSymbol = document.getElementById('b-contact-break-symbol');
+
+        const bulbSingle = document.getElementById('bulb-single');
         const bulbA = document.getElementById('bulb-a');
-        const bulbBGroup = document.getElementById('bulb-b-group');
         const bulbB = document.getElementById('bulb-b');
 
         // --- State ---
@@ -186,41 +189,37 @@
             const isSwitchActive = state.actionType === 'momentary' ? state.isPressed : state.isOn;
 
             // --- Update Visuals ---
-            // 1. Configure SVG based on contact type
-            aContactGroup.classList.toggle('hidden', state.contactType !== 'a');
-            bContactGroup.classList.toggle('hidden', state.contactType !== 'b');
-            cContactGroup.classList.toggle('hidden', state.contactType !== 'c');
-            
-            bulbAGroup.classList.toggle('hidden', state.contactType === 'c');
-            bulbBGroup.classList.toggle('hidden', state.contactType !== 'c');
+            // 1. Configure SVG layout based on contact type
+            const isCContact = state.contactType === 'c';
+            singleOutputGroup.classList.toggle('hidden', isCContact);
+            doubleOutputGroup.classList.toggle('hidden', !isCContact);
+            bContactBreakSymbol.classList.toggle('hidden', state.contactType !== 'b');
 
-            // When C-contact, use both bulbs but reposition bulb A to match NC contact
-            if (state.contactType === 'c') {
-                bulbAGroup.classList.remove('hidden'); // Show A bulb as well
-                bulbAGroup.style.transform = 'translate(170, 20px)'; // Move A bulb down to y=70
-            } else {
-                bulbAGroup.style.transform = 'translate(170, 0)'; // Reset A bulb position
-            }
-            
             // 2. Update lever, bulbs, and text based on switch state
             let description = '';
             
+            // Define angles for contacts
+            const angleOpen = -30; // Angle when switch is open
+            const angleSingleClosed = 0; // Angle for a/b contact
+            const angleC_NO = -22; // Angle for c-contact NO (B)
+            const angleC_NC = 22; // Angle for c-contact NC (A)
+
             switch (state.contactType) {
                 case 'a': // a接点 (Normally Open)
-                    lever.style.transform = isSwitchActive ? 'rotate(0deg)' : 'rotate(-25deg)';
-                    bulbA.classList.toggle('on', isSwitchActive);
+                    lever.style.transform = `rotate(${isSwitchActive ? angleSingleClosed : angleOpen}deg)`;
+                    bulbSingle.classList.toggle('on', isSwitchActive);
                     description = `通常時OFF。${state.actionType === 'momentary' ? '押している間' : '押すと'}ONになります。`;
                     break;
                 case 'b': // b接点 (Normally Closed)
-                    lever.style.transform = isSwitchActive ? 'rotate(-25deg)' : 'rotate(0deg)';
-                    bulbA.classList.toggle('on', !isSwitchActive);
+                    lever.style.transform = `rotate(${isSwitchActive ? angleOpen : angleSingleClosed}deg)`;
+                    bulbSingle.classList.toggle('on', !isSwitchActive);
                     description = `通常時ON。${state.actionType === 'momentary' ? '押している間' : '押すと'}OFFになります。`;
                     break;
                 case 'c': // c接点 (Changeover)
-                    lever.style.transform = isSwitchActive ? 'rotate(-25deg)' : 'rotate(25deg)';
+                    lever.style.transform = `rotate(${isSwitchActive ? angleC_NO : angleC_NC}deg)`;
                     bulbA.classList.toggle('on', !isSwitchActive); // NC contact (Bulb A)
                     bulbB.classList.toggle('on', isSwitchActive);  // NO contact (Bulb B)
-                    description = `通常時AがON。${state.actionType === 'momentary' ? '押している間' : '押すと'}BがONに切り替わります。`;
+                    description = `通常時A(NC)がON。${state.actionType === 'momentary' ? '押している間' : '押すと'}B(NO)がONに切り替わります。`;
                     break;
             }
             statusText.textContent = description;

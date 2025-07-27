@@ -54,6 +54,18 @@
             <!-- Visualization -->
             <div class="w-full bg-gray-900 rounded-lg p-2 mb-6">
                 <canvas id="visualizer-canvas"></canvas>
+                <!-- *** ADDED: Legend for bit status *** -->
+                <div class="flex justify-end items-center gap-x-4 text-xs text-gray-400 px-2 py-1">
+                    <span class="font-bold">受信ビットステータス凡例:</span>
+                    <div class="flex items-center gap-x-2">
+                        <span class="w-3 h-3 bg-green-400 rounded-sm"></span>
+                        <span>正常</span>
+                    </div>
+                    <div class="flex items-center gap-x-2">
+                        <span class="w-3 h-3 bg-red-400 rounded-sm"></span>
+                        <span>エラー</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Data Display -->
@@ -64,7 +76,9 @@
                 </div>
                 <div class="bg-gray-700 p-4 rounded-lg">
                     <h3 class="font-semibold text-indigo-400 mb-2">受信データ (デコード結果)</h3>
-                    <p id="received-text" class="font-mono break-all text-2xl h-16"></p>
+                    <div class="flex items-center h-16">
+                        <p id="received-text" class="font-mono break-all text-2xl"></p>
+                    </div>
                 </div>
             </div>
 
@@ -184,33 +198,30 @@
             ctx.textAlign = 'left';
             
             if (mode === 'rs232') {
-                // TxD line
                 ctx.beginPath();
                 ctx.moveTo(90, h / 2);
                 ctx.lineTo(w - 90, h / 2);
                 ctx.stroke();
                 ctx.fillText('TxD', 100, h/2 - 10);
                 
-                // GND line
+                const gndY = h * 0.95;
                 ctx.beginPath();
-                ctx.moveTo(10, h * 0.85); // Adjusted Y for status bar
-                ctx.lineTo(w - 10, h * 0.85); // Adjusted Y for status bar
+                ctx.moveTo(10, gndY);
+                ctx.lineTo(w - 10, gndY);
                 ctx.stroke();
-                ctx.fillText('GND', 20, h * 0.85 - 10); // Adjusted Y for status bar
+                ctx.fillText('GND', 20, gndY - 10);
             } else { // rs485
-                // A line
                 ctx.beginPath();
                 ctx.moveTo(90, h * 0.4);
                 ctx.lineTo(w - 90, h * 0.4);
                 ctx.stroke();
                 ctx.fillText('A', 100, h*0.4 - 10);
                 
-                // B line
                 ctx.beginPath();
                 ctx.moveTo(90, h * 0.6);
                 ctx.lineTo(w - 90, h * 0.6);
                 ctx.stroke();
-                ctx.fillText('B', 100, h*0.6 - 10);
+                ctx.fillText('B', 100, h*0.6 + 10);
             }
         };
 
@@ -223,11 +234,11 @@
             const h = height / (window.devicePixelRatio || 1);
 
             const totalBits = binaryStr.length;
-            const bitDuration = 100; // ms per bit, faster for more data
+            const bitDuration = 100; // ms per bit
             const totalDuration = totalBits * bitDuration;
             let startTime = null;
-            let receivedBinary = '';
             
+            const receptionResults = new Array(totalBits);
             const noiseAmplitude = h * 0.25; 
 
             const animate = (timestamp) => {
@@ -248,139 +259,116 @@
                 
                 // Draw signal
                 ctx.lineWidth = 2;
-                ctx.beginPath();
-                
                 let lastY_A = midLevel;
                 let lastY_B = midLevel;
 
-                if (mode === 'rs232') {
-                    ctx.strokeStyle = '#63b3ed'; // blue-400
-                    ctx.beginPath();
-                    ctx.moveTo(startX, midLevel);
+                const pathA = new Path2D();
+                const pathB = new Path2D();
+                if (mode === 'rs232') pathA.moveTo(startX, midLevel);
+                if (mode === 'rs485') {
+                    pathA.moveTo(startX, h * 0.5);
+                    pathB.moveTo(startX, h * 0.5);
+                    lastY_A = h * 0.5;
+                    lastY_B = h * 0.5;
                 }
 
-                for (let i = 0; i < totalBits; i++) {
-                    const bitStartTime = i * bitDuration;
-                    if (elapsedTime < bitStartTime) break;
-                    
-                    const bitProgress = Math.min((elapsedTime - bitStartTime) / bitDuration, 1);
+                const currentBitIndex = Math.floor(elapsedTime / bitDuration);
+
+                for (let i = 0; i <= currentBitIndex && i < totalBits; i++) {
                     const bit = binaryStr[i];
-                    
                     const x1 = startX + (i / totalBits) * signalPathLength;
-                    const x2 = startX + ((i + bitProgress) / totalBits) * signalPathLength;
+                    const nextX = startX + ((i + 1) / totalBits) * signalPathLength;
+                    const x2 = (i === currentBitIndex) ? startX + ((i + (elapsedTime % bitDuration) / bitDuration) / totalBits) * signalPathLength : nextX;
 
                     if (mode === 'rs232') {
                         const targetY = bit === '0' ? highLevel : lowLevel;
-                        ctx.lineTo(x1, lastY_A);
-                        ctx.lineTo(x1, targetY);
-                        ctx.lineTo(x2, targetY);
+                        pathA.lineTo(x1, lastY_A);
+                        pathA.lineTo(x1, targetY);
+                        pathA.lineTo(x2, targetY);
                         lastY_A = targetY;
                     } else { // rs485
                         const targetY_A = bit === '1' ? h * 0.3 : h * 0.5;
                         const targetY_B = bit === '1' ? h * 0.7 : h * 0.5;
-                        
-                        const pathA = new Path2D();
-                        pathA.moveTo(x1, lastY_A);
+                        pathA.lineTo(x1, lastY_A);
                         pathA.lineTo(x1, targetY_A);
                         pathA.lineTo(x2, targetY_A);
-                        ctx.strokeStyle = '#68d391'; // green-400
-                        ctx.stroke(pathA);
                         lastY_A = targetY_A;
 
-                        const pathB = new Path2D();
-                        pathB.moveTo(x1, lastY_B);
+                        pathB.lineTo(x1, lastY_B);
                         pathB.lineTo(x1, targetY_B);
                         pathB.lineTo(x2, targetY_B);
-                        ctx.strokeStyle = '#fc8181'; // red-400
-                        ctx.stroke(pathB);
                         lastY_B = targetY_B;
                     }
                 }
-                if (mode === 'rs232') ctx.stroke();
+                
+                if (mode === 'rs232') {
+                    ctx.strokeStyle = '#63b3ed'; // blue-400
+                    ctx.stroke(pathA);
+                } else {
+                    ctx.strokeStyle = '#68d391'; // green-400
+                    ctx.stroke(pathA);
+                    ctx.strokeStyle = '#fc8181'; // red-400
+                    ctx.stroke(pathB);
+                }
 
 
                 // --- Noise and Reception Logic ---
-                let currentReceivedBinary = '';
-                const receiverX = endX + 5;
-
-                ctx.font = '11px Noto Sans JP';
-                ctx.fillStyle = '#a0aec0';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText('受信ビットステータス:', startX, h * 0.9 - 5);
+                const statusBarY = h * 0.85;
+                const statusBarHeight = h * 0.08;
+                let receivedBinaryString = '';
                 
                 for (let i = 0; i < totalBits; i++) {
-                    const bitStartTime = (i + 1) * bitDuration;
-                    if (elapsedTime < bitStartTime) break;
+                    if (elapsedTime < (i + 1) * bitDuration) break;
 
-                    const originalBit = binaryStr[i];
-                    let receivedBit = originalBit;
-                    
-                    let noise = 0;
-                    if (noiseToggle.checked) {
-                        noise = (Math.random() - 0.5) * noiseAmplitude;
-                    }
+                    if (receptionResults[i] === undefined) {
+                        const originalBit = binaryStr[i];
+                        let receivedBit = originalBit;
+                        let noise = 0;
+                        if (noiseToggle.checked) {
+                            noise = (Math.random() - 0.5) * noiseAmplitude;
+                        }
 
-                    if (mode === 'rs232') {
-                        const bitCenterY = originalBit === '0' ? highLevel : lowLevel;
-                        const noisyY = bitCenterY + noise;
-                        if(noiseToggle.checked) {
-                            ctx.beginPath();
-                            ctx.moveTo(receiverX, bitCenterY);
-                            ctx.lineTo(receiverX, noisyY);
-                            ctx.strokeStyle = 'yellow';
-                            ctx.lineWidth = 1;
-                            ctx.stroke();
-                            ctx.lineWidth = 2;
+                        if (mode === 'rs232') {
+                            const bitCenterY = originalBit === '0' ? highLevel : lowLevel;
+                            const noisyY = bitCenterY + noise;
+                            receivedBit = (noisyY > midLevel) ? '1' : '0';
+                        } else { // rs485
+                            const yA = (originalBit === '1' ? h * 0.3 : h * 0.5) + noise;
+                            const yB = (originalBit === '1' ? h * 0.7 : h * 0.5) + noise;
+                            receivedBit = ((yA - yB) < -5) ? '1' : '0';
                         }
-                        receivedBit = (noisyY > midLevel) ? '1' : '0';
-                    } else { // rs485
-                        const yA = (originalBit === '1' ? h * 0.3 : h * 0.5) + noise;
-                        const yB = (originalBit === '1' ? h * 0.7 : h * 0.5) + noise;
-                        if(noiseToggle.checked) {
-                            ctx.strokeStyle = 'yellow';
-                            ctx.lineWidth = 1;
-                            ctx.beginPath(); ctx.moveTo(receiverX, yA - noise); ctx.lineTo(receiverX, yA); ctx.stroke();
-                            ctx.beginPath(); ctx.moveTo(receiverX, yB - noise); ctx.lineTo(receiverX, yB); ctx.stroke();
-                            ctx.lineWidth = 2;
-                        }
-                        receivedBit = ((yA - yB) < -5) ? '1' : '0';
+                        receptionResults[i] = {
+                            isOk: receivedBit === originalBit,
+                            bit: receivedBit
+                        };
                     }
                     
-                    currentReceivedBinary += receivedBit;
+                    receivedBinaryString += receptionResults[i].bit;
 
-                    // *** FIX: Corrected Y position for the status bar ***
                     const rectWidth = signalPathLength / totalBits;
                     const rectX = startX + (i / totalBits) * signalPathLength;
-                    const rectY = h * 0.9; // Corrected Y coordinate
-                    const rectHeight = h * 0.1; // Made slightly taller
-
-                    if (receivedBit === originalBit) {
-                        ctx.fillStyle = 'rgba(104, 211, 145, 0.9)'; // green-400
+                    
+                    // *** Use Tailwind colors for consistency ***
+                    if (receptionResults[i].isOk) {
+                        ctx.fillStyle = 'rgba(74, 222, 128, 1)'; // green-400
                     } else {
-                        ctx.fillStyle = 'rgba(252, 129, 129, 0.9)'; // red-400
+                        ctx.fillStyle = 'rgba(248, 113, 113, 1)'; // red-400
                     }
-                    ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
-                    ctx.strokeStyle = '#2d3748'; // gray-800
-                    ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+                    ctx.fillRect(rectX, statusBarY, rectWidth - 1, statusBarHeight);
                 }
                 
-                // Update received text display
-                if (receivedBinary !== currentReceivedBinary) {
-                    receivedBinary = currentReceivedBinary;
-                    let decodedText = '';
-                    for (let i = 0; i < receivedBinary.length; i += 8) {
-                        const chunk = receivedBinary.slice(i, i + 8);
-                        if (chunk.length === 8) {
-                            try {
-                                decodedText += String.fromCharCode(parseInt(chunk, 2));
-                            } catch (e) {
-                                decodedText += '�';
-                            }
+                let decodedText = '';
+                for (let i = 0; i < receivedBinaryString.length; i += 8) {
+                    const chunk = receivedBinaryString.slice(i, i + 8);
+                    if (chunk.length === 8) {
+                        try {
+                            decodedText += String.fromCharCode(parseInt(chunk, 2));
+                        } catch (e) {
+                            decodedText += '�';
                         }
                     }
-                    updateDataDisplay(binaryStr, decodedText);
                 }
+                receivedTextEl.textContent = decodedText;
 
 
                 if (progress < 1) {
@@ -407,7 +395,9 @@
 
         window.addEventListener('resize', () => {
             resizeCanvas();
-            drawIdleState();
+            if (!isAnimating) {
+               drawIdleState();
+            }
         });
 
         // --- Initialization ---

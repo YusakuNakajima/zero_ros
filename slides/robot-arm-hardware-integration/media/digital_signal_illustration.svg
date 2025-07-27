@@ -1,0 +1,76 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="800" height="400" fill="#f8f9fa"/>
+  
+  <!-- グリッド線 -->
+  <defs>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="400" fill="url(#grid)"/>
+  
+  <!-- 軸 -->
+  <line x1="50" y1="350" x2="750" y2="350" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="50" y1="350" x2="50" y2="50" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 矢印マーカー -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- 軸ラベル -->
+  <text x="30" y="40" font-family="Arial, sans-serif" font-size="16" fill="#333">電圧</text>
+  <text x="760" y="355" font-family="Arial, sans-serif" font-size="16" fill="#333">時間</text>
+  
+  <!-- HIGH/LOWレベル線 -->
+  <line x1="50" y1="100" x2="750" y2="100" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+  <line x1="50" y1="300" x2="750" y2="300" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+  
+  <!-- レベルラベル -->
+  <text x="10" y="105" font-family="Arial, sans-serif" font-size="14" fill="#666">HIGH</text>
+  <text x="10" y="305" font-family="Arial, sans-serif" font-size="14" fill="#666">LOW</text>
+  
+  <!-- デジタル信号波形 -->
+  <path d="M 100 300 L 100 100 L 150 100 L 150 300 L 200 300 L 200 100 L 250 100 L 250 300 L 300 300 L 300 100 L 350 100 L 350 100 L 400 100 L 400 300 L 450 300 L 450 100 L 500 100 L 500 300 L 550 300 L 550 300 L 600 300 L 600 300 L 650 300 L 650 100 L 700 100 L 700 300" 
+        fill="none" stroke="#ff4444" stroke-width="3"/>
+  
+  <!-- ビット値 -->
+  <text x="115" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">1</text>
+  <text x="165" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">0</text>
+  <text x="215" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">1</text>
+  <text x="265" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">0</text>
+  <text x="315" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">1</text>
+  <text x="365" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">1</text>
+  <text x="415" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">0</text>
+  <text x="465" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">1</text>
+  <text x="515" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">0</text>
+  <text x="565" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">0</text>
+  <text x="615" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">0</text>
+  <text x="665" y="340" font-family="monospace" font-size="20" text-anchor="middle" fill="#333">1</text>
+  
+  <!-- バイナリ表記 -->
+  <text x="100" y="380" font-family="monospace" font-size="16" fill="#333">101011010001 (二進数)</text>
+  
+  <!-- 十進数表記 -->
+  <text x="100" y="395" font-family="monospace" font-size="16" fill="#333">= 2769 (十進数) = AD1 (十六進数)</text>
+  
+  <!-- タイトル -->
+  <text x="400" y="25" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">電気信号によるビットデータの伝送</text>
+  
+  <!-- 説明テキスト -->
+  <text x="550" y="120" font-family="Arial, sans-serif" font-size="14" fill="#666">HIGH = 1 (電圧高)</text>
+  <text x="550" y="140" font-family="Arial, sans-serif" font-size="14" fill="#666">LOW = 0 (電圧低)</text>
+  
+  <!-- 信号の流れを示す矢印 -->
+  <defs>
+    <marker id="flow-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#4CAF50"/>
+    </marker>
+  </defs>
+  
+  <path d="M 100 200 L 680 200" stroke="#4CAF50" stroke-width="2" stroke-dasharray="10,5" marker-end="url(#flow-arrow)" opacity="0.6"/>
+  <text x="400" y="195" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#4CAF50">データの流れ</text>
+</svg>
