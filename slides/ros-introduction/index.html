@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,7 +10,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +22,7 @@
     <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
 </head>
+
 <body>
     <div class="reveal">
         <div class="slides">
@@ -69,9 +72,13 @@
                 <div class="slide-layout-image">
                     <div class="image-section">
                         <p style="text-align: center; margin-bottom: 10px;">
-                            <strong>→ <a href="https://vimeo.com/639235111?autoplay=1&muted=1&stream_id=Y2xpcHN8MTU3MTA2MDd8aWQ6ZGVzY3xbXQ%3D%3D" target="_blank" style="color: #3b82f6; text-decoration: underline;">動画で見る</a></strong>
+                            <strong>→ <a
+                                    href="https://vimeo.com/639235111?autoplay=1&muted=1&stream_id=Y2xpcHN8MTU3MTA2MDd8aWQ6ZGVzY3xbXQ%3D%3D"
+                                    target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">動画で見る</a></strong>
                         </p>
-                        <iframe data-src="https://player.vimeo.com/video/639235111?autoplay=1&muted=1" width="100%" height="315" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                        <iframe data-src="https://player.vimeo.com/video/639235111?autoplay=1&muted=1" width="100%"
+                            height="315" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
                     </div>
                     <div class="text-section">
                         <h2>ROSとは</h2>
@@ -80,7 +87,9 @@
                             <li>分散システムのミドルウェア</li>
                             <li>豊富なライブラリとツール群</li>
                         </ol>
-                        <p><a href="https://docs.google.com/presentation/d/1BZU3nFDiSrUU7wAMpqgY4kU6-65wxzvfHVRZigsHlDI/edit?usp=sharing" target="_blank" style="color: #3b82f6; text-decoration: underline;">ROSの説明資料</a></p>
+                        <p><a href="https://docs.google.com/presentation/d/1BZU3nFDiSrUU7wAMpqgY4kU6-65wxzvfHVRZigsHlDI/edit?usp=sharing"
+                                target="_blank" style="color: #3b82f6; text-decoration: underline;">5分で分かるROSとは何か？by
+                                ROSJP</a></p>
                     </div>
                 </div>
             </section>
@@ -89,36 +98,46 @@
             <section>
                 <section>
                     <h2>ROSを使った勉強の進め方</h2>
-                    <p>ROSを使うにはロボット工学やシステム構築など様々な知識が必要なので、ヒントを書いておきます</p>
                 </section>
 
                 <section>
                     <h2>1. 環境構築</h2>
-                    <ol>
-                        <li>Dockerを推奨</li>
-                        <li>環境構築でつまずかない</li>
-                        <li>トラブル回避が容易</li>
-                        <li><a href="https://memoteki.net/archives/2955" target="_blank" style="color: #3b82f6; text-decoration: underline;">環境構築例</a></li>
-                    </ol>
+                    <ul>
+                        <li>環境構築で躓くとその先のロボット開発が進まない</li>
+                        <li>まずはDockerを使ってROSの環境を構築するのが便利</li>
+                        <li>Dockerの使い方は別途学ぶ必要がある</li>
+                    </ul>
                 </section>
 
                 <section>
-                    <h2>2. 困ったとき</h2>
-                    <ol>
-                        <li>ROS日本コミュニティを活用</li>
-                        <li><a href="https://rosjp.connpass.com/" target="_blank" style="color: #3b82f6; text-decoration: underline;">公式サイト</a></li>
-                        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1" target="_blank" style="color: #3b82f6; text-decoration: underline;">Slack招待フォーム</a></li>
-                    </ol>
+                    <h2>2. チュートリアル</h2>
+                    <ul>
+                        <li><a href="http://wiki.ros.org/ja/ROS/Tutorials" target="_blank" style="color: #3b82f6; text-decoration: underline;">http://wiki.ros.org/ja/ROS/Tutorials</a></li>
+                        <li>ただし、チュートリアルだけでは動くロボットを作るのは難しい</li>
+                        <li>このスライドはその補完を目的としている</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>3. 困ったときは</h2>
+                    <ul>
+                        <li>コミュニティ内で質問（<a href="https://wiki.ros.org/ja/Support" target="_blank" style="color: #3b82f6; text-decoration: underline;">https://wiki.ros.org/ja/Support</a>）することができる</li>
+                        <li>ただし、英語なので、日本コミュニティの方がハードルが低い</li>
+                        <li>ROS日本コミュニティ：<a href="https://rosjp.connpass.com/" target="_blank" style="color: #3b82f6; text-decoration: underline;">https://rosjp.connpass.com/</a></li>
+                        <li>Slackワークスペース：<a href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1" target="_blank" style="color: #3b82f6; text-decoration: underline;">招待フォーム</a></li>
+                    </ul>
                 </section>
             </section>
 
-            <!-- スライド6: ROSの便利な点 -->
+            <!-- スライド6: ROSで実際のロボットを動かすには -->
             <section>
-                <h2>ROSの便利な点</h2>
-                <ol>
-                    <li>リアルタイムデータ交換が簡単 ← フォーカス</li>
-                    <li>豊富な可視化・制御ツール ← 次回紹介</li>
-                </ol>
+                <h2>ROSで実際のロボットを動かすには</h2>
+                <p>以下の2点が重要</p>
+                <ul>
+                    <li>ステップ1：ロボットアームを表示</li>
+                    <li>ステップ2：ロボットアームを動かす</li>
+                </ul>
+                <p>本スライドでは前準備として<br>ROSのプログラムの基本的な仕組みを紹介 →</p>
             </section>
 
             <!-- スライド7: ROSのプログラム基本単位：ノード -->
@@ -129,22 +148,24 @@
                     </div>
                     <div class="text-section">
                         <h2>ROSのプログラム基本単位：ノード</h2>
-                        <ol>
+                        <ul>
                             <li>1ノード=1プロセス</li>
                             <li>機能ごとに分割可能</li>
                             <li>柔軟なシステム構築</li>
-                        </ol>
+                        </ul>
                     </div>
                 </div>
             </section>
 
             <!-- スライド8: ノード間の通信：トピック、サービス、アクション -->
             <section>
-                <h2>ノード間の通信：トピック、サービス、アクション</h2>
+                <h2>ノード間の通信</h2>
                 <p style="text-align: center; margin-bottom: 10px;">
-                    <strong>→ <a href="interactive_app/ros_communications.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                    <strong>→ <a href="interactive_app/ros_communications.html" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                 </p>
-                <iframe data-src="interactive_app/ros_communications.html" width="100%" height="500px" frameborder="0"></iframe>
+                <iframe data-src="interactive_app/ros_communications.html" width="100%" height="500px"
+                    frameborder="0"></iframe>
             </section>
 
             <!-- スライド9: パラメータ管理 -->
@@ -156,12 +177,11 @@
                         </div>
                         <div class="text-section">
                             <h2>パラメータ管理</h2>
-                            <ol>
-                                <li>設定値の一元管理</li>
-                                <li>ROS1：パラメータサーバー</li>
+                            <ul>
+                                <li>ロボットには多数のパラメータが必要</li>
+                                <li>ROS1：一括管理</li>
                                 <li>ROS2：ノード別管理</li>
-                                <li>動的変更が可能</li>
-                            </ol>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -171,12 +191,19 @@
             <section>
                 <section>
                     <h2>ROSbag</h2>
-                    <ol>
-                        <li>データ記録・再生フォーマット</li>
-                        <li>センサーデータの保存</li>
-                        <li>解析・デバッグに活用</li>
-                        <li><code>rosbag record -O my_bag.bag /topic1</code></li>
-                    </ol>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/ros_bag.png" alt="rosbag">
+                        </div>
+                        <div class="text-section">
+                            <h2>データの保存と再生</h2>
+                            <ul>
+                                <li>rostopicのデータをそのまま保存</li>
+                                <li>解析・デバッグに活用</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </section>
 
                 <section>
@@ -186,42 +213,39 @@
                         </div>
                         <div class="text-section">
                             <h2>データの可視化</h2>
-                            <ol>
-                                <li><a href="https://github.com/facontidavide/PlotJuggler" target="_blank" style="color: #3b82f6; text-decoration: underline;">PlotJuggler</a>が便利</li>
+                            <ul>
+                                <li><a href="https://github.com/facontidavide/PlotJuggler" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">PlotJuggler</a>が便利</li>
                                 <li>bagファイル読み込み</li>
                                 <li>データのグラフ化</li>
                                 <li>CSVエクスポート</li>
-                            </ol>
+                            </ul>
                         </div>
                     </div>
                 </section>
 
                 <section>
                     <h2>データの再生</h2>
-                    <ol>
+                    <ul>
                         <li><code>rosbag play my_bag.bag</code></li>
-                        <li>全データ再生は困難</li>
+                        <li>Topicの完全再現は現実的でないので注意</li>
                         <li>記録時に抜け落ちるデータ有</li>
-                        <li>完全再現は現実的でない</li>
-                    </ol>
+                    </ul>
                 </section>
             </section>
 
             <!-- スライド11: 説明はここまで -->
             <section>
                 <h2>説明はここまで、あとは実際に作りながら学んでください</h2>
-                <ol>
-                    <li>実際にロボットを動かしながら学習</li>
-                    <li>基本的な使い方を体験</li>
-                    <li><a href="../ros-model-display/index.html" style="color: #3b82f6; text-decoration: underline;">ロボットモデル表示</a></li>
-                    <li><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">シリーズ一覧</a></li>
-                </ol>
+                <h4>実際にロボットを動かしながら学習<br>→ <a href="../ros-model-display/index.html"
+                        style="color: #3b82f6; text-decoration: underh4ne;">ロボットモデル表示</a></li>
             </section>
 
             <!-- シリーズ一覧に戻る -->
             <section>
                 <h2>ありがとうございました</h2>
-                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
             </section>
         </div>
     </div>
@@ -269,10 +293,11 @@
 
             // キーボードショートカットのカスタマイズ
             keyboard: {
-                'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
                 // その他のChalkboardショートカットはデフォルトで有効
             }
         });
     </script>
 </body>
+
 </html>

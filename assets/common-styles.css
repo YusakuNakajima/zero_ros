@@ -143,6 +143,20 @@ mark.code-highlight-green {
     font-style: italic;
 }
 
+/* テキストのみの横並びレイアウト */
+.slide-layout-text {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    height: 100%;
+    gap: 2%;
+}
+
+.slide-layout-text .text-column {
+    flex: 0 0 48%;
+    text-align: left;
+}
+
 /* コードセクション設定 */
 .code-section {
     flex: 0 0 45%;

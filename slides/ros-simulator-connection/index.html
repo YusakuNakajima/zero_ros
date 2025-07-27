@@ -1,183 +1,174 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ゼロからのROS入門 - シミュレータや実機との接続</title>
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
 
     <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
 </head>
+
 <body>
     <div class="reveal">
         <div class="slides">
-            <section data-background-image="media/image1.png" data-background-opacity="0.3">
+            <!-- タイトルスライド -->
+            <section data-background-image="media/gazebo.png" data-background-opacity="0.3">
                 <h1>ゼロからのROS入門</h1>
                 <p>シミュレータや実機との接続</p>
                 <p>大阪大学 中島優作</p>
                 <br>
-                <p><a href="../../index.html" style="color: #333; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
 
+            <!-- 本スライドの担当範囲 -->
             <section>
-                <h2>本スライドのゴール</h2>
-                <ul>
-                    <li class="fragment">Bringupパッケージのlaunchファイルが書けるようになります</li>
-                    <li class="fragment">新しいロボットのROS対応で必要です</li>
-                    <li class="fragment">シミュレーションやコントローラとの接続について理解できます</li>
-                    <li class="fragment">Gazeboシミュレータ以外にMujocoシミュレータを使いたい場合や、力制御用等の公開コントローラを使いたい時に助けになります</li>
-                </ul>
+                <h2>本スライドの担当範囲</h2>
+                <p>本スライドではシミュレータ上でロボットを動かす方法を説明します。</p>
             </section>
 
+            <!-- ROSで使われるシミュレータの種類 -->
             <section>
-                <h2>シミュレータや実機との接続方法</h2>
-                <p>ROSではros_control(ROS2はros2_control)というロボット制御のための標準アーキテクチャが用意されているので、これを使ってロボット制御、シミュレータや実機との接続を行います</p>
-                <img src="media/image2.png" alt="ros_control概要" style="max-width: 80%; height: auto;">
-            </section>
-
-            <section>
-                <h2>ros_controlの概念図</h2>
-                <img src="media/image3.png" alt="ros_control概念図" style="max-width: 90%; height: auto;">
-                <ul style="font-size: 0.8em;">
-                    <li>Controller manager: コントローラ管理</li>
-                    <li>位置制御や力制御をここで切り替え</li>
-                    <li>シミュレータ(sim:=true) / ロボット実機(sim:=false)</li>
-                </ul>
-            </section>
-
-            <section>
-                <h2>復習：ROSでのロボットモデルの表示の仕組み</h2>
-                <img src="media/image4.png" alt="ロボットモデル表示" style="max-width: 85%; height: auto;">
-                <p style="font-size: 0.8em;">Rvizで見ているのはTF（joint_statesではない）</p>
-            </section>
-
-            <section>
-                <h2>BringupのLaunchのざっくり解説</h2>
-                <h3>UR5eのLaunchファイルの例</h3>
-                <pre><code data-trim data-noescape>
-&lt;group if="$(arg sim)"&gt;
-  &lt;include file="$(find robot_bringup)/launch/inc/load_contoller.launch"&gt;
-    &lt;arg name="controller_config_file" value="$(arg controller_config_file)" /&gt;
-    &lt;arg name="controllers" value="$(arg controllers)" /&gt;
-  &lt;/include&gt;
-  &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
-&lt;/group&gt;
-&lt;group unless="$(arg sim)"&gt;
-  &lt;include file="$(find robot_driver)/launch/robot_driver.launch" /&gt;
-  &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
-&lt;/group&gt;
-
-&lt;include file="$(find onolab_ur5e_moveit_config)/launch/move_group.launch"/&gt;
-
-&lt;node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" /&gt;
-                </code></pre>
-            </section>
-
-            <section>
-                <h2>Launchファイル説明</h2>
-                <ul>
-                    <li class="fragment">sim:=trueでシミュレータ用のロボットドライバを起動</li>
-                    <li class="fragment">sim:=falseで実機のロボットドライバを起動</li>
-                    <li class="fragment">ロボット制御用にMoveItを起動</li>
-                    <li class="fragment">ロボット表示用にRvizを起動</li>
-                </ul>
-            </section>
-
-            <section>
-                <h2>ロボットアーム制御</h2>
-                <p>ここではロボットアーム制御用のツールを紹介</p>
-                <p style="font-size: 0.8em;">アルゴリズムは「ロボットアーム制御とモーションプランニング」スライドで紹介</p>
-            </section>
-
-            <section>
-                <h2>Controller Manager</h2>
-                <ul>
-                    <li>ロボット制御用のコントローラをプラグインで管理するツール</li>
-                    <li>GUIでの切り替えが便利(コードでも切り替え可能)</li>
-                </ul>
-                <p><strong>GUIを起動するコマンド</strong></p>
-                <pre><code>rosrun rqt_controller_manager rqt_controller_manager</code></pre>
-                <img src="media/image5.png" alt="Controller Manager GUI" style="max-width: 70%; height: auto;">
-            </section>
-
-            <section>
-                <h2>Joint Trajectory Controller GUI</h2>
-                <ul>
-                    <li>アーム位置制御の基本コントローラがJointTrajectoryControllerです</li>
-                    <li>専用GUIがあり動作確認で便利</li>
-                </ul>
-                <pre><code>rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller</code></pre>
-            </section>
-
-            <section>
-                <h2>シミュレータの種類</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h3>①簡易シミュレータ</h3>
-                        <ul style="font-size: 0.8em;">
-                            <li>ロボット動作確認のための簡易シミュレータ</li>
-                            <li>ロボットと周りの環境との接触は考慮されません(動作が軽い)</li>
-                            <li>主に計算したモーションが正しいかの確認で使います</li>
-                            <li>ROS1：外部パッケージのfake_jointを使って実装</li>
-                            <li>ROS2：標準機能のMock Componentsで実装</li>
+                <h2>ROSのシミュレータの種類</h2>
+                <div class="slide-layout-text">
+                    <div class="text-column">
+                        <h3>動作確認</h3>
+                        <ul>
+                            <li><a href="https://github.com/tork-a/fake_joint" style="color: #3b82f6;">fake_joint</a>
+                            </li>
+                            <li>ロボットと周りの環境との接触は考慮されませんが動作が軽い</li>
+                            <li>位置制御のみ使える</li>
                         </ul>
                     </div>
-                    <div>
-                        <h3>②物理シミュレータ</h3>
-                        <ul style="font-size: 0.8em;">
+                    <div class="text-column">
+                        <h3>物理シミュレータ</h3>
+                        <ul>
+                            <li><a href="https://gazebosim.org/home" style="color: #3b82f6;">Gazebo</a></li>
                             <li>ロボットと周りの環境との接触等を含めた物理シミュレータ</li>
-                            <li>ロボットと周りの環境との接触も考慮します(計算重い、GPU必須)</li>
-                            <li>Gazebo、Mujocoといった物理シミュレータを使います</li>
-                            <li>主にロボット学習のテスト環境やSim to Realで使います</li>
+                            <li>物理計算が重いのでGPUがあった方が良いです</li>
                         </ul>
                     </div>
                 </div>
-                <p class="fragment" style="font-size: 0.7em;">※僕らが開発で普段使っているシミュレータは①です</p>
             </section>
 
-            <!-- シリーズ一覧に戻る -->
+            <!-- fake_joint -->
+            <section>
+                <section>
+                    <h2>fake_joint</h2>
+                    <img src="media/fake_joint.png" alt="fake_joint詳細">
+                    <p>使い方↓</p>
+                </section>
+
+                <section>
+                    <h2>fake_joint</h2>
+                    <ul>
+                        <li>fake_jointはTORK-A(東京オープンソースロボティクス協会)が開発したROS1のパッケージで、Rviz上で直接ロボットの動きをシミュレーションできます。</li>
+                        <li>元々ROSにはない仕組みでしたが、ROS2ではMockComponentという名前で公式から同様の機能が提供されています。</li>
+                    </ul>
+
+                </section>
+
+                <!-- fake_jointの使い方 -->
+                <section>
+                    <h2>fake_jointの使い方</h2>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code data-trim data-line-numbers class="xml">
+&lt;launch&gt;
+  &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
+  &lt;arg name="controller_config_file" default="$(find grinding_robot_bringup)/config/ur5e_controllers_fake_joint.yaml" /&gt;
+  &lt;arg name="controllers" default="joint_state_controller scaled_pos_joint_traj_controller" /&gt;
+  &lt;arg name="rviz_config" default="$(find grinding_robot_bringup)/etc/display_for_grinding.rviz" /&gt;
+
+  &lt;!-- Load URDF --&gt;
+  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
+  &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
+     
+  &lt;!-- Controllers config --&gt;
+  &lt;rosparam file="$(arg controller_config_file)" command="load"/&gt;
+
+  &lt;!-- Load controllers --&gt;
+  &lt;node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
+    args="$(arg controllers)" output="screen" respawn="false" /&gt;
+
+  &lt;!--Run Fake joint driver --&gt;
+  &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
+
+  &lt;!-- Launch moveit --&gt;
+  &lt;include file="$(find ur5e_moveit_config)/launch/move_group.launch"&gt;
+    &lt;arg name="allow_trajectory_execution" default="true" /&gt;
+    &lt;arg name="fake_execution" value="false" /&gt;
+  &lt;/include&gt;
+
+  &lt;!-- launch rviz --&gt;
+  &lt;node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/&gt;
+&lt;/launch&gt;
+                        </code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+            <!-- gazebo -->
+            <section>
+                <h2>gazebo</h2>
+                <div class="slide-layout-image">
+                    <div class="slide-image">
+                        <img src="media/gazebo.png" alt="Gazebo詳細">
+                    </div>
+                    <div class="slide-content">
+                        <ul>
+                            <li>GazeboはROSの公式なシミュレータで、3D環境でロボットを動かすことができます。</li>
+                            <li>GazeboはROSと密接に統合されており、センサデータやロボットの状態をリアルタイムで取得できます。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 終了スライド -->
             <section>
                 <h2>ありがとうございました</h2>
-                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
             </section>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/zoom/zoom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/zoom/zoom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
     <script>
         Reveal.initialize({
-            // 基本的な表示設定
-            controls: true,  // ナビゲーションUIを表示
-            progress: true,  // 進捗バーを表示
-            center: true,    // スライドを中央揃え
-            hash: true,      // URLにスライド番号を反映
-            slideNumber: true, // スライド番号を表示
+            controls: true,
+            progress: true,
+            center: true,
+            hash: true,
+            slideNumber: true,
 
-            // プラグインの有効化
             plugins: [
-                RevealZoom,      // Zoomプラグインを有効化
-                RevealMenu,      // Menuプラグインを有効化
-                RevealChalkboard // Chalkboardプラグインを有効化
+                RevealZoom,
+                RevealHighlight,
+                RevealMenu,
+                RevealChalkboard
             ],
 
-            // 各プラグインの設定（任意）
             menu: {
-                numbers: true, // 目次にスライド番号を表示
-                title: 'プレゼンテーション目次' // メニューのタイトル
+                numbers: true,
+                title: 'プレゼンテーション目次'
             },
             chalkboard: {
                 boardmarkerWidth: 3,
@@ -186,13 +177,11 @@
                 theme: "chalkboard"
             },
 
-            // キーボードショートカットのカスタマイズ
             keyboard: {
-                'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
-
-                // その他のChalkboardショートカットはデフォルトで有効
+                'm': function () { RevealMenu.toggle(); }
             }
         });
     </script>
 </body>
+
 </html>

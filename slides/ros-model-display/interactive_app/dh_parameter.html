@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブDHパラメータ学習アプリ（関節数可変）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            overscroll-behavior: none;
+        }
+        .slider-label {
+            width: 60px;
+            text-align: right;
+            margin-right: 10px;
+            font-family: monospace;
+        }
+        .slider-value {
+            width: 50px;
+            text-align: left;
+            font-family: monospace;
+        }
+        .info-box {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="flex flex-col lg:flex-row h-screen w-screen">
+        <!-- 3Dビューア -->
+        <div id="canvas-container" class="flex-grow h-1/2 lg:h-full w-full lg:w-2/3 bg-gray-200 relative">
+             <div id="info-box" class="info-box absolute top-2 left-2 p-4 rounded-lg shadow-lg max-w-md">
+                <h2 class="text-xl font-bold mb-2">DHパラメータとは？</h2>
+                <p class="text-sm">ロボットの各関節（ジョイント）と腕（リンク）の関係を4つのパラメータで定義する方法です。これにより、複雑なロボットアームの姿勢を数学的に計算できます。</p>
+                <ul class="list-disc list-inside mt-2 text-sm space-y-1">
+                    <li><code class="font-bold">θ (シータ)</code>: Z軸周りの回転角度</li>
+                    <li><code class="font-bold">d (ディー)</code>: Z軸方向の距離</li>
+                    <li><code class="font-bold">a (エー)</code>: 新しいX軸方向の距離（リンク長）</li>
+                    <li><code class="font-bold">α (アルファ)</code>: 新しいX軸周りのねじれ角度</li>
+                </ul>
+                <p class="text-xs mt-3 text-gray-600">マウスで3Dモデルをドラッグして回転、スクロールでズームできます。</p>
+            </div>
+        </div>
+
+        <!-- コントロールパネル -->
+        <div class="w-full lg:w-1/3 h-1/2 lg:h-full bg-white p-4 overflow-y-auto shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-4">ロボットコントローラ</h1>
+            
+            <div id="controls-container" class="space-y-6">
+                <!-- 関節コントロールがここに追加されます -->
+            </div>
+
+            <div class="mt-8 text-center space-x-2 flex flex-wrap justify-center gap-2">
+                <button id="add-joint-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    関節を追加
+                </button>
+                <button id="remove-joint-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    関節を削除
+                </button>
+                <button id="reset-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    リセット
+                </button>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-bold mb-2">DHパラメータテーブル</h3>
+                <div class="overflow-x-auto">
+                    <table id="dh-table" class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-4 py-2">関節 (i)</th>
+                                <th scope="col" class="px-4 py-2">θᵢ (deg)</th>
+                                <th scope="col" class="px-4 py-2">dᵢ (m)</th>
+                                <th scope="col" class="px-4 py-2">aᵢ (m)</th>
+                                <th scope="col" class="px-4 py-2">αᵢ (deg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- テーブル行がここに追加されます -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Three.jsの初期設定
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(3, 4, 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // カメラコントロール
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // ライト
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // グリッドヘルパー
+        const gridHelper = new THREE.GridHelper(10, 10);
+        scene.add(gridHelper);
+
+        // 初期DHパラメータ
+        const initialParams = [
+            { theta: 0, d: 1, a: 0.5, alpha: 90 },
+            { theta: 0, d: 0, a: 1.5, alpha: 0 },
+            { theta: 0, d: 0, a: 1.0, alpha: 0 }
+        ];
+        let dhParams = JSON.parse(JSON.stringify(initialParams));
+
+        const controlsContainer = document.getElementById('controls-container');
+        const dhTableBody = document.querySelector('#dh-table tbody');
+
+        // UIの生成
+        function createSlider(jointIndex, param, min, max, step) {
+            const value = dhParams[jointIndex][param];
+            const container = document.createElement('div');
+            container.className = 'flex items-center';
+            
+            const label = document.createElement('label');
+            label.className = 'slider-label';
+            label.textContent = `${param}ᵢ:`;
+            
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = min;
+            slider.max = max;
+            slider.step = step;
+            slider.value = value;
+            slider.className = 'w-full mx-2';
+            slider.dataset.joint = jointIndex;
+            slider.dataset.param = param;
+
+            const valueDisplay = document.createElement('span');
+            valueDisplay.className = 'slider-value';
+            valueDisplay.textContent = value.toFixed(2);
+            
+            container.appendChild(label);
+            container.appendChild(slider);
+            container.appendChild(valueDisplay);
+
+            slider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                dhParams[jointIndex][param] = val;
+                valueDisplay.textContent = val.toFixed(2);
+                updateRobot();
+                updateTable();
+            });
+
+            return container;
+        }
+
+        function createJointControls() {
+            controlsContainer.innerHTML = '';
+            dhParams.forEach((params, i) => {
+                const jointBox = document.createElement('div');
+                jointBox.className = 'p-4 border rounded-lg shadow-sm';
+
+                const title = document.createElement('h3');
+                title.className = 'text-lg font-semibold mb-2';
+                title.textContent = `関節 ${i + 1}`;
+                jointBox.appendChild(title);
+                
+                // i = jointIndex
+                jointBox.appendChild(createSlider(i, 'theta', -180, 180, 1));
+                jointBox.appendChild(createSlider(i, 'd', 0, 2, 0.1));
+                jointBox.appendChild(createSlider(i, 'a', 0, 2, 0.1));
+                jointBox.appendChild(createSlider(i, 'alpha', -180, 180, 1));
+
+                controlsContainer.appendChild(jointBox);
+            });
+        }
+        
+        // DHテーブルの更新
+        function updateTable() {
+            dhTableBody.innerHTML = '';
+            dhParams.forEach((p, i) => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b';
+                row.innerHTML = `
+                    <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">${i + 1}</td>
+                    <td class="px-4 py-2">${p.theta.toFixed(1)}</td>
+                    <td class="px-4 py-2">${p.d.toFixed(2)}</td>
+                    <td class="px-4 py-2">${p.a.toFixed(2)}</td>
+                    <td class="px-4 py-2">${p.alpha.toFixed(1)}</td>
+                `;
+                dhTableBody.appendChild(row);
+            });
+        }
+
+        let robotGroup = new THREE.Group();
+        scene.add(robotGroup);
+
+        // ロボットの描画更新
+        function updateRobot() {
+            // 既存のロボットを削除
+            while(robotGroup.children.length > 0){ 
+                robotGroup.remove(robotGroup.children[0]); 
+            }
+
+            let currentMatrix = new THREE.Matrix4(); // ベース座標系
+
+            // ベースを描画
+            const baseCylinder = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.3, 0.3, 0.1, 32),
+                new THREE.MeshStandardMaterial({ color: 0x555555 })
+            );
+            baseCylinder.position.y = 0.05;
+            robotGroup.add(baseCylinder);
+            
+            const baseAxes = new THREE.AxesHelper(1.0);
+            robotGroup.add(baseAxes);
+            
+            let prevLinkEndMatrix = new THREE.Matrix4().copy(currentMatrix);
+
+            dhParams.forEach((p, i) => {
+                const { theta, d, a, alpha } = p;
+                const thetaRad = THREE.MathUtils.degToRad(theta);
+                const alphaRad = THREE.MathUtils.degToRad(alpha);
+
+                const rotZ = new THREE.Matrix4().makeRotationZ(thetaRad);
+                const transZ = new THREE.Matrix4().makeTranslation(0, 0, d);
+                const transX = new THREE.Matrix4().makeTranslation(a, 0, 0);
+                const rotX = new THREE.Matrix4().makeRotationX(alphaRad);
+
+                const transformMatrix = new THREE.Matrix4()
+                    .multiply(rotZ)
+                    .multiply(transZ)
+                    .multiply(transX)
+                    .multiply(rotX);
+                
+                currentMatrix.multiply(transformMatrix);
+
+                const jointGeo = new THREE.SphereGeometry(0.15, 32, 16);
+                const jointMat = new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0xff4136 : 0x0074d9 });
+                const joint = new THREE.Mesh(jointGeo, jointMat);
+                
+                const startPoint = new THREE.Vector3().setFromMatrixPosition(prevLinkEndMatrix);
+                const jointPosition = new THREE.Vector3().setFromMatrixPosition(
+                    new THREE.Matrix4().multiplyMatrices(prevLinkEndMatrix, new THREE.Matrix4().multiply(rotZ).multiply(transZ))
+                );
+                const endPoint = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
+
+                joint.position.copy(jointPosition);
+                robotGroup.add(joint);
+
+                if (d > 0.01) {
+                    createLink(startPoint, jointPosition, 0xaaaaaa);
+                }
+                if (a > 0.01) {
+                    createLink(jointPosition, endPoint, 0xaaaaaa);
+                }
+
+                const axesHelper = new THREE.AxesHelper(1.0);
+                axesHelper.applyMatrix4(currentMatrix);
+                robotGroup.add(axesHelper);
+                
+                prevLinkEndMatrix.copy(currentMatrix);
+            });
+        }
+
+        function createLink(p1, p2, color) {
+            const distance = p1.distanceTo(p2);
+            if (distance < 0.01) return;
+
+            const linkCylinder = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.08, distance, 16),
+                new THREE.MeshStandardMaterial({ color: color, metalness: 0.5, roughness: 0.5 })
+            );
+
+            const midpoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+            linkCylinder.position.copy(midpoint);
+            
+            const direction = new THREE.Vector3().subVectors(p2, p1).normalize();
+            const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+            linkCylinder.setRotationFromQuaternion(quaternion);
+
+            robotGroup.add(linkCylinder);
+        }
+
+        // --- イベントリスナー ---
+        document.getElementById('add-joint-button').addEventListener('click', () => {
+            // 新しい関節をデフォルト値で追加
+            dhParams.push({ theta: 0, d: 0, a: 1.0, alpha: 0 });
+            createJointControls();
+            updateRobot();
+            updateTable();
+        });
+
+        document.getElementById('remove-joint-button').addEventListener('click', () => {
+            // 関節が1つより多い場合のみ削除
+            if (dhParams.length > 1) {
+                dhParams.pop(); // 最後の関節を削除
+                createJointControls();
+                updateRobot();
+                updateTable();
+            }
+        });
+
+        document.getElementById('reset-button').addEventListener('click', () => {
+            dhParams = JSON.parse(JSON.stringify(initialParams));
+            createJointControls();
+            updateRobot();
+            updateTable();
+        });
+
+        // アニメーションループ
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ウィンドウリサイズ対応
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }, false);
+
+        // 初期化
+        createJointControls();
+        updateRobot();
+        updateTable();
+        animate();
+
+    </script>
+</body>
+</html>

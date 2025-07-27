@@ -556,6 +556,40 @@
                 </section>
             </section>
 
+            <!-- 余談：ロボットモデルの数式表現 -->
+            <section>
+                <section>
+                    <h2>ロボットモデルの数式表現</h2>
+                    <ul>
+                        <li>ロボットの構造を行列で表現する方法としてDHパラメータがあります</li>
+                        <li>URDFで読み込んだロボットの制御の裏ではDHパラメータを使って計算しています</li>
+                    </ul>
+                    <p>DHパラメータとは？↓</p>
+                </section>
+
+                <!-- DHパラメータとは？ -->
+                <section>
+                    <h2>DHパラメータとは？</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/dh_parameter.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/dh_parameter.html" width="100%" height="200px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>ロボットの関節とリンクの相対的な位置関係を表すためのパラメータです</li>
+                                <li>たった4つのパラメータでロボットの構造を表現でき、行列を使ってロボットの運動学を効率的に計算できます</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>※厳密には<a href="https://qiita.com/wahhoi22/items/d3716f5900da507bfa62" target="_blank" style="color: #3b82f6; text-decoration: underline;">修正DHパラメータ</a>です</p>
+                </section>
+            </section>
+
             <!-- シリーズ一覧に戻る -->
             <section>
                 <h2>ありがとうございました</h2>
