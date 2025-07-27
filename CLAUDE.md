@@ -146,19 +146,18 @@ Reveal.initialize({
 
 ### スライド一覧
 
-1. **[ゼロからのロボットアーム入門](slides/robot-arm-basic-control/)** - ロボットアームの基礎知識、TCP制御、モーション種類、シミュレーション、ロボット選定方法
-2. **[ロボットアーム入門~システムインテグレーション~](slides/robot-arm-hardware-integration/)** - ロボットアームとの接続方法、グリッパ制御、RS485通信、システム統合
+1. **[ロボットアーム入門 ~ ハードウェアインテグレーション ~](slides/robot-arm-hardware-integration/)** - ロボットアームとの接続方法、グリッパ制御、RS485通信、システム統合
+2. **[ロボットアーム入門 ~ ロボットの基本操作 ~](slides/robot-arm-basic-control/)** - ロボットアームの基礎知識、TCP制御、モーション種類、シミュレーション、ロボット選定方法
 3. **[ゼロからのROS入門](slides/ros-introduction/)** - ROS学習戦略と効果的な学習リソースの選択方法
-4. **[ロボットモデルの表示](slides/ros-model-display/)** - URDF/XACROによるロボットモデリング、TFシステム、RVizでの可視化
-5. **[アーム位置制御とモーションプランニング](slides/ros-arm-position-control/)** - MoveItフレームワーク、IKソルバー、JointTrajectoryController実装
-6. **[シミュレータや実機との接続](slides/ros-simulator-connection/)** - ros_controlフレームワーク、Bringupパッケージ、ハードウェアインターフェース
+4. **[ゼロからのROS入門 - ロボットモデルの表示](slides/ros-model-display/)** - URDF/XACROによるロボットモデリング、TFシステム、RVizでの可視化
+5. **[ゼロからのROS入門 - ROSにおけるシミュレータ](slides/ros-simulator-connection/)** - fake_jointとGazeboシミュレータの使い方、軽量動作確認と物理シミュレーション
+6. **[ゼロからのROS入門 ~アーム位置制御とモーションプランニング~](slides/ros-arm-position-control/)** - MoveItフレームワーク、IKソルバー、JointTrajectoryController実装
 
-### 学習順序
+## 学習順序
 
-- **初学者**: ロボットアーム入門 → システムインテグレーション → ROS入門
+- **初学者**: ロボットアーム入門 → システムインテグレーション
 - **ROS実践者**: ロボットモデル表示 → シミュレータ接続 → アーム制御 
-- **システム構築者**: ロボットアーム入門 → システムインテグレーション → ロボットモデル表示 → シミュレータ接続
-- **上級者**: 必要な部分を選択的に学習
+
 
 各スライドディレクトリには詳細な`CLAUDE.md`ファイルがあり、学習内容や構成を確認できます。
 **テキスト**と囲われている部分が1スライドを表しています。
