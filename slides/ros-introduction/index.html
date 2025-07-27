@@ -1,245 +1,278 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>ゼロからのROS入門</title>
+    <title>ゼロからのROS入門</title>
 
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
 
-		<!-- 共通スタイル読み込み -->
-		<link rel="stylesheet" href="../../assets/common-styles.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>
-					<h1>ゼロからのROS入門</h1>
-					<p>大阪大学 中島優作</p>
-					<br>
-					<p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
-				</section>
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- スライド1: タイトル -->
+            <section>
+                <h1>ゼロからのROS入門</h1>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
 
-				<section>
-					<h2>はじめに</h2>
-					<p>この資料はROSの中でもロボットアーム制御に特化した内容です</p>
-					<p>移動ロボットは対象外です</p>
-				</section>
+            <!-- スライド2: スライドの担当範囲 -->
+            <section>
+                <h2>スライドの担当範囲</h2>
+                <ol>
+                    <li>ROSシステムの概要説明</li>
+                    <li>読み飛ばしてロボットを動かすのもOK</li>
+                    <li>必要に応じて選択的に学習</li>
+                </ol>
+            </section>
 
-				<section>
-					<h2>このスライドの使い方</h2>
-					<p>ロボット制御やROSの使い方の解説がメイン</p>
-					<p>実装を始めると、システムの中身が分からず挫折しがち</p>
-					<p>本スライド後半でオススメを紹介</p>
-					<ul>
-						<li>書籍やハンズオン</li>
-					</ul>
-					<p>必要最小限のロボット制御とシステム実装を具体的解説</p>
-					<p>特にROSの使い方はほとんど触れませんので別資料を参考にしてください</p>
-					<p>本スライド資料</p>
-					<p>知識</p>
-					<p>実践</p>
-				</section>
+            <!-- スライド3: 参考書籍 -->
+            <section>
+                <div class="slide-layout-image">
+                    <div class="image-section dual-images">
+                        <div class="image-with-caption">
+                            <img src="media/ros2_programming.png" alt="ROS 2ではじめよう">
+                            <div class="image-caption">ROS 2ではじめよう<br>次世代ロボットプログラミング</div>
+                        </div>
+                        <div class="image-with-caption">
+                            <img src="media/ros2_and_python_AI_robot_introduction.png" alt="ROS2とPython">
+                            <div class="image-caption">ROS2とPythonで作って学ぶ<br>AIロボット入門</div>
+                        </div>
+                    </div>
+                    <div class="text-section">
+                        <h2>参考書籍</h2>
+                        <ol>
+                            <li>ROS 2の詳しい解説書</li>
+                            <li>初心者向け実践書</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
 
-				<section>
-					<h2>ゼロからのROS入門シリーズ</h2>
-					<p>内容別にスライドを作成しています</p>
-					<p>スライドは作成途中のものもありますのでご容赦ください</p>
-					<ul>
-						<li>環境構築のためのDockerとUbuntuの基礎</li>
-						<li>ロボットアーム制御とモーションプランニング</li>
-						<li>ロボットモデルの表示</li>
-						<li>ROSパッケージの形式知と暗黙知</li>
-						<li>シミュレータや実機との接続(ros_control)</li>
-					</ul>
-				</section>
+            <!-- スライド4: ROSとは -->
+            <section>
+                <div class="slide-layout-image">
+                    <div class="image-section">
+                        <p style="text-align: center; margin-bottom: 10px;">
+                            <strong>→ <a href="https://vimeo.com/639235111?autoplay=1&muted=1&stream_id=Y2xpcHN8MTU3MTA2MDd8aWQ6ZGVzY3xbXQ%3D%3D" target="_blank" style="color: #3b82f6; text-decoration: underline;">動画で見る</a></strong>
+                        </p>
+                        <iframe data-src="https://player.vimeo.com/video/639235111?autoplay=1&muted=1" width="100%" height="315" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                    </div>
+                    <div class="text-section">
+                        <h2>ROSとは</h2>
+                        <ol>
+                            <li>ロボットシステム開発プラットフォーム</li>
+                            <li>分散システムのミドルウェア</li>
+                            <li>豊富なライブラリとツール群</li>
+                        </ol>
+                        <p><a href="https://docs.google.com/presentation/d/1BZU3nFDiSrUU7wAMpqgY4kU6-65wxzvfHVRZigsHlDI/edit?usp=sharing" target="_blank" style="color: #3b82f6; text-decoration: underline;">ROSの説明資料</a></p>
+                    </div>
+                </div>
+            </section>
 
-				<section>
-					<h2>ROSの勉強にオススメの資料</h2>
-					<img src="media/image1.png" alt="ROSの勉強にオススメの資料">
-				</section>
+            <!-- スライド5: ROSを使った勉強の進め方 -->
+            <section>
+                <section>
+                    <h2>ROSを使った勉強の進め方</h2>
+                    <p>ROSを使うにはロボット工学やシステム構築など様々な知識が必要なので、ヒントを書いておきます</p>
+                </section>
 
-				<section>
-					<h2>ROSとは</h2>
-					<p>ROSの説明はROS日本コミュニティーの資料を参照</p>
-					<img src="media/image2.png" alt="ROSとは">
-				</section>
+                <section>
+                    <h2>1. 環境構築</h2>
+                    <ol>
+                        <li>Dockerを推奨</li>
+                        <li>環境構築でつまずかない</li>
+                        <li>トラブル回避が容易</li>
+                        <li><a href="https://memoteki.net/archives/2955" target="_blank" style="color: #3b82f6; text-decoration: underline;">環境構築例</a></li>
+                    </ol>
+                </section>
 
-				<section>
-					<h2>可能であれば誰かに聞きながら進めるのが良いです</h2>
-					<p>ROSをやってて一番辛いのは、ロボットを動かしたいのにそこまで到達できずに挫折してしまうことです</p>
-					<p>挫折しそうな時に相談できる相手がいると良いです</p>
-					<p>ROSのJapan User GroupのSlackがまずは聞きやすいかもしれません</p>
-					<img src="media/image3.png" alt="誰かに聞きながら">
-				</section>
+                <section>
+                    <h2>2. 困ったとき</h2>
+                    <ol>
+                        <li>ROS日本コミュニティを活用</li>
+                        <li><a href="https://rosjp.connpass.com/" target="_blank" style="color: #3b82f6; text-decoration: underline;">公式サイト</a></li>
+                        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1" target="_blank" style="color: #3b82f6; text-decoration: underline;">Slack招待フォーム</a></li>
+                    </ol>
+                </section>
+            </section>
 
-				<section>
-					<h2>一人でROSを始める場合まずはここからが良いと思います</h2>
-					<h3>ROS 2とPythonで作って学ぶAIロボット入門</h3>
-					<ul>
-						<li>ロボット制御もROSも知らない人にオススメ</li>
-						<li>ROSの環境がDockerで用意されているので、すぐに勉強を始めることができる</li>
-						<li>ロボット制御の初歩を幅広く扱っている</li>
-						<li>この書籍から次のステップに進むには、ROSとロボット制御をより深く理解する必要があります</li>
-					</ul>
-					<img src="media/image4.png" alt="ROS 2とPythonで作って学ぶAIロボット入門">
-				</section>
+            <!-- スライド6: ROSの便利な点 -->
+            <section>
+                <h2>ROSの便利な点</h2>
+                <ol>
+                    <li>リアルタイムデータ交換が簡単 ← フォーカス</li>
+                    <li>豊富な可視化・制御ツール ← 次回紹介</li>
+                </ol>
+            </section>
 
-				<section>
-					<h2>ROSのオススメ参考資料(ロボット制御は別で学ぶ必要あり)</h2>
-					<h3>ROS 2とPythonで作って学ぶAIロボット入門</h3>
-					<ul>
-						<li>ロボット制御もROSも知らない人にオススメ</li>
-						<li>ロボット制御も初歩のみ扱っている</li>
-					</ul>
-					<h3>ROS 2ではじめよう 次世代ロボットプログラミング</h3>
-					<ul>
-						<li>ROSの詳しい解説本</li>
-						<li>ロボット制御はほとんどない</li>
-					</ul>
-					<img src="media/image5.png" alt="ROSのオススメ参考資料">
-				</section>
+            <!-- スライド7: ROSのプログラム基本単位：ノード -->
+            <section>
+                <div class="slide-layout-image">
+                    <div class="image-section">
+                        <img src="media/ros_nodes.svg" alt="ROSノード">
+                    </div>
+                    <div class="text-section">
+                        <h2>ROSのプログラム基本単位：ノード</h2>
+                        <ol>
+                            <li>1ノード=1プロセス</li>
+                            <li>機能ごとに分割可能</li>
+                            <li>柔軟なシステム構築</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
 
-				<section>
-					<h2>ROSのオススメ参考サイト(ロボット制御は別で学ぶ必要あり)</h2>
-					<h3>ROS講座</h3>
-					<ul>
-						<li>ロボットの動作だけでなくROSのプラグインやGUIの作り方など非常に幅広い題材で参考になります</li>
-						<li>ROS1版がコンテンツが豊富ですが、ROS2版もあります</li>
-					</ul>
-					<h3>ROS2導入&レクチャー</h3>
-					<ul>
-						<li>研究室の学生を対象としているので、ROS2のコーディングスタイルなど初見でつまずきやすい内容も丁寧に扱っています</li>
-					</ul>
-					<img src="media/image6.png" alt="ROSのオススメ参考サイト">
-				</section>
+            <!-- スライド8: ノード間の通信：トピック、サービス、アクション -->
+            <section>
+                <h2>ノード間の通信：トピック、サービス、アクション</h2>
+                <p style="text-align: center; margin-bottom: 10px;">
+                    <strong>→ <a href="interactive_app/ros_communications.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                </p>
+                <iframe data-src="interactive_app/ros_communications.html" width="100%" height="500px" frameborder="0"></iframe>
+            </section>
 
-				<section>
-					<h2>ROS1とROS2の所感</h2>
-					<p>2025年5月で(Ubuntu20.04と同時に)ROS1のサポートは終了</p>
-					<p>今後はROS2に移行するように見えるが。。。</p>
+            <!-- スライド9: パラメータ管理 -->
+            <section>
+                <section>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/ros_param.svg" alt="ROSパラメータ">
+                        </div>
+                        <div class="text-section">
+                            <h2>パラメータ管理</h2>
+                            <ol>
+                                <li>設定値の一元管理</li>
+                                <li>ROS1：パラメータサーバー</li>
+                                <li>ROS2：ノード別管理</li>
+                                <li>動的変更が可能</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+            </section>
 
-					<h3>個人的な所感</h3>
-					<ul>
-						<li>研究レベルだとROS1も特に国内はまだまだ使われている印象</li>
-						<li>正直、研究だとパッケージが豊富なROS1の方が使いやすい</li>
-						<li>ROS2は開発が盛んで安定して動かせないことも多く玄人向け</li>
-						<li>特に初心者はエラーで詰まって挫折しやすい</li>
-						<li>Ubuntu22.04でもROS1を使いたい人がいるので文献もある</li>
-						<li>Ubuntu22.04のホスト環境へのROS1インストール</li>
-						<li>僕はUbuntu22.04でDocker上にROS1環境を構築して使っていますが特に不具合はないです</li>
-						<li>趣味,研究 →　ROS1</li>
-						<li>実務,ROS2の書籍で勉強 →　ROS2</li>
-						<li>で27年までは良いのではという気がします(慣れたらもちろんROS2へ)</li>
-					</ul>
-					<img src="media/image7.png" alt="ROS1とROS2の所感">
-				</section>
+            <!-- スライド10: ROSbag -->
+            <section>
+                <section>
+                    <h2>ROSbag</h2>
+                    <ol>
+                        <li>データ記録・再生フォーマット</li>
+                        <li>センサーデータの保存</li>
+                        <li>解析・デバッグに活用</li>
+                        <li><code>rosbag record -O my_bag.bag /topic1</code></li>
+                    </ol>
+                </section>
 
-				<section>
-					<h2>ロボット制御のオススメ資料</h2>
-					<img src="media/image8.png" alt="ロボット制御のオススメ資料">
-				</section>
+                <section>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/plot_juggler.png" alt="PlotJuggler">
+                        </div>
+                        <div class="text-section">
+                            <h2>データの可視化</h2>
+                            <ol>
+                                <li><a href="https://github.com/facontidavide/PlotJuggler" target="_blank" style="color: #3b82f6; text-decoration: underline;">PlotJuggler</a>が便利</li>
+                                <li>bagファイル読み込み</li>
+                                <li>データのグラフ化</li>
+                                <li>CSVエクスポート</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
 
-				<section>
-					<h2>ロボット制御のオススメ参考資料</h2>
-					<h3>イラストで学ぶロボット工学</h3>
-					<ul>
-						<li>初歩的な内容を網羅的に扱っていて最初に読むのにちょうど良い</li>
-					</ul>
-					<h3>実践ロボット制御</h3>
-					<ul>
-						<li>名著「ロボット制御基礎論」を現在版にブラッシュアップした書籍</li>
-						<li>理論的な詳しさと実装面までの手引きが充実している</li>
-					</ul>
-					<img src="media/image9.png" alt="ロボット制御のオススメ参考資料">
-				</section>
+                <section>
+                    <h2>データの再生</h2>
+                    <ol>
+                        <li><code>rosbag play my_bag.bag</code></li>
+                        <li>全データ再生は困難</li>
+                        <li>記録時に抜け落ちるデータ有</li>
+                        <li>完全再現は現実的でない</li>
+                    </ol>
+                </section>
+            </section>
 
-				<section>
-					<h2>ロボット制御の資料を探す際の注意点</h2>
-					<p>タイトルと中身の対応が分からない</p>
-					<p>ロボット制御は主に移動とアームがあるが書籍名は「ロボット工学」や「ロボット制御」など一見ロボットアームを扱っているとわからないようなタイトルの書籍も多い</p>
-					<p>また、レベル感と目的が様々で、何から読んだらよいのか分からない</p>
-					<p>アーム制御の書籍はROS等の具体的な実装は書かれていない</p>
-					<p>ROSの書籍はアーム制御の理論面は書かれてはいない</p>
-					<p>しかし実際は両方を知っていないといけない</p>
-					<img src="media/image10.png" alt="ロボット制御の資料を探す際の注意点">
-				</section>
+            <!-- スライド11: 説明はここまで -->
+            <section>
+                <h2>説明はここまで、あとは実際に作りながら学んでください</h2>
+                <ol>
+                    <li>実際にロボットを動かしながら学習</li>
+                    <li>基本的な使い方を体験</li>
+                    <li><a href="../ros-model-display/index.html" style="color: #3b82f6; text-decoration: underline;">ロボットモデル表示</a></li>
+                    <li><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">シリーズ一覧</a></li>
+                </ol>
+            </section>
 
-				<section>
-					<h2>ロボット制御の資料を探す際の注意点</h2>
-					<h3>書籍が古い</h3>
-					<p>ロボットアーム制御の基礎理論は1980年代にできあがったが、当時は今のように6軸アームロボットが普及していなかったので、書籍は3軸などの簡単なモデルロボットを扱っている</p>
-					<p>また、当時はコンピュータの速度も遅かったので、運動学等は主に解析解で得ることが多かった</p>
-					<p>現在は6次元以上のアームを使うことが当たり前でコンピュータの速度も速いため数値解法を使うことが多い。特に2000年以前の書籍は勉強にはなるものの現代的な実装には合わないことがあるので注意してもらいたい。</p>
-					<img src="media/image11.png" alt="書籍が古い">
-				</section>
+            <!-- シリーズ一覧に戻る -->
+            <section>
+                <h2>ありがとうございました</h2>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+            </section>
+        </div>
+    </div>
 
-				<!-- シリーズ一覧に戻る -->
-				<section>
-					<h2>ありがとうございました</h2>
-					<p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
-				</section>
-			</div>
-		</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				// 基本的な表示設定
-				controls: true,  // ナビゲーションUIを表示
-				progress: true,  // 進捗バーを表示
-				center: true,    // スライドを中央揃え
-				hash: true,      // URLにスライド番号を反映
-				slideNumber: true, // スライド番号を表示
+            // プラグインの有効化
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
 
-				// プラグインの有効化
-				plugins: [
-					RevealMarkdown,
-					RevealHighlight,
-					RevealNotes,
-					RevealZoom,      // Zoomプラグインを有効化
-					RevealMenu,      // Menuプラグインを有効化
-					RevealChalkboard // Chalkboardプラグインを有効化
-				],
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
 
-				// 各プラグインの設定（任意）
-				menu: {
-					numbers: true, // 目次にスライド番号を表示
-					title: 'プレゼンテーション目次' // メニューのタイトル
-				},
-				chalkboard: {
-					boardmarkerWidth: 3,
-					chalkWidth: 7,
-					transition: 200,
-					theme: "chalkboard"
-				},
-
-				// キーボードショートカットのカスタマイズ
-				keyboard: {
-					'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
-
-					// その他のChalkboardショートカットはデフォルトで有効
-				}
-			});
-		</script>
-	</body>
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function() { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+    </script>
+</body>
 </html>

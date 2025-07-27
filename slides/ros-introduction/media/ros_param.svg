@@ -1,0 +1,125 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background -->
+  <rect x="0" y="0" width="800" height="600" fill="white"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="24" font-weight="bold">ROSパラメータシステムの比較</text>
+  
+  <!-- ROS1 Section -->
+  <g id="ros1-section">
+    <text x="200" y="70" text-anchor="middle" font-size="20" font-weight="bold" fill="#e74c3c">ROS1</text>
+    
+    <!-- Parameter Server -->
+    <rect x="100" y="100" width="200" height="80" fill="#3498db" stroke="#2c3e50" stroke-width="2" rx="10"/>
+    <text x="200" y="135" text-anchor="middle" font-size="16" fill="white" font-weight="bold">パラメータサーバー</text>
+    <text x="200" y="155" text-anchor="middle" font-size="14" fill="white">(中央管理)</text>
+    
+    <!-- ROS Master -->
+    <rect x="140" y="200" width="120" height="40" fill="#9b59b6" stroke="#2c3e50" stroke-width="2" rx="5"/>
+    <text x="200" y="225" text-anchor="middle" font-size="14" fill="white">ROS Master</text>
+    
+    <!-- Nodes -->
+    <g id="ros1-nodes">
+      <!-- Node 1 -->
+      <circle cx="100" cy="320" r="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2"/>
+      <text x="100" y="325" text-anchor="middle" font-size="12" fill="white">Node A</text>
+      
+      <!-- Node 2 -->
+      <circle cx="200" cy="380" r="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2"/>
+      <text x="200" y="385" text-anchor="middle" font-size="12" fill="white">Node B</text>
+      
+      <!-- Node 3 -->
+      <circle cx="300" cy="320" r="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2"/>
+      <text x="300" y="325" text-anchor="middle" font-size="12" fill="white">Node C</text>
+    </g>
+    
+    <!-- Arrows from nodes to parameter server -->
+    <defs>
+      <marker id="arrowhead1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 10 3, 0 6" fill="#2c3e50"/>
+      </marker>
+      <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 10 3, 0 6" fill="#3498db"/>
+      </marker>
+    </defs>
+    
+    <path d="M 120 285 L 180 180" stroke="#2c3e50" stroke-width="2" fill="none" marker-end="url(#arrowhead1)"/>
+    <path d="M 200 340 L 200 180" stroke="#2c3e50" stroke-width="2" fill="none" marker-end="url(#arrowhead1)"/>
+    <path d="M 280 285 L 220 180" stroke="#2c3e50" stroke-width="2" fill="none" marker-end="url(#arrowhead1)"/>
+    
+    <!-- Labels -->
+    <text x="80" y="260" font-size="12" fill="#2c3e50">get/set</text>
+    <text x="210" y="260" font-size="12" fill="#2c3e50">get/set</text>
+    <text x="290" y="260" font-size="12" fill="#2c3e50">get/set</text>
+    
+    <!-- Features -->
+    <text x="200" y="450" text-anchor="middle" font-size="14" font-weight="bold">特徴：</text>
+    <text x="200" y="470" text-anchor="middle" font-size="12">・グローバルな名前空間</text>
+    <text x="200" y="490" text-anchor="middle" font-size="12">・XMLRPCベース</text>
+    <text x="200" y="510" text-anchor="middle" font-size="12">・単一障害点</text>
+  </g>
+  
+  <!-- Divider -->
+  <line x1="400" y1="80" x2="400" y2="520" stroke="#7f8c8d" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <!-- ROS2 Section -->
+  <g id="ros2-section">
+    <text x="600" y="70" text-anchor="middle" font-size="20" font-weight="bold" fill="#27ae60">ROS2</text>
+    
+    <!-- Nodes with embedded parameters -->
+    <g id="ros2-nodes">
+      <!-- Node 1 -->
+      <g>
+        <circle cx="500" cy="150" r="50" fill="#27ae60" stroke="#2c3e50" stroke-width="2"/>
+        <text x="500" y="145" text-anchor="middle" font-size="12" fill="white">Node A</text>
+        <rect x="470" y="155" width="60" height="20" fill="#f39c12" rx="3"/>
+        <text x="500" y="168" text-anchor="middle" font-size="10" fill="white">params</text>
+      </g>
+      
+      <!-- Node 2 -->
+      <g>
+        <circle cx="600" cy="220" r="50" fill="#27ae60" stroke="#2c3e50" stroke-width="2"/>
+        <text x="600" y="215" text-anchor="middle" font-size="12" fill="white">Node B</text>
+        <rect x="570" y="225" width="60" height="20" fill="#f39c12" rx="3"/>
+        <text x="600" y="238" text-anchor="middle" font-size="10" fill="white">params</text>
+      </g>
+      
+      <!-- Node 3 -->
+      <g>
+        <circle cx="700" cy="150" r="50" fill="#27ae60" stroke="#2c3e50" stroke-width="2"/>
+        <text x="700" y="145" text-anchor="middle" font-size="12" fill="white">Node C</text>
+        <rect x="670" y="155" width="60" height="20" fill="#f39c12" rx="3"/>
+        <text x="700" y="168" text-anchor="middle" font-size="10" fill="white">params</text>
+      </g>
+    </g>
+    
+    <!-- DDS Communication -->
+    <ellipse cx="600" cy="320" rx="120" ry="40" fill="none" stroke="#3498db" stroke-width="2" stroke-dasharray="5,5"/>
+    <text x="600" y="325" text-anchor="middle" font-size="14" fill="#3498db">DDS通信</text>
+    
+    <!-- Arrows between nodes -->
+    <path d="M 540 180 L 560 195" stroke="#3498db" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+    <path d="M 660 180 L 640 195" stroke="#3498db" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+    <path d="M 550 150 L 650 150" stroke="#3498db" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+    
+    <!-- Labels -->
+    <text x="600" y="120" text-anchor="middle" font-size="12" fill="#2c3e50">パラメータサービス</text>
+    
+    <!-- Features -->
+    <text x="600" y="450" text-anchor="middle" font-size="14" font-weight="bold">特徴：</text>
+    <text x="600" y="470" text-anchor="middle" font-size="12">・分散型（各ノードが管理）</text>
+    <text x="600" y="490" text-anchor="middle" font-size="12">・DDSベース</text>
+    <text x="600" y="510" text-anchor="middle" font-size="12">・動的再構成対応</text>
+  </g>
+  
+  <!-- Legend -->
+  <g id="legend" transform="translate(50, 540)">
+    <text x="0" y="0" font-size="12" font-weight="bold">凡例：</text>
+    <circle cx="80" cy="-5" r="8" fill="#e74c3c"/>
+    <text x="95" y="0" font-size="11">ROS1ノード</text>
+    <circle cx="180" cy="-5" r="8" fill="#27ae60"/>
+    <text x="195" y="0" font-size="11">ROS2ノード</text>
+    <rect x="280" y="-12" width="30" height="14" fill="#f39c12" rx="2"/>
+    <text x="315" y="0" font-size="11">パラメータ</text>
+  </g>
+</svg>
