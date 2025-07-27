@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RS485 vs RS232 通信シミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        .btn-active {
+            background-color: #4f46e5 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-400">RS485 vs RS232 通信シミュレーター</h1>
+            <p class="text-gray-400 mt-2">シリアル通信の方式によるノイズ耐性の違いを視覚的に理解する</p>
+        </header>
+
+        <main class="bg-gray-800 rounded-xl shadow-2xl p-4 md:p-6">
+            <!-- Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-end">
+                <div class="flex flex-col">
+                    <label class="mb-2 font-semibold text-gray-300">1. 通信モード選択</label>
+                    <div class="flex rounded-lg bg-gray-700 p-1">
+                        <button id="rs232-btn" class="w-full py-2 px-4 rounded-md text-sm md:text-base transition-colors duration-300">RS232 (シングルエンド)</button>
+                        <button id="rs485-btn" class="w-full py-2 px-4 rounded-md text-sm md:text-base transition-colors duration-300">RS485 (差動信号)</button>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label for="data-input" class="mb-2 font-semibold text-gray-300">2. 送信データ</label>
+                    <input type="text" id="data-input" value="Hello RS485!" class="bg-gray-700 border border-gray-600 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow">
+                </div>
+                <div class="flex flex-col gap-4">
+                     <div class="relative flex items-start">
+                        <div class="flex h-6 items-center">
+                            <input id="noise-toggle" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-700 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm leading-6">
+                            <label for="noise-toggle" class="font-medium text-gray-300">ノイズを印加</label>
+                            <p class="text-gray-400 text-xs">通信経路上に電気的ノイズを発生させます。</p>
+                        </div>
+                    </div>
+                    <button id="send-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 disabled:bg-gray-500">3. 送信開始</button>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="w-full bg-gray-900 rounded-lg p-2 mb-6">
+                <canvas id="visualizer-canvas"></canvas>
+            </div>
+
+            <!-- Data Display -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-indigo-400 mb-2">送信データ (バイナリ)</h3>
+                    <p id="sent-binary" class="font-mono break-all text-gray-300 h-16 overflow-y-auto"></p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-indigo-400 mb-2">受信データ (デコード結果)</h3>
+                    <p id="received-text" class="font-mono break-all text-2xl h-16"></p>
+                </div>
+            </div>
+
+            <!-- Explanation -->
+            <div id="explanation" class="mt-8 p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+                <h3 id="exp-title" class="font-bold text-lg text-indigo-400 mb-2"></h3>
+                <p id="exp-body" class="text-gray-300 leading-relaxed"></p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const rs232Btn = document.getElementById('rs232-btn');
+        const rs485Btn = document.getElementById('rs485-btn');
+        const dataInput = document.getElementById('data-input');
+        const noiseToggle = document.getElementById('noise-toggle');
+        const sendBtn = document.getElementById('send-btn');
+        const canvas = document.getElementById('visualizer-canvas');
+        const sentBinaryEl = document.getElementById('sent-binary');
+        const receivedTextEl = document.getElementById('received-text');
+        const expTitle = document.getElementById('exp-title');
+        const expBody = document.getElementById('exp-body');
+        const ctx = canvas.getContext('2d');
+
+        // --- State ---
+        let mode = 'rs232'; // 'rs232' or 'rs485'
+        let isAnimating = false;
+
+        // --- Explanations ---
+        const explanations = {
+            rs232: {
+                title: "RS232 (シングルエンド方式)",
+                body: "1本の信号線(TxD)とグランド(GND)の間の電圧で '0' と '1' を表現します。構造はシンプルですが、GNDを基準にするため、経路上のノイズが信号に直接影響を与えやすく、長距離伝送には向きません。ノイズが乗ると電圧がしきい値を超えてしまい、ビットエラーが発生しやすくなります。"
+            },
+            rs485: {
+                title: "RS485 (差動信号方式)",
+                body: "AとBの2本の信号線を使い、その『電圧差』で '0' と '1' を表現します。2本の線には逆相の信号が流れます。外部からノイズが加わっても、AとBの両方にほぼ同じように影響するため、電圧差は保たれます。これにより、ノイズに非常に強く、長距離・高速通信が可能になります。"
+            }
+        };
+
+        // --- Utility Functions ---
+        const stringToBinary = (str) => {
+            return str.split('').map(char => {
+                return char.charCodeAt(0).toString(2).padStart(8, '0');
+            }).join('');
+        };
+
+        // --- UI Update Functions ---
+        const setMode = (newMode) => {
+            mode = newMode;
+            if (mode === 'rs232') {
+                rs232Btn.classList.add('btn-active');
+                rs485Btn.classList.remove('btn-active');
+            } else {
+                rs485Btn.classList.add('btn-active');
+                rs232Btn.classList.remove('btn-active');
+            }
+            updateExplanation();
+            drawIdleState();
+        };
+
+        const updateExplanation = () => {
+            expTitle.textContent = explanations[mode].title;
+            expBody.textContent = explanations[mode].body;
+        };
+        
+        const updateDataDisplay = (binaryStr, receivedStr) => {
+            sentBinaryEl.textContent = binaryStr.replace(/(.{8})/g, '$1 ');
+            receivedTextEl.textContent = receivedStr;
+        };
+
+        const toggleControls = (disabled) => {
+            isAnimating = disabled;
+            sendBtn.disabled = disabled;
+            dataInput.disabled = disabled;
+            noiseToggle.disabled = disabled;
+            rs232Btn.disabled = disabled;
+            rs485Btn.disabled = disabled;
+        };
+
+        // --- Canvas Drawing Functions ---
+        const resizeCanvas = () => {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = (rect.width * 0.4) * dpr; // Maintain aspect ratio
+            ctx.scale(dpr, dpr);
+        };
+
+        const drawDevice = (x, y, label) => {
+            ctx.fillStyle = '#4a5568'; // gray-700
+            ctx.fillRect(x, y, 80, 40);
+            ctx.strokeStyle = '#a0aec0'; // gray-400
+            ctx.strokeRect(x, y, 80, 40);
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '14px Noto Sans JP';
+            ctx.fillText(label, x + 40, y + 20);
+        };
+
+        const drawIdleState = () => {
+            const { width, height } = canvas;
+            const w = width / (window.devicePixelRatio || 1);
+            const h = height / (window.devicePixelRatio || 1);
+            
+            ctx.clearRect(0, 0, width, height);
+
+            drawDevice(10, h / 2 - 20, '送信側');
+            drawDevice(w - 90, h / 2 - 20, '受信側');
+
+            ctx.strokeStyle = '#718096'; // gray-500
+            ctx.lineWidth = 1;
+            ctx.font = '12px Noto Sans JP';
+            ctx.fillStyle = '#a0aec0'; // gray-400
+            ctx.textAlign = 'left';
+            
+            if (mode === 'rs232') {
+                // TxD line
+                ctx.beginPath();
+                ctx.moveTo(90, h / 2);
+                ctx.lineTo(w - 90, h / 2);
+                ctx.stroke();
+                ctx.fillText('TxD', 100, h/2 - 10);
+                
+                // GND line
+                ctx.beginPath();
+                ctx.moveTo(10, h * 0.85); // Adjusted Y for status bar
+                ctx.lineTo(w - 10, h * 0.85); // Adjusted Y for status bar
+                ctx.stroke();
+                ctx.fillText('GND', 20, h * 0.85 - 10); // Adjusted Y for status bar
+            } else { // rs485
+                // A line
+                ctx.beginPath();
+                ctx.moveTo(90, h * 0.4);
+                ctx.lineTo(w - 90, h * 0.4);
+                ctx.stroke();
+                ctx.fillText('A', 100, h*0.4 - 10);
+                
+                // B line
+                ctx.beginPath();
+                ctx.moveTo(90, h * 0.6);
+                ctx.lineTo(w - 90, h * 0.6);
+                ctx.stroke();
+                ctx.fillText('B', 100, h*0.6 - 10);
+            }
+        };
+
+        const animateTransmission = (binaryStr) => {
+            toggleControls(true);
+            receivedTextEl.innerHTML = '';
+            
+            const { width, height } = canvas;
+            const w = width / (window.devicePixelRatio || 1);
+            const h = height / (window.devicePixelRatio || 1);
+
+            const totalBits = binaryStr.length;
+            const bitDuration = 100; // ms per bit, faster for more data
+            const totalDuration = totalBits * bitDuration;
+            let startTime = null;
+            let receivedBinary = '';
+            
+            const noiseAmplitude = h * 0.25; 
+
+            const animate = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const elapsedTime = timestamp - startTime;
+                const progress = Math.min(elapsedTime / totalDuration, 1);
+
+                ctx.clearRect(0, 0, width, height);
+                drawIdleState();
+
+                const startX = 90;
+                const endX = w - 90;
+                const signalPathLength = endX - startX;
+                
+                const highLevel = h * 0.45; 
+                const lowLevel = h * 0.55; 
+                const midLevel = h / 2;
+                
+                // Draw signal
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                let lastY_A = midLevel;
+                let lastY_B = midLevel;
+
+                if (mode === 'rs232') {
+                    ctx.strokeStyle = '#63b3ed'; // blue-400
+                    ctx.beginPath();
+                    ctx.moveTo(startX, midLevel);
+                }
+
+                for (let i = 0; i < totalBits; i++) {
+                    const bitStartTime = i * bitDuration;
+                    if (elapsedTime < bitStartTime) break;
+                    
+                    const bitProgress = Math.min((elapsedTime - bitStartTime) / bitDuration, 1);
+                    const bit = binaryStr[i];
+                    
+                    const x1 = startX + (i / totalBits) * signalPathLength;
+                    const x2 = startX + ((i + bitProgress) / totalBits) * signalPathLength;
+
+                    if (mode === 'rs232') {
+                        const targetY = bit === '0' ? highLevel : lowLevel;
+                        ctx.lineTo(x1, lastY_A);
+                        ctx.lineTo(x1, targetY);
+                        ctx.lineTo(x2, targetY);
+                        lastY_A = targetY;
+                    } else { // rs485
+                        const targetY_A = bit === '1' ? h * 0.3 : h * 0.5;
+                        const targetY_B = bit === '1' ? h * 0.7 : h * 0.5;
+                        
+                        const pathA = new Path2D();
+                        pathA.moveTo(x1, lastY_A);
+                        pathA.lineTo(x1, targetY_A);
+                        pathA.lineTo(x2, targetY_A);
+                        ctx.strokeStyle = '#68d391'; // green-400
+                        ctx.stroke(pathA);
+                        lastY_A = targetY_A;
+
+                        const pathB = new Path2D();
+                        pathB.moveTo(x1, lastY_B);
+                        pathB.lineTo(x1, targetY_B);
+                        pathB.lineTo(x2, targetY_B);
+                        ctx.strokeStyle = '#fc8181'; // red-400
+                        ctx.stroke(pathB);
+                        lastY_B = targetY_B;
+                    }
+                }
+                if (mode === 'rs232') ctx.stroke();
+
+
+                // --- Noise and Reception Logic ---
+                let currentReceivedBinary = '';
+                const receiverX = endX + 5;
+
+                ctx.font = '11px Noto Sans JP';
+                ctx.fillStyle = '#a0aec0';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('受信ビットステータス:', startX, h * 0.9 - 5);
+                
+                for (let i = 0; i < totalBits; i++) {
+                    const bitStartTime = (i + 1) * bitDuration;
+                    if (elapsedTime < bitStartTime) break;
+
+                    const originalBit = binaryStr[i];
+                    let receivedBit = originalBit;
+                    
+                    let noise = 0;
+                    if (noiseToggle.checked) {
+                        noise = (Math.random() - 0.5) * noiseAmplitude;
+                    }
+
+                    if (mode === 'rs232') {
+                        const bitCenterY = originalBit === '0' ? highLevel : lowLevel;
+                        const noisyY = bitCenterY + noise;
+                        if(noiseToggle.checked) {
+                            ctx.beginPath();
+                            ctx.moveTo(receiverX, bitCenterY);
+                            ctx.lineTo(receiverX, noisyY);
+                            ctx.strokeStyle = 'yellow';
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                            ctx.lineWidth = 2;
+                        }
+                        receivedBit = (noisyY > midLevel) ? '1' : '0';
+                    } else { // rs485
+                        const yA = (originalBit === '1' ? h * 0.3 : h * 0.5) + noise;
+                        const yB = (originalBit === '1' ? h * 0.7 : h * 0.5) + noise;
+                        if(noiseToggle.checked) {
+                            ctx.strokeStyle = 'yellow';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath(); ctx.moveTo(receiverX, yA - noise); ctx.lineTo(receiverX, yA); ctx.stroke();
+                            ctx.beginPath(); ctx.moveTo(receiverX, yB - noise); ctx.lineTo(receiverX, yB); ctx.stroke();
+                            ctx.lineWidth = 2;
+                        }
+                        receivedBit = ((yA - yB) < -5) ? '1' : '0';
+                    }
+                    
+                    currentReceivedBinary += receivedBit;
+
+                    // *** FIX: Corrected Y position for the status bar ***
+                    const rectWidth = signalPathLength / totalBits;
+                    const rectX = startX + (i / totalBits) * signalPathLength;
+                    const rectY = h * 0.9; // Corrected Y coordinate
+                    const rectHeight = h * 0.1; // Made slightly taller
+
+                    if (receivedBit === originalBit) {
+                        ctx.fillStyle = 'rgba(104, 211, 145, 0.9)'; // green-400
+                    } else {
+                        ctx.fillStyle = 'rgba(252, 129, 129, 0.9)'; // red-400
+                    }
+                    ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
+                    ctx.strokeStyle = '#2d3748'; // gray-800
+                    ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+                }
+                
+                // Update received text display
+                if (receivedBinary !== currentReceivedBinary) {
+                    receivedBinary = currentReceivedBinary;
+                    let decodedText = '';
+                    for (let i = 0; i < receivedBinary.length; i += 8) {
+                        const chunk = receivedBinary.slice(i, i + 8);
+                        if (chunk.length === 8) {
+                            try {
+                                decodedText += String.fromCharCode(parseInt(chunk, 2));
+                            } catch (e) {
+                                decodedText += '�';
+                            }
+                        }
+                    }
+                    updateDataDisplay(binaryStr, decodedText);
+                }
+
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    toggleControls(false);
+                }
+            };
+
+            requestAnimationFrame(animate);
+        };
+
+        // --- Event Listeners ---
+        rs232Btn.addEventListener('click', () => setMode('rs232'));
+        rs485Btn.addEventListener('click', () => setMode('rs485'));
+        
+        sendBtn.addEventListener('click', () => {
+            const data = dataInput.value;
+            if (!data || isAnimating) return;
+            const binaryStr = stringToBinary(data);
+            updateDataDisplay(binaryStr, '');
+            animateTransmission(binaryStr);
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            drawIdleState();
+        });
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            resizeCanvas();
+            setMode('rs232');
+            updateDataDisplay(stringToBinary(dataInput.value), '');
+        });
+
+    </script>
+</body>
+</html>

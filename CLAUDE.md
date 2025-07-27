@@ -65,6 +65,19 @@
 * **スライド n+2: 参考資料**
     * `<h2>`, `<ul>`
 
+* **アプリの埋め込み**
+    * `<p>` (全画面表示リンク)
+    * `<iframe>` (アプリのURLを`data-src`属性に指定)
+```html
+<p style="text-align: center; margin-bottom: 10px;">
+                    <strong>→ <a href="interactive_app/app_name.html" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                </p>
+                <iframe data-src="interactive_app/app_name.html" width="100%" height="200px"
+                    frameborder="0"></iframe>
+```
+
+---
 -----
 
 ## 4\. JavaScript設定
