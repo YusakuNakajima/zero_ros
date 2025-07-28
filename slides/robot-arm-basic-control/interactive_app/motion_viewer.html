@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボット動作軌跡 比較シミュレーター (全軌道比較モード追加)</title>
+    <title>ロボット動作軌跡 比較シミュレーター (関節速度リミット機能付き)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -185,8 +185,25 @@
                 </div>
                 <p id="error-message" class="text-yellow-400 text-center mt-2 text-sm h-4"></p>
             </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-600">
+                <h2 class="text-lg font-bold text-center mb-2 text-white">速度設定</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="joint-speed" class="font-semibold text-pink-400 mb-2 block text-center">PTP目標速度 (deg/s)</label>
+                        <input type="number" id="joint-speed" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="90">
+                    </div>
+                    <div>
+                        <label for="tcp-speed" class="font-semibold text-teal-400 mb-2 block text-center">LIN/CIRC 手先速度 (mm/s)</label>
+                        <input type="number" id="tcp-speed" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="100">
+                    </div>
+                </div>
+                <div class="mt-4">
+                     <label for="joint-speed-limit" class="font-semibold text-yellow-400 mb-2 block text-center">全体 関節最大速度 (rad/s)</label>
+                     <input type="number" id="joint-speed-limit" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="3.14">
+                </div>
+            </div>
 
-            <!-- ジョグ操作パネル -->
             <div id="jog-panel-container" class="mt-4 pt-4 border-t border-gray-600">
                 <h2 class="text-lg font-bold text-center mb-2 text-white">ジョグ操作</h2>
                 <div id="jog-mode-selector" class="flex justify-center space-x-2 bg-gray-800 p-2 rounded-lg mb-4">
@@ -204,7 +221,6 @@
                     </div>
                 </div>
                 <div id="jog-controls">
-                    <!-- 関節ジョグ -->
                     <div id="joint-jog-panel">
                         <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
                             <span class="font-bold w-16 text-center">J1 (deg)</span>
@@ -225,7 +241,6 @@
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="2" data-dir="1">+</button>
                         </div>
                     </div>
-                    <!-- 直交座標ジョグ (ベース/ツール) -->
                     <div id="cartesian-jog-panel" class="hidden">
                         <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
                             <span class="font-bold w-16 text-center text-red-400">X (mm)</span>
@@ -509,9 +524,48 @@
             resetScene();
         }
 
+        // 関節速度予測 ヘルパー関数
+        function estimateMaxJointVelocity(curve, baseDuration) {
+            const steps = 100; // 軌道のサンプリング数
+            const point = new THREE.Vector3();
+            let lastAngles = calculateAnglesFor( (curve instanceof THREE.Line3) ? curve.at(0, point) : curve.getPoint(0) );
+
+            if (!lastAngles) return null; 
+
+            let maxEstimatedVelocity = 0;
+            const dt = baseDuration / steps / 1000.0; // 1ステップあたりの時間 [s]
+            if (dt < 1e-6) return 0;
+
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const currentPoint = (curve instanceof THREE.Line3) ? curve.at(t, point) : curve.getPoint(t);
+                const currentAngles = calculateAnglesFor(currentPoint);
+                
+                if (currentAngles) {
+                    const velJ1 = Math.abs(currentAngles.j1 - lastAngles.j1) / dt;
+                    const velJ2 = Math.abs(currentAngles.j2 - lastAngles.j2) / dt;
+                    const velJ3 = Math.abs(currentAngles.j3 - lastAngles.j3) / dt;
+                    maxEstimatedVelocity = Math.max(maxEstimatedVelocity, velJ1, velJ2, velJ3);
+                    lastAngles = currentAngles;
+                } else {
+                    // 軌道の一部が範囲外なら、非常に大きな値を返してエラー扱いにする
+                    return Infinity;
+                }
+            }
+            return maxEstimatedVelocity;
+        }
+
         function startComparison() {
             if (isAnimating) return;
             
+            const jointSpeedDeg = parseFloat(document.getElementById('joint-speed').value) || 90;
+            const tcpSpeed = parseFloat(document.getElementById('tcp-speed').value) || 100;
+            const jointSpeedLimitRadInput = parseFloat(document.getElementById('joint-speed-limit').value) || 3.14;
+
+            const jointSpeedRad = THREE.MathUtils.degToRad(Math.max(0.1, jointSpeedDeg));
+            const safeTcpSpeed = Math.max(0.1, tcpSpeed);
+            const jointSpeedLimitRad = Math.max(0.1, jointSpeedLimitRadInput);
+
             resetScene();
             isAnimating = true;
             setJogPanelEnabled(false);
@@ -532,7 +586,6 @@
             lastAngles = { ...startAngles };
             lastTime = animationStartTime;
 
-            const duration = 2500;
             const selectedMode = document.querySelector('input[name="animation-mode"]:checked').value;
             
             const onComplete = () => {
@@ -547,6 +600,19 @@
                     const pathLine = createPathLine(pathColors.ptp);
                     const endAngles = calculateAnglesFor(endPos);
                     if (!endAngles) { document.getElementById('error-message').textContent = '終了点が可動範囲外です。'; resetScene(); return; }
+                    
+                    const effectiveJointSpeedRad = Math.min(jointSpeedRad, jointSpeedLimitRad);
+                    const deltaAngles = {
+                        j1: Math.abs(endAngles.j1 - startAngles.j1),
+                        j2: Math.abs(endAngles.j2 - startAngles.j2),
+                        j3: Math.abs(endAngles.j3 - startAngles.j3)
+                    };
+                    const maxAngleChange = Math.max(deltaAngles.j1, deltaAngles.j2, deltaAngles.j3);
+                    
+                    // ▼▼▼ PTPのピーク速度を考慮してdurationを計算（2倍する） ▼▼▼
+                    const duration = (maxAngleChange / effectiveJointSpeedRad) * 1000 * 2;
+                    // ▲▲▲ 修正 ▲▲▲
+
                     new TWEEN.Tween(startAngles).to(endAngles, duration).easing(TWEEN.Easing.Quadratic.InOut)
                         .onUpdate((angles) => { setJointAngles(angles); updatePath(pathLine); }).onComplete(onComplete).start();
                     break;
@@ -554,7 +620,24 @@
                 case 'LIN': {
                     const pathLine = createPathLine(pathColors.lin);
                     const lineCurve = new THREE.Line3(startPos, endPos);
-                    new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
+                    
+                    const distance = startPos.distanceTo(endPos);
+                    const baseDuration = (distance / safeTcpSpeed) * 1000;
+                    
+                    const estimatedMaxSpeed = estimateMaxJointVelocity(lineCurve, baseDuration);
+                    if (estimatedMaxSpeed === Infinity) {
+                        document.getElementById('error-message').textContent = 'LIN: 軌道の一部が可動範囲外です。';
+                        resetScene(); return;
+                    }
+                    
+                    let finalDuration = baseDuration;
+                    if (estimatedMaxSpeed && estimatedMaxSpeed > jointSpeedLimitRad) {
+                        const slowdownFactor = estimatedMaxSpeed / jointSpeedLimitRad;
+                        finalDuration = baseDuration * slowdownFactor;
+                        console.log(`LIN: 関節速度リミットを超過予測。動作時間を ${baseDuration.toFixed(0)}ms -> ${finalDuration.toFixed(0)}ms に延長`);
+                    }
+                    
+                    new TWEEN.Tween({ t: 0 }).to({ t: 1 }, finalDuration).easing(TWEEN.Easing.Linear.None)
                         .onUpdate(({ t }) => {
                             const targetPoint = new THREE.Vector3();
                             lineCurve.at(t, targetPoint);
@@ -565,21 +648,37 @@
                 case 'CIRC': {
                     const pathLine = createPathLine(pathColors.circ);
                     const colinearityCheck = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(viaPos, startPos), new THREE.Vector3().subVectors(endPos, startPos)).length();
+                    
+                    const curve = (colinearityCheck < 0.01)
+                        ? new THREE.Line3(startPos, endPos)
+                        : new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
+
                     if (colinearityCheck < 0.01) {
-                        document.getElementById('error-message').textContent = 'CIRC: 各点が直線状のためLINで動作します。';
-                        const lineCurve = new THREE.Line3(startPos, endPos);
-                        new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).onUpdate(({t}) => {
-                            const targetPoint = new THREE.Vector3(); lineCurve.at(t, targetPoint);
-                            if(solveIK(targetPoint)) updatePath(pathLine);
-                        }).onComplete(onComplete).start();
-                    } else {
-                        const circleCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
-                        new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
-                            .onUpdate(({ t }) => {
-                                const targetPoint = circleCurve.getPoint(t);
-                                if (solveIK(targetPoint)) { updatePath(pathLine); }
-                            }).onComplete(onComplete).start();
+                         document.getElementById('error-message').textContent = 'CIRC: 各点が直線状のためLINで動作します。';
                     }
+
+                    const distance = curve.getLength();
+                    const baseDuration = (distance / safeTcpSpeed) * 1000;
+
+                    const estimatedMaxSpeed = estimateMaxJointVelocity(curve, baseDuration);
+                     if (estimatedMaxSpeed === Infinity) {
+                        document.getElementById('error-message').textContent = 'CIRC: 軌道の一部が可動範囲外です。';
+                        resetScene(); return;
+                    }
+
+                    let finalDuration = baseDuration;
+                    if (estimatedMaxSpeed && estimatedMaxSpeed > jointSpeedLimitRad) {
+                        const slowdownFactor = estimatedMaxSpeed / jointSpeedLimitRad;
+                        finalDuration = baseDuration * slowdownFactor;
+                        console.log(`CIRC: 関節速度リミットを超過予測。動作時間を ${baseDuration.toFixed(0)}ms -> ${finalDuration.toFixed(0)}ms に延長`);
+                    }
+
+                    new TWEEN.Tween({ t: 0 }).to({ t: 1 }, finalDuration).easing(TWEEN.Easing.Linear.None)
+                        .onUpdate(({ t }) => {
+                            const targetPoint = curve.getPoint(t);
+                            if (solveIK(targetPoint)) { updatePath(pathLine); }
+                        }).onComplete(onComplete).start();
+
                     break;
                 }
                 case 'COMP': {
@@ -590,24 +689,48 @@
                     const endAngles = calculateAnglesFor(endPos);
                     if (!startAngles || !endAngles) { document.getElementById('error-message').textContent = '開始点または終了点が可動範囲外です。'; resetScene(); return; }
 
-                    const circTween = new TWEEN.Tween({t: 0}).to({t: 1}, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
-                        .onStart(() => solveIK(startPos))
-                        .onUpdate(({t}) => {
-                            const curve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
-                            if (solveIK(curve.getPoint(t))) updatePath(circPath);
-                        }).onComplete(onComplete);
+                    // PTP duration
+                    const effectivePtpSpeed = Math.min(jointSpeedRad, jointSpeedLimitRad);
+                    const deltaAngles = { j1: Math.abs(endAngles.j1 - startAngles.j1), j2: Math.abs(endAngles.j2 - startAngles.j2), j3: Math.abs(endAngles.j3 - startAngles.j3) };
+                    // ▼▼▼ PTPのピーク速度を考慮してdurationを計算（2倍する） ▼▼▼
+                    const durationPtp = (Math.max(deltaAngles.j1, deltaAngles.j2, deltaAngles.j3) / effectivePtpSpeed) * 1000 * 2;
+                    // ▲▲▲ 修正 ▲▲▲
 
-                    const linTween = new TWEEN.Tween({t: 0}).to({t: 1}, duration).easing(TWEEN.Easing.Sinusoidal.InOut)
+                    // LIN duration
+                    const lineCurve = new THREE.Line3(startPos, endPos);
+                    const distanceLin = lineCurve.getLength();
+                    const baseDurationLin = (distanceLin / safeTcpSpeed) * 1000;
+                    const estMaxSpeedLin = estimateMaxJointVelocity(lineCurve, baseDurationLin);
+                    let durationLin = baseDurationLin;
+                    if (estMaxSpeedLin && estMaxSpeedLin > jointSpeedLimitRad) {
+                        durationLin = baseDurationLin * (estMaxSpeedLin / jointSpeedLimitRad);
+                    }
+                     if (estMaxSpeedLin === Infinity) { document.getElementById('error-message').textContent = 'LIN軌道が範囲外です'; resetScene(); return; }
+
+
+                    // CIRC duration
+                    const circCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
+                    const distanceCirc = circCurve.getLength();
+                    const baseDurationCirc = (distanceCirc / safeTcpSpeed) * 1000;
+                    const estMaxSpeedCirc = estimateMaxJointVelocity(circCurve, baseDurationCirc);
+                    let durationCirc = baseDurationCirc;
+                     if (estMaxSpeedCirc && estMaxSpeedCirc > jointSpeedLimitRad) {
+                        durationCirc = baseDurationCirc * (estMaxSpeedCirc / jointSpeedLimitRad);
+                    }
+                    if (estMaxSpeedCirc === Infinity) { document.getElementById('error-message').textContent = 'CIRC軌道が範囲外です'; resetScene(); return; }
+
+                    // Tweens
+                    const circTween = new TWEEN.Tween({t: 0}).to({t: 1}, durationCirc).easing(TWEEN.Easing.Linear.None)
                         .onStart(() => solveIK(startPos))
-                        .onUpdate(({t}) => {
-                            const curve = new THREE.Line3(startPos, endPos);
-                            if (solveIK(curve.at(t, new THREE.Vector3()))) updatePath(linPath);
-                        }).chain(circTween);
+                        .onUpdate(({t}) => { if (solveIK(circCurve.getPoint(t))) updatePath(circPath); }).onComplete(onComplete);
+
+                    const linTween = new TWEEN.Tween({t: 0}).to({t: 1}, durationLin).easing(TWEEN.Easing.Linear.None)
+                        .onStart(() => solveIK(startPos))
+                        .onUpdate(({t}) => { if (solveIK(lineCurve.at(t, new THREE.Vector3()))) updatePath(linPath); }).chain(circTween);
                     
-                    const ptpTween = new TWEEN.Tween(startAngles).to(endAngles, duration).easing(TWEEN.Easing.Quadratic.InOut)
+                    const ptpTween = new TWEEN.Tween(startAngles).to(endAngles, durationPtp).easing(TWEEN.Easing.Quadratic.InOut)
                         .onStart(() => setJointAngles(startAngles))
-                        .onUpdate((angles) => { setJointAngles(angles); updatePath(ptpPath); })
-                        .chain(linTween);
+                        .onUpdate((angles) => { setJointAngles(angles); updatePath(ptpPath); }).chain(linTween);
 
                     ptpTween.start();
                     break;
@@ -647,7 +770,10 @@
             setJogPanelEnabled(true);
             document.getElementById('start-btn').disabled = false;
             document.getElementById('update-pos-btn').disabled = false;
-            document.getElementById('error-message').textContent = '';
+            const errorMsg = document.getElementById('error-message');
+            if (!errorMsg.textContent.includes('軌道')) { // Do not clear critical path error
+                 errorMsg.textContent = '';
+            }
             robot.visible = true;
             resetVelocityChart();
             solveIK(startPos);
@@ -670,10 +796,11 @@
         }
         
         function calculateAnglesFor(targetWorldPos) {
+            if (!targetWorldPos) return null;
             const L2 = 40, l3Length = 29, tcpOffset = endEffectorDefs[currentEndEffectorType].tcpOffset, L3 = l3Length + tcpOffset, j2PivotZ = 30;
             const theta1 = Math.atan2(targetWorldPos.y, targetWorldPos.x);
             const r = Math.sqrt(targetWorldPos.x ** 2 + targetWorldPos.y ** 2), h = targetWorldPos.z - j2PivotZ, distSq = r ** 2 + h ** 2, dist = Math.sqrt(distSq);
-            if (dist > L2 + L3 || dist < Math.abs(L2 - L3)) return null;
+            if (dist > L2 + L3 + 1e-3 || dist < Math.abs(L2 - L3) - 1e-3) return null; // Add tolerance
             const cos_val_theta3 = (distSq - L2 ** 2 - L3 ** 2) / (2 * L2 * L3);
             if (Math.abs(cos_val_theta3) > 1) return null;
             const theta3 = Math.acos(cos_val_theta3), alpha = Math.atan2(h, r);

@@ -53,21 +53,24 @@
 
             <!-- アームの軌道制御とは -->
             <section>
-                <h2>アームの軌道制御とは、位置制御との違い</h2>
+                <h2>アームの軌道制御の良さ</h2>
                 <div style="display: flex; align-items: center; gap: 2em;">
                     <div style="flex: 1;">
                         <iframe src="interactive_app/waypoints_and_trajectory.html" width="100%" height="400" frameborder="0"></iframe>
                     </div>
                     <div style="flex: 1;">
-                        <h4>位置制御（メーカー制御）</h4>
+                        <h4>メーカー制御</h4>
                         <ul>
-                            <li>基本的にwaypointsごとに動きを止める</li>
-                            <li>連続的に動こうとするとガタガタした動きになる</li>
+                            <li>waypointsごとに動きを止める</li>
+                            <li>精度と動きの滑らかさがトレードオフ</li>
                         </ul>
 
                         <h4>軌道制御</h4>
-                        <p>動きを止めないので、非常に滑らかな動きができる<br>
-                            粉体粉砕などの連続的なタスクに有効</p>
+                        <ul>
+                            <li>waypointsごとに動きを止めない</li>
+                            <li>精度と動きの滑らかさを両立</li>
+                        </ul>
+
                     </div>
                 </div>
             </section>
