@@ -79,6 +79,8 @@
   &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
   &lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;
   &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
+
+  &lt;arg name="rviz_config" default="$(find grinding_descriptions)/rviz/ur5e.rviz" /&gt; &lt;node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" required="true" /&gt;
 &lt;/launch&gt;
                     </code></pre>
                     </div>
@@ -191,154 +193,83 @@
                 <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~type(動作の種類)~</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>revolute: 回転関節（角度制限あり）</li>
-                                <li>continuous: 連続回転関節（角度制限なし）</li>
-                                <li>prismatic: 直動関節</li>
-                                <li>fixed: 固定関節(動かない手先とかで使用)</li>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    <ul>
+                        <li>revolute: 回転関節（角度制限あり）</li>
+                        <li>continuous: 連続回転関節（角度制限なし）</li>
+                        <li>prismatic: 直動関節</li>
+                        <li>fixed: 固定関節(動かない手先とかで使用)</li>
+                    </ul>
                 </section> <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~リンクとのつながりと制限~</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li><strong>parent/child</strong>: 親リンクと子リンクの指定</li>
-                                <li><strong>origin</strong>: 親リンクからの位置・姿勢</li>
-                                <li><strong>axis</strong>: 回転軸の方向ベクトル</li>
-                                <li><strong>limit</strong>: 動作範囲、トルク、速度の制限</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <ul>
+                        <li><strong>parent/child</strong>: 親リンクと子リンクの指定</li>
+                        <li><strong>origin</strong>: 親リンクからの位置・姿勢</li>
+                        <li><strong>axis</strong>: 回転軸の方向ベクトル</li>
+                        <li><strong>limit</strong>: 動作範囲、トルク、速度の制限</li>
+                    </ul>
                 </section>
 
                 <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~visual(表示用)~</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>geometry: 形状（box, cylinder, sphere, mesh）</li>
-                                <li>CADデータ→daeやstlにしてmeshで表示することが多い</li>
-                                <li>material: 色・材質</li>
-                                <li>origin: リンク座標系からの位置・姿勢</li>
-                                <ul>
-                                </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    <ul>
+                        <li>geometry: 形状（box, cylinder, sphere, mesh）</li>
+                        <li>CADデータ→daeやstlにしてmeshで表示することが多い</li>
+                        <li>material: 色・材質</li>
+                        <li>origin: リンク座標系からの位置・姿勢</li>
+                    </ul>
                 </section> <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~collision(干渉計算用)~</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>干渉計算は重い！モーションプランニング計算量の半分以上は干渉計算</li>
-                                <li>通常はvisualより簡単な形状(よく使うのは円柱とか)を使用し計算量を削減</li>
-
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    <ul>
+                        <li>干渉計算は重い！モーションプランニング計算量の半分以上は干渉計算</li>
+                        <li>通常はvisualより簡単な形状(よく使うのは円柱とか)を使用し計算量を削減</li>
+                    </ul>
                 </section>
 
                 <!-- 物理属性 -->
                 <section>
                     <h2>ジョイントの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
+                    <ul>
+                        <li>Dynamics
                             <ul>
-                                <li>Dynamics
-                                    <ul>
-                                        <li>friction: 静摩擦[N or N/m]</li>
-                                        <li>damping: 減衰値[Ns/m or Nms/rad]</li>
-
-                                    </ul>
-                                </li>
-
+                                <li>friction: 静摩擦[N or N/m]</li>
+                                <li>damping: 減衰値[Ns/m or Nms/rad]</li>
                             </ul>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </section>
                 <!-- 物理属性 -->
                 <section>
                     <h2>リンクの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
+                    <ul>
+                        <li>慣性パラメータ ~inertial~
                             <ul>
-                                <li>慣性パラメータ ~inertial~
-                                    <ul>
-                                        <li>mass: 質量</li>
-                                        <li>ixx, iyy, izz: 主軸周りの慣性モーメント</li>
-                                        <li>ixy, ixz, iyz: 慣性乗積（通常は0）</li>
-                                        <li>CADソフトの計算値や実測値を使う</li>
-                                    </ul>
-                                </li>
+                                <li>mass: 質量</li>
+                                <li>ixx, iyy, izz: 主軸周りの慣性モーメント</li>
+                                <li>ixy, ixz, iyz: 慣性乗積（通常は0）</li>
+                                <li>CADソフトの計算値や実測値を使う</li>
                             </ul>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </section>
                 <!-- 物理属性 -->
                 <section>
                     <h2>リンク間相互作用</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
+                    <ul>
+                        <li>contact_coefficients
                             <ul>
-                                <li>contact_coefficients
-                                    <ul>
-                                        <li>リンクが相互に接触している時のリンクの動作</li>
-                                        <li>mu: 摩擦係数</li>
-                                        <li>kp: 剛性係数</li>
-                                        <li>kd: 減衰係数</li>
-                                    </ul>
-                                </li>
+                                <li>リンクが相互に接触している時のリンクの動作</li>
+                                <li>mu: 摩擦係数</li>
+                                <li>kp: 剛性係数</li>
+                                <li>kd: 減衰係数</li>
                             </ul>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </section>
 
                 <!-- XACRO -->
