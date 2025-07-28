@@ -27,7 +27,7 @@
     <div class="reveal">
         <div class="slides">
             <section data-background-image="media/teaching_image.jpg" data-background-opacity="0.3">
-                <h1>ロボットアーム入門</h1>
+                <h1>ゼロからのロボットアーム入門</h1>
                 <p>~ ロボットの基本操作 ~</p>
                 <p>大阪大学 中島優作</p>
                 <br>
@@ -46,7 +46,7 @@
             </section>
             <section>
                 <h2>オススメ参考資料</h2>
-                <p>このスライドは数式を省いて実際のロボットでの説明を重視しています。数式がしっかり載っている教科書との併用すると理解が深まるのでおススメします。</p>
+                <p>このスライドと教科書の併用をおススメします</p>
                 <ol>
                     <div style="display: flex; align-items: center; margin-bottom: 20px;">
                         <img src="media/産業用ロボットtheビギニング.jpg" style="width: 20%; margin-right: 20px;">
@@ -56,7 +56,7 @@
 
                     <div style="display: flex; align-items: center;">
                         <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
-                        <p>イラストで学ぶロボット工学 - ロボットアームの初歩を網羅しつつも、数式もでくるので本格的。<br>最も基本の位置制御まで扱っている</p>
+                        <p>イラストで学ぶロボット工学 - ロボットアームの初歩を網羅しつつも、数式もでくるので本格的</p>
                     </div>
 
                 </ol>
@@ -643,8 +643,8 @@ finally:
                         <div style="flex: 1;">
                             <h4>ROS生成モーション</h4>
                             <ul>
-                                <li>PC上で完全に動作を計算してロボットに送るので、非常に滑らかに動ける</li>
-                                <li>精密な動作をさせたいときはこっち</li>
+                                <li>PC上で完全に動作を計算してロボットに送る</li>
+                                <li>0.1 mmくらい精密な動作をさせたいときはこっち</li>
 
                             </ul>
 
@@ -653,9 +653,8 @@ finally:
                         <div style="flex: 1;">
                             <h4>メーカー提供モーション</h4>
                             <ul>
-                                <li>PTPやLINはリアルタイムにモーションを計算しながら動かすので、繋げてもなかなか滑らかにならない</li>
-                                <li>メーカー提供のモーション(直線とか円とか)は事前計算で滑らかに動くので、それで十分ならこっち</li>
-
+                                <li>ロボットコントローラでモーションを計算する</li>
+                                <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
                             </ul>
 
                         </div>
