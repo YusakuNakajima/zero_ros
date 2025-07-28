@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボット動作軌跡 比較シミュレーター (関節速度リミット機能付き)</title>
+    <title>ロボット動作軌跡 比較シミュレーター (PTP補間改善版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -160,7 +160,7 @@
                         <div class="grid grid-cols-3 gap-2">
                             <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
                             <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
-                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center" value="50">
+                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center" value="70">
                         </div>
                     </div>
                      <div>
@@ -174,7 +174,7 @@
                     <div>
                         <h3 class="font-semibold text-orange-400 mb-2">終了点 (X, Y, Z)</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
+                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
                             <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center" value="-20">
                             <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center" value="10">
                         </div>
@@ -200,7 +200,7 @@
                 </div>
                 <div class="mt-4">
                      <label for="joint-speed-limit" class="font-semibold text-yellow-400 mb-2 block text-center">全体 関節最大速度 (rad/s)</label>
-                     <input type="number" id="joint-speed-limit" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="3.14">
+                     <input type="number" id="joint-speed-limit" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="1.0">
                 </div>
             </div>
 
@@ -279,6 +279,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="module">
+        // --- ▼▼▼ PTP補間アルゴリズムを追加 ▼▼▼ ---
+        /**
+         * 台形速度プロファイル（Trapezoidal Velocity Profile）を生成するカスタムイージング関数
+         * @param {number} r - 加減速区間の割合 (0 < r < 0.5). e.g., 0.2は20%加速, 60%定速, 20%減速
+         * @returns {function(number): number} TWEEN.jsで使えるイージング関数
+         */
+        function createTrapezoidalEasing(r) {
+            if (r <= 0 || r >= 0.5) {
+                return TWEEN.Easing.Linear.None; // 不正な値の場合はリニアにフォールバック
+            }
+
+            // 正規化された移動距離1を移動するのに必要な、正規化された最大速度
+            const V_max = 1 / (1 - r);
+            
+            return function(t) {
+                if (t < r) {
+                    // 加速区間
+                    return 0.5 * V_max / r * t * t;
+                } else if (t < 1 - r) {
+                    // 定速区間
+                    const p_at_r = 0.5 * V_max * r;
+                    return p_at_r + V_max * (t - r);
+                } else {
+                    // 減速区間
+                    const p_at_1_minus_r = V_max * (1 - 1.5 * r);
+                    const time_in_decel = t - (1 - r);
+                    return p_at_1_minus_r + V_max * time_in_decel - (0.5 * V_max / r) * time_in_decel * time_in_decel;
+                }
+            };
+        }
+        const blendRatio = 0.2; // 加減速区間の割合（合計で40%）
+        const trapezoidalEase = createTrapezoidalEasing(blendRatio);
+        // --- ▲▲▲ PTP補間アルゴリズムを追加 ▲▲▲ ---
+
+
         // --- 基本設定 ---
         let scene, camera, renderer, controls;
         let robot, flange;
@@ -306,8 +341,8 @@
         };
 
         // --- ターゲット ---
-        let startPos = new THREE.Vector3(40, 20, 50);
-        let endPos = new THREE.Vector3(40, -20, 10);
+        let startPos = new THREE.Vector3(40, 20, 70);
+        let endPos = new THREE.Vector3(20, -20, 10);
         let viaPos = new THREE.Vector3(60, 0, 30);
         
         // --- 速度プロット用 ---
@@ -548,7 +583,6 @@
                     maxEstimatedVelocity = Math.max(maxEstimatedVelocity, velJ1, velJ2, velJ3);
                     lastAngles = currentAngles;
                 } else {
-                    // 軌道の一部が範囲外なら、非常に大きな値を返してエラー扱いにする
                     return Infinity;
                 }
             }
@@ -560,7 +594,7 @@
             
             const jointSpeedDeg = parseFloat(document.getElementById('joint-speed').value) || 90;
             const tcpSpeed = parseFloat(document.getElementById('tcp-speed').value) || 100;
-            const jointSpeedLimitRadInput = parseFloat(document.getElementById('joint-speed-limit').value) || 3.14;
+            const jointSpeedLimitRadInput = parseFloat(document.getElementById('joint-speed-limit').value) || 1.0;
 
             const jointSpeedRad = THREE.MathUtils.degToRad(Math.max(0.1, jointSpeedDeg));
             const safeTcpSpeed = Math.max(0.1, tcpSpeed);
@@ -609,11 +643,10 @@
                     };
                     const maxAngleChange = Math.max(deltaAngles.j1, deltaAngles.j2, deltaAngles.j3);
                     
-                    // ▼▼▼ PTPのピーク速度を考慮してdurationを計算（2倍する） ▼▼▼
-                    const duration = (maxAngleChange / effectiveJointSpeedRad) * 1000 * 2;
-                    // ▲▲▲ 修正 ▲▲▲
+                    // 台形補間のピーク速度は V_max = V_avg / (1 - r) となるため、durationを調整
+                    const duration = (maxAngleChange / effectiveJointSpeedRad) / (1 - blendRatio) * 1000;
 
-                    new TWEEN.Tween(startAngles).to(endAngles, duration).easing(TWEEN.Easing.Quadratic.InOut)
+                    new TWEEN.Tween(startAngles).to(endAngles, duration).easing(trapezoidalEase)
                         .onUpdate((angles) => { setJointAngles(angles); updatePath(pathLine); }).onComplete(onComplete).start();
                     break;
                 }
@@ -634,7 +667,6 @@
                     if (estimatedMaxSpeed && estimatedMaxSpeed > jointSpeedLimitRad) {
                         const slowdownFactor = estimatedMaxSpeed / jointSpeedLimitRad;
                         finalDuration = baseDuration * slowdownFactor;
-                        console.log(`LIN: 関節速度リミットを超過予測。動作時間を ${baseDuration.toFixed(0)}ms -> ${finalDuration.toFixed(0)}ms に延長`);
                     }
                     
                     new TWEEN.Tween({ t: 0 }).to({ t: 1 }, finalDuration).easing(TWEEN.Easing.Linear.None)
@@ -670,7 +702,6 @@
                     if (estimatedMaxSpeed && estimatedMaxSpeed > jointSpeedLimitRad) {
                         const slowdownFactor = estimatedMaxSpeed / jointSpeedLimitRad;
                         finalDuration = baseDuration * slowdownFactor;
-                        console.log(`CIRC: 関節速度リミットを超過予測。動作時間を ${baseDuration.toFixed(0)}ms -> ${finalDuration.toFixed(0)}ms に延長`);
                     }
 
                     new TWEEN.Tween({ t: 0 }).to({ t: 1 }, finalDuration).easing(TWEEN.Easing.Linear.None)
@@ -692,9 +723,7 @@
                     // PTP duration
                     const effectivePtpSpeed = Math.min(jointSpeedRad, jointSpeedLimitRad);
                     const deltaAngles = { j1: Math.abs(endAngles.j1 - startAngles.j1), j2: Math.abs(endAngles.j2 - startAngles.j2), j3: Math.abs(endAngles.j3 - startAngles.j3) };
-                    // ▼▼▼ PTPのピーク速度を考慮してdurationを計算（2倍する） ▼▼▼
-                    const durationPtp = (Math.max(deltaAngles.j1, deltaAngles.j2, deltaAngles.j3) / effectivePtpSpeed) * 1000 * 2;
-                    // ▲▲▲ 修正 ▲▲▲
+                    const durationPtp = (Math.max(deltaAngles.j1, deltaAngles.j2, deltaAngles.j3) / effectivePtpSpeed) / (1 - blendRatio) * 1000;
 
                     // LIN duration
                     const lineCurve = new THREE.Line3(startPos, endPos);
@@ -728,7 +757,7 @@
                         .onStart(() => solveIK(startPos))
                         .onUpdate(({t}) => { if (solveIK(lineCurve.at(t, new THREE.Vector3()))) updatePath(linPath); }).chain(circTween);
                     
-                    const ptpTween = new TWEEN.Tween(startAngles).to(endAngles, durationPtp).easing(TWEEN.Easing.Quadratic.InOut)
+                    const ptpTween = new TWEEN.Tween(startAngles).to(endAngles, durationPtp).easing(trapezoidalEase)
                         .onStart(() => setJointAngles(startAngles))
                         .onUpdate((angles) => { setJointAngles(angles); updatePath(ptpPath); }).chain(linTween);
 
