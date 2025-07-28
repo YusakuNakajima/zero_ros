@@ -78,42 +78,24 @@
             <!-- アーム制御の前提知識 -->
             <section>
                 <section>
-                    <h2>ROSにおけるアーム制御の前提知識(読み飛ばしてもok)</h2>
+                    <h2>ROSのコントローラ命名規則(読み飛ばしてもok)</h2>
                 </section>
 
-                <!-- ロボットアームの構造 -->
-                <section>
-                    <h2>ロボットアームの構造</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png" alt="ロボットアーム構造図" style="width: 100%;">
-                            <p style="font-size: 0.6em;">FAプロダクツより引用(https://jss1.jp/column/column_162/)</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>ジョイント(関節)</strong> - モーターが入っていて動く</li>
-                                <li><strong>リンク</strong> - ジョイントを繋ぐ<br>
-                                    剛性が高い方がロボット動作の精度が良くなる</li>
-                                <li><strong>エンドエフェクタ(手先効果器)</strong> - 作業をする手先<br>
-                                    作業に応じて付け替える2本指や5本指のハンド吸盤</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
+             
                 <!-- アーム制御は組合せ -->
                 <section>
-                    <h2>アーム制御は組合せ</h2>
+                    <h2>アーム制御則は組合せ</h2>
                     <style>
                         .custom-table {
                             margin: auto;
                             border-collapse: collapse;
                             font-weight: bold;
+                            color: #ffffff;
                         }
 
                         .custom-table th,
                         .custom-table td {
-                            border: 1px solid #ccc;
+                            border: 2px solid #666;
                             padding: 16px;
                             text-align: center;
                             vertical-align: middle;
@@ -121,35 +103,40 @@
                         }
 
                         .custom-table th {
-                            background-color: #f0f0f0;
+                            background-color: #444;
+                            color: #ffffff;
                         }
 
-                        /* 各列の背景色 */
+                        /* 各列の背景色 - 黒背景対応 */
                         .col-control {
-                            background-color: #e7eff9;
+                            background-color: #2d3e5a;
+                            color: #87ceeb;
                         }
 
                         .col-coords {
-                            background-color: #fce8e6;
+                            background-color: #5a2d2d;
+                            color: #ffb3b3;
                         }
 
                         .col-action {
-                            background-color: #e6f4ea;
+                            background-color: #2d5a3d;
+                            color: #90ee90;
                         }
 
                         .caption {
                             margin-top: 20px;
                             font-size: 0.8em;
                             text-align: left;
+                            color: #ffffff;
                         }
                     </style>
 
                     <table class="custom-table">
                         <thead>
                             <tr>
-                                <th>ロボットが可能な制御</th>
+                                <th>ロボット関節の制御</th>
                                 <th>指定したい座標系</th>
-                                <th>やりたい制御</th>
+                                <th>ユーザーが実現したい制御</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -875,6 +862,256 @@
                                         <li>手先の振動抑制</li>
                                     </ul>
                                 </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 軌道補間方法の詳細 (縦スライド) -->
+                <section>
+                    <h2>軌道補間方法の選択</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/interpolation_methods.png" alt="補間方法比較" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>なぜ補間が重要か</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>waypointsは離散的な点</li>
+                                <li>ロボットには連続的な軌道が必要</li>
+                                <li>補間方法で動作の滑らかさが決まる</li>
+                            </ul>
+                            <h3>主な補間方法</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>線形補間</strong> - 最も単純</li>
+                                <li><strong>3次スプライン</strong> - 滑らかな位置と速度</li>
+                                <li><strong>5次スプライン</strong> - 最も滑らか</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 線形補間 (縦スライド) -->
+                <section>
+                    <h2>線形補間</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/linear_interpolation.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/linear_interpolation.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>特徴</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>計算</strong>：最も単純・高速</li>
+                                <li><strong>連続性</strong>：位置のみ連続（C⁰連続）</li>
+                                <li><strong>欠点</strong>：角で急激な方向変化</li>
+                            </ul>
+                            <h3>適用場面</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>高速な動作が必要な場合</li>
+                                <li>計算リソースが限られる場合</li>
+                                <li>簡単なpoint-to-point動作</li>
+                            </ul>
+                            <h3>数式</h3>
+                            <p style="font-size: 0.8em; font-family: monospace;">
+                                q(t) = q₀ + (q₁ - q₀) × t/T
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3次スプライン補間 (縦スライド) -->
+                <section>
+                    <h2>3次スプライン補間</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/cubic_spline.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/cubic_spline.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>特徴</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>連続性</strong>：位置と速度が連続（C¹連続）</li>
+                                <li><strong>計算</strong>：適度な計算コスト</li>
+                                <li><strong>制約</strong>：開始・終了速度を指定可能</li>
+                            </ul>
+                            <h3>適用場面</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>一般的なロボット動作</li>
+                                <li>滑らかさと計算コストのバランス</li>
+                                <li>多くのライブラリでデフォルト</li>
+                            </ul>
+                            <h3>数式</h3>
+                            <p style="font-size: 0.8em; font-family: monospace;">
+                                q(t) = a₃t³ + a₂t² + a₁t + a₀
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5次スプライン補間 (縦スライド) -->
+                <section>
+                    <h2>5次スプライン補間</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/quintic_spline.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/quintic_spline.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>特徴</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>連続性</strong>：位置・速度・加速度連続（C²連続）</li>
+                                <li><strong>滑らかさ</strong>：最も滑らかな軌道</li>
+                                <li><strong>制約</strong>：開始・終了の速度・加速度指定可能</li>
+                            </ul>
+                            <h3>適用場面</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>高精度作業（組み立て・研磨）</li>
+                                <li>振動抑制が重要な場合</li>
+                                <li>人間に近い自然な動作</li>
+                            </ul>
+                            <h3>数式</h3>
+                            <p style="font-size: 0.8em; font-family: monospace;">
+                                q(t) = a₅t⁵ + a₄t⁴ + a₃t³ + a₂t² + a₁t + a₀
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 補間方法の比較まとめ (縦スライド) -->
+                <section>
+                    <h2>補間方法の比較まとめ</h2>
+                    <style>
+                        .comparison-table {
+                            margin: auto;
+                            border-collapse: collapse;
+                            font-size: 0.8em;
+                            width: 90%;
+                            color: #ffffff;
+                        }
+                        .comparison-table th,
+                        .comparison-table td {
+                            border: 2px solid #666;
+                            padding: 12px;
+                            text-align: center;
+                            vertical-align: middle;
+                        }
+                        .comparison-table th {
+                            background-color: #444;
+                            font-weight: bold;
+                            color: #ffffff;
+                        }
+                        .good { 
+                            background-color: #2d5a3d; 
+                            color: #90ee90;
+                            font-weight: bold;
+                        }
+                        .medium { 
+                            background-color: #5a4d2d; 
+                            color: #ffeb3b;
+                            font-weight: bold;
+                        }
+                        .poor { 
+                            background-color: #5a2d2d; 
+                            color: #ff6b6b;
+                            font-weight: bold;
+                        }
+                    </style>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>補間方法</th>
+                                <th>計算コスト</th>
+                                <th>滑らかさ</th>
+                                <th>連続性</th>
+                                <th>適用場面</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>線形補間</strong></td>
+                                <td class="good">低</td>
+                                <td class="poor">低</td>
+                                <td>C⁰</td>
+                                <td>高速動作・簡単制御</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3次スプライン</strong></td>
+                                <td class="medium">中</td>
+                                <td class="medium">中</td>
+                                <td>C¹</td>
+                                <td>一般的なロボット制御</td>
+                            </tr>
+                            <tr>
+                                <td><strong>5次スプライン</strong></td>
+                                <td class="poor">高</td>
+                                <td class="good">高</td>
+                                <td>C²</td>
+                                <td>高精度作業・振動抑制</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1em; font-size: 0.9em;">
+                        <p><strong>推奨</strong>：用途に応じて選択。迷った場合は3次スプラインが無難</p>
+                    </div>
+                </section>
+
+                <!-- JointTrajectoryControllerでの補間設定 (縦スライド) -->
+                <section>
+                    <h2>JointTrajectoryControllerでの補間設定</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <pre style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
+<code># JointTrajectoryController設定例（YAML）
+joint_trajectory_controller:
+  type: joint_trajectory_controller/JointTrajectoryController
+  joints:
+    - joint1
+    - joint2
+    - joint3
+  constraints:
+    goal_time: 0.5
+    joint1: {trajectory: 0.05, goal: 0.02}
+  gains:
+    joint1: {p: 100, d: 1, i: 1, i_clamp: 1}
+  # 補間設定
+  interpolation_method: "spline"  # linear, spline
+  spline_degree: 5                # 3 or 5</code>
+                            </pre>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>設定パラメータ</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>interpolation_method</strong>
+                                    <ul>
+                                        <li>"linear" - 線形補間</li>
+                                        <li>"spline" - スプライン補間</li>
+                                    </ul>
+                                </li>
+                                <li><strong>spline_degree</strong>
+                                    <ul>
+                                        <li>3 - 3次スプライン</li>
+                                        <li>5 - 5次スプライン</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <h3>実装時の注意点</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>速度・加速度制約の設定</li>
+                                <li>制御周期との整合性</li>
+                                <li>ハードウェア性能の考慮</li>
                             </ul>
                         </div>
                     </div>
