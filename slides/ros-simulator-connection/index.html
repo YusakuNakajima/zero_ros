@@ -112,16 +112,13 @@
   &lt;node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/&gt;
 &lt;/launch&gt;
      
-  &lt;!-- Controllers config --&gt;
+&lt;!-- Load controllers --&gt;
   &lt;rosparam file="$(arg controller_config_file)" command="load"/&gt;
-
-  &lt;!-- Load controllers --&gt;
   &lt;node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
     args="$(arg controllers)" output="screen" respawn="false" /&gt;
 
   &lt;!--Run Fake joint driver --&gt;
   &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
-
 
                         </code></pre>
                         </div>
