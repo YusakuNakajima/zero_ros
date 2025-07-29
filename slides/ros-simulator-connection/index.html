@@ -118,6 +118,13 @@
   
   &lt;!--Run Fake joint driver --&gt;
   &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
+  
+  &lt;!-- Launch moveit --&gt;
+  &lt;include file="$(find ur5e_moveit_config)/launch/move_group.launch"&gt;
+    &lt;arg name="allow_trajectory_execution" default="true" /&gt;
+    &lt;arg name="fake_execution" value="false" /&gt;
+  &lt;/include&gt;
+  
   &lt;/launch&gt;
                         </code></pre>
                         </div>
