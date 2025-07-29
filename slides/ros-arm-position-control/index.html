@@ -90,7 +90,7 @@
                                 障害物回避なしのモーションプランニング<br>
                                 常に接触するタスクで便利</li>
                         </ul>
-                    <p>JointTrajectoryControllerってどういう意味？<br>ROSのコントローラの命名則↓</p>
+                        <p>JointTrajectoryControllerってどういう意味？<br>ROSのコントローラの命名則↓</p>
                     </div>
                 </section>
 
@@ -186,9 +186,10 @@
                     <h2>よく使うROSの関節空間の<br>アームコントローラ</h2>
                     <div style="margin-bottom: 2em;">
                         <p style="font-size: 0.8em; margin-bottom: 0.5em;">
-                            参考: <a href="https://github.com/harumo11/moveit_start/blob/master/docs/docs/joint_trajectory_controller/joint_trajectory_controller.md" 
-                            target="_blank" style="color: #4CAF50; text-decoration: underline;">
-                            joint_trajectory_controller.md</a>
+                            参考: <a
+                                href="https://github.com/harumo11/moveit_start/blob/master/docs/docs/joint_trajectory_controller/joint_trajectory_controller.md"
+                                target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                                joint_trajectory_controller.md</a>
                         </p>
                         <ul style="font-size: 0.9em;">
                             <li><strong>position_controllers/JointTrajectoryController</strong></li>
@@ -201,9 +202,9 @@
                     <h2>よく使うROSの直交空間の<br>アームコントローラ</h2>
                     <div>
                         <p style="font-size: 0.8em; margin-bottom: 0.5em;">
-                            参考: <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers" 
-                            target="_blank" style="color: #4CAF50; text-decoration: underline;">
-                            cartesian_controllers</a>
+                            参考: <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers"
+                                target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                                cartesian_controllers</a>
                         </p>
                         <p style="font-size: 0.8em; color: #ccc; margin-bottom: 0.5em;">
                             position_controllers→velocity_controllersでも利用可能
@@ -423,7 +424,7 @@
                         </div>
                     </div>
                 </section>
-    <section>
+                <section>
                     <h2>クォータニオンを扱う方法</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
@@ -453,7 +454,8 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">
-                            <p style="font-size: 0.6em;">MoveItで使える手法一覧<br>https://opensource-robotics.tokyo.jp/?p=4313</p>
+                            <p style="font-size: 0.6em;">MoveItで使える手法一覧<br>https://opensource-robotics.tokyo.jp/?p=4313
+                            </p>
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -548,16 +550,14 @@
             <!-- JointTrajectoryControllerによるアーム制御 (スライド23) -->
             <section>
                 <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
-                    <h2>JointTrajectoryControllerによるアーム制御</h2>
+                    <h2>JointTrajectoryControllerによるアーム制御の基本</h2>
                 </section>
 
                 <!-- JTCでの実装の流れ (縦スライド) -->
                 <section>
                     <h2>JTCの実装4ステップ</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/jtc_implementation_flow.jpg" alt="JTC実装フロー" style="width: 100%;">
-                        </div>
+
                         <div style="flex: 1;">
                             <ol>
                                 <li>手先のwaypoints決定</li>
@@ -574,7 +574,7 @@
                     <h2>step1:waypoimtsの計算</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/trajectory_generation.png" alt="目標姿勢計算" style="width: 100%;">
+                            <img src="media/waypoints_example.png" alt="目標姿勢計算" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -584,7 +584,7 @@
                             </ul>
                         </div>
                     </div>
-                </section>               
+                </section>
                 <!-- 逆運動学の必要性 (縦スライド) -->
                 <section>
                     <h2>step2:逆運動学(IK)</h2>
@@ -638,14 +638,22 @@
                     <div style="margin-bottom: 1.5em;">
                         <h3>数値解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> - ROS1と共通ソルバーを使いたい場合にオススメ<br>
+                            <li><strong><a
+                                        href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
+                                        target="_blank"
+                                        style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> -
+                                ROS1と共通ソルバーを使いたい場合にオススメ<br>
                                 ニュートン法とSQP(逐次二次計画法)のハイブリッドで収束</li>
                         </ul>
                     </div>
                     <div>
                         <h3>解析解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> - 高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
+                            <li><strong><a
+                                        href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html"
+                                        target="_blank"
+                                        style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> -
+                                高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
                         </ul>
                     </div>
                 </section>
@@ -653,12 +661,16 @@
                 <!-- Pythonで使えるIKソルバー (縦スライド) -->
                 <section>
                     <h2>Pythonで使えるIKソルバー</h2>
-                          <p>計算速度の問題がなければPythonのIKソルバーを使っても良い</p>
+                    <p>計算速度の問題がなければPythonのIKソルバーを使っても良い</p>
                     <div style="margin-bottom: 1.5em;">
                         <h3>数値解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank" style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong> - TRAC LABで開発された手法、よく使われる</li>
-                            <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank" style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> - 最先端の剛体アルゴリズムを実装したライブラリ</li>
+                            <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank"
+                                        style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong>
+                                - TRAC LABで開発された手法、よく使われる</li>
+                            <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank"
+                                        style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> -
+                                最先端の剛体アルゴリズムを実装したライブラリ</li>
                         </ul>
                     </div>
                 </section>
@@ -673,11 +685,10 @@
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
-                                <li><strong>軌跡：</strong>逆運動学で得た解(JointTrajectory)を並べたもの<br>
-                                    どこを通るのかという空間的な情報を列挙したもの</li>
+                                <li><strong>軌跡：</strong>逆運動学で得た解</li>
                                 <li><strong>軌道：</strong>時間的な情報を加えたもの</li>
-                                <li>JointTrajectoryControllerでは軌道計算を自動的に行ってくれる</li>
-                                <li>ユーザーが渡すのはPositionとTimeFromStartだけ</li>
+                                <li>JointTrajectoryControllerでは、PositionとTimeFromStartを渡すと軌道計算と実行が可能</li>
+                                <li>点が十分多ければ割となめらかになるが、速度をきちんと計算する場合は次のスライドへ→</li>
                             </ul>
                         </div>
                     </div>
@@ -685,17 +696,33 @@
 
                 <!-- 実行 (縦スライド) -->
                 <section>
-                    <h2>実行</h2>
+                    <h2>JointTrajectoryの送信方法</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/trajectory_generation.png" alt="実行方法" style="width: 100%;">
+                            <img src="media/JTC_action.png" alt="実行方法" style="width: 100%;">
                             <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
                                 <li>TopicやActionで軌跡(JointTrajectory)を送信することで実行</li>
                                 <li><strong>Topicで送った場合：</strong>即時反映される</li>
-                                <li><strong>Actionで送った場合：</strong>目標到達までの状態や、過負荷などで目標のTrajectoiryからずれていないかを確認できる</li>
+                                <li><strong>Actionで送った場合：</strong>目標到達までの状態確認や途中変更も可能</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>JointTrajectoryControllerのテスト方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/JTC_GUI.png" alt="実行方法" style="width: 100%;">
+                            <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li>rqt_joint_trajectory_controller_guiが便利</li>
+                                <li>そもそもJointTrajectoryControllerが正常に動いているのかをテストするときなどに使える</li>
                             </ul>
                         </div>
                     </div>
@@ -733,7 +760,7 @@
             <!-- JointTrajectoryControllerによるアームの速度制御 (9枚目) -->
             <section>
                 <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
-                    <h2>JointTrajectoryControllerによるアームの速度制御</h2>
+                    <h2>JointTrajectoryControllerによるアームの速度・加速度制御</h2>
                 </section>
 
                 <!-- 手先の速度制御はなぜ必要か？ (縦スライド) -->
@@ -741,134 +768,18 @@
                     <h2>手先の速度制御はなぜ必要か？</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/hand_velocity_control.png" alt="手先速度制御の必要性" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <p>「JointTrajectoryControllerによるアーム制御」では手先の速度は厳密に考えていない</p>
+                            <p>ここまで紹介した手法では速度が厳密ではない</p>
                             <ul style="font-size: 0.9em;">
                                 <li><strong>課題</strong>
                                     <ul>
                                         <li>手先の速度が一定でない</li>
-                                        <li>動作の滑らかさが保証されない</li>
-                                        <li>作業効率に影響</li>
+                                        <li>動作に振動が出やすい</li>
                                     </ul>
                                 </li>
                                 <li><strong>解決方法</strong>
                                     <ul>
-                                        <li>ヤコビアンを用いた速度制御</li>
-                                        <li>手先速度と関節速度の関係を考慮</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ヤコビアン関節速度と手先速度の関係 (縦スライド) -->
-                <section>
-                    <h2>ヤコビアン関節速度と手先速度の関係</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/jacobian.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/jacobian.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>ヤコビアンとは</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>関節角度変化と手先位置変化の関係を表す行列</li>
-                                <li>微分の連鎖律から導出</li>
-                                <li>速度の関係式：<strong>v = J * q̇</strong></li>
-                            </ul>
-                            <h3>物理的意味</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>v: 手先速度ベクトル（6次元）</li>
-                                <li>J: ヤコビアン行列（6×n）</li>
-                                <li>q̇: 関節角速度ベクトル（n次元）</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 逆ヤコビアンによる手先速度の計算 (縦スライド) -->
-                <section>
-                    <h2>逆ヤコビアンによる手先速度の計算</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/jacobian_inverse_ik.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/jacobian_inverse_ik.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>逆ヤコビアンの計算</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>目標</strong>：手先速度 → 関節速度</li>
-                                <li><strong>式</strong>：q̇ = J⁻¹ * v</li>
-                                <li><strong>問題</strong>：Jが正方行列でない場合</li>
-                            </ul>
-                            <h3>解決方法</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>疑似逆行列</strong>：J⁺ = Jᵀ(JJᵀ)⁻¹</li>
-                                <li><strong>特異点対策</strong>：Damped Least Squares</li>
-                                <li><strong>冗長性解決</strong>：Null Space制御</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- JointTrajectoryControllerのvelocityとaccelerationに追加 (縦スライド) -->
-                <section>
-                    <h2>JointTrajectoryControllerのvelocityとaccelerationに追加</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/jtc_velocity_accel.png" alt="速度・加速度制御" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>拡張されたJointTrajectoryPoint</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>positions</strong>：関節角度</li>
-                                <li><strong>velocities</strong>：関節角速度</li>
-                                <li><strong>accelerations</strong>：関節角加速度</li>
-                                <li><strong>time_from_start</strong>：時間</li>
-                            </ul>
-                            <h3>制御の利点</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>より滑らかな動作</li>
-                                <li>手先速度の制御</li>
-                                <li>振動の抑制</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 速度と加速度、モーションの滑らかさの関係 (縦スライド) -->
-                <section>
-                    <h2>速度と加速度、モーションの滑らかさの関係</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/spline_comparison.png" alt="スプライン比較" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>3次スプライン vs 5次スプライン</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>3次スプライン</strong>
-                                    <ul>
-                                        <li>位置と速度の連続性</li>
-                                        <li>計算コストが低い</li>
-                                        <li>加速度不連続で振動発生</li>
-                                    </ul>
-                                </li>
-                                <li><strong>5次スプライン</strong>
-                                    <ul>
-                                        <li>位置、速度、加速度の連続性</li>
-                                        <li>より滑らかな動作</li>
-                                        <li>手先の振動抑制</li>
+                                        <li>ヤコビアンによる速度計算</li>
+                                        <li>速度も考慮したJointTrajectoryControllerの制御</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -878,26 +789,28 @@
 
                 <!-- 軌道補間方法の詳細 (縦スライド) -->
                 <section>
-                    <h2>軌道補間方法の選択</h2>
+                    <h2>軌道補間の方法</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/interpolation_methods.png" alt="補間方法比較" style="width: 100%;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/interpolation_methods.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/interpolation_methods.html" width="100%" height="400"
+                                frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
-                            <h3>なぜ補間が重要か</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>waypointsは離散的な点</li>
-                                <li>ロボットには連続的な軌道が必要</li>
-                                <li>補間方法で動作の滑らかさが決まる</li>
-                            </ul>
                             <h3>主な補間方法</h3>
                             <ul style="font-size: 0.9em;">
                                 <li><strong>線形補間</strong> - 最も単純</li>
                                 <li><strong>3次スプライン</strong> - 滑らかな位置と速度</li>
-                                <li><strong>5次スプライン</strong> - 最も滑らか</li>
+                                <li><strong>5次スプライン</strong> - 滑らかな位置、速度、加速度</li>
+                                <li><strong>台形</strong> - 動作が速い</li>
                             </ul>
                         </div>
                     </div>
+                    <p>※教科書の時間多項式とスプラインは等価です</p>
+                    <p>2点→時間多項式, 複数点→スプラインという違いです</p>
                 </section>
 
                 <!-- 線形補間 (縦スライド) -->
@@ -1082,52 +995,104 @@
                     </div>
                 </section>
 
+
+                <!-- ヤコビアン関節速度と手先速度の関係 (縦スライド) -->
+                <section>
+                    <h2>関節速度の計算方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/jacobian.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/jacobian.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>ヤコビアンとは</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>関節角度変化と手先位置変化の関係を表す行列</li>
+                                <li>微分の連鎖律から導出</li>
+                                <li>速度の関係式：<strong>v = J * q̇</strong></li>
+                            </ul>
+                            <h3>物理的意味</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>v: 手先速度ベクトル（6次元）</li>
+                                <li>J: ヤコビアン行列（6×n）</li>
+                                <li>q̇: 関節角速度ベクトル（n次元）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 逆ヤコビアンによる手先速度の計算 (縦スライド) -->
+                <section>
+                    <h2>逆ヤコビアンによる手先速度の計算</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/jacobian_inverse_ik.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/jacobian_inverse_ik.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>逆ヤコビアンの計算</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>目標</strong>：手先速度 → 関節速度</li>
+                                <li><strong>式</strong>：q̇ = J⁻¹ * v</li>
+                                <li><strong>問題</strong>：Jが正方行列でない場合</li>
+                            </ul>
+                            <h3>解決方法</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>疑似逆行列</strong>：J⁺ = Jᵀ(JJᵀ)⁻¹</li>
+                                <li><strong>特異点対策</strong>：Damped Least Squares</li>
+                                <li><strong>冗長性解決</strong>：Null Space制御</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- JointTrajectoryControllerのvelocityとaccelerationに追加 (縦スライド) -->
+                <section>
+                    <h2>JointTrajectoryControllerにvelocityとaccelerationを追加</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>positions</strong>：関節角度</li>
+                                <li><strong>velocities</strong>：関節角速度</li>
+                                <li><strong>accelerations</strong>：関節角加速度</li>
+                                <li><strong>time_from_start</strong>：時間</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+
                 <!-- JointTrajectoryControllerでの補間設定 (縦スライド) -->
                 <section>
-                    <h2>JointTrajectoryControllerでの補間設定</h2>
+                    <h2>JointTrajectoryControllerでの補間設定例</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <pre
                                 style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
-<code># JointTrajectoryController設定例（YAML）
-joint_trajectory_controller:
-  type: joint_trajectory_controller/JointTrajectoryController
-  joints:
-    - joint1
-    - joint2
-    - joint3
-  constraints:
-    goal_time: 0.5
-    joint1: {trajectory: 0.05, goal: 0.02}
-  gains:
-    joint1: {p: 100, d: 1, i: 1, i_clamp: 1}
-  # 補間設定
-  interpolation_method: "spline"  # linear, spline
-  spline_degree: 5                # 3 or 5</code>
+<code><span style="color: #718096;"># JointTrajectoryController設定例（YAML）</span>
+<span style="color: #4299e1;">joint_trajectory_controller</span>:
+  <span style="color: #68d391;">type</span>: <span style="color: #f6e05e;">joint_trajectory_controller/JointTrajectoryController</span>
+  <span style="color: #68d391;">joints</span>:
+    - <span style="color: #f6e05e;">joint1</span>
+    - <span style="color: #f6e05e;">joint2</span>
+    - <span style="color: #f6e05e;">joint3</span>
+  <span style="color: #68d391;">constraints</span>:
+    <span style="color: #68d391;">goal_time</span>: <span style="color: #fbb6ce;">0.5</span>
+    <span style="color: #68d391;">joint1</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.05</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.02</span>}
+  <span style="color: #68d391;">gains</span>:
+    <span style="color: #68d391;">joint1</span>: {<span style="color: #68d391;">p</span>: <span style="color: #fbb6ce;">100</span>, <span style="color: #68d391;">d</span>: <span style="color: #fbb6ce;">1</span>, <span style="color: #68d391;">i</span>: <span style="color: #fbb6ce;">1</span>, <span style="color: #68d391;">i_clamp</span>: <span style="color: #fbb6ce;">1</span>}
+  <span style="color: #718096;"># 補間設定</span>
+  <span style="color: #68d391;">interpolation_method</span>: <span style="color: #f6e05e;">"spline"</span>  <span style="color: #718096;"># linear, spline</span>
+  <span style="color: #68d391;">spline_degree</span>: <span style="color: #fbb6ce;">5</span>                <span style="color: #718096;"># 3 or 5</span></code>
                             </pre>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>設定パラメータ</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>interpolation_method</strong>
-                                    <ul>
-                                        <li>"linear" - 線形補間</li>
-                                        <li>"spline" - スプライン補間</li>
-                                    </ul>
-                                </li>
-                                <li><strong>spline_degree</strong>
-                                    <ul>
-                                        <li>3 - 3次スプライン</li>
-                                        <li>5 - 5次スプライン</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                            <h3>実装時の注意点</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>速度・加速度制約の設定</li>
-                                <li>制御周期との整合性</li>
-                                <li>ハードウェア性能の考慮</li>
-                            </ul>
                         </div>
                     </div>
                 </section>
