@@ -94,48 +94,79 @@
                 </div>
             </section>
 
+
+            <section>
+                <h2>ROSではまりがちなこと</h2>
+                <ol>
+                    <li>使い方が分からない</li>
+                    <li>相談する人がいない</li>
+                    <li>ごちゃごちゃいじっている間に環境が壊れて動かなくなった</li>
+                    <li>中身がどうなっているのかブラックボックスで応用が利かない</li>
+                </ol>
+            </section>
+
             <!-- スライド5: ROSを使った勉強の進め方 -->
             <section>
                 <section>
                     <h2>ROSを使った勉強の進め方</h2>
+                    <ol>
+                        <li>使い方&nbsp;→&nbsp;チュートリアル or LLM</li>
+                        <li>相談&nbsp;→&nbsp;コミュニティ or LLM</li>
+                        <li>環境&nbsp;→&nbsp;仮想環境</li>
+                        <li>実装&nbsp;→&nbsp;個人や組織に依存。。。</li>
+                    </ol>
+                    <p>実装を学ぶ場がない...→</p>
+                    <p>1~3は以下↓</p>
                 </section>
 
-                <section>
-                    <h2>1. 環境構築</h2>
-                    <ul>
-                        <li>環境構築で躓くとその先のロボット開発が進まない</li>
-                        <li>まずはDockerを使ってROSの環境を構築するのが便利</li>
-                        <li>Dockerの使い方は別途学ぶ必要がある</li>
-                    </ul>
-                </section>
+
 
                 <section>
-                    <h2>2. チュートリアル</h2>
+                    <h2>1. チュートリアル</h2>
                     <ul>
-                        <li><a href="http://wiki.ros.org/ja/ROS/Tutorials" target="_blank" style="color: #3b82f6; text-decoration: underline;">http://wiki.ros.org/ja/ROS/Tutorials</a></li>
+                        <li><a href="http://wiki.ros.org/ja/ROS/Tutorials" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">http://wiki.ros.org/ja/ROS/Tutorials</a>
+                        </li>
                         <li>ただし、チュートリアルだけでは動くロボットを作るのは難しい</li>
                         <li>このスライドはその補完を目的としている</li>
                     </ul>
                 </section>
 
                 <section>
-                    <h2>3. 困ったときは</h2>
+                    <h2>2. 困ったときは</h2>
                     <ul>
-                        <li>コミュニティ内で質問（<a href="https://wiki.ros.org/ja/Support" target="_blank" style="color: #3b82f6; text-decoration: underline;">https://wiki.ros.org/ja/Support</a>）することができる</li>
+                        <li>コミュニティ内で質問（<a href="https://wiki.ros.org/ja/Support" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">https://wiki.ros.org/ja/Support</a>）することができる
+                        </li>
                         <li>ただし、英語なので、日本コミュニティの方がハードルが低い</li>
-                        <li>ROS日本コミュニティ：<a href="https://rosjp.connpass.com/" target="_blank" style="color: #3b82f6; text-decoration: underline;">https://rosjp.connpass.com/</a></li>
-                        <li>Slackワークスペース：<a href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1" target="_blank" style="color: #3b82f6; text-decoration: underline;">招待フォーム</a></li>
+                        <li>ROS日本コミュニティ：<a href="https://rosjp.connpass.com/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">https://rosjp.connpass.com/</a></li>
+                        <li>Slackワークスペース：<a
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1"
+                                target="_blank" style="color: #3b82f6; text-decoration: underline;">招待フォーム</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>3. 環境構築</h2>
+                    <ul>
+                        <li>環境構築で躓くとその先のロボット開発が進まない</li>
+                        <li>Dockerを使ってROSの環境を構築するのが便利</li>
+                        <li>勉強だけならWSLでも良い(実機の制御は困難)</li>
                     </ul>
                 </section>
             </section>
 
+
             <!-- スライド6: ROSで実際のロボットを動かすには -->
             <section>
-                <h2>ROSで実際のロボットを動かすには</h2>
-                <p>以下の2点が重要</p>
+                <h2>本スライド集では実装を学ぶ</h2>
+                <p>ロボットアームの実装はざっくり以下の2ステップ</p>
                 <ul>
-                    <li>ステップ1：ロボットアームを表示</li>
-                    <li>ステップ2：ロボットアームを動かす</li>
+                    <li><a href="../ros-model-display/index.html" style="color: #3b82f6; text-decoration: underline;">→
+                            ステップ1：ロボットアームを表示</a></li>
+                    <li><a href="../ros-arm-position-control/index.html"
+                            style="color: #3b82f6; text-decoration: underline;">→ ステップ2：ロボットアームを動かす</a></li>
                 </ul>
                 <p>本スライドでは前準備として<br>ROSのプログラムの基本的な仕組みを紹介 →</p>
             </section>
@@ -237,8 +268,12 @@
             <!-- スライド11: 説明はここまで -->
             <section>
                 <h2>説明はここまで、あとは実際に作りながら学んでください</h2>
-                <h4>実際にロボットを動かしながら学習<br>→ <a href="../ros-model-display/index.html"
-                        style="color: #3b82f6; text-decoration: underh4ne;">ロボットモデル表示</a></li>
+                <ul>
+                    <li>モデルを作りたい<a href="../ros-model-display/index.html"
+                            style="color: #3b82f6; text-decoration: underh4ne;">→ロボットモデル表示</a>
+                    <li>モデルはある、動かしたい<a href="../ros-arm-position-control/index.html"
+                            style="color: #3b82f6; text-decoration: underh4ne;">→ロボットアーム制御</a>
+                </ul>
             </section>
 
             <!-- シリーズ一覧に戻る -->

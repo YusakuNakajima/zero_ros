@@ -52,6 +52,7 @@
             </section>
 
 
+
             <!-- Rvizとは？ -->
             <section>
                 <h2>Rvizとは？</h2>
@@ -69,6 +70,47 @@
                 </div>
             </section>
 
+                        <!-- パッケージ作成例 -->
+            <section>
+                <h2>環境構築</h2>
+                <div class="slide-layout-code">
+                    <div class="code-section">
+                        <pre><code data-trim class="bash">
+export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
+ ./BUILD-DOCKER-IMAGE.sh
+ ./RUN-DOCKER-CONTAINER.sh 
+ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
+                        </code></pre>
+                    </div>
+                    <div class="text-section">
+                        <ul>
+                            <li>Dockerを使って環境構築します</li>
+                            <li>powder_grindingリポジトリで用意してある環境を使ってください</li>
+                            <li>サポートが終了したROS1環境のためUbuntuProのアカウントが必要です</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- パッケージ作成例 -->
+            <section>
+                <h2>勉強用のパッケージを</h2>
+                <div class="slide-layout-code">
+                    <div class="code-section">
+                        <pre><code data-trim class="bash">
+ros2 pkg create ros_study --build-type ament-python
+                        </code></pre>
+                    </div>
+                    <div class="text-section">
+                        <ul>
+                            <li>URDFを作成する前に、まずは作業用のパッケージを作成しましょう</li>
+                            <li>パッケージ名は任意（ここでは"ros_study"を例としています）</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
             <section>
                 <h2>まずはURDFを表示</h2>
                 <div class="slide-layout-code">
@@ -80,12 +122,12 @@
   &lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;
   &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
 
-  &lt;arg name="rviz_config" default="$(find grinding_descriptions)/rviz/ur5e.rviz" /&gt; &lt;node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" required="true" /&gt;
+  &lt;arg name="rviz_config" default="$(find grinding_descriptions)/cfg/view_robot.rviz" /&gt; &lt;node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" required="true" /&gt;
 &lt;/launch&gt;
                     </code></pre>
                     </div>
                     <div class="text-section">
-                        <p>このlaunchを実行してください</p>
+                        <p>このlaunchをlaunchディレクトリで実行してください</p>
                     </div>
                 </div>
             </section>
@@ -465,7 +507,8 @@
                             </ul>
                         </div>
                     </div>
-                </section><section>
+                </section>
+                <section>
                     <h2>同期の仕組み<br>~TFの気持ちになろう~</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
@@ -480,7 +523,9 @@
                             <ul>
                                 <li>6軸アームであれば6個の軸で同期をとる必要があるので、難しさを体験してみよう！</li>
                                 <li>アプリは雰囲気で正確ではありません</li>
-                                <li>実際の同期の仕組みは<a href="https://www.slideshare.net/slideshow/tftf2/46875007" target="_blank" style="color: #3b82f6; text-decoration: underline;">TF完全理解</a>を参照</li>
+                                <li>実際の同期の仕組みは<a href="https://www.slideshare.net/slideshow/tftf2/46875007"
+                                        target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">TF完全理解</a>を参照</li>
                             </ul>
                         </div>
                     </div>
@@ -517,14 +562,16 @@
                             </ul>
                         </div>
                     </div>
-                    <p>※厳密には<a href="https://qiita.com/wahhoi22/items/d3716f5900da507bfa62" target="_blank" style="color: #3b82f6; text-decoration: underline;">修正DHパラメータ</a>です</p>
+                    <p>※厳密には<a href="https://qiita.com/wahhoi22/items/d3716f5900da507bfa62" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">修正DHパラメータ</a>です</p>
                 </section>
             </section>
 
             <!-- シリーズ一覧に戻る -->
             <section>
                 <h2>ありがとうございました</h2>
-                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
             </section>
         </div>
     </div>
