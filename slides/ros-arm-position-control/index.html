@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,33 +53,47 @@
             </section>
 
             <!-- アームの軌道制御とは -->
-                            <section>
-                    <h2>ROSを使う利点</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <h4>ROS生成モーション</h4>
-                            <ul>
-                                <li>PC上で完全に動作を計算してロボットに送る</li>
-                                <li>0.1 mmくらい精密な動作をさせたいときはこっち</li>
-                            </ul>
-                        </div>
-                        <div style="flex: 1;">
-                            <h4>メーカー提供モーション</h4>
-                            <ul>
-                                <li>ロボットコントローラでモーションを計算</li>
-                                <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
-                            </ul>
-                        </div>
+            <section>
+                <h2>ROSを使う利点</h2>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <h4>ROS生成モーション</h4>
+                        <ul>
+                            <li>PC上で完全に動作を計算してロボットに送る</li>
+                            <li>0.1 mmくらい精密な動作をさせたいときはこっち</li>
+                        </ul>
                     </div>
-                </section>
+                    <div style="flex: 1;">
+                        <h4>メーカー提供モーション</h4>
+                        <ul>
+                            <li>ロボットコントローラでモーションを計算</li>
+                            <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
 
             <!-- アーム制御の前提知識 -->
             <section>
+
+
+
                 <section>
-                    <h2>ROSのコントローラ命名規則(読み飛ばしてもok)</h2>
+                    <p>本スライドでは軌道制御の実装を扱います</p>
+
+                    <div style="margin-top: 2em;">
+                        <ul>
+                            <li><strong>実装方法1: MoveIt</strong><br>
+                                障害物回避ありのモーションプランニング<br>
+                                ピッキングなどで便利</li>
+                            <li><strong>実装方法2: JointTrajectoryController</strong><br>
+                                障害物回避なしのモーションプランニング<br>
+                                常に接触するタスクで便利</li>
+                        </ul>
+                    <p>JointTrajectoryControllerってどういう意味？<br>ROSのコントローラの命名則↓</p>
+                    </div>
                 </section>
 
-             
                 <!-- アーム制御は組合せ -->
                 <section>
                     <h2>アーム制御則は組合せ</h2>
@@ -135,16 +150,16 @@
                                 <th>指定したい座標系</th>
                                 <th>ユーザーが実現したい制御</th>
                             </tr>
-                            <tbody>
-                        </thead>
+                        <tbody>
+                            </thead>
                             <tr>
                                 <td class="col-control">位置</td>
-                                <td class="col-coords">関節座標系<br>(ジョイント座標系)</td>
+                                <td class="col-coords">関節座標系</td>
                                 <td class="col-action">位置</td>
                             </tr>
                             <tr>
                                 <td class="col-control">速度</td>
-                                <td class="col-coords" rowspan="2">直交座標系<br>(デカルト座標系)</td>
+                                <td class="col-coords" rowspan="2">直交座標系</td>
                                 <td class="col-action">速度</td>
                             </tr>
                             <tr>
@@ -155,39 +170,79 @@
                     </table>
 
                     <div class="caption">
-                        <p>
-                            例) 位置制御ロボットで直交座標系(XYZ空間)に対して位置制御したい<br>
-                            → XYZで座標を指定してロボットアームをうごかせる
+
+                        <h4>ROSコントローラ命名則</h4>
+                        <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
+                            <span style="color: #87ceeb;">position_controllers</span>/<span
+                                style="color: #ffb3b3;">Joint</span><span
+                                style="color: #90ee90;">TrajectoryController</span>
                         </p>
+
                     </div>
                 </section>
 
-                  <!-- ROSのアームコントローラの命名規則 -->
+                <!-- よく使うROSのアームコントローラ -->
                 <section>
-                    <h2>ROSのアームコントローラの命名規則</h2>
-                    <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
-                        position_controllers/JointTrajectoryController
-                    </p>
+                    <h2>よく使うROSの関節空間の<br>アームコントローラ</h2>
+                    <div style="margin-bottom: 2em;">
+                        <p style="font-size: 0.8em; margin-bottom: 0.5em;">
+                            参考: <a href="https://github.com/harumo11/moveit_start/blob/master/docs/docs/joint_trajectory_controller/joint_trajectory_controller.md" 
+                            target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                            joint_trajectory_controller.md</a>
+                        </p>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>position_controllers/JointTrajectoryController</strong></li>
+                            <li><strong>velocity_controllers/JointTrajectoryController</strong></li>
+                            <li><strong>effort_controllers/JointTrajectoryController</strong></li>
+                        </ul>
+                    </div>
+                </section> <!-- よく使うROSのアームコントローラ -->
+                <section>
+                    <h2>よく使うROSの直交空間の<br>アームコントローラ</h2>
+                    <div>
+                        <p style="font-size: 0.8em; margin-bottom: 0.5em;">
+                            参考: <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers" 
+                            target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                            cartesian_controllers</a>
+                        </p>
+                        <p style="font-size: 0.8em; color: #ccc; margin-bottom: 0.5em;">
+                            position_controllers→velocity_controllersでも利用可能
+                        </p>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>position_controllers/CartesianMotionController</strong></li>
+                            <li><strong>position_controllers/CartesianForceController</strong></li>
+                            <li><strong>position_controllers/CartesianComplianceController</strong></li>
+                        </ul>
+                    </div>
                 </section>
-
-
 
                 <!-- ロボットの制御種類 -->
                 <section>
-                    <h2>多くのロボットは位置/速度制御</h2>
+                    <h2>市販だと位置/速度制御が多い</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/ur_robot.png" alt="代表的なロボット" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
-                            <h3>位置/速度制御対応ロボット</h3>
+                            <h3>位置/速度制御</h3>
+                            <p>position_controllers, velocity_controllersのみ使用可</p>
                             <ul>
                                 <li>Universal Robot</li>
                                 <li>DENSO</li>
-                                <li>Dobot</li>
-                                <li>その他多数のロボット</li>
+                                <li>その他多数</li>
                             </ul>
-                            <h3>トルク制御対応ロボット</h3>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>トルク制御できるロボットもある</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/franka_robot.png" alt="代表的なロボット" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>トルク制御</h3>
+                            <p>effort_controllersも使用可</p>
                             <ul>
                                 <li>Franka Robotics</li>
                                 <li>KUKA</li>
@@ -196,37 +251,6 @@
                     </div>
                 </section>
 
-                <!-- よく使うROSのアームコントローラ -->
-                <section>
-                    <h2>よく使うROSのアームコントローラ</h2>
-                    <div style="margin-bottom: 2em;">
-                        <h3>関節座標系に対して位置制御したい</h3>
-                        <p><strong>JointTrajectoryController</strong><br>
-                            ROS標準のアームコントローラ<br>
-                            位置 or 速度 or トルク制御ロボットに対応</p>
-                    </div>
-                    <div>
-                        <h3>直交座標系に対して位置/力制御したい</h3>
-                        <p><strong>CartesianControllers</strong><br>
-                            位置 or 速度制御ロボットの手先に力覚センサを取り付けて位置/力制御を実現するROSパッケージ</p>
-                    </div>
-                </section>
-
-              
-            </section>
-            <section>
-                <p>本スライドでは軌道制御の実装を扱います</p>
-            
-                <div style="margin-top: 2em;">
-                    <ul>
-                        <li><strong>実装方法1: MoveIt</strong><br>
-                            障害物回避ありのモーションプランニング<br>
-                            ピッキングなどで便利</li>
-                        <li><strong>実装方法2: JointTrajectoryController</strong><br>
-                            障害物回避なしのモーションプランニング<br>
-                            常に接触するタスクで便利</li>
-                    </ul>
-                </div>
             </section>
 
             <!-- MoveItによるアーム制御 (スライド10) -->
@@ -403,7 +427,7 @@
 
 
                 <!-- MoveIt2で使えるパスプランニング (縦スライド) -->
-                          <section>
+                <section>
                     <h2>Step2:モーションプランニング</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
@@ -1000,6 +1024,7 @@
                             width: 90%;
                             color: #ffffff;
                         }
+
                         .comparison-table th,
                         .comparison-table td {
                             border: 2px solid #666;
@@ -1007,23 +1032,27 @@
                             text-align: center;
                             vertical-align: middle;
                         }
+
                         .comparison-table th {
                             background-color: #444;
                             font-weight: bold;
                             color: #ffffff;
                         }
-                        .good { 
-                            background-color: #2d5a3d; 
+
+                        .good {
+                            background-color: #2d5a3d;
                             color: #90ee90;
                             font-weight: bold;
                         }
-                        .medium { 
-                            background-color: #5a4d2d; 
+
+                        .medium {
+                            background-color: #5a4d2d;
                             color: #ffeb3b;
                             font-weight: bold;
                         }
-                        .poor { 
-                            background-color: #5a2d2d; 
+
+                        .poor {
+                            background-color: #5a2d2d;
                             color: #ff6b6b;
                             font-weight: bold;
                         }
@@ -1072,7 +1101,8 @@
                     <h2>JointTrajectoryControllerでの補間設定</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <pre style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
+                            <pre
+                                style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
 <code># JointTrajectoryController設定例（YAML）
 joint_trajectory_controller:
   type: joint_trajectory_controller/JointTrajectoryController
@@ -1121,7 +1151,8 @@ joint_trajectory_controller:
             <!-- シリーズ一覧に戻る -->
             <section>
                 <h2>ありがとうございました</h2>
-                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
             </section>
 
         </div>
