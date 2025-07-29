@@ -423,6 +423,27 @@
                         </div>
                     </div>
                 </section>
+    <section>
+                    <h2>クォータニオンを扱う方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>TF</strong>
+                                    <ul>
+                                        <li>ROS標準</li>
+                                        <li>ROS専用の型を使えるのが便利</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Scipy Rotation</strong>
+                                    <ul>
+                                        <li>ROS不要でクオータニオンの計算が可能</li>
+                                        <li>SLERPもあるので僕はよく使う</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
 
 
 
@@ -432,18 +453,18 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">
-                            <p style="font-size: 0.6em;">https://opensource-robotics.tokyo.jp/?p=4313</p>
+                            <p style="font-size: 0.6em;">MoveItで使える手法一覧<br>https://opensource-robotics.tokyo.jp/?p=4313</p>
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li><strong>産業用ロボモーション</strong>
+                                <li><strong>産業用モーション(PTP,LIN,CIRC)</strong>
                                     <ul>
-                                        <li>Pilz Industrial Motion Planner (障害物を考慮しない)</li>
+                                        <li>Pilz Industrial Motion Planner</li>
                                     </ul>
                                 </li>
                                 <li><strong>サンプリングベース</strong>
                                     <ul>
-                                        <li>OMPL</li>
+                                        <li>OMPLの中の手法</li>
                                     </ul>
                                 </li>
                                 <li><strong>最適化ベース</strong>
@@ -456,36 +477,6 @@
                         </div>
                     </div>
                 </section>
-                <section>
-                    <h2>Step2:モーションプランニング</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">
-                            <p style="font-size: 0.6em;">https://opensource-robotics.tokyo.jp/?p=4313</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>産業用ロボモーション</strong>
-                                    <ul>
-                                        <li>Pilz Industrial Motion Planner (障害物を考慮しない)</li>
-                                    </ul>
-                                </li>
-                                <li><strong>サンプリングベース</strong>
-                                    <ul>
-                                        <li>OMPL</li>
-                                    </ul>
-                                </li>
-                                <li><strong>最適化ベース</strong>
-                                    <ul>
-                                        <li>CHOMP</li>
-                                        <li>STOMP</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- サンプリングベースの手法(RRT) (縦スライド) -->
                 <section>
                     <h2>サンプリングベースの手法(RRT)</h2>
@@ -498,11 +489,11 @@
                                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         <div style="flex: 1;">
-                            <p>MoveItでデフォルトで使う</p>
+                            <p>MoveItのデフォルト</p>
                             <ul style="font-size: 0.9em;">
                                 <li>ランダムにパスを伸ばして障害物がなかったら採用、を繰り返す</li>
-                                <li>単純なRRTだとジグザグなので、実際は後処理をかけてスムーズにする</li>
-                                <li>MoveItのデフォルトではスタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
+                                <li>実際は後処理をかけてスムーズに</li>
+                                <li>スタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
                             </ul>
                         </div>
                     </div>
@@ -543,10 +534,9 @@
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
-                                <li><strong>コスト：</strong>障害物の距離を遠く、軌道の距離を短く、など</li>
+                                <li><strong>コスト：</strong>障害物の距離を遠くなど</li>
                                 <li><strong>最適化：</strong>確率的最適化</li>
-                                <li>軌道にノイズを載せて最適化</li>
-                                <li>軌道は最適化で決めるけど、最適化はサンプリングベースなので、最適化とサンプリングのハイブリッドでもある</li>
+                                <li>軌道は最適化で決めるけど、最適化はサンプリングベースというハイブリッドっぽい</li>
                                 <li>滑らかさはCHOMPより劣るが解が収束しやすく実用上は使いやすい</li>
                             </ul>
                         </div>
@@ -563,15 +553,15 @@
 
                 <!-- JTCでの実装の流れ (縦スライド) -->
                 <section>
-                    <h2>JTCでの実装の流れは5ステップ</h2>
+                    <h2>JTCの実装4ステップ</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/jtc_implementation_flow.jpg" alt="JTC実装フロー" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <ol>
-                                <li>ロボット手先の目標姿勢決定(XYZ座標で指定)</li>
-                                <li>逆運動学(手先目標姿勢に対応するロボット関節角度計算)</li>
+                                <li>手先のwaypoints決定</li>
+                                <li>逆運動学</li>
                                 <li>軌道・軌跡生成</li>
                                 <li>実行</li>
                             </ol>
@@ -581,24 +571,23 @@
 
                 <!-- 目標姿勢の計算 (縦スライド) -->
                 <section>
-                    <h2>目標姿勢の計算</h2>
+                    <h2>step1:waypoimtsの計算</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/trajectory_generation.png" alt="目標姿勢計算" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>powder_grindingパッケージだとmotion_generatorが行う</li>
-                                <li>1つの姿勢ではなく、連続的な姿勢の変化を計算</li>
-                                <li>連続的な姿勢の集まりをwaypointsと呼ぶ(図の赤点のこと)</li>
+                                <li>1点あたり位置とクオータニオンの7次元で表現</li>
+                                <li>これをならべてwaypointsにする</li>
+                                <li>クオータニオンのSlerpを活用すると滑らかになる</li>
                             </ul>
                         </div>
                     </div>
-                </section>
-
+                </section>               
                 <!-- 逆運動学の必要性 (縦スライド) -->
                 <section>
-                    <h2>逆運動学の必要性</h2>
+                    <h2>step2:逆運動学(IK)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/ik_image.png" alt="逆運動学説明" style="width: 100%;">
@@ -606,7 +595,7 @@
                         <div style="flex: 1;">
                             <p>XYZでロボットの手先姿勢を指定したい<br>
                                 ただ、動かせるのはロボットの関節<br>
-                                そこで手先姿勢→ロボットの関節をする必要があり、これを逆運動学という</p>
+                                そこで手先姿勢→ロボットの関節の計算をする(逆運動学,IK=InverseKinematics)</p>
                         </div>
                     </div>
                 </section>
@@ -644,20 +633,19 @@
 
                 <!-- MoveIt2で使えるIKソルバー (縦スライド) -->
                 <section>
-                    <h2>MoveIt2で使えるIKソルバー</h2>
+                    <h2>MoveItのIKソルバー</h2>
+                    <p>MoveItでモーション生成をせずに、IKソルバーだけ使うことも可能</p>
                     <div style="margin-bottom: 1.5em;">
                         <h3>数値解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong>pick_ik</strong> - MoveIt2用に実装されたソルバーでMoveIt2ならオススメ<br>
-                                グローバルミニマム：進化的アルゴリズム、ローカルミニマム：勾配降下法を組みあわせている</li>
-                            <li><strong>TRACK-IK</strong> - ROS1と共通ソルバーを使いたい場合にオススメ<br>
+                            <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> - ROS1と共通ソルバーを使いたい場合にオススメ<br>
                                 ニュートン法とSQP(逐次二次計画法)のハイブリッドで収束</li>
                         </ul>
                     </div>
                     <div>
                         <h3>解析解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong>IKFast</strong> - 高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
+                            <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html" target="_blank" style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> - 高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
                         </ul>
                     </div>
                 </section>
@@ -665,14 +653,12 @@
                 <!-- Pythonで使えるIKソルバー (縦スライド) -->
                 <section>
                     <h2>Pythonで使えるIKソルバー</h2>
+                          <p>計算速度の問題がなければPythonのIKソルバーを使っても良い</p>
                     <div style="margin-bottom: 1.5em;">
                         <h3>数値解ソルバー</h3>
                         <ul style="font-size: 0.8em;">
-                            <li><strong>TRACK-IK</strong> - これまで長年使われてきた実績があるので安心して使える<br>
-                                track_ik_pythonにpython実装もある</li>
-                            <li><strong>QuIK</strong> - 2024年に発表されたばかりの高速な数値会IK手法<br>
-                                投稿を見る限り解が近いIKであれば10us程度で解けそう<br>
-                                ROS2用のC++実装やpythonラッパーが公開されている</li>
+                            <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank" style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong> - TRAC LABで開発された手法、よく使われる</li>
+                            <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank" style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> - 最先端の剛体アルゴリズムを実装したライブラリ</li>
                         </ul>
                     </div>
                 </section>
