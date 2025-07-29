@@ -37,7 +37,7 @@
             <!-- ロボット制御の書籍 -->
             <section>
                 <h2>ロボット制御参考資料</h2>
-                <p>このスライドは数式を省いて実際のロボットでの説明を重視しています。数式がしっかり載っている教科書との併用すると理解が深まるのでおススメします。</p>
+                <p>本スライド(実践)、教科書(理論)の併用がおススメ</p>
                 <ol>
                     <div style="display: flex; align-items: center;">
                         <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
@@ -45,35 +45,32 @@
                     </div>
                     <div style="display: flex; align-items: center; margin-bottom: 20px;">
                         <img src="media/実践ロボット制御.jpg" style="width: 20%; margin-right: 20px;">
-                        <p>教科書「ロボット制御基礎論」を現在版にブラッシュアップ、理論的な詳しさと実装面までの手引きが充実している</p>
+                        <p>教科書「ロボット制御基礎論」を現在版にブラッシュアップ、理論的な詳しさと実装面までの手引きが充実</p>
                     </div>
 
                 </ol>
             </section>
 
             <!-- アームの軌道制御とは -->
-            <section>
-                <h2>アームの軌道制御の良さ</h2>
-                <div style="display: flex; align-items: center; gap: 2em;">
-                    <div style="flex: 1;">
-                        <iframe src="interactive_app/waypoints_and_trajectory.html" width="100%" height="400" frameborder="0"></iframe>
+                            <section>
+                    <h2>ROSを使う利点</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h4>ROS生成モーション</h4>
+                            <ul>
+                                <li>PC上で完全に動作を計算してロボットに送る</li>
+                                <li>0.1 mmくらい精密な動作をさせたいときはこっち</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4>メーカー提供モーション</h4>
+                            <ul>
+                                <li>ロボットコントローラでモーションを計算</li>
+                                <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div style="flex: 1;">
-                        <h4>メーカー制御</h4>
-                        <ul>
-                            <li>waypointsごとに動きを止める</li>
-                            <li>精度と動きの滑らかさがトレードオフ</li>
-                        </ul>
-
-                        <h4>軌道制御</h4>
-                        <ul>
-                            <li>waypointsごとに動きを止めない</li>
-                            <li>精度と動きの滑らかさを両立</li>
-                        </ul>
-
-                    </div>
-                </div>
-            </section>
+                </section>
 
             <!-- アーム制御の前提知識 -->
             <section>
@@ -165,6 +162,16 @@
                     </div>
                 </section>
 
+                  <!-- ROSのアームコントローラの命名規則 -->
+                <section>
+                    <h2>ROSのアームコントローラの命名規則</h2>
+                    <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
+                        position_controllers/JointTrajectoryController
+                    </p>
+                </section>
+
+
+
                 <!-- ロボットの制御種類 -->
                 <section>
                     <h2>多くのロボットは位置/速度制御</h2>
@@ -205,15 +212,7 @@
                     </div>
                 </section>
 
-                <!-- ROSのアームコントローラの命名規則 -->
-                <section>
-                    <h2>ROSのアームコントローラの命名規則</h2>
-                    <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
-                        position_controllers/JointTrajectoryController
-                    </p>
-                </section>
-
-
+              
             </section>
             <section>
                 <p>本スライドでは軌道制御の実装を扱います</p>
