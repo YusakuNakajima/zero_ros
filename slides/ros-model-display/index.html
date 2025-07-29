@@ -70,7 +70,7 @@
                 </div>
             </section>
 
-                        <!-- パッケージ作成例 -->
+
             <section>
                 <h2>環境構築</h2>
                 <div class="slide-layout-code">
@@ -95,11 +95,11 @@ export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
 
             <!-- パッケージ作成例 -->
             <section>
-                <h2>勉強用のパッケージを</h2>
+                <h2>勉強用のパッケージ作成</h2>
                 <div class="slide-layout-code">
                     <div class="code-section">
                         <pre><code data-trim class="bash">
-ros2 pkg create ros_study --build-type ament-python
+catkin_create_pkg ros_study rospy 
                         </code></pre>
                     </div>
                     <div class="text-section">
@@ -110,7 +110,7 @@ ros2 pkg create ros_study --build-type ament-python
                     </div>
                 </div>
             </section>
-            
+
             <section>
                 <h2>まずはURDFを表示</h2>
                 <div class="slide-layout-code">
@@ -127,7 +127,7 @@ ros2 pkg create ros_study --build-type ament-python
                     </code></pre>
                     </div>
                     <div class="text-section">
-                        <p>このlaunchをlaunchディレクトリで実行してください</p>
+                        <p>launchディレクトリを作成し、launchを実行してください</p>
                     </div>
                 </div>
             </section>
@@ -325,10 +325,9 @@ ros2 pkg create ros_study --build-type ament-python
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>ロボットアームはリンク→ジョイントの繰り返し構造が多いのに、URDFはべた書きなので効率が悪い</li>
                                 <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
+                                <li>リンク→ジョイントの繰り返し構造をマクロで書けるので便利</li>
                                 <li>XACRO読み込み時に変数を渡す</li>
-                                <li>関数で繰り返し構造の定義を簡素化する</li>
                             </ul>
                         </div>
                     </div>
@@ -351,10 +350,8 @@ ros2 pkg create ros_study --build-type ament-python
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>XACROのinclude機能が便利です</li>
-                                <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよいです</li>
-                                <li>固定ジョイント（type="fixed"）でアームの先端に接続</li>
-                                <li>エンドエフェクタは用途に応じて付け替え可能</li>
+                                <li>XACROのinclude機能が便利</li>
+                                <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよい</li>
                             </ul>
                         </div>
                     </div>
