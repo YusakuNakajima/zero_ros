@@ -545,6 +545,78 @@
                     </div>
                 </section>
 
+                <!-- MoveItCommanderによる実装 -->
+                <section>
+                    <h2>MoveItCommanderによる実装</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <div style="position: relative;">
+                                <button onclick="copyCode('moveit-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">コピー</button>
+                            <pre id="moveit-code" style="font-size: 0.35em; line-height: 1.2em; margin: 0; max-height: 65vh; overflow-y: auto; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
+<code><span style="color: #718096;">#!/usr/bin/env python</span>
+<span style="color: #718096;"># -*- coding: utf-8 -*-</span>
+<span style="color: #718096;">"""
+MoveIt Commander Demo for ROS Arm Position Control
+"""</span>
+
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">rospy</span>
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">moveit_commander</span>
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">geometry_msgs.msg</span>
+<span style="color: #f56565;">from</span> <span style="color: #4299e1;">math</span> <span style="color: #f56565;">import</span> <span style="color: #4299e1;">pi</span>
+
+<span style="color: #f56565;">class</span> <span style="color: #68d391;">MoveItDemo</span>:
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">__init__</span>(<span style="color: #63b3ed;">self</span>):
+        <span style="color: #4299e1;">moveit_commander</span>.<span style="color: #fbb6ce;">roscpp_initialize</span>(<span style="color: #4299e1;">sys</span>.<span style="color: #fbb6ce;">argv</span>)
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">init_node</span>(<span style="color: #f6e05e;">'moveit_demo'</span>, <span style="color: #63b3ed;">anonymous</span>=<span style="color: #68d391;">True</span>)
+        
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">robot</span> = <span style="color: #4299e1;">moveit_commander</span>.<span style="color: #fbb6ce;">RobotCommander</span>()
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">scene</span> = <span style="color: #4299e1;">moveit_commander</span>.<span style="color: #fbb6ce;">PlanningSceneInterface</span>()
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span> = <span style="color: #4299e1;">moveit_commander</span>.<span style="color: #fbb6ce;">MoveGroupCommander</span>(<span style="color: #f6e05e;">"manipulator"</span>)
+
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">go_to_joint_state</span>(<span style="color: #63b3ed;">self</span>, <span style="color: #63b3ed;">joint_goal</span>):
+        <span style="color: #718096;">"""関節角度を指定して移動"""</span>
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span>.<span style="color: #fbb6ce;">go</span>(<span style="color: #63b3ed;">joint_goal</span>, <span style="color: #63b3ed;">wait</span>=<span style="color: #68d391;">True</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span>.<span style="color: #fbb6ce;">stop</span>()
+        
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">go_to_pose_goal</span>(<span style="color: #63b3ed;">self</span>, <span style="color: #63b3ed;">pose_goal</span>):
+        <span style="color: #718096;">"""姿勢を指定して移動"""</span>
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span>.<span style="color: #fbb6ce;">set_pose_target</span>(<span style="color: #63b3ed;">pose_goal</span>)
+        <span style="color: #63b3ed;">plan</span> = <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span>.<span style="color: #fbb6ce;">go</span>(<span style="color: #63b3ed;">wait</span>=<span style="color: #68d391;">True</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span>.<span style="color: #fbb6ce;">stop</span>()
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">move_group</span>.<span style="color: #fbb6ce;">clear_pose_targets</span>()
+        <span style="color: #f56565;">return</span> <span style="color: #63b3ed;">plan</span>
+
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">demo_sequence</span>(<span style="color: #63b3ed;">self</span>):
+        <span style="color: #718096;"># ホームポジションに移動</span>
+        <span style="color: #63b3ed;">joint_goal</span> = [<span style="color: #68d391;">0</span>, -<span style="color: #4299e1;">pi</span>/<span style="color: #68d391;">4</span>, <span style="color: #68d391;">0</span>, -<span style="color: #4299e1;">pi</span>/<span style="color: #68d391;">2</span>, <span style="color: #68d391;">0</span>, <span style="color: #4299e1;">pi</span>/<span style="color: #68d391;">3</span>]
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">go_to_joint_state</span>(<span style="color: #63b3ed;">joint_goal</span>)
+        
+        <span style="color: #718096;"># 姿勢指定での移動</span>
+        <span style="color: #63b3ed;">pose_goal</span> = <span style="color: #4299e1;">geometry_msgs</span>.<span style="color: #fbb6ce;">msg</span>.<span style="color: #fbb6ce;">Pose</span>()
+        <span style="color: #63b3ed;">pose_goal</span>.<span style="color: #fbb6ce;">orientation</span>.<span style="color: #fbb6ce;">w</span> = <span style="color: #68d391;">1.0</span>
+        <span style="color: #63b3ed;">pose_goal</span>.<span style="color: #fbb6ce;">position</span>.<span style="color: #fbb6ce;">x</span> = <span style="color: #68d391;">0.4</span>
+        <span style="color: #63b3ed;">pose_goal</span>.<span style="color: #fbb6ce;">position</span>.<span style="color: #fbb6ce;">y</span> = <span style="color: #68d391;">0.1</span>
+        <span style="color: #63b3ed;">pose_goal</span>.<span style="color: #fbb6ce;">position</span>.<span style="color: #fbb6ce;">z</span> = <span style="color: #68d391;">0.4</span>
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">go_to_pose_goal</span>(<span style="color: #63b3ed;">pose_goal</span>)
+
+<span style="color: #f56565;">if</span> <span style="color: #fbb6ce;">__name__</span> == <span style="color: #f6e05e;">'__main__'</span>:
+    <span style="color: #63b3ed;">demo</span> = <span style="color: #68d391;">MoveItDemo</span>()
+    <span style="color: #63b3ed;">demo</span>.<span style="color: #fbb6ce;">demo_sequence</span>()
+</code></pre>
+                            </div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>MoveItCommanderを使った基本的な実装例</li>
+                                <li>関節角度指定での移動</li>
+                                <li>姿勢指定での移動</li>
+                                <li>カルテシアン軌道での移動</li>
+                                <li>実際のロボット制御ではこのような流れでプログラムを組む</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
             </section>
 
             <!-- JointTrajectoryControllerによるアーム制御 (スライド23) -->
@@ -753,6 +825,91 @@
                             <td>：JointTrajectoryController</td>
                         </tr>
                     </table>
+                </section>
+
+                <!-- JointTrajectoryControllerの実装 -->
+                <section>
+                    <h2>JointTrajectoryControllerの実装</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <div style="position: relative;">
+                                <button onclick="copyCode('jtc-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">コピー</button>
+                            <pre id="jtc-code" style="font-size: 0.35em; line-height: 1.2em; margin: 0; max-height: 65vh; overflow-y: auto; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
+<code><span style="color: #718096;">#!/usr/bin/env python</span>
+<span style="color: #718096;">"""
+JointTrajectoryController Demo
+"""</span>
+
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">rospy</span>
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">actionlib</span>
+<span style="color: #f56565;">from</span> <span style="color: #4299e1;">control_msgs.msg</span> <span style="color: #f56565;">import</span> <span style="color: #4299e1;">FollowJointTrajectoryAction</span>, <span style="color: #4299e1;">FollowJointTrajectoryGoal</span>
+<span style="color: #f56565;">from</span> <span style="color: #4299e1;">trajectory_msgs.msg</span> <span style="color: #f56565;">import</span> <span style="color: #4299e1;">JointTrajectory</span>, <span style="color: #4299e1;">JointTrajectoryPoint</span>
+
+<span style="color: #f56565;">class</span> <span style="color: #68d391;">JTCDemo</span>:
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">__init__</span>(<span style="color: #63b3ed;">self</span>):
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">init_node</span>(<span style="color: #f6e05e;">'jtc_demo'</span>, <span style="color: #63b3ed;">anonymous</span>=<span style="color: #68d391;">True</span>)
+        
+        <span style="color: #718096;"># ActionClient作成</span>
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span> = <span style="color: #4299e1;">actionlib</span>.<span style="color: #fbb6ce;">SimpleActionClient</span>(
+            <span style="color: #f6e05e;">'/arm_controller/follow_joint_trajectory'</span>,
+            <span style="color: #4299e1;">FollowJointTrajectoryAction</span>
+        )
+        
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">joint_names</span> = [
+            <span style="color: #f6e05e;">'shoulder_pan_joint'</span>, <span style="color: #f6e05e;">'shoulder_lift_joint'</span>, 
+            <span style="color: #f6e05e;">'elbow_joint'</span>, <span style="color: #f6e05e;">'wrist_1_joint'</span>, 
+            <span style="color: #f6e05e;">'wrist_2_joint'</span>, <span style="color: #f6e05e;">'wrist_3_joint'</span>
+        ]
+
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">create_trajectory</span>(<span style="color: #63b3ed;">self</span>, <span style="color: #63b3ed;">waypoints</span>, <span style="color: #63b3ed;">durations</span>):
+        <span style="color: #718096;">"""軌道を作成"""</span>
+        <span style="color: #63b3ed;">trajectory</span> = <span style="color: #4299e1;">JointTrajectory</span>()
+        <span style="color: #63b3ed;">trajectory</span>.<span style="color: #fbb6ce;">joint_names</span> = <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">joint_names</span>
+        
+        <span style="color: #f56565;">for</span> <span style="color: #63b3ed;">waypoint</span>, <span style="color: #63b3ed;">duration</span> <span style="color: #f56565;">in</span> <span style="color: #fbb6ce;">zip</span>(<span style="color: #63b3ed;">waypoints</span>, <span style="color: #63b3ed;">durations</span>):
+            <span style="color: #63b3ed;">point</span> = <span style="color: #4299e1;">JointTrajectoryPoint</span>()
+            <span style="color: #63b3ed;">point</span>.<span style="color: #fbb6ce;">positions</span> = <span style="color: #63b3ed;">waypoint</span>
+            <span style="color: #63b3ed;">point</span>.<span style="color: #fbb6ce;">time_from_start</span> = <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">Duration</span>(<span style="color: #63b3ed;">duration</span>)
+            <span style="color: #63b3ed;">trajectory</span>.<span style="color: #fbb6ce;">points</span>.<span style="color: #fbb6ce;">append</span>(<span style="color: #63b3ed;">point</span>)
+        
+        <span style="color: #f56565;">return</span> <span style="color: #63b3ed;">trajectory</span>
+
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">execute_trajectory</span>(<span style="color: #63b3ed;">self</span>, <span style="color: #63b3ed;">trajectory</span>):
+        <span style="color: #718096;">"""軌道を実行"""</span>
+        <span style="color: #63b3ed;">goal</span> = <span style="color: #4299e1;">FollowJointTrajectoryGoal</span>()
+        <span style="color: #63b3ed;">goal</span>.<span style="color: #fbb6ce;">trajectory</span> = <span style="color: #63b3ed;">trajectory</span>
+        
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">send_goal</span>(<span style="color: #63b3ed;">goal</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">wait_for_result</span>()
+        <span style="color: #f56565;">return</span> <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">get_result</span>()
+
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">demo_sequence</span>(<span style="color: #63b3ed;">self</span>):
+        <span style="color: #718096;">"""デモシーケンス"""</span>
+        <span style="color: #63b3ed;">waypoints</span> = [
+            [<span style="color: #68d391;">0</span>, -<span style="color: #68d391;">1.57</span>, <span style="color: #68d391;">0</span>, -<span style="color: #68d391;">1.57</span>, <span style="color: #68d391;">0</span>, <span style="color: #68d391;">0</span>],      <span style="color: #718096;"># ホーム</span>
+            [<span style="color: #68d391;">0.5</span>, -<span style="color: #68d391;">1.0</span>, <span style="color: #68d391;">1.0</span>, -<span style="color: #68d391;">1.5</span>, -<span style="color: #68d391;">0.5</span>, <span style="color: #68d391;">0</span>] <span style="color: #718096;"># 目標</span>
+        ]
+        <span style="color: #63b3ed;">durations</span> = [<span style="color: #68d391;">0.0</span>, <span style="color: #68d391;">3.0</span>]
+        
+        <span style="color: #63b3ed;">trajectory</span> = <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">create_trajectory</span>(<span style="color: #63b3ed;">waypoints</span>, <span style="color: #63b3ed;">durations</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">execute_trajectory</span>(<span style="color: #63b3ed;">trajectory</span>)
+
+<span style="color: #f56565;">if</span> <span style="color: #fbb6ce;">__name__</span> == <span style="color: #f6e05e;">'__main__'</span>:
+    <span style="color: #63b3ed;">demo</span> = <span style="color: #68d391;">JTCDemo</span>()
+    <span style="color: #63b3ed;">demo</span>.<span style="color: #fbb6ce;">demo_sequence</span>()
+</code></pre>
+                            </div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>まともに書くと大変だが、JTC_executor.pyのようなライブラリを使うと簡単</li>
+                                <li>ActionClientでFollowJointTrajectoryを使用</li>
+                                <li>軌道の作成（位置・速度・加速度設定）</li>
+                                <li>複数waypoints対応</li>
+                                <li>実際のロボット制御でよく使われるパターン</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
             </section>
@@ -1077,22 +1234,73 @@
                         <div style="flex: 1;">
                             <pre
                                 style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
-<code><span style="color: #718096;"># JointTrajectoryController設定例（YAML）</span>
-<span style="color: #4299e1;">joint_trajectory_controller</span>:
-  <span style="color: #68d391;">type</span>: <span style="color: #f6e05e;">joint_trajectory_controller/JointTrajectoryController</span>
+<code><span style="color: #718096;"># ur_joint_trajectory_controller.yaml</span>
+<span style="color: #4299e1;">pos_joint_traj_controller</span>:
+  <span style="color: #68d391;">type</span>: <span style="color: #f6e05e;">position_controllers/JointTrajectoryController</span>
   <span style="color: #68d391;">joints</span>:
-    - <span style="color: #f6e05e;">joint1</span>
-    - <span style="color: #f6e05e;">joint2</span>
-    - <span style="color: #f6e05e;">joint3</span>
+    - <span style="color: #f6e05e;">shoulder_pan_joint</span>
+    - <span style="color: #f6e05e;">shoulder_lift_joint</span>
+    - <span style="color: #f6e05e;">elbow_joint</span>
+    - <span style="color: #f6e05e;">wrist_1_joint</span>
+    - <span style="color: #f6e05e;">wrist_2_joint</span>
+    - <span style="color: #f6e05e;">wrist_3_joint</span>
   <span style="color: #68d391;">constraints</span>:
-    <span style="color: #68d391;">goal_time</span>: <span style="color: #fbb6ce;">0.5</span>
-    <span style="color: #68d391;">joint1</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.05</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.02</span>}
-  <span style="color: #68d391;">gains</span>:
-    <span style="color: #68d391;">joint1</span>: {<span style="color: #68d391;">p</span>: <span style="color: #fbb6ce;">100</span>, <span style="color: #68d391;">d</span>: <span style="color: #fbb6ce;">1</span>, <span style="color: #68d391;">i</span>: <span style="color: #fbb6ce;">1</span>, <span style="color: #68d391;">i_clamp</span>: <span style="color: #fbb6ce;">1</span>}
-  <span style="color: #718096;"># 補間設定</span>
-  <span style="color: #68d391;">interpolation_method</span>: <span style="color: #f6e05e;">"spline"</span>  <span style="color: #718096;"># linear, spline</span>
-  <span style="color: #68d391;">spline_degree</span>: <span style="color: #fbb6ce;">5</span>                <span style="color: #718096;"># 3 or 5</span></code>
+    <span style="color: #68d391;">goal_time</span>: <span style="color: #fbb6ce;">0.6</span>
+    <span style="color: #68d391;">stopped_velocity_tolerance</span>: <span style="color: #fbb6ce;">0.05</span>
+    <span style="color: #68d391;">shoulder_pan_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+    <span style="color: #68d391;">shoulder_lift_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+    <span style="color: #68d391;">elbow_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+  <span style="color: #68d391;">stop_trajectory_duration</span>: <span style="color: #fbb6ce;">0.5</span>
+  <span style="color: #68d391;">state_publish_rate</span>: <span style="color: #fbb6ce;">500</span>
+  <span style="color: #68d391;">action_monitor_rate</span>: <span style="color: #fbb6ce;">20</span></code>
                             </pre>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- waypointsの表示 -->
+            <section>
+                <section>
+                    <h2>waypointsの表示</h2>
+                    <p>デバッグ用にwaypointsを表示したいことはよくある、方法を紹介</p>
+                </section>
+
+                <!-- VisualizationMarkerを使った表示 -->
+                <section>
+                    <h2>VisualizationMarkerを使った表示</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/visualization_marker.png" alt="VisualizationMarker表示例" style="width: 100%;">
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>RVizの可視化ツールであるVisualizationMarkerが便利</li>
+                                <li>位置の表示には適しているが、姿勢の表示には適していない</li>
+                                <li>球形、矢印、線などの形状で表示可能</li>
+                                <li>色やサイズも自由に設定可能</li>
+                                <li>軌道の確認やデバッグに最適</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TFを使った表示 -->
+                <section>
+                    <h2>TFを使った表示</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/tf_visualization.png" alt="TF表示例" style="width: 100%;">
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>Markerは主に位置の表示だが、座標管理のTFを使うことで位置+向きの姿勢を知ることができる</li>
+                                <li>TFは本来ロボットや環境の座標管理用なので、あまり良くないかも（Poseを使うべきかもしれない）</li>
+                                <li>座標系として表示されるため、向きも直感的に理解できる</li>
+                                <li>RVizのTFディスプレイで簡単に確認可能</li>
+                                <li>時間の概念があるため、動的な表示も可能</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -1149,6 +1357,28 @@
                 // その他のChalkboardショートカットはデフォルトで有効
             }
         });
+
+        // コピー機能
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const codeText = codeElement.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(function() {
+                // コピー成功時のフィードバック
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'コピー完了!';
+                button.style.background = '#48bb78';
+                
+                setTimeout(function() {
+                    button.textContent = originalText;
+                    button.style.background = '#4299e1';
+                }, 1500);
+            }).catch(function(err) {
+                console.error('コピーに失敗しました: ', err);
+                alert('コピーに失敗しました');
+            });
+        }
     </script>
 </body>
 

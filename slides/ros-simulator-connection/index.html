@@ -20,13 +20,52 @@
 
     <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
+    
+    <!-- 追加のスタイル -->
+    <style>
+        .code-block-with-highlights {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .code-highlight-red-bg {
+            background-color: rgba(220, 53, 69, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        
+        .code-highlight-blue-bg {
+            background-color: rgba(0, 123, 255, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        
+        .code-highlight-green-bg {
+            background-color: rgba(40, 167, 69, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        
+        .code-block-with-highlights pre {
+            margin: 0;
+            background: transparent !important;
+        }
+        
+        .code-block-with-highlights code {
+            background: transparent !important;
+        }
+    </style>
 </head>
 
 <body>
     <div class="reveal">
         <div class="slides">
             <!-- タイトルスライド -->
-            <section data-background-image="media/gazebo.png" data-background-opacity="0.3">
+            <section data-background-image="media/gazebo.png" data-background-opacity="0.3" style="background-color: black;">
                 <h1>ゼロからのROS入門</h1>
                 <p>ROSにおけるシミュレータ</p>
                 <p>大阪大学 中島優作</p>
@@ -92,9 +131,15 @@
 
                 </section>
 
-                <!-- fake_jointの使い方 -->
+                <!-- ros_control_fake_joint.svg全画面表示 -->
                 <section>
-                    <h2>fake_jointの使い方</h2>
+                    <h2>fake jointとロボットコントローラとのつながり</h2>
+                    <img src="media/ros_control_fake_joint.svg.svg" alt="ros_control構成図" style="width: 100%; height: auto;">
+                </section>
+
+                <!-- fake_jointを使うlaunchの例 -->
+                <section>
+                    <h2>fake_jointを使うlaunchの例</h2>
                     <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code data-trim data-line-numbers class="xml">
@@ -115,18 +160,58 @@
   &lt;rosparam file="$(arg controller_config_file)" command="load"/&gt;
   &lt;node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
   args="$(arg controllers)" output="screen" respawn="false" /&gt;
-  
-  &lt;!--Run Fake joint driver --&gt;
-  &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
-  
-  &lt;!-- Launch moveit --&gt;
+
+    &lt;!-- Launch moveit --&gt;
   &lt;include file="$(find ur5e_moveit_config)/launch/move_group.launch"&gt;
     &lt;arg name="allow_trajectory_execution" default="true" /&gt;
     &lt;arg name="fake_execution" value="false" /&gt;
   &lt;/include&gt;
   
+  &lt;!--Run Fake joint driver --&gt;
+  &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
+  
+
+  
   &lt;/launch&gt;
                         </code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 対応関係 -->
+                <section>
+                    <h2>対応関係</h2>
+                    <div class="slide-layout-image-code">
+                        <div class="image-section">
+                            <img src="media/ros_control_fake_joint.svg.svg" alt="ros_control構成図" style="width: 100%; height: auto;">
+                        </div>
+                        <div class="code-section">
+                            <div class="code-block-with-highlights">
+                                <div class="code-highlight-red-bg">
+                                    <pre><code data-trim class="xml">&lt;!-- Load URDF --&gt;
+&lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
+&lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
+
+&lt;!-- launch rviz --&gt;
+&lt;node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/&gt;</code></pre>
+                                </div>
+                                <div class="code-highlight-blue-bg">
+                                    <pre><code data-trim class="xml">&lt;!-- Load controllers --&gt;
+&lt;rosparam file="$(arg controller_config_file)" command="load"/&gt;
+&lt;node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
+      args="$(arg controllers)" output="screen" respawn="false" /&gt;
+
+&lt;!-- Launch moveit --&gt;
+&lt;include file="$(find ur5e_moveit_config)/launch/move_group.launch"&gt;
+  &lt;arg name="allow_trajectory_execution" default="true" /&gt;
+  &lt;arg name="fake_execution" value="false" /&gt;
+&lt;/include&gt;</code></pre>
+                                </div>
+                                <div class="code-highlight-green-bg">
+                                    <pre><code data-trim class="xml">&lt;!--Run Fake joint driver --&gt;
+&lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;</code></pre>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

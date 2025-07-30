@@ -1,4 +1,4 @@
-スライドを完全に作り直します、以下の指示通りにスライドを作ってください
+以下の指示通りにスライドを作ってください
 cssはassets/common-styles.cssを参照してください
 claude.mdをスライドの内容に合わて作成してください。
 
@@ -21,27 +21,36 @@ claude.mdをスライドの内容に合わて作成してください。
 ネストした番号はスライドの縦方向へのネストを表しています
 「」内はスライドタイトルを表しています
 空白は修正なし
-タイトル：ゼロからのROS入門シミュレータや実機との接続
-バックグラウンド：gazebo.png
+
+1. 
+2. 
+3. 
+4. 
 5. a
-   14. MoveItCommanderによる実装
-   slides/ros-model-display/index.htmlを参考にmoveit_demo.pyを埋め込み
-https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/moveit_executor.pyを参考にmoveit_demo.pyを作成
-6. a
-   12. JointTrajectoryControllerの実装
-   まともに書くと大変なので、https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/JTC_executor.pyを使うと簡単に書ける
-   slides/ros-model-display/index.htmlを参考にjtc_demo.pyを埋め込み
-   同時にjtc_demo.pyを作成
-7. 
-8. waypointsの表示
-   1. デバッグ用にwaypointsを表示したいことはよくある、方法を紹介
-   2. DisplayMarkerを使った表示
-      1. RVizの可視化ツールであるDisplayMarkerが便利
-      2. 位置の表示には適しているが、姿勢の表示には適していない
-      3. 実装、   slides/ros-model-display/index.htmlを参考にmarker_display_demo.pyを埋め込み
-      https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/marker_display.pyを参考にmarker_display_demo.pyを作成
-   3. TFを使った表示
-      1. Markerは主に位置の表示だが、座標管理のTFを使うことで位置+向きの姿勢を知ることができる
-      2. TFは本来ロボットや環境の座標管理用なので、あまり良くないかも(Poseを使うべきかもしれない)
-      3. 実装、   slides/ros-model-display/index.htmlを参考にtf_display_demo.pyを埋め込み
-   https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/tf_publisher.pyを参考にtf_display_demo.pyを作成
+   1. a
+   2. a
+   3. ros_control_fake_joint.svg.svgを全画面表示
+   4. fake_jointを使うlaunchの例
+   5. 対応関係、左に3枚目のsvg表示、右に4枚目のlaunchを表示、
+   背景に色を付けて、
+   以下は赤色の背景で
+   	  <!-- Load URDF -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+ 
+    <!-- launch rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/>
+  以下は水色
+	  <!-- Load controllers -->
+  <rosparam file="$(arg controller_config_file)" command="load"/>
+  <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
+  args="$(arg controllers)" output="screen" respawn="false" />
+ 
+    <!-- Launch moveit -->
+  <include file="$(find ur5e_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" default="true" />
+    <arg name="fake_execution" value="false" />
+  </include>
+  以下は緑
+   <!--Run Fake joint driver -->
+  <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" />
