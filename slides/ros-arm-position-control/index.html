@@ -835,94 +835,91 @@ MoveIt Commander Demo for ROS Arm Position Control
                             <div style="position: relative;">
                                 <button onclick="selectAllCode('jtc-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">全文選択</button>
                             <pre id="jtc-code" style="font-size: 0.35em; line-height: 1.2em; margin: 0; max-height: 65vh; overflow-y: auto; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
-<code>#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import rospy
-import actionlib
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+<code class="language-python"><span style="color: #718096;">#!/usr/bin/env python3</span>
+<span style="color: #718096;"># -*- coding: utf-8 -*-</span>
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">rospy</span>
+<span style="color: #f56565;">import</span> <span style="color: #4299e1;">actionlib</span>
+<span style="color: #f56565;">from</span> <span style="color: #4299e1;">control_msgs.msg</span> <span style="color: #f56565;">import</span> <span style="color: #4299e1;">FollowJointTrajectoryAction</span>, <span style="color: #4299e1;">FollowJointTrajectoryGoal</span>
+<span style="color: #f56565;">from</span> <span style="color: #4299e1;">trajectory_msgs.msg</span> <span style="color: #f56565;">import</span> <span style="color: #4299e1;">JointTrajectory</span>, <span style="color: #4299e1;">JointTrajectoryPoint</span>
 
-class JTCDemo:
-    def __init__(self):
-        rospy.init_node('jtc_demo', anonymous=True)
+<span style="color: #f56565;">class</span> <span style="color: #68d391;">JTCDemo</span>:
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">__init__</span>(<span style="color: #63b3ed;">self</span>):
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">init_node</span>(<span style="color: #f6e05e;">'jtc_demo'</span>, <span style="color: #63b3ed;">anonymous</span>=<span style="color: #68d391;">True</span>)
         
-        # ActionClient作成
-        self.client = actionlib.SimpleActionClient(
-            '/scaled_pos_joint_traj_controller/follow_joint_trajectory',
-            FollowJointTrajectoryAction
+        <span style="color: #718096;"># ActionClient作成</span>
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span> = <span style="color: #4299e1;">actionlib</span>.<span style="color: #fbb6ce;">SimpleActionClient</span>(
+            <span style="color: #f6e05e;">'/scaled_pos_joint_traj_controller/follow_joint_trajectory'</span>,
+            <span style="color: #4299e1;">FollowJointTrajectoryAction</span>
         )
         
-        # サーバーが起動するまで待機
-        rospy.loginfo("Waiting for the FollowJointTrajectory action server to come up...")
-        self.client.wait_for_server()
-        rospy.loginfo("Connected to the FollowJointTrajectory action server.")
+        <span style="color: #718096;"># サーバーが起動するまで待機</span>
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">loginfo</span>(<span style="color: #f6e05e;">"Waiting for the FollowJointTrajectory action server to come up..."</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">wait_for_server</span>()
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">loginfo</span>(<span style="color: #f6e05e;">"Connected to the FollowJointTrajectory action server."</span>)
         
-        self.joint_names = [
-            'shoulder_pan_joint', 'shoulder_lift_joint', 
-            'elbow_joint', 'wrist_1_joint', 
-            'wrist_2_joint', 'wrist_3_joint'
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">joint_names</span> = [
+            <span style="color: #f6e05e;">'shoulder_pan_joint'</span>, <span style="color: #f6e05e;">'shoulder_lift_joint'</span>, 
+            <span style="color: #f6e05e;">'elbow_joint'</span>, <span style="color: #f6e05e;">'wrist_1_joint'</span>, 
+            <span style="color: #f6e05e;">'wrist_2_joint'</span>, <span style="color: #f6e05e;">'wrist_3_joint'</span>
         ]
 
-    def create_trajectory(self, waypoints, durations):
-        """軌道を作成"""
-        trajectory = JointTrajectory()
-        trajectory.joint_names = self.joint_names
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">create_trajectory</span>(<span style="color: #63b3ed;">self</span>, <span style="color: #63b3ed;">waypoints</span>, <span style="color: #63b3ed;">durations</span>):
+        <span style="color: #718096;">"""軌道を作成"""</span>
+        <span style="color: #63b3ed;">trajectory</span> = <span style="color: #4299e1;">JointTrajectory</span>()
+        <span style="color: #63b3ed;">trajectory</span>.<span style="color: #fbb6ce;">joint_names</span> = <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">joint_names</span>
         
-        for waypoint, duration in zip(waypoints, durations):
-            point = JointTrajectoryPoint()
-            point.positions = waypoint
-            point.time_from_start = rospy.Duration(duration)
-            trajectory.points.append(point)
+        <span style="color: #f56565;">for</span> <span style="color: #63b3ed;">waypoint</span>, <span style="color: #63b3ed;">duration</span> <span style="color: #f56565;">in</span> <span style="color: #fbb6ce;">zip</span>(<span style="color: #63b3ed;">waypoints</span>, <span style="color: #63b3ed;">durations</span>):
+            <span style="color: #63b3ed;">point</span> = <span style="color: #4299e1;">JointTrajectoryPoint</span>()
+            <span style="color: #63b3ed;">point</span>.<span style="color: #fbb6ce;">positions</span> = <span style="color: #63b3ed;">waypoint</span>
+            <span style="color: #63b3ed;">point</span>.<span style="color: #fbb6ce;">time_from_start</span> = <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">Duration</span>(<span style="color: #63b3ed;">duration</span>)
+            <span style="color: #63b3ed;">trajectory</span>.<span style="color: #fbb6ce;">points</span>.<span style="color: #fbb6ce;">append</span>(<span style="color: #63b3ed;">point</span>)
         
-        return trajectory
+        <span style="color: #f56565;">return</span> <span style="color: #63b3ed;">trajectory</span>
 
-    def execute_trajectory(self, trajectory):
-        """軌道を実行"""
-        goal = FollowJointTrajectoryGoal()
-        goal.trajectory = trajectory
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">execute_trajectory</span>(<span style="color: #63b3ed;">self</span>, <span style="color: #63b3ed;">trajectory</span>):
+        <span style="color: #718096;">"""軌道を実行"""</span>
+        <span style="color: #63b3ed;">goal</span> = <span style="color: #4299e1;">FollowJointTrajectoryGoal</span>()
+        <span style="color: #63b3ed;">goal</span>.<span style="color: #fbb6ce;">trajectory</span> = <span style="color: #63b3ed;">trajectory</span>
         
-        rospy.loginfo("Sending trajectory goal...")
-        self.client.send_goal(goal)
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">loginfo</span>(<span style="color: #f6e05e;">"Sending trajectory goal..."</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">send_goal</span>(<span style="color: #63b3ed;">goal</span>)
         
-        rospy.loginfo("Waiting for result...")
-        self.client.wait_for_result()
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">loginfo</span>(<span style="color: #f6e05e;">"Waiting for result..."</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">wait_for_result</span>()
         
-        result = self.client.get_result()
-        if result:
-            rospy.loginfo(f"Trajectory execution finished with status: {result.error_code}")
-        else:
-            rospy.logwarn("Trajectory execution failed or no result received.")
-        return result
+        <span style="color: #63b3ed;">result</span> = <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">client</span>.<span style="color: #fbb6ce;">get_result</span>()
+        <span style="color: #f56565;">if</span> <span style="color: #63b3ed;">result</span>:
+            <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">loginfo</span>(<span style="color: #f6e05e;">f"Trajectory execution finished with status: </span>{<span style="color: #63b3ed;">result</span>.<span style="color: #fbb6ce;">error_code</span>}<span style="color: #f6e05e;">"</span>)
+        <span style="color: #f56565;">else</span>:
+            <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">logwarn</span>(<span style="color: #f6e05e;">"Trajectory execution failed or no result received."</span>)
+        <span style="color: #f56565;">return</span> <span style="color: #63b3ed;">result</span>
 
-    def demo_sequence(self):
-        """デモシーケンス"""
-        waypoints = [
-            [0.0, -1.57, 0.0, -1.57, 0.0, 0.0],      # ホーム (ラジアン)
-            [0.5, -1.0, 1.0, -1.5, -0.5, 0.0] # 目標 (ラジアン)
+    <span style="color: #f56565;">def</span> <span style="color: #fbb6ce;">demo_sequence</span>(<span style="color: #63b3ed;">self</span>):
+        <span style="color: #718096;">"""デモシーケンス"""</span>
+        <span style="color: #63b3ed;">waypoints</span> = [
+            [<span style="color: #68d391;">0.0</span>, -<span style="color: #68d391;">1.57</span>, <span style="color: #68d391;">0.0</span>, -<span style="color: #68d391;">1.57</span>, <span style="color: #68d391;">0.0</span>, <span style="color: #68d391;">0.0</span>],      <span style="color: #718096;"># ホーム (ラジアン)</span>
+            [<span style="color: #68d391;">0.5</span>, -<span style="color: #68d391;">1.0</span>, <span style="color: #68d391;">1.0</span>, -<span style="color: #68d391;">1.5</span>, -<span style="color: #68d391;">0.5</span>, <span style="color: #68d391;">0.0</span>] <span style="color: #718096;"># 目標 (ラジアン)</span>
         ]
-        # 各ウェイポイントに到達するまでの総時間
-        # 最初のウェイポイントは通常0.0秒で設定し、次のウェイポイントまでの時間を累計で指定
-        durations = [0.0, 3.0] 
+        <span style="color: #718096;"># 各ウェイポイントに到達するまでの総時間</span>
+        <span style="color: #718096;"># 最初のウェイポイントは通常0.0秒で設定し、次のウェイポイントまでの時間を累計で指定</span>
+        <span style="color: #63b3ed;">durations</span> = [<span style="color: #68d391;">0.0</span>, <span style="color: #68d391;">3.0</span>] 
         
-        trajectory = self.create_trajectory(waypoints, durations)
-        self.execute_trajectory(trajectory)
+        <span style="color: #63b3ed;">trajectory</span> = <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">create_trajectory</span>(<span style="color: #63b3ed;">waypoints</span>, <span style="color: #63b3ed;">durations</span>)
+        <span style="color: #63b3ed;">self</span>.<span style="color: #fbb6ce;">execute_trajectory</span>(<span style="color: #63b3ed;">trajectory</span>)
 
-if __name__ == '__main__':
-    try:
-        demo = JTCDemo()
-        demo.demo_sequence()
-    except rospy.ROSInterruptException:
-        rospy.loginfo("ROS node interrupted.")
+<span style="color: #f56565;">if</span> <span style="color: #fbb6ce;">__name__</span> == <span style="color: #f6e05e;">'__main__'</span>:
+    <span style="color: #f56565;">try</span>:
+        <span style="color: #63b3ed;">demo</span> = <span style="color: #68d391;">JTCDemo</span>()
+        <span style="color: #63b3ed;">demo</span>.<span style="color: #fbb6ce;">demo_sequence</span>()
+    <span style="color: #f56565;">except</span> <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">ROSInterruptException</span>:
+        <span style="color: #4299e1;">rospy</span>.<span style="color: #fbb6ce;">loginfo</span>(<span style="color: #f6e05e;">"ROS node interrupted."</span>)
 </code></pre>
                             </div>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>まともに書くと大変だが、JTC_executor.pyのようなライブラリを使うと簡単</li>
                                 <li>ActionClientでFollowJointTrajectoryを使用</li>
-                                <li>軌道の作成（位置・速度・加速度設定）</li>
-                                <li>複数waypoints対応</li>
-                                <li>実際のロボット制御でよく使われるパターン</li>
+                                <li>実際のロボット制御だとこれにIKが入る</li>
                             </ul>
                         </div>
                     </div>
