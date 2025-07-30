@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5e_with_tools">
+
+    <xacro:include filename="$(find ur_description)/urdf/ur5e.xacro" />
+
+    <xacro:arg name="pestle_length" default="0.1092" />
+    <xacro:arg name="spatula_length" default="0.089" />
+
+    <link name="world" />
+    <joint name="world_joint" type="fixed">
+        <parent link="world" />
+        <child link="base_link" /> <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    </joint>
+
+    <link name="pestle">
+        <visual>
+            <origin xyz="0 0 0.0001" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://grinding_descriptions/mesh/end_effector/pestle_ur.stl" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.0001" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://grinding_descriptions/mesh/end_effector/pestle_ur.stl" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="joint_pestle" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0" />
+        <parent link="tool0" /> <child link="pestle" />
+    </joint>
+
+    <link name="pestle_tip" />
+    <joint name="joint_pestle_tip" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 $(arg pestle_length)" />
+        <parent link="pestle" />
+        <child link="pestle_tip" />
+    </joint>
+
+    <link name="spatula">
+        <visual>
+            <origin xyz="0 0 0.0001" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://grinding_descriptions/mesh/end_effector/spatula.stl" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.0001" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://grinding_descriptions/mesh/end_effector/spatula.stl" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="joint_spatula" type="fixed">
+        <origin rpy="0 ${-pi/2} 0" xyz="-0.03655 0 0.0135" />
+        <parent link="tool0" /> <child link="spatula" />
+    </joint>
+
+    <link name="spatula_tip" />
+    <joint name="joint_spatula_tip" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 $(arg spatula_length)" />
+        <parent link="spatula" />
+        <child link="spatula_tip" />
+    </joint>
+
+    <link name="dummy_ee" />
+    <joint name="joint_dummy_ee" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0" />
+        <parent link="tool0" /> <child link="dummy_ee" />
+    </joint>
+
+</robot>

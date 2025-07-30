@@ -116,7 +116,7 @@ catkin_create_pkg ros_study rospy
                 <h2>まずはURDFを表示</h2>
                 <div class="slide-layout-image">
                     <div class="image-section">
-                        <iframe src="code/launch_example_display.html" width="100%" height="400px" 
+                        <iframe data-src="code/launch_example_display.html" width="100%" height="400px" 
                             frameborder="0"></iframe>
                     </div>
                     <div class="text-section">
@@ -348,39 +348,20 @@ catkin_create_pkg ros_study rospy
                 </section>
                 <!-- ROS-industrial標準リンク名 -->
                 <section>
-                    <h2>ROS-industrial標準リンク名</h2>
+                    <h2>標準リンク名</h2>
+                    <p>ROSでよく使うリンク(慣習であって絶対ではない)</p>
                     <ul>
-                                <li><strong>base</strong>: 産業用コントローラのベース座標系と一致</li>
-                                <li><strong>tool0</strong>: 産業用コントローラのデフォルトツール座標系と一致</li>
+                                <li><strong>base_link</strong>: ROSのベース座標系</li>
+                                <li><strong>world</strong>: Gazebo等のシミュレータのベース座標系</li>
+                    </ul>
+                    <p>ROS-industrialの標準リンク(産業用ロボットとの互換性を持たせるために決められている)</p>
+                    <ul>
+                                <li><strong>base</strong>: 産業用コントローラのベース座標系</li>
+                                <li><strong>tool0</strong>: 産業用コントローラのデフォルトツール座標系</li>
                                 <li><strong>flange</strong>: エンドエフェクタ取り付け用フレーム（REP 103準拠、x+が前方）</li>
                             </ul>
                 </section>
 
-                <section>
-                    <h2>標準フレームの詳細</h2>
-                    <ul>
-                        <li><strong>base frame</strong>
-                            <ul>
-                                <li>産業用コントローラのメイン直交座標系の原点</li>
-                                <li>例：Fanuc(World Frame)、KUKA($ROBROOT)</li>
-                            </ul>
-                        </li>
-                        <li><strong>tool0 frame</strong>
-                            <ul>
-                                <li>産業用コントローラの未設定ツールフレーム</li>
-                                <li>例：Fanuc(Tool Frame)、KUKA($TOOL)</li>
-                                <li><strong>※編集禁止</strong></li>
-                            </ul>
-                        </li>
-                        <li><strong>flange frame</strong>
-                            <ul>
-                                <li>エンドエフェクタモデル取り付け専用</li>
-                                <li>REP 103準拠でx+が前方向</li>
-                                <li><strong>※編集禁止、ジオメトリなし</strong></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </section>
             </section>
 
             <!-- ステップ2：URDFの表示launchコード例 -->
@@ -594,6 +575,43 @@ catkin_create_pkg ros_study rospy
             selection.removeAllRanges();
             selection.addRange(range);
         }
+
+        // 外部コードファイルを読み込む関数
+        async function loadExternalCode() {
+            try {
+                // URDFコードの読み込み（簡略版を使用）
+                const urdfResponse = await fetch('code/ur5e_robot.urdf');
+                const urdfText = await urdfResponse.text();
+                const urdfCodeElement = document.querySelector('.external-urdf-code');
+                if (urdfCodeElement) {
+                    urdfCodeElement.textContent = urdfText;
+                }
+
+                // XACROコードの読み込み
+                const xacroResponse = await fetch('code/ur5e_robot.xacro');
+                const xacroText = await xacroResponse.text();
+                
+                // エンドエフェクタ付きXACROコードの読み込み
+                const xacroWithEefResponse = await fetch('code/ur5e_robot_with_eef.xacro');
+                const xacroWithEefText = await xacroWithEefResponse.text();
+                
+                const xacroCodeElements = document.querySelectorAll('.external-xacro-code');
+                xacroCodeElements.forEach((element, index) => {
+                    if (index === 0) {
+                        // 最初のXACROブロック（通常のXACRO説明用）
+                        element.textContent = xacroText;
+                    } else {
+                        // 2番目のXACROブロック（エンドエフェクタ追加用）
+                        element.textContent = xacroWithEefText;
+                    }
+                });
+
+                // コードハイライトを再適用
+                hljs.highlightAll();
+            } catch (error) {
+                console.error('コードファイルの読み込みに失敗しました:', error);
+            }
+        }
         Reveal.initialize({
             // 基本的な表示設定
             controls: true,  // ナビゲーションUIを表示
@@ -627,6 +645,11 @@ catkin_create_pkg ros_study rospy
 
                 // その他のChalkboardショートカットはデフォルトで有効
             }
+        });
+
+        // Reveal.js初期化後に外部コードを読み込み
+        Reveal.on('ready', function() {
+            loadExternalCode();
         });
     </script>
 </body>
