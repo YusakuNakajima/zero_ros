@@ -551,7 +551,7 @@
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <div style="position: relative;">
-                                <button onclick="copyCode('moveit-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">コピー</button>
+                                <button onclick="selectAllCode('moveit-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">全文選択</button>
                             <pre id="moveit-code" style="font-size: 0.35em; line-height: 1.2em; margin: 0; max-height: 65vh; overflow-y: auto; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
 <code><span style="color: #718096;">#!/usr/bin/env python</span>
 <span style="color: #718096;"># -*- coding: utf-8 -*-</span>
@@ -833,7 +833,7 @@ MoveIt Commander Demo for ROS Arm Position Control
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <div style="position: relative;">
-                                <button onclick="copyCode('jtc-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">コピー</button>
+                                <button onclick="selectAllCode('jtc-code')" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">全文選択</button>
                             <pre id="jtc-code" style="font-size: 0.35em; line-height: 1.2em; margin: 0; max-height: 65vh; overflow-y: auto; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
 <code><span style="color: #718096;">#!/usr/bin/env python</span>
 <span style="color: #718096;">"""
@@ -1358,26 +1358,25 @@ JointTrajectoryController Demo
             }
         });
 
-        // コピー機能
-        function copyCode(elementId) {
+        // 全文選択機能
+        function selectAllCode(elementId) {
             const codeElement = document.getElementById(elementId);
-            const codeText = codeElement.textContent;
-            
-            navigator.clipboard.writeText(codeText).then(function() {
-                // コピー成功時のフィードバック
-                const button = event.target;
-                const originalText = button.textContent;
-                button.textContent = 'コピー完了!';
-                button.style.background = '#48bb78';
-                
-                setTimeout(function() {
-                    button.textContent = originalText;
-                    button.style.background = '#4299e1';
-                }, 1500);
-            }).catch(function(err) {
-                console.error('コピーに失敗しました: ', err);
-                alert('コピーに失敗しました');
-            });
+            const range = document.createRange();
+            range.selectNodeContents(codeElement);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            // 選択成功時のフィードバック
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '選択完了!';
+            button.style.background = '#48bb78';
+
+            setTimeout(function() {
+                button.textContent = '全文選択';
+                button.style.background = '#4299e1';
+            }, 1500);
         }
     </script>
 </body>
