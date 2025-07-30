@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Robots MoveJ/ServoJ 動作シミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        .warning-text {
+            color: #ef4444; /* red-500 */
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+        }
+        .info-text {
+            color: #3b82f6; /* blue-500 */
+            font-weight: bold;
+        }
+        canvas {
+            cursor: crosshair;
+            touch-action: none;
+        }
+        /* Custom styles for radio button toggle */
+        input[type="radio"] + label {
+            color: #4b5563; /* gray-600 */
+            background-color: #e5e7eb; /* gray-200 */
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Style for MoveJ when checked */
+        #moveTypeMoveJ:checked + label {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        /* Style for ServoJ when checked */
+        #moveTypeServoJ:checked + label {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+        <header class="bg-gray-800 text-white p-4 text-center">
+            <h1 class="text-2xl font-bold">UR MoveJ vs ServoJ 動作シミュレーター</h1>
+        </header>
+
+        <main class="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Controls and Info -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-3 text-gray-700">操作方法</h2>
+                    <p class="text-gray-600 mb-4">
+                        1. 移動タイプを選択<br>
+                        2. キャンバスをクリックして目標を設定すると、移動が開始されます。
+                    </p>
+                    
+                    <!-- Radio Button Selection -->
+                    <fieldset class="mb-4">
+                        <legend class="font-semibold text-gray-700 mb-2">移動タイプ選択</legend>
+                        <div class="flex justify-around rounded-lg p-1 space-x-2">
+                            <div class="flex-1">
+                                <input type="radio" name="moveType" id="moveTypeMoveJ" value="movej" class="sr-only" checked>
+                                <label for="moveTypeMoveJ" class="w-full text-center block px-4 py-2 rounded-md cursor-pointer transition-colors">MoveJ</label>
+                            </div>
+                            <div class="flex-1">
+                                <input type="radio" name="moveType" id="moveTypeServoJ" value="servoj" class="sr-only">
+                                <label for="moveTypeServoJ" class="w-full text-center block px-4 py-2 rounded-md cursor-pointer transition-colors">ServoJ</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="infoBox" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+                    <h3 class="text-lg font-bold text-yellow-800 mb-2">解説と注意</h3>
+                    <p id="infoText" class="text-gray-700 transition-all duration-300">
+                        移動タイプを選択して、動きの違いを確認してみましょう。
+                    </p>
+                </div>
+                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-3 text-gray-700">重要なポイント</h2>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><strong class="text-blue-600">MoveJ/L:</strong> 速度と加速度が設定でき、滑らかに動きます。ティーチングや通常の運用に適しています。</li>
+                        <li><strong class="text-red-600">ServoJ/L:</strong> ゲイン(追従性)を設定し、目標値に最速で追従します。非常に高速で予期せぬ動きをする可能性があり、衝突の危険性が高いです。</li>
+                        <li class="font-bold">安全のために、まず`MoveJ/L`でゆっくり動かし、意図しない姿勢や干渉がないかを確認してから、他のコマンドを使用してください。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column: Canvas -->
+            <div class="lg:col-span-2 bg-gray-200 rounded-lg overflow-hidden border-4 border-gray-300 aspect-w-4 aspect-h-3">
+                 <canvas id="robotCanvas" class="w-full h-full"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const canvas = document.getElementById('robotCanvas');
+        const ctx = canvas.getContext('2d');
+        const infoText = document.getElementById('infoText');
+        const infoBox = document.getElementById('infoBox');
+
+        // --- Robot Arm Parameters ---
+        let arm1Length, arm2Length;
+        const basePosition = { x: 0, y: 0 };
+
+        // --- State Variables ---
+        let target = { x: 0, y: 0 };
+        let currentAngles = { a1: -Math.PI / 4, a2: Math.PI / 2 };
+        let targetAngles = { a1: -Math.PI / 4, a2: Math.PI / 2 };
+        let mode = 'stop'; // 'movej', 'servoj', 'stop'
+        let animationFrameId;
+
+        // --- Utility Functions ---
+        const lerp = (start, end, t) => start * (1 - t) + end * t;
+        
+        function resizeCanvas() {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+            
+            basePosition.x = canvas.width / 2;
+            basePosition.y = canvas.height * 0.8;
+            arm1Length = Math.min(canvas.width, canvas.height) * 0.3;
+            arm2Length = Math.min(canvas.width, canvas.height) * 0.3;
+
+            if (target.x === 0 && target.y === 0) {
+                 target = { x: basePosition.x + 50, y: basePosition.y - 100 };
+                 targetAngles = calculateIK(target.x, target.y) || targetAngles;
+            }
+            
+            draw();
+        }
+
+        // --- Inverse Kinematics (IK) ---
+        function calculateIK(x, y) {
+            const dx = x - basePosition.x;
+            const dy = y - basePosition.y;
+            const distSq = dx * dx + dy * dy;
+            const dist = Math.sqrt(distSq);
+
+            if (dist > arm1Length + arm2Length || dist < Math.abs(arm1Length - arm2Length)) {
+                return null;
+            }
+
+            const cosA2 = (distSq - arm1Length * arm1Length - arm2Length * arm2Length) / (2 * arm1Length * arm2Length);
+            const clampedCosA2 = Math.max(-1, Math.min(1, cosA2));
+            let a2 = Math.acos(clampedCosA2);
+            a2 = -a2; // Elbow-up configuration
+
+            const k1 = arm1Length + arm2Length * Math.cos(a2);
+            const k2 = arm2Length * Math.sin(a2);
+            const a1 = Math.atan2(dy, dx) - Math.atan2(k2, k1);
+
+            return { a1, a2 };
+        }
+
+        // --- Drawing Functions ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTarget();
+            drawArm();
+            drawBase();
+        }
+
+        function drawArm() {
+            const p1 = {
+                x: basePosition.x + arm1Length * Math.cos(currentAngles.a1),
+                y: basePosition.y + arm1Length * Math.sin(currentAngles.a1)
+            };
+            const p2 = {
+                x: p1.x + arm2Length * Math.cos(currentAngles.a1 + currentAngles.a2),
+                y: p1.y + arm2Length * Math.sin(currentAngles.a1 + currentAngles.a2)
+            };
+
+            ctx.strokeStyle = '#4b5563';
+            ctx.lineWidth = 15;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(basePosition.x, basePosition.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+
+            ctx.fillStyle = '#1f2937';
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, 12, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(p2.x, p2.y, 10, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        function drawBase() {
+            ctx.fillStyle = '#1f2937';
+            ctx.beginPath();
+            ctx.arc(basePosition.x, basePosition.y, 20, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillRect(basePosition.x - 40, basePosition.y + 20, 80, 20);
+        }
+
+        function drawTarget() {
+            if (target) {
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, 15, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(target.x - 10, target.y);
+                ctx.lineTo(target.x + 10, target.y);
+                ctx.moveTo(target.x, target.y - 10);
+                ctx.lineTo(target.x, target.y + 10);
+                ctx.stroke();
+            }
+        }
+        
+        // --- Animation Loop ---
+        function animate() {
+            let isMoving = false;
+            let speed = 0;
+
+            if (mode === 'movej') {
+                speed = 0.05; // Slow and smooth
+            } else if (mode === 'servoj') {
+                speed = 0.4; // Very fast
+            }
+
+            currentAngles.a1 = lerp(currentAngles.a1, targetAngles.a1, speed);
+            currentAngles.a2 = lerp(currentAngles.a2, targetAngles.a2, speed);
+            
+            if (Math.abs(currentAngles.a1 - targetAngles.a1) > 0.01 || Math.abs(currentAngles.a2 - targetAngles.a2) > 0.01) {
+                isMoving = true;
+            } else {
+                currentAngles = { ...targetAngles };
+            }
+
+            draw();
+
+            if (isMoving) {
+                animationFrameId = requestAnimationFrame(animate);
+            } else {
+                mode = 'stop';
+            }
+        }
+
+        // --- Event Handlers ---
+        function handleInteraction(event) {
+            event.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX || event.touches[0].clientX) - rect.left;
+            const y = (event.clientY || event.touches[0].clientY) - rect.top;
+
+            const newTargetAngles = calculateIK(x, y);
+            if (newTargetAngles) {
+                target = { x, y };
+                targetAngles = newTargetAngles;
+                
+                // Stop any ongoing movement
+                if (mode !== 'stop') {
+                    cancelAnimationFrame(animationFrameId);
+                }
+
+                const selectedMode = document.querySelector('input[name="moveType"]:checked').value;
+                mode = selectedMode;
+
+                if (mode === 'movej') {
+                    infoBox.className = 'bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg';
+                    infoText.innerHTML = `<span class="info-text">MoveJ:</span> ゆっくりと目標へ移動します。安全な動作です。`;
+                } else if (mode === 'servoj') {
+                    infoBox.className = 'bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg';
+                    infoText.innerHTML = `<strong class="warning-text">危険！ ServoJ:</strong> 新しい目標に最速で追従します！`;
+                }
+                
+                animate();
+
+            } else {
+                infoText.innerHTML = `<span class="warning-text">目標地点に到達できません！</span>`;
+                setTimeout(() => { infoText.textContent = '別の場所をクリックしてください。'; }, 2000);
+            }
+        }
+
+        canvas.addEventListener('mousedown', handleInteraction);
+        canvas.addEventListener('touchstart', handleInteraction);
+
+        // --- Initialization ---
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            infoText.innerHTML = 'ようこそ！<br>移動タイプを選び、キャンバスをクリックして開始してください。';
+        });
+
+    </script>
+</body>
+</html>
