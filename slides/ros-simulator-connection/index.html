@@ -140,40 +140,18 @@
                 <!-- fake_jointを使うlaunchの例 -->
                 <section>
                     <h2>fake_jointを使うlaunchの例</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code data-trim data-line-numbers class="xml">
-&lt;launch&gt;
-  &lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
-  &lt;arg name="controller_config_file" default="$(find grinding_robot_bringup)/config/ur5e_controllers_fake_joint.yaml" /&gt;
-  &lt;arg name="controllers" default="joint_state_controller scaled_pos_joint_traj_controller" /&gt;
-  &lt;arg name="rviz_config" default="$(find grinding_robot_bringup)/etc/display_for_grinding.rviz" /&gt;
-
-  &lt;!-- Load URDF --&gt;
-  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
-  &lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
-
-    &lt;!-- launch rviz --&gt;
-  &lt;node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/&gt;
-  
-  &lt;!-- Load controllers --&gt;
-  &lt;rosparam file="$(arg controller_config_file)" command="load"/&gt;
-  &lt;node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
-  args="$(arg controllers)" output="screen" respawn="false" /&gt;
-
-    &lt;!-- Launch moveit --&gt;
-  &lt;include file="$(find ur5e_moveit_config)/launch/move_group.launch"&gt;
-    &lt;arg name="allow_trajectory_execution" default="true" /&gt;
-    &lt;arg name="fake_execution" value="false" /&gt;
-  &lt;/include&gt;
-  
-  &lt;!--Run Fake joint driver --&gt;
-  &lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
-  
-
-  
-  &lt;/launch&gt;
-                        </code></pre>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/fake_joint_launch_display.html" width="100%" height="400px" 
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>fake_jointを使った起動ファイルの例</li>
+                                <li>robot_descriptionでロボットモデルを読み込み</li>
+                                <li>controller.yamlでコントローラを設定</li>
+                                <li>MoveItやRvizも同時に起動</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -248,7 +226,18 @@
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
     <script>
+        function selectAllCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const range = document.createRange();
+            range.selectNodeContents(codeElement);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
         Reveal.initialize({
             controls: true,
             progress: true,
@@ -258,9 +247,9 @@
 
             plugins: [
                 RevealZoom,
-                RevealHighlight,
                 RevealMenu,
-                RevealChalkboard
+                RevealChalkboard,
+                RevealHighlight
             ],
 
             menu: {
