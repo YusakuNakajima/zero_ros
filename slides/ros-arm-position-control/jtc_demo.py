@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 JointTrajectoryController Demo for ROS Arm Position Control
@@ -19,7 +19,7 @@ class JTCDemo:
         
         # JointTrajectoryControllerのActionクライアント
         self.client = actionlib.SimpleActionClient(
-            '/arm_controller/follow_joint_trajectory',
+            '/scaled_pos_joint_traj_controller/follow_joint_trajectory',
             FollowJointTrajectoryAction
         )
         
