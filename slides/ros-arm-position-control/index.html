@@ -297,40 +297,23 @@
 
                 <!-- 手先の姿勢の表現 (縦スライド) -->
                 <section>
-                    <h2>ステップ1:手先の姿勢の表現</h2>
+                    <h2>ステップ1:手先姿勢の表現</h2>
+                    <p>位置(position)+向き(orientation)=姿勢(pose)</p>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
-                            <p>姿勢(pose)は位置(position)+向き(orientation)で表現</p>
                             <ul>
                                 <li><strong>位置：</strong>XYZで表す</li>
-                                <li><strong>向き：</strong>位置制御ではオイラー角 or クオータニオンを使う
-                                    <ul style="font-size: 0.8em;">
-                                        <li><strong>オイラー角</strong> - 直観的にわかりやすいがジンバルロックがあるので軌道や軌跡の計算には向かない</li>
-                                        <li><strong>クオータニオン</strong> - 人にはわかりにくいがジンバルロックがないので軌道や軌跡の計算に便利</li>
-                                    </ul>
-                                </li>
+                                <li><strong>向き：</strong>オイラー角 or クオータニオン</li>
+                                <li>ROSでは内部計算でクオータニオンを使う</li>
+                                
+                                
                             </ul>
                         </div>
                     </div>
-                </section>
-
-                <!-- 姿勢の表現 - オススメの実装 (縦スライド) -->
-                <section>
-                    <h2>姿勢の表現 - オススメの実装</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/implementation_example.png" alt="実装例" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>計算は<strong>直観的にわかりやすいオイラー角</strong></li>
-                                <li>実際の動作生成では<strong>オイラー角→クォータニオンに変換</strong></li>
-                            </ul>
-                        </div>
-                    </div>
+                    <p>実用上は最初と最後の姿勢をオイラー角で指定、クオータニオンに変換後に補完してROSに渡す</p>
                 </section>
 
                 <!-- オイラー角による表現 (縦スライド) -->
@@ -368,10 +351,15 @@
                 <section>
                     <h2>クォータニオンによる表現</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/quaternion.png" alt="クォータニオン表現" style="width: 100%;">
+                          <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/euler_vs_quat.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/euler_vs_quat.html" width="100%" height="400"
+                                frameborder="0"></iframe>
                         </div>
-                        <div style="flex: 1;">
+                      <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
                                 <li><strong>利点</strong>
                                     <ul>
@@ -398,10 +386,10 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/euler_quat.html" target="_blank"
+                                <a href="interactive_app/euler_vs_quat_interpolation.html" target="_blank"
                                     style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
-                            <iframe src="interactive_app/euler_quat.html" width="100%" height="400"
+                            <iframe src="interactive_app/euler_vs_quat_interpolation.html" width="100%" height="400"
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
@@ -444,6 +432,16 @@
                             </ul>
                         </div>
                     </div>
+                </section>
+                <!-- 姿勢の表現 - オススメの実装 (縦スライド) -->
+                <section>
+                    <h2>姿勢の表現 - オススメの実装</h2>
+                    <ul>
+                        <li>最初と最後の姿勢は<strong>直観的にわかりやすいオイラー角</strong>で指定</li>
+                        <li>最初→最後の間のwaypointsの計算では<strong>オイラー角→クォータニオンに変換</strong>してSlerpで補完</li>
+                        <li>ROSはクオータニオンしか扱えない点に注意</li>
+                    </ul>
+
                 </section>
 
 
@@ -550,7 +548,7 @@
                     <h2>MoveItCommanderによる実装</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <iframe src="code/moveit_demo_display.html" width="100%" height="400px" 
+                            <iframe src="code/moveit_demo_display.html" width="100%" height="400px"
                                 frameborder="0"></iframe>
                         </div>
                         <div class="text-section">
@@ -598,9 +596,9 @@
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>1点あたり位置とクオータニオンの7次元で表現</li>
-                                <li>これをならべてwaypointsにする</li>
-                                <li>クオータニオンのSlerpを活用すると滑らかになる</li>
+                                <li>位置とクオータニオンの7次元を並べてwaypointsを作成</li>
+                                <li>クオータニオンのSlerpを活用すると動作が滑らかになる</li>
+                                <li>詳しくはMoveItのスライドを確認</li>
                             </ul>
                         </div>
                     </div>
@@ -698,25 +696,36 @@
                 <!-- 軌跡・軌道生成 (縦スライド) -->
                 <section>
                     <h2>軌跡・軌道生成</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/trajectory_generation.png" alt="軌跡軌道生成" style="width: 100%;">
-                            <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>軌跡：</strong>逆運動学で得た解</li>
-                                <li><strong>軌道：</strong>時間的な情報を加えたもの</li>
-                                <li>JointTrajectoryControllerでは、PositionとTimeFromStartを渡すと軌道計算と実行が可能</li>
-                                <li>点が十分多ければ割となめらかになるが、速度をきちんと計算する場合は次のスライドへ→</li>
-                            </ul>
-                        </div>
-                    </div>
+
+                    <ul style="font-size: 0.9em;">
+                        <li><strong>軌跡：</strong>逆運動学で得た解, 時間情報なし</li>
+                        <li><strong>軌道：</strong>時間情報を加えたもの</li>
+                        <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
+                        <li>JointTrajectoryControllerでは、PositionとTimeFromStartを渡すと軌道計算と実行が可能↓</li>
+                    </ul>
+
                 </section>
 
                 <!-- 実行 (縦スライド) -->
                 <section>
                     <h2>JointTrajectoryの送信方法</h2>
+                    <ul style="font-size: 0.9em;">
+                        <li>Topic or Actionで軌跡(JointTrajectory)を送信し実行</li>
+                        <li><strong>Topic</strong></li>
+                        <ul>
+                            <li>/joint_trajectory_controller_name/commandに送信</li>
+                            <li>送ったら直ちに動作を実行、途中で止められない</li>
+                        </ul>
+                        <li><strong>Action</strong>
+                            <ul>
+                                <li>/joint_trajectory_controller_name/FollowJointTrajectoryに送信</li>
+                                <li>目標到達までの状態確認や途中変更も可能</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Actionで送った場合の利点</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/JTC_action.png" alt="実行方法" style="width: 100%;">
@@ -724,9 +733,8 @@
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
-                                <li>TopicやActionで軌跡(JointTrajectory)を送信することで実行</li>
-                                <li><strong>Topicで送った場合：</strong>即時反映される</li>
-                                <li><strong>Actionで送った場合：</strong>目標到達までの状態確認や途中変更も可能</li>
+                                <li>途中でキャンセルしたり、軌道を変更して滑らかに繋ぐことができる</li>
+                                <li>即時に反映したいとき以外は基本的にActionを使うべき</li>
                             </ul>
                         </div>
                     </div>
@@ -737,12 +745,13 @@
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <img src="media/JTC_GUI.png" alt="実行方法" style="width: 100%;">
-                            <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
                                 <li>rqt_joint_trajectory_controller_guiが便利</li>
-                                <li>そもそもJointTrajectoryControllerが正常に動いているのかをテストするときなどに使える</li>
+                                <li>JointTrajectoryControllerが正常に動いているのかをテストするときなどに使える</li>
+                                <li>「controller」の枠内の名前がjoint_trajectory_controller_nameなので、トピックやアクションで送りたい場合の確認にも使える
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -758,7 +767,7 @@
                         </tr>
                         <tr>
                             <td>逆運動学</td>
-                            <td>：TrackIK</td>
+                            <td>：MoveIt IK Solver(TrackIK)</td>
                         </tr>
                         <tr>
                             <td>軌道生成</td>
@@ -780,7 +789,7 @@
                     <h2>JointTrajectoryControllerの実装</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <iframe src="code/jtc_demo_display.html" width="100%" height="400px" 
+                            <iframe src="code/jtc_demo_display.html" width="100%" height="400px"
                                 frameborder="0"></iframe>
                         </div>
                         <div class="text-section">
@@ -792,21 +801,20 @@
                     </div>
                 </section>
 
-                
+
                 <!-- JointTrajectoryControllerの実装 -->
                 <section>
                     <h2>JTC + IKの実装</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <iframe src="code/jtc_with_ik_demo_display.html" width="100%" height="400px" 
+                            <iframe src="code/jtc_with_ik_demo_display.html" width="100%" height="400px"
                                 frameborder="0"></iframe>
                         </div>
                         <div class="text-section">
                             <ul>
                                 <li>MoveItのIKソルバーを組み込んだデモ</li>
                                 <li>手先座標系での相対移動が可能</li>
-                                <li>IKで意図しない解を引かないように工夫が必要</li>
-                                <li>インタラクティブなキーボード操作デモ付き</li>
+                                <li>Attemptsが少ないと失敗が多いことも確認できる</li>
                             </ul>
                         </div>
                     </div>
@@ -1172,7 +1180,7 @@
                     <h2>VisualizationMarkerを使った表示</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <iframe src="code/marker_display_demo_display.html" width="100%" height="400px" 
+                            <iframe src="code/marker_display_demo_display.html" width="100%" height="400px"
                                 frameborder="0"></iframe>
                         </div>
                         <div class="text-section">
@@ -1192,7 +1200,7 @@
                     <h2>TFを使った表示</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <iframe src="code/tf_display_demo_display.html" width="100%" height="400px" 
+                            <iframe src="code/tf_display_demo_display.html" width="100%" height="400px"
                                 frameborder="0"></iframe>
                         </div>
                         <div class="text-section">
@@ -1275,7 +1283,7 @@
             button.textContent = '選択完了!';
             button.style.background = '#48bb78';
 
-            setTimeout(function() {
+            setTimeout(function () {
                 button.textContent = '全文選択';
                 button.style.background = '#4299e1';
             }, 1500);

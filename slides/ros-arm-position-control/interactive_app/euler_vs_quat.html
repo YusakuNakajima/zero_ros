@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>回転表現の比較：回転ベクトル vs RPY (Universal Robot)</title>
+    <title>ROSにおける姿勢表現：クオータニオン vs RPY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -51,53 +51,63 @@
 
     <div class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">回転表現の比較</h1>
-            <p class="mt-2 text-lg text-gray-600"><b>Universal Robot</b>で採用されている回転ベクトルとRPYの違いを視覚的に理解する</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">ROSにおける姿勢表現</h1>
+            <p class="mt-2 text-lg text-gray-600"><b>クオータニオン</b>と<b>RPY</b>の違いを視覚的に理解する</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Rotation Vector Card -->
+            <!-- Quaternion Card -->
             <div class="bg-white p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-semibold text-blue-600">1. 回転ベクトル</h2>
-                    <button id="reset-rv" class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">リセット</button>
+                    <h2 class="text-2xl font-semibold text-blue-600">1. クオータニオン</h2>
+                    <button id="reset-quat" class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">リセット</button>
                 </div>
-                <div class="mb-4">
-                    <label for="rv-mode" class="block text-sm font-medium text-gray-700 mb-1">表現タイプ:</label>
-                    <select id="rv-mode" class="w-full p-2 border border-gray-300 rounded-md bg-white">
-                        <option value="rad">回転ベクトル [rad]</option>
-                        <option value="deg">回転ベクトル [°]</option>
-                    </select>
-                </div>
-                <p id="rv-desc" class="text-sm text-gray-600 mb-2">
-                    <b>Universal Robot</b>の標準的な回転表現です。ベクトルの方向が回転軸、長さが<strong class="font-medium">ラジアン単位</strong>の回転角度になります。
+                <p class="text-sm text-gray-600 mb-2">
+                    <b>ROS</b>で標準的に使われる回転表現です。4つの要素(x, y, z, w)で3次元の回転を表し、ジンバルロックの問題がありません。
+                    実際の計算では、浮動小数点演算の誤差を補正するため、<b class="text-gray-800">単位クオータニオン（ノルムが1）</b>を維持するように定期的に正規化が行われます。<br>
+                    <span class="font-bold text-purple-600">紫色の線</span>は現在の回転軸を示します。<br><br>
+                    <b class="text-gray-800">操作のヒント:</b> まず <b>x, y, z</b> のスライダーで回転軸（紫色の線）を決め、次に <b>w</b> のスライダーでその軸周りの回転量を調整する、と考えると直感的です。
                 </p>
-                <p class="text-sm text-gray-700 font-medium mb-4">ベクトルの長さ (ノルム): <span id="rv-norm" class="font-bold text-blue-600">0.0000</span></p>
+                <div class="flex items-center my-4">
+                    <input id="unit-quat-checkbox" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="unit-quat-checkbox" class="ml-2 block text-sm font-medium text-gray-900">
+                        単位クオータニオンを維持する (ノルムを1に固定)
+                    </label>
+                </div>
+                <p class="text-sm text-gray-700 font-medium mb-4">クオータニオンのノルム: <span id="quat-norm" class="font-bold text-blue-600">1.0000</span></p>
                 <div id="canvas-container1" class="w-full h-64 md:h-80 bg-gray-900 rounded-lg relative overflow-hidden"></div>
                 <div id="controls1" class="mt-6 space-y-4">
-                    <!-- Vector X -->
+                    <!-- Quaternion X -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
-                            <label for="vec-x" class="text-sm font-medium text-gray-700">ベクトル X: <span id="vec-x-value" class="font-bold text-blue-600">0.00</span></label>
-                            <input type="number" id="vec-x-input" min="-4" max="4" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <label for="q-x" class="text-sm font-medium text-gray-700">X: <span id="q-x-value" class="font-bold text-blue-600">0.00</span></label>
+                            <input type="number" id="q-x-input" min="-1" max="1" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="vec-x" type="range" min="-4" max="4" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="q-x" type="range" min="-1" max="1" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
-                    <!-- Vector Y -->
+                    <!-- Quaternion Y -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
-                            <label for="vec-y" class="text-sm font-medium text-gray-700">ベクトル Y: <span id="vec-y-value" class="font-bold text-blue-600">0.00</span></label>
-                            <input type="number" id="vec-y-input" min="-4" max="4" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <label for="q-y" class="text-sm font-medium text-gray-700">Y: <span id="q-y-value" class="font-bold text-blue-600">0.00</span></label>
+                            <input type="number" id="q-y-input" min="-1" max="1" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="vec-y" type="range" min="-4" max="4" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="q-y" type="range" min="-1" max="1" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
-                    <!-- Vector Z -->
+                    <!-- Quaternion Z -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
-                            <label for="vec-z" class="text-sm font-medium text-gray-700">ベクトル Z: <span id="vec-z-value" class="font-bold text-blue-600">0.00</span></label>
-                            <input type="number" id="vec-z-input" min="-4" max="4" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <label for="q-z" class="text-sm font-medium text-gray-700">Z: <span id="q-z-value" class="font-bold text-blue-600">0.00</span></label>
+                            <input type="number" id="q-z-input" min="-1" max="1" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="vec-z" type="range" min="-4" max="4" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="q-z" type="range" min="-1" max="1" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    </div>
+                    <!-- Quaternion W -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="q-w" class="text-sm font-medium text-gray-700">W: <span id="q-w-value" class="font-bold text-blue-600">1.00</span></label>
+                            <input type="number" id="q-w-input" min="-1" max="1" step="0.01" value="1" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                        </div>
+                        <input id="q-w" type="range" min="-1" max="1" step="0.01" value="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                 </div>
             </div>
@@ -116,7 +126,7 @@
                     </select>
                 </div>
                 <p id="rpy-desc" class="text-sm text-gray-600 mb-4">
-                    <b>Universal Robot</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">ラジアン単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±π/2に近づくとジンバルロックが発生します。</strong>
+                    <b>ROS</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">ラジアン単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±π/2に近づくとジンバルロックが発生します。</strong>
                 </p>
                 <div id="canvas-container2" class="w-full h-64 md:h-80 bg-gray-900 rounded-lg relative overflow-hidden"></div>
                 <div id="controls2" class="mt-6 space-y-4">
@@ -124,25 +134,25 @@
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="roll" class="text-sm font-medium text-gray-700">Roll (X軸): <span id="roll-value" class="font-bold text-green-600">0.00</span><span id="roll-unit"> rad</span></label>
-                            <input type="number" id="roll-input" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="roll-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="roll" type="range" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="roll" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                     <!-- Pitch -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="pitch" class="text-sm font-medium text-gray-700">Pitch (Y軸): <span id="pitch-value" class="font-bold text-green-600">0.00</span><span id="pitch-unit"> rad</span></label>
-                            <input type="number" id="pitch-input" min="-1.5708" max="1.5708" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="pitch-input" min="-1.57" max="1.57" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="pitch" type="range" min="-1.5708" max="1.5708" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="pitch" type="range" min="-1.57" max="1.57" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                     <!-- Yaw -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="yaw" class="text-sm font-medium text-gray-700">Yaw (Z軸): <span id="yaw-value" class="font-bold text-green-600">0.00</span><span id="yaw-unit"> rad</span></label>
-                            <input type="number" id="yaw-input" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="yaw-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="yaw" type="range" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="yaw" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                 </div>
             </div>
@@ -199,21 +209,23 @@
         }
 
         // --- DOM Element Selection ---
-        // Scene 1: Rotation Vector
+        // Scene 1: Quaternion
         const scene1 = initScene('canvas-container1', true); // Add axis line to scene 1
-        const rvModeSelect = document.getElementById('rv-mode');
-        const rvDesc = document.getElementById('rv-desc');
-        const rvNorm = document.getElementById('rv-norm');
-        const vecXSlider = document.getElementById('vec-x');
-        const vecYSlider = document.getElementById('vec-y');
-        const vecZSlider = document.getElementById('vec-z');
-        const vecXInput = document.getElementById('vec-x-input');
-        const vecYInput = document.getElementById('vec-y-input');
-        const vecZInput = document.getElementById('vec-z-input');
-        const vecXValue = document.getElementById('vec-x-value');
-        const vecYValue = document.getElementById('vec-y-value');
-        const vecZValue = document.getElementById('vec-z-value');
-        const resetRvButton = document.getElementById('reset-rv');
+        const unitQuatCheckbox = document.getElementById('unit-quat-checkbox');
+        const quatNorm = document.getElementById('quat-norm');
+        const qxSlider = document.getElementById('q-x');
+        const qySlider = document.getElementById('q-y');
+        const qzSlider = document.getElementById('q-z');
+        const qwSlider = document.getElementById('q-w');
+        const qxInput = document.getElementById('q-x-input');
+        const qyInput = document.getElementById('q-y-input');
+        const qzInput = document.getElementById('q-z-input');
+        const qwInput = document.getElementById('q-w-input');
+        const qxValue = document.getElementById('q-x-value');
+        const qyValue = document.getElementById('q-y-value');
+        const qzValue = document.getElementById('q-z-value');
+        const qwValue = document.getElementById('q-w-value');
+        const resetQuatButton = document.getElementById('reset-quat');
 
         // Scene 2: RPY
         const scene2 = initScene('canvas-container2');
@@ -232,52 +244,61 @@
         const pitchUnit = document.getElementById('pitch-unit');
         const yawUnit = document.getElementById('yaw-unit');
         const resetRpyButton = document.getElementById('reset-rpy');
+        
+        // --- Global State ---
+        let isUpdatingQuat = false; // Flag to prevent event loops during normalization
 
         // --- Animation Loop ---
         function animate() {
             requestAnimationFrame(animate);
 
             if (scene1) {
-                const vec = new THREE.Vector3(
-                    parseFloat(vecXSlider.value),
-                    parseFloat(vecYSlider.value),
-                    parseFloat(vecZSlider.value)
+                const quat = new THREE.Quaternion(
+                    parseFloat(qxSlider.value),
+                    parseFloat(qySlider.value),
+                    parseFloat(qzSlider.value),
+                    parseFloat(qwSlider.value)
                 );
                 
-                const norm = vec.length();
-                rvNorm.textContent = norm.toFixed(4);
+                const norm = quat.length();
+                quatNorm.textContent = norm.toFixed(4);
 
-                // Update axis line visualization to pass through the origin
+                // Use a normalized quaternion for rotation and axis calculation
+                const normalizedQuat = quat.clone();
+                if (norm > 0) {
+                    normalizedQuat.normalize();
+                }
+                
+                // Apply rotation to the cube
+                scene1.cube.setRotationFromQuaternion(normalizedQuat);
+
+                // Update axis line visualization
                 const positions = scene1.axisLine.geometry.attributes.position.array;
-                if (norm > 0.0001) { // Check for non-zero vector
-                    const axisDirection = vec.clone().normalize();
-                    const lineLength = 5; // A fixed length to make it visible
-                    
-                    // Start point
-                    positions[0] = axisDirection.x * -lineLength;
-                    positions[1] = axisDirection.y * -lineLength;
-                    positions[2] = axisDirection.z * -lineLength;
-                    
-                    // End point
-                    positions[3] = axisDirection.x * lineLength;
-                    positions[4] = axisDirection.y * lineLength;
-                    positions[5] = axisDirection.z * lineLength;
+                const w = normalizedQuat.w;
+                const s = Math.sqrt(1.0 - w * w); // This is sin(angle/2)
+
+                if (s < 0.001) { // If there's almost no rotation, hide the line
+                    for (let i = 0; i < 6; i++) positions[i] = 0;
                 } else {
-                    // If vector is zero, make the line disappear
-                    for(let i = 0; i < 6; i++) positions[i] = 0;
+                    const axis = new THREE.Vector3(
+                        normalizedQuat.x / s,
+                        normalizedQuat.y / s,
+                        normalizedQuat.z / s
+                    );
+                    const lineLength = 5; // A fixed length to make it visible
+
+                    // Start point
+                    positions[0] = axis.x * -lineLength;
+                    positions[1] = axis.y * -lineLength;
+                    positions[2] = axis.z * -lineLength;
+
+                    // End point
+                    positions[3] = axis.x * lineLength;
+                    positions[4] = axis.y * lineLength;
+                    positions[5] = axis.z * lineLength;
                 }
                 scene1.axisLine.geometry.attributes.position.needsUpdate = true;
 
-                let angle = norm;
-                if (angle > 0) {
-                    const axis = vec.clone().normalize();
-                    if (rvModeSelect.value === 'deg') {
-                        angle = THREE.MathUtils.degToRad(angle);
-                    }
-                    scene1.cube.setRotationFromAxisAngle(axis, angle);
-                } else {
-                    scene1.cube.rotation.set(0, 0, 0);
-                }
                 scene1.renderer.render(scene1.scene, scene1.camera);
             }
 
@@ -291,37 +312,39 @@
                     pitch = THREE.MathUtils.degToRad(pitch);
                     yaw = THREE.MathUtils.degToRad(yaw);
                 }
+                // Setting rotation from Euler angles. 'ZYX' is a common order for RPY.
                 scene2.cube.rotation.set(roll, pitch, yaw, 'ZYX');
                 scene2.renderer.render(scene2.scene, scene2.camera);
             }
         }
 
         // --- Control Update Functions ---
-        function updateRvValues() {
-            vecXValue.textContent = parseFloat(vecXSlider.value).toFixed(2);
-            vecYValue.textContent = parseFloat(vecYSlider.value).toFixed(2);
-            vecZValue.textContent = parseFloat(vecZSlider.value).toFixed(2);
+        function updateQuatValues() {
+            qxValue.textContent = parseFloat(qxSlider.value).toFixed(2);
+            qyValue.textContent = parseFloat(qySlider.value).toFixed(2);
+            qzValue.textContent = parseFloat(qzSlider.value).toFixed(2);
+            qwValue.textContent = parseFloat(qwSlider.value).toFixed(2);
         }
 
         function updateRpyValues() {
             const mode = rpyModeSelect.value;
-            const format = (val) => (mode === 'deg' ? val : parseFloat(val).toFixed(2));
+            const format = (val) => (mode === 'deg' ? parseInt(val) : parseFloat(val).toFixed(2));
             rollValue.textContent = format(rollSlider.value);
             pitchValue.textContent = format(pitchSlider.value);
             yawValue.textContent = format(yawSlider.value);
         }
-
+        
         function updateRpyControls() {
             const mode = rpyModeSelect.value;
             let unitLabel, min, max, step, descHtml;
             switch (mode) {
                 case 'rad':
                     unitLabel = ' rad'; min = -Math.PI; max = Math.PI; step = 0.01;
-                    descHtml = `<b>Universal Robot</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">ラジアン単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±π/2に近づくとジンバルロックが発生します。</strong>`;
+                    descHtml = `<b>ROS</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">ラジアン単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±π/2に近づくとジンバルロックが発生します。</strong>`;
                     break;
                 default: // deg
                     unitLabel = '°'; min = -180; max = 180; step = 1;
-                    descHtml = `<b>Universal Robot</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">度数単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±90°に近づくとジンバルロックが発生します。</strong>`;
+                    descHtml = `<b>ROS</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">度数単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±90°に近づくとジンバルロックが発生します。</strong>`;
                     break;
             }
             rpyDesc.innerHTML = descHtml;
@@ -336,13 +359,45 @@
 
             updateRpyValues();
         }
+        
+        function normalizeQuatControls() {
+            if (isUpdatingQuat) return;
+            isUpdatingQuat = true;
+
+            const quat = new THREE.Quaternion(
+                parseFloat(qxSlider.value),
+                parseFloat(qySlider.value),
+                parseFloat(qzSlider.value),
+                parseFloat(qwSlider.value)
+            );
+
+            if (quat.lengthSq() > 0.00001) {
+                quat.normalize();
+            } else {
+                quat.set(0, 0, 0, 1);
+            }
+
+            // Update all controls with the new normalized values
+            qxSlider.value = quat.x;
+            qxInput.value = quat.x;
+            qySlider.value = quat.y;
+            qyInput.value = quat.y;
+            qzSlider.value = quat.z;
+            qzInput.value = quat.z;
+            qwSlider.value = quat.w;
+            qwInput.value = quat.w;
+            
+            updateQuatValues();
+            isUpdatingQuat = false;
+        }
 
         // --- Reset Functions ---
-        function resetRvControls() {
-            rvModeSelect.value = 'rad';
-            [vecXSlider, vecYSlider, vecZSlider, vecXInput, vecYInput, vecZInput].forEach(el => el.value = 0);
-            rvModeSelect.dispatchEvent(new Event('change'));
-            updateRvValues();
+        function resetQuatControls() {
+            unitQuatCheckbox.checked = false;
+            [qxSlider, qySlider, qzSlider, qxInput, qyInput, qzInput].forEach(el => el.value = 0);
+            qwSlider.value = 1;
+            qwInput.value = 1;
+            updateQuatValues();
         }
 
         function resetRpyControls() {
@@ -352,30 +407,42 @@
 
         // --- Event Listener Setup ---
         function setupEventListeners() {
-            // Helper to link a slider and a number input
+            // Helper to link a slider and a number input, with a callback
             const linkSliderAndInput = (slider, input, updateFunc) => {
                 slider.addEventListener('input', () => {
+                    if (isUpdatingQuat) return;
                     input.value = slider.value;
                     if(updateFunc) updateFunc();
                 });
                 input.addEventListener('input', () => {
+                    if (isUpdatingQuat) return;
                     const value = Math.max(parseFloat(slider.min), Math.min(parseFloat(slider.max), parseFloat(input.value) || 0));
                     slider.value = value;
                     if (input.value != value) input.value = value;
                     if(updateFunc) updateFunc();
                 });
             };
+            
+            // Quaternion update handler
+            const quatUpdateHandler = () => {
+                if (unitQuatCheckbox.checked) {
+                    normalizeQuatControls();
+                } else {
+                    updateQuatValues();
+                }
+            };
 
-            // Rotation Vector listeners
-            rvModeSelect.addEventListener('change', () => {
-                rvDesc.innerHTML = rvModeSelect.value === 'rad'
-                    ? `<b>Universal Robot</b>の標準的な回転表現です。ベクトルの方向が回転軸、長さが<strong class="font-medium">ラジアン単位</strong>の回転角度になります。`
-                    : `<b>Universal Robot</b>の標準的な回転表現です。ベクトルの方向が回転軸、長さが<strong class="font-medium">度数単位</strong>の回転角度になります。`;
+            // Quaternion listeners
+            linkSliderAndInput(qxSlider, qxInput, quatUpdateHandler);
+            linkSliderAndInput(qySlider, qyInput, quatUpdateHandler);
+            linkSliderAndInput(qzSlider, qzInput, quatUpdateHandler);
+            linkSliderAndInput(qwSlider, qwInput, quatUpdateHandler);
+            resetQuatButton.addEventListener('click', resetQuatControls);
+            unitQuatCheckbox.addEventListener('change', () => {
+                if (unitQuatCheckbox.checked) {
+                    normalizeQuatControls();
+                }
             });
-            linkSliderAndInput(vecXSlider, vecXInput, updateRvValues);
-            linkSliderAndInput(vecYSlider, vecYInput, updateRvValues);
-            linkSliderAndInput(vecZSlider, vecZInput, updateRvValues);
-            resetRvButton.addEventListener('click', resetRvControls);
 
             // RPY listeners
             rpyModeSelect.addEventListener('change', updateRpyControls);
@@ -388,7 +455,9 @@
         // --- Start ---
         if (scene1 && scene2) {
             setupEventListeners();
-            updateRpyControls(); // Initialize RPY controls on load
+            // Initialize control states
+            updateQuatValues();
+            resetRpyControls(); // Set RPY to default (rad)
             animate();
         } else {
             console.error("One or both scenes failed to initialize.");

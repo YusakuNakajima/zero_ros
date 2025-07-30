@@ -84,25 +84,28 @@
                 return result; // コメント行はこれ以上処理しない
             }
             
-            // 文字列（ダブルクォート）
-            result = result.replace(/(".*?")/g, '<span class="string">$1</span>');
+            // トリプルクォート文字列（docstring）を先に処理
+            result = result.replace(/("""[\s\S]*?""")/g, '<span class="string">$1</span>');
+            result = result.replace(/('''[\s\S]*?''')/g, '<span class="string">$1</span>');
             
-            // 文字列（シングルクォート）
-            result = result.replace(/('.*?')/g, '<span class="string">$1</span>');
+            // 通常の文字列（ダブルクォート）- 既に処理された部分を除外
+            result = result.replace(/(?!<span[^>]*>)("(?:[^"\\\\]|\\\\.)*")(?![^<]*<\/span>)/g, '<span class="string">$1</span>');
             
-            // docstring（トリプルクォート）
-            result = result.replace(/(""".*?""")/g, '<span class="string">$1</span>');
-            result = result.replace(/('''.*?''')/g, '<span class="string">$1</span>');
+            // 通常の文字列（シングルクォート）- 既に処理された部分を除外
+            result = result.replace(/(?!<span[^>]*>)('(?:[^'\\\\]|\\\\.)*')(?![^<]*<\/span>)/g, '<span class="string">$1</span>');
             
-            // キーワード
+            // キーワード（既に処理された部分を除外）
             const keywords = ['def', 'class', 'import', 'from', 'if', 'else', 'elif', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'return', 'yield', 'break', 'continue', 'pass', 'lambda', 'and', 'or', 'not', 'in', 'is', 'None', 'True', 'False'];
             keywords.forEach(keyword => {
-                const regex = new RegExp(`\\b${keyword}\\b`, 'g');
-                result = result.replace(regex, `<span class="keyword">${keyword}</span>`);
+                const regex = new RegExp(`(?!<span[^>]*>)\\b(${keyword})\\b(?![^<]*<\/span>)`, 'g');
+                result = result.replace(regex, `<span class="keyword">$1</span>`);
             });
             
-            // 数値
-            result = result.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+            // 数値（既に処理された部分を除外）
+            result = result.replace(/(?!<span[^>]*>)\b(\d+\.?\d*)\b(?![^<]*<\/span>)/g, '<span class="number">$1</span>');
+            
+            // クラス名（大文字で始まる識別子）
+            result = result.replace(/(?!<span[^>]*>)\b([A-Z][a-zA-Z0-9_]*)\b(?![^<]*<\/span>)/g, '<span class="class-name">$1</span>');
             
             return result;
         }
