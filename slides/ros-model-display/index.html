@@ -358,6 +358,50 @@ catkin_create_pkg ros_study rospy
                         </div>
                     </div>
                 </section>
+
+                <!-- ROS-industrial標準リンク名 -->
+                <section>
+                    <h2>ROS-industrial標準リンク名</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/ros_industrial_frames.png" alt="ROS-industrial標準フレーム" 
+                                 style="max-width: 80%; height: auto;">
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li><strong>base</strong>: 産業用コントローラのベース座標系と一致</li>
+                                <li><strong>tool0</strong>: 産業用コントローラのデフォルトツール座標系と一致</li>
+                                <li><strong>flange</strong>: エンドエフェクタ取り付け用フレーム（REP 103準拠、x+が前方）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>標準フレームの詳細</h2>
+                    <ul>
+                        <li><strong>base frame</strong>
+                            <ul>
+                                <li>産業用コントローラのメイン直交座標系の原点</li>
+                                <li>例：Fanuc(World Frame)、KUKA($ROBROOT)</li>
+                            </ul>
+                        </li>
+                        <li><strong>tool0 frame</strong>
+                            <ul>
+                                <li>産業用コントローラの未設定ツールフレーム</li>
+                                <li>例：Fanuc(Tool Frame)、KUKA($TOOL)</li>
+                                <li><strong>※編集禁止</strong></li>
+                            </ul>
+                        </li>
+                        <li><strong>flange frame</strong>
+                            <ul>
+                                <li>エンドエフェクタモデル取り付け専用</li>
+                                <li>REP 103準拠でx+が前方向</li>
+                                <li><strong>※編集禁止、ジオメトリなし</strong></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
             </section>
 
             <!-- ステップ2：URDFの表示launchコード例 -->
@@ -488,27 +532,8 @@ catkin_create_pkg ros_study rospy
                     </div>
                 </section>
 
-                <!-- 機能2：座標管理 -->
                 <section>
                     <h2>機能2：座標管理</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/tf_1d.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/tf_1d.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>TFは最新の座標を使わない、指定した時間 or 少しだけ前の座標を使うことで、座標系間での同期をとっている。</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>同期の仕組み<br>~TFの気持ちになろう~</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <p style="text-align: center; margin-bottom: 10px;">
@@ -520,7 +545,7 @@ catkin_create_pkg ros_study rospy
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>6軸アームであれば6個の軸で同期をとる必要があるので、難しさを体験してみよう！</li>
+                                <li>TFは最新の座標を使わない、指定した時間 or 少しだけ前の座標を使うことで、座標系間での同期をとっている。</li>
                                 <li>アプリは雰囲気で正確ではありません</li>
                                 <li>実際の同期の仕組みは<a href="https://www.slideshare.net/slideshow/tftf2/46875007"
                                         target="_blank"

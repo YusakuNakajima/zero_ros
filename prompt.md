@@ -23,51 +23,25 @@ claude.mdをスライドの内容に合わて作成してください。
 空白は修正なし
 タイトル：ゼロからのROS入門シミュレータや実機との接続
 バックグラウンド：gazebo.png
-1. 本スライドの担当範囲
-   - 本スライドではシミュレータ上でロボットを動かす方法を説明します。
-2. ROSで使われるシミュレータの種類
-   1. 動作確認：fake_joint(https://github.com/tork-a/fake_joint)
-  ロボットと周りの環境との接触は考慮されませんが動作が軽いです
-   2. 物理シミュレータ：Gazebo(https://gazebosim.org/home)
-   -  ロボットと周りの環境との接触等を含めた物理シミュレータ
-ロボットと周りの環境との接触も考慮します(計算重い、GPU必須)
-
-1. fake_joint
-   1. fake_jointはTORK-A(東京オープンソースロボティクス協会)が開発したROS1のパッケージで、Rviz上で直接ロボットの動きをシミュレーションできます。
-      - 元々ROSにはない仕組みでしたが、ROS2ではMockComponentという名前で公式から同様の機能が提供されています。
-   2. 使い方
-   ```xml
-      <launch>
-  <arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/>
-   <arg name="controller_config_file" default="$(find grinding_robot_bringup)/config/ur5e_controllers_fake_joint.yaml" />
-  <arg name="controllers" default="joint_state_controller scaled_pos_joint_traj_controller" />
-    <arg name="rviz_config" default="$(find grinding_robot_bringup)/etc/display_for_grinding.rviz" />
-
-    <!-- Load URDF -->
-  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-     
-  <!-- Controllers config -->
-  <rosparam file="$(arg controller_config_file)" command="load"/>
-
-  <!-- Load controllers -->
-  <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
-    args="$(arg controllers)" output="screen" respawn="false" />
-
-   <!--Run Fake joint driver -->
-    <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" />
-
-    <!-- Launch moveit -->
-  <include file="$(find ur5e_moveit_config)/launch/move_group.launch">
-    <arg name="allow_trajectory_execution" default="true" />
-    <arg name="fake_execution" value="false" />
-  </include>
-
-  <!-- launch rviz -->
-  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/>
-</launch>
-      ```
-
-1. gazebo
-   - GazeboはROSの公式なシミュレータで、3D環境でロボットを動かすことができます。
-   - GazeboはROSと密接に統合されており、センサデータやロボットの状態をリアルタイムで取得できます。
+5. a
+   14. MoveItCommanderによる実装
+   slides/ros-model-display/index.htmlを参考にmoveit_demo.pyを埋め込み
+https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/moveit_executor.pyを参考にmoveit_demo.pyを作成
+6. a
+   12. JointTrajectoryControllerの実装
+   まともに書くと大変なので、https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/JTC_executor.pyを使うと簡単に書ける
+   slides/ros-model-display/index.htmlを参考にjtc_demo.pyを埋め込み
+   同時にjtc_demo.pyを作成
+7. 
+8. waypointsの表示
+   1. デバッグ用にwaypointsを表示したいことはよくある、方法を紹介
+   2. DisplayMarkerを使った表示
+      1. RVizの可視化ツールであるDisplayMarkerが便利
+      2. 位置の表示には適しているが、姿勢の表示には適していない
+      3. 実装、   slides/ros-model-display/index.htmlを参考にmarker_display_demo.pyを埋め込み
+      https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/marker_display.pyを参考にmarker_display_demo.pyを作成
+   3. TFを使った表示
+      1. Markerは主に位置の表示だが、座標管理のTFを使うことで位置+向きの姿勢を知ることができる
+      2. TFは本来ロボットや環境の座標管理用なので、あまり良くないかも(Poseを使うべきかもしれない)
+      3. 実装、   slides/ros-model-display/index.htmlを参考にtf_display_demo.pyを埋め込み
+   https://github.com/quantumbeam/powder_grinding/blob/develop/grinding_motion_routines/src/grinding_motion_routines/tf_publisher.pyを参考にtf_display_demo.pyを作成
