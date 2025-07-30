@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTC with IK Demo Code</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .code-container {
+            background-color: #2d2d30;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid #3e3e42;
+        }
+        .code-line-wrapper {
+            display: flex;
+            line-height: 1.5;
+        }
+        .line-numbers {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+            min-width: 40px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .code-line {
+            white-space: pre;
+            flex: 1;
+        }
+        .comment { color: #6a9955; }
+        .string { color: #ce9178; }
+        .keyword { color: #569cd6; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        .class-name { color: #4ec9b0; }
+        .operator { color: #d4d4d4; }
+        .builtin { color: #4fc1ff; }
+    </style>
+</head>
+<body>
+    <div class="code-container" style="position: relative;">
+        <button onclick="selectAllCode()" style="position: absolute; top: 10px; right: 10px; background: #4299e1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">全文選択</button>
+        <div id="code-content">Loading...</div>
+    </div>
+
+    <script>
+        async function loadCode() {
+            try {
+                const response = await fetch('jtc_with_ik_demo.py');
+                const text = await response.text();
+                const lines = text.split('\n');
+                
+                let html = '';
+                lines.forEach((line, index) => {
+                    const lineNumber = index + 1;
+                    const highlightedLine = highlightPython(line);
+                    
+                    html += `<div class="code-line-wrapper"><span class="line-numbers">${lineNumber}</span><span class="code-line">${highlightedLine}</span></div>`;
+                });
+                
+                document.getElementById('code-content').innerHTML = html;
+            } catch (error) {
+                document.getElementById('code-content').innerHTML = 'Error loading file: ' + error.message;
+            }
+        }
+        
+        function highlightPython(line) {
+            // HTMLエスケープ
+            let result = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // コメント（最優先）
+            if (result.includes('#')) {
+                result = result.replace(/(#.*$)/g, '<span class="comment">$1</span>');
+                return result; // コメント行はこれ以上処理しない
+            }
+            
+            // 文字列（ダブルクォート）
+            result = result.replace(/(".*?")/g, '<span class="string">$1</span>');
+            
+            // 文字列（シングルクォート）
+            result = result.replace(/('.*?')/g, '<span class="string">$1</span>');
+            
+            // docstring（トリプルクォート）
+            result = result.replace(/(""".*?""")/g, '<span class="string">$1</span>');
+            result = result.replace(/('''.*?''')/g, '<span class="string">$1</span>');
+            
+            // キーワード
+            const keywords = ['def', 'class', 'import', 'from', 'if', 'else', 'elif', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'return', 'yield', 'break', 'continue', 'pass', 'lambda', 'and', 'or', 'not', 'in', 'is', 'None', 'True', 'False'];
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+                result = result.replace(regex, `<span class="keyword">${keyword}</span>`);
+            });
+            
+            // 数値
+            result = result.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+            
+            return result;
+        }
+
+        function selectAllCode() {
+            const codeContent = document.getElementById('code-content');
+            const range = document.createRange();
+            range.selectNodeContents(codeContent);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+        
+        loadCode();
+    </script>
+</body>
+</html>
