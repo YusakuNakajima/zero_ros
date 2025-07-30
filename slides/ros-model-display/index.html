@@ -644,7 +644,7 @@ catkin_create_pkg ros_study rospy
         // 外部ファイル読み込み関数
         async function loadExternalCode() {
             try {
-                const response = await fetch('urdf_example.xml');
+                const response = await fetch('code/ur5e_robot.urdf');
                 const urdfText = await response.text();
 
                 // HTMLエスケープ
@@ -654,7 +654,7 @@ catkin_create_pkg ros_study rospy
                     .replace(/>/g, '&gt;');
 
                 // XACROコードの読み込み
-                const xacroResponse = await fetch('xacro_example.xml');
+                const xacroResponse = await fetch('code/ur5e_robot.xacro');
                 const xacroText = await xacroResponse.text();
                 const escapedXacro = xacroText
                     .replace(/&/g, '&amp;')
@@ -662,7 +662,7 @@ catkin_create_pkg ros_study rospy
                     .replace(/>/g, '&gt;');
 
                 // LAUNCHコードの読み込み
-                const launchResponse = await fetch('launch_example.xml');
+                const launchResponse = await fetch('code/launch_example.launch');
                 const launchText = await launchResponse.text();
                 const escapedLaunch = launchText
                     .replace(/&/g, '&amp;')
