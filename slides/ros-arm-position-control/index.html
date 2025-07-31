@@ -308,8 +308,8 @@
                                 <li><strong>位置：</strong>XYZで表す</li>
                                 <li><strong>向き：</strong>オイラー角 or クオータニオン</li>
                                 <li>ROSでは内部計算でクオータニオンを使う</li>
-                                
-                                
+
+
                             </ul>
                         </div>
                     </div>
@@ -351,7 +351,7 @@
                 <section>
                     <h2>クォータニオンによる表現</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
-                          <div style="flex: 1;">
+                        <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
                                 <a href="interactive_app/euler_vs_quat.html" target="_blank"
                                     style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
@@ -359,7 +359,7 @@
                             <iframe src="interactive_app/euler_vs_quat.html" width="100%" height="400"
                                 frameborder="0"></iframe>
                         </div>
-                      <div style="flex: 1;">
+                        <div style="flex: 1;">
                             <ul style="font-size: 0.9em;">
                                 <li><strong>利点</strong>
                                     <ul>
@@ -652,45 +652,42 @@
                 <!-- MoveIt2で使えるIKソルバー (縦スライド) -->
                 <section>
                     <h2>MoveItのIKソルバー</h2>
-                    <p>MoveItでモーション生成をせずに、IKソルバーだけ使うことも可能</p>
-                    <div style="margin-bottom: 1.5em;">
-                        <h3>数値解ソルバー</h3>
-                        <ul style="font-size: 0.8em;">
-                            <li><strong><a
-                                        href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
-                                        target="_blank"
-                                        style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> -
-                                ROS1と共通ソルバーを使いたい場合にオススメ<br>
-                                ニュートン法とSQP(逐次二次計画法)のハイブリッドで収束</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3>解析解ソルバー</h3>
-                        <ul style="font-size: 0.8em;">
-                            <li><strong><a
-                                        href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html"
-                                        target="_blank"
-                                        style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> -
-                                高速にIKを解きたい場合(ただ数値解より解が収束しにくい)</li>
-                        </ul>
-                    </div>
+                    <p>MoveItのIKソルバー(ROS Service)だけ使用可能</p>
+                    <p>通信時間がかかるので数点のIKなら実用的</p>
+                    <ul style="font-size: 0.8em;">
+                        <li><strong><a
+                                    href="https://moveit.github.io/moveit_tutorials/doc/kinematics_configuration/kinematics_configuration_tutorial.html"
+                                    target="_blank" style="color: #4CAF50; text-decoration: underline;">KDL</a></strong>
+                            -
+                            ニュートン法の数値解ソルバー, MoveItでデフォルト</li>
+
+                        <li><strong><a
+                                    href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
+                                    target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> -
+                            数値解ソルバーでニュートン法とSQP(逐次二次計画法)のハイブリッド, KDLより収束性が良い, Universal RobotのMoveItでデフォルト</li>
+                        <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html"
+                                    target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> -
+                            解析解ソルバー, 計算は早いが解を安定して得にくい</li>
+
+                    </ul>
                 </section>
 
                 <!-- Pythonで使えるIKソルバー (縦スライド) -->
                 <section>
                     <h2>Pythonで使えるIKソルバー</h2>
-                    <p>計算速度の問題がなければPythonのIKソルバーを使っても良い</p>
-                    <div style="margin-bottom: 1.5em;">
-                        <h3>数値解ソルバー</h3>
-                        <ul style="font-size: 0.8em;">
-                            <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank"
-                                        style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong>
-                                - TRAC LABで開発された手法、よく使われる</li>
-                            <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank"
-                                        style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> -
-                                最先端の剛体アルゴリズムを実装したライブラリ</li>
-                        </ul>
-                    </div>
+                    <p>大量のIKはIk用ライブラリを直接使うのが良い</p>
+                    <p>実際に使われている手法を紹介</p>
+
+                    <ul style="font-size: 0.8em;">
+                        <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong>
+                            - MoveItでも使われている手法, 安定性と計算速度のバランスが良い</li>
+                        <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> -
+                            最先端の剛体アルゴリズムを実装したライブラリ, Franka Roboticsのライブラリでデフォルト</li>
+                    </ul>
                 </section>
 
                 <!-- 軌跡・軌道生成 (縦スライド) -->
@@ -701,7 +698,8 @@
                         <li><strong>軌跡：</strong>逆運動学で得た解, 時間情報なし</li>
                         <li><strong>軌道：</strong>時間情報を加えたもの</li>
                         <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
-                        <li>JointTrajectoryControllerでは、PositionとTimeFromStartを渡すと軌道計算と実行が可能↓</li>
+                        <li>JointTrajectoryControllerでは、少なくともPositionとTimeFromStartを渡すと軌道計算と実行が可能</li>
+                        <li>振動を抑える場合は厳密な速度, 加速度が必要だが、実用上はpositionだけでも問題ないことも多い</li>
                     </ul>
 
                 </section>
@@ -750,7 +748,6 @@
                             <ul style="font-size: 0.9em;">
                                 <li>rqt_joint_trajectory_controller_guiが便利</li>
                                 <li>JointTrajectoryControllerが正常に動いているのかをテストするときなどに使える</li>
-                                <li>「controller」の枠内の名前がjoint_trajectory_controller_nameなので、トピックやアクションで送りたい場合の確認にも使える
                                 </li>
                             </ul>
                         </div>
@@ -813,13 +810,43 @@
                         <div class="text-section">
                             <ul>
                                 <li>MoveItのIKソルバーを組み込んだデモ</li>
-                                <li>手先座標系での相対移動が可能</li>
-                                <li>Attemptsが少ないと失敗が多いことも確認できる</li>
+                                <li>関節の限界を超える場合でもIKが得られるが、ロボットの軌道が大回りになるので注意</li>
+                                <p style="font-size: 0.6em;">※避けるにはwaypoints間の関節角度に許容量を持たせる等の実装をする</p>
+
                             </ul>
                         </div>
                     </div>
                 </section>
-
+      <!-- JointTrajectoryControllerでの補間設定 (縦スライド) -->
+                <section>
+                    <h2>JointTrajectoryControllerの設定例</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <pre
+                                style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
+<code><span style="color: #718096;"># ur_joint_trajectory_controller.yaml</span>
+<span style="color: #4299e1;">pos_joint_traj_controller</span>:
+  <span style="color: #68d391;">type</span>: <span style="color: #f6e05e;">position_controllers/JointTrajectoryController</span>
+  <span style="color: #68d391;">joints</span>:
+    - <span style="color: #f6e05e;">shoulder_pan_joint</span>
+    - <span style="color: #f6e05e;">shoulder_lift_joint</span>
+    - <span style="color: #f6e05e;">elbow_joint</span>
+    - <span style="color: #f6e05e;">wrist_1_joint</span>
+    - <span style="color: #f6e05e;">wrist_2_joint</span>
+    - <span style="color: #f6e05e;">wrist_3_joint</span>
+  <span style="color: #68d391;">constraints</span>:
+    <span style="color: #68d391;">goal_time</span>: <span style="color: #fbb6ce;">0.6</span>
+    <span style="color: #68d391;">stopped_velocity_tolerance</span>: <span style="color: #fbb6ce;">0.05</span>
+    <span style="color: #68d391;">shoulder_pan_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+    <span style="color: #68d391;">shoulder_lift_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+    <span style="color: #68d391;">elbow_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+  <span style="color: #68d391;">stop_trajectory_duration</span>: <span style="color: #fbb6ce;">0.5</span>
+  <span style="color: #68d391;">state_publish_rate</span>: <span style="color: #fbb6ce;">500</span>
+  <span style="color: #68d391;">action_monitor_rate</span>: <span style="color: #fbb6ce;">20</span></code>
+                            </pre>
+                        </div>
+                    </div>
+                </section>
             </section>
 
             <!-- JointTrajectoryControllerによるアームの速度制御 (9枚目) -->
@@ -830,24 +857,17 @@
 
                 <!-- 手先の速度制御はなぜ必要か？ (縦スライド) -->
                 <section>
-                    <h2>手先の速度制御はなぜ必要か？</h2>
+                    <h2>速度・加速度制御は必要か？</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <p>ここまで紹介した手法では速度が厳密ではない</p>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>課題</strong>
-                                    <ul>
-                                        <li>手先の速度が一定でない</li>
-                                        <li>動作に振動が出やすい</li>
-                                    </ul>
-                                </li>
-                                <li><strong>解決方法</strong>
-                                    <ul>
-                                        <li>ヤコビアンによる速度計算</li>
-                                        <li>速度も考慮したJointTrajectoryControllerの制御</li>
-                                    </ul>
-                                </li>
+                            <p>ここまで紹介した手法の課題</p>
+                            <ul>
+                                <li>急加速、急減速</li>
+                                <li>動作に振動が出やすい</li>
                             </ul>
+
+
+
                         </div>
                     </div>
                 </section>
@@ -874,107 +894,7 @@
                             </ul>
                         </div>
                     </div>
-                    <p>※教科書の時間多項式とスプラインは等価です</p>
-                    <p>2点→時間多項式, 複数点→スプラインという違いです</p>
-                </section>
-
-                <!-- 線形補間 (縦スライド) -->
-                <section>
-                    <h2>線形補間</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/linear_interpolation.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/linear_interpolation.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>特徴</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>計算</strong>：最も単純・高速</li>
-                                <li><strong>連続性</strong>：位置のみ連続（C⁰連続）</li>
-                                <li><strong>欠点</strong>：角で急激な方向変化</li>
-                            </ul>
-                            <h3>適用場面</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>高速な動作が必要な場合</li>
-                                <li>計算リソースが限られる場合</li>
-                                <li>簡単なpoint-to-point動作</li>
-                            </ul>
-                            <h3>数式</h3>
-                            <p style="font-size: 0.8em; font-family: monospace;">
-                                q(t) = q₀ + (q₁ - q₀) × t/T
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3次スプライン補間 (縦スライド) -->
-                <section>
-                    <h2>3次スプライン補間</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/cubic_spline.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/cubic_spline.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>特徴</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>連続性</strong>：位置と速度が連続（C¹連続）</li>
-                                <li><strong>計算</strong>：適度な計算コスト</li>
-                                <li><strong>制約</strong>：開始・終了速度を指定可能</li>
-                            </ul>
-                            <h3>適用場面</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>一般的なロボット動作</li>
-                                <li>滑らかさと計算コストのバランス</li>
-                                <li>多くのライブラリでデフォルト</li>
-                            </ul>
-                            <h3>数式</h3>
-                            <p style="font-size: 0.8em; font-family: monospace;">
-                                q(t) = a₃t³ + a₂t² + a₁t + a₀
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5次スプライン補間 (縦スライド) -->
-                <section>
-                    <h2>5次スプライン補間</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/quintic_spline.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/quintic_spline.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>特徴</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>連続性</strong>：位置・速度・加速度連続（C²連続）</li>
-                                <li><strong>滑らかさ</strong>：最も滑らかな軌道</li>
-                                <li><strong>制約</strong>：開始・終了の速度・加速度指定可能</li>
-                            </ul>
-                            <h3>適用場面</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li>高精度作業（組み立て・研磨）</li>
-                                <li>振動抑制が重要な場合</li>
-                                <li>人間に近い自然な動作</li>
-                            </ul>
-                            <h3>数式</h3>
-                            <p style="font-size: 0.8em; font-family: monospace;">
-                                q(t) = a₅t⁵ + a₄t⁴ + a₃t³ + a₂t² + a₁t + a₀
-                            </p>
-                        </div>
-                    </div>
+                    <p style="font-size: 0.8em;">※教科書で出てくる時間多項式とスプラインは等価です<br>2点→時間多項式, 複数点→スプラインという違いです</p>
                 </section>
 
                 <!-- 補間方法の比較まとめ (縦スライド) -->
@@ -1053,12 +973,41 @@
                                 <td>C²</td>
                                 <td>高精度作業・振動抑制</td>
                             </tr>
+                            <tr>
+                                <td><strong>台形補間</strong></td>
+                                <td class="good">低</td>
+                                <td class="medium">中</td>
+                                <td>C⁰</td>
+                                <td>高速動作・効率重視</td>
+                            </tr>
                         </tbody>
                     </table>
                     <div style="margin-top: 1em; font-size: 0.9em;">
-                        <p><strong>推奨</strong>：用途に応じて選択。迷った場合は3次スプラインが無難</p>
+                        <p>迷った場合は3次スプラインが無難</p>
                     </div>
                 </section>
+
+                <section>
+                    <h2>関節速度計算はなくても良い</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/5D_spline_with_ZEROvolocity_ZEROaccceralation.png" alt="速度0加速度0でのスプライン"
+                                style="width: 100%; margin-bottom: 5px;">
+                            <p style="font-size: 0.8em; margin-top: 0; margin-bottom: 10px;">waypointsが少ないと波打つ</p>
+                            <img src="media/5D_spline_with_ZEROvolocity_ZEROaccceralation_over_waypoints.png"
+                                alt="点を増やした場合" style="width: 100%; margin-bottom: 5px;">
+                            <p style="font-size: 0.8em; margin-top: 0;">waypointsを増やす滑らか</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>2点であれば「速度 and/or 加速度を0」</li>
+                                <li>3点以上であっても十分細かいwaypointsをとれば「速度 and/or 加速度を0」でも割となめらか</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8em; margin-top: 0; margin-bottom: 10px;">それでも厳密な速度計算が必要という方は↓</p>
+                </section>
+
 
 
                 <!-- ヤコビアン関節速度と手先速度の関係 (縦スライド) -->
@@ -1119,52 +1068,8 @@
                     </div>
                 </section>
 
-                <!-- JointTrajectoryControllerのvelocityとaccelerationに追加 (縦スライド) -->
-                <section>
-                    <h2>JointTrajectoryControllerにvelocityとaccelerationを追加</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>positions</strong>：関節角度</li>
-                                <li><strong>velocities</strong>：関節角速度</li>
-                                <li><strong>accelerations</strong>：関節角加速度</li>
-                                <li><strong>time_from_start</strong>：時間</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
 
-
-                <!-- JointTrajectoryControllerでの補間設定 (縦スライド) -->
-                <section>
-                    <h2>JointTrajectoryControllerでの補間設定例</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <pre
-                                style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
-<code><span style="color: #718096;"># ur_joint_trajectory_controller.yaml</span>
-<span style="color: #4299e1;">pos_joint_traj_controller</span>:
-  <span style="color: #68d391;">type</span>: <span style="color: #f6e05e;">position_controllers/JointTrajectoryController</span>
-  <span style="color: #68d391;">joints</span>:
-    - <span style="color: #f6e05e;">shoulder_pan_joint</span>
-    - <span style="color: #f6e05e;">shoulder_lift_joint</span>
-    - <span style="color: #f6e05e;">elbow_joint</span>
-    - <span style="color: #f6e05e;">wrist_1_joint</span>
-    - <span style="color: #f6e05e;">wrist_2_joint</span>
-    - <span style="color: #f6e05e;">wrist_3_joint</span>
-  <span style="color: #68d391;">constraints</span>:
-    <span style="color: #68d391;">goal_time</span>: <span style="color: #fbb6ce;">0.6</span>
-    <span style="color: #68d391;">stopped_velocity_tolerance</span>: <span style="color: #fbb6ce;">0.05</span>
-    <span style="color: #68d391;">shoulder_pan_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
-    <span style="color: #68d391;">shoulder_lift_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
-    <span style="color: #68d391;">elbow_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
-  <span style="color: #68d391;">stop_trajectory_duration</span>: <span style="color: #fbb6ce;">0.5</span>
-  <span style="color: #68d391;">state_publish_rate</span>: <span style="color: #fbb6ce;">500</span>
-  <span style="color: #68d391;">action_monitor_rate</span>: <span style="color: #fbb6ce;">20</span></code>
-                            </pre>
-                        </div>
-                    </div>
-                </section>
+          
 
             </section>
 

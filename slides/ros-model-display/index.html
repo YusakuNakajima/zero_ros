@@ -226,6 +226,60 @@ catkin_create_pkg ros_study rospy
                     </div>
                 </section>
 
+                         <!-- XACRO -->
+                <section>
+                    <h2>XACRO（XML Macros for Robots）</h2>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code class="language-xml external-xacro-code" data-trim>
+<!-- XACROコードが外部ファイルから読み込まれます -->
+</code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
+                                <li>リンク→ジョイントの繰り返し構造をマクロで書けるので便利</li>
+                                <li>XACRO読み込み時に変数を渡す</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- エンドエフェクタ追加 -->
+                                 <!-- XACRO -->
+                <section>
+                    <h2>エンドエフェクタを追加したい</h2>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code class="language-xml external-xacro-code" data-trim>
+<!-- XACROコードが外部ファイルから読み込まれます -->
+</code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                          <li>XACROのinclude機能が便利</li>
+                                <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよい</li>
+                                <li>pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- ROS-industrial標準リンク名 -->
+                <section>
+                    <h2>標準リンク名</h2>
+                    <p>ROSでよく使うリンク(慣習であって絶対ではない)</p>
+                    <ul>
+                                <li><strong>base_link</strong>: ROSのベース座標系</li>
+                                <li><strong>world</strong>: Gazebo等のシミュレータのベース座標系</li>
+                    </ul>
+                    <p>ROS-industrialの標準リンク(産業用ロボットとの互換性を持たせるために決められている)</p>
+                    <ul>
+                                <li><strong>base</strong>: 産業用コントローラのベース座標系</li>
+                                <li><strong>tool0</strong>: 産業用コントローラのデフォルトツール座標系</li>
+                                <li><strong>flange</strong>: エンドエフェクタ取り付け用フレーム（REP 103準拠、x+が前方）</li>
+                            </ul>
+                </section>
+
                 <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~type(動作の種類)~</h2>
@@ -308,59 +362,7 @@ catkin_create_pkg ros_study rospy
                     </ul>
                 </section>
 
-                <!-- XACRO -->
-                <section>
-                    <h2>XACRO（XML Macros for Robots）</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-xacro-code" data-trim>
-<!-- XACROコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
-                                <li>リンク→ジョイントの繰り返し構造をマクロで書けるので便利</li>
-                                <li>XACRO読み込み時に変数を渡す</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- エンドエフェクタ追加 -->
-                                 <!-- XACRO -->
-                <section>
-                    <h2>エンドエフェクタを追加したい</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code class="language-xml external-xacro-code" data-trim>
-<!-- XACROコードが外部ファイルから読み込まれます -->
-</code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                          <li>XACROのinclude機能が便利</li>
-                                <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよい</li>
-                                <li>pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <!-- ROS-industrial標準リンク名 -->
-                <section>
-                    <h2>標準リンク名</h2>
-                    <p>ROSでよく使うリンク(慣習であって絶対ではない)</p>
-                    <ul>
-                                <li><strong>base_link</strong>: ROSのベース座標系</li>
-                                <li><strong>world</strong>: Gazebo等のシミュレータのベース座標系</li>
-                    </ul>
-                    <p>ROS-industrialの標準リンク(産業用ロボットとの互換性を持たせるために決められている)</p>
-                    <ul>
-                                <li><strong>base</strong>: 産業用コントローラのベース座標系</li>
-                                <li><strong>tool0</strong>: 産業用コントローラのデフォルトツール座標系</li>
-                                <li><strong>flange</strong>: エンドエフェクタ取り付け用フレーム（REP 103準拠、x+が前方）</li>
-                            </ul>
-                </section>
+       
 
             </section>
 
