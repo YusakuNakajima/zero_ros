@@ -266,6 +266,95 @@
                 </section>
             </section>
 
+            <section>
+                <section>
+                    <h2>環境構築</h2>
+                    <p>自力での環境構築はLinux,Docker,ROS,などの幅広い知識が(主にトラブル解決に)求められます</p>
+                    <p>まずは先人が作ったものを活用してください(僕も最初はそのように始めました)↓</p>
+                </section>
+                <section>
+                    <h2>必要な環境とソフトウェア</h2>
+                    <ul>
+                        <li>OS: Ubunut 20.04以降(22.04, 24.04もok)</li>
+                        <li>Dockerを事前にインストールしておいてください(https://docs.docker.com/engine/install/ubuntu/)</li>
+
+                    </ul>
+                    </ul>
+
+                </section>
+                <section>
+                    <h2>WSLを使いたい方への注意</h2>
+                    <ul>
+                        <li>Windows上のWSLでの構築も可能ですがメモリ消費が多くトラブルが多いので推奨しません</li>
+                        <li>どうしても使う場合はwin11以降,デスクトップPC,CPUはi7相当,メモリは32GBを推奨します</li>
+                        <li>それ未満の性能だとビルド中にフリーズするなどのトラブルがある可能性があります</li>
+                        <li>DockerDesktopを事前にインストールしておいてください(https://www.docker.com/ja-jp/products/docker-desktop/)</li>
+                        <li>DockerDesktopとWSLの接続には設定→Resource→WSL integrationで使用したいWSLをONにします</li>
+                    </ul>
+
+                </section>
+                <section>
+                    <h2>パッケージのクローン</h2>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code data-trim class="bash">
+                                git clone -b develop https://github.com/quantumbeam/powder_grinding.git
+                                cd powder_grinding/env
+                        </code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>環境構築で使うリポジトリをクローンします</li>
+                                <li>今回はpowder_grindingのdevelopブランチです</li>
+                                <li>また、環境構築はenvディレクトリ内で行うので、事前に移動しておいてください</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>Dockerイメージの作成</h2>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code data-trim class="bash">
+                                export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
+                                ./BUILD-DOCKER-IMAGE.sh
+                        </code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>事前にUbuntuProのトークンの入力が必要です</li>
+                                <p style="font-size: 0.6em;">ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</p>
+                                <li>アカウント作成の後にダッシュボード(https://ubuntu.com/pro/dashboard)に表示されるトークンを環境変数(exportのコマンド)で登録しておきます
+                                </li>
+                                <li>その後、BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>Dockerコンテナの起動</h2>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code data-trim class="bash">
+ ./RUN-DOCKER-CONTAINER.sh 
+ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
+source /opt/ros/noetic/setup.bash
+ source devel/setup.bash
+                        </code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>Dockerイメージの作成が終わったらDockerコンテナを起動します(RUN-DOCKER-CONTAINER.shを実行)</li>
+                                <li>ターミナルの環境が自動的にDockerコンテナ内に移動しますので、ROSの環境のビルドをします(INITIAL_SETUP_ROS_ENVIROMENTS.shを実行)
+                                </li>
+                                <li>ROS環境をのビルド結果を反映するのが最後のコマンドになります(source /opt/ros/noetic/setup.bash source
+                                    devel/setup.bash)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+            </section>
 
             <section>
                 <section>
@@ -313,7 +402,7 @@
                         </li>
                     </ol>
                 </section>
-                
+
             </section>
 
 
