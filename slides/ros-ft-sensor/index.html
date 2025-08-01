@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>ゼロからのセンサ入門 ~フォーストルクセンサ~</title>
+    <title>ゼロからのROS入門 ~フォーストルクセンサ~</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
@@ -28,7 +28,7 @@
         <div class="slides">
             <!-- スライド1: タイトル -->
             <section>
-                <h1>ゼロからのセンサ入門 ~フォーストルクセンサ~</h1>
+                <h1>ゼロからのROS入門 ~フォーストルクセンサ~</h1>
                 <p>大阪大学 中島優作</p>
                 <br>
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
@@ -36,39 +36,20 @@
 
             <!-- スライド2: 初めにフォーストルクセンサ -->
             <section>
-                <section>
-                    <h2>初めにフォーストルクセンサ</h2>
-                    <ul>
-                        <li>6軸の力・トルクを測定するセンサ</li>
-                        <li>ロボットアームの先端やベースに取り付け</li>
-                        <li>接触力・接触位置の計測が可能</li>
-                        <li>精密な力制御を実現</li>
-                        <li>安全な人間・ロボット協働</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>本スライドでの扱い方</h2>
-                    <ul>
-                        <li>使い方は人それぞれなので詳細は触れず、例だけ紹介します</li>
-                        <li>全般で使える内容として、データの読み出し、ノイズ除去、座標変換を扱います</li>
-                        <li>実装の詳細よりも基本概念を重視</li>
-                        <li>ROSでの統合方法に焦点</li>
-                    </ul>
-                </section>
+                <h2>本スライドの担当範囲</h2>
+                <ul>
+                    <li>使い方は人それぞれなので詳細は触れず、例だけ紹介します</li>
+                    <li>全般で使える内容として、データの読み出し、ノイズ除去、座標変換を扱います</li>
+                    <li>実装の詳細よりも基本概念を重視</li>
+                    <li>ROSでの統合方法に焦点</li>
+                </ul>
             </section>
 
             <!-- スライド3: フォーストルクセンサの用途 -->
             <section>
                 <section>
                     <h2>フォーストルクセンサの用途</h2>
-                    <ul>
-                        <li>フォース制御・コンプライアンス制御</li>
-                        <li>力の均一分散・センシング</li>
-                        <li>ロボット学習での情報付加</li>
-                        <li>安全監視・衝突検出</li>
-                        <li>組み立て作業・挿入タスク</li>
-                    </ul>
+                    <p>均一な力をかける制御や接触時のデータ収集に使います↓</p>
                 </section>
 
                 <section>
@@ -107,15 +88,66 @@
 
             <!-- スライド4: フォーストルクセンサの読み出し -->
             <section>
-                <h2>フォーストルクセンサの読み出し</h2>
-                <ul>
-                    <li>ここでは、日本国内でよく使われるleptrinoのセンサを扱います</li>
-                    <li>USB/Ethernet接続対応</li>
-                    <li>ROS標準のgeometry_msgs/WrenchStamped</li>
-                    <li>リアルタイムデータ取得</li>
-                    <li>キャリブレーション機能</li>
-                    <li>高精度・低ノイズ測定</li>
-                </ul>
+                <section>
+                    <h2>leptrinoフォーストルクセンサのROSパッケージの例</h2>
+                    <ul>
+                        <li>日本国内でよく使われるleptrinoのROSでの使い方を紹介↓</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Leptrinoフォーストルクセンサとは</h2>
+                    <ul>
+                        <li>安価で性能も十分</li>
+                        <li>USB接続で使いやすい</li>
+                        <li>ROSでの統合が簡単</li>
+                        <li>日本国内で広く使用されている</li>
+                        <li>高精度な6軸力・トルク測定</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>パッケージの使い方 3 Steps</h2>
+                    <ol>
+                        <li><strong>clone</strong><br>
+                            <code>git clone https://github.com/hiveground-ros-package/leptrino_force_torque</code>
+                        </li>
+                        <li><strong>rosdep</strong><br>
+                            <code>rosdep install -i --from-paths src</code>
+                        </li>
+                        <li><strong>build</strong><br>
+                            <code>catkin build; source devel/setup.bash</code>
+                        </li>
+                    </ol>
+                    <p>これで準備完了</p>
+                </section>
+
+                <section>
+                    <h2>USBのセンサのパスの指定方法</h2>
+                    <ul>
+                        <li><strong>基本的なパス:</strong><br>
+                            <code>/dev/ttyACM*</code> または <code>/dev/ttyUSB*</code>
+                        </li>
+                        <li><strong>製品固有のパス:</strong><br>
+                            チップによっては、<code>/dev/serial/by-id</code>で確認をすると製品ごとの固有のパスも可能
+                        </li>
+                        <li>デバイスの安定した識別が可能</li>
+                        <li>複数センサ使用時に便利</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>センサーデータの確認</h2>
+                    <ul>
+                        <li><strong>センサの起動:</strong><br>
+                            <code>roslaunch leptrino_force_torque leptrino.launch</code><br>
+                            <small>※COMポートは先ほど確認したものを指定する</small>
+                        </li>
+                        <li><strong>wrench_stampedのデバッグ表示:</strong></li>
+                        <li><code>rostopic echo</code> または <code>rqt_plot</code>で確認</li>
+                        <li>リアルタイムでの力・トルクデータ監視</li>
+                    </ul>
+                </section>
             </section>
 
             <!-- スライド5: ノイズ除去 -->
