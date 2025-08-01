@@ -259,7 +259,7 @@
                 <section>
                     <h2>データの再生</h2>
                     <ul>
-                        <li><code>rosbag play my_bag.bag</code></li>
+                        <li><code>root@powder_grinding_ros:~/catkin_ws# rosbag play my_bag.bag</code></li>
                         <li>Topicの完全再現は現実的でないので注意</li>
                         <li>記録時に抜け落ちるデータ有</li>
                     </ul>
@@ -275,8 +275,8 @@
                 <section>
                     <h2>必要な環境とソフトウェア</h2>
                     <ul>
-                        <li>OS: Ubunut 20.04以降(22.04, 24.04もok)</li>
-                        <li>Dockerを事前にインストールしておいてください(https://docs.docker.com/engine/install/ubuntu/)</li>
+                        <li>OS: Ubuntu 20.04以降(22.04, 24.04もok)</li>
+                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストールしておいてください</li>
 
                     </ul>
                     </ul>
@@ -288,70 +288,49 @@
                         <li>Windows上のWSLでの構築も可能ですがメモリ消費が多くトラブルが多いので推奨しません</li>
                         <li>どうしても使う場合はwin11以降,デスクトップPC,CPUはi7相当,メモリは32GBを推奨します</li>
                         <li>それ未満の性能だとビルド中にフリーズするなどのトラブルがある可能性があります</li>
-                        <li>DockerDesktopを事前にインストールしておいてください(https://www.docker.com/ja-jp/products/docker-desktop/)</li>
+                        <li><a href="https://www.docker.com/ja-jp/products/docker-desktop/" target="_blank" style="color: #3b82f6; text-decoration: underline;">DockerDesktop</a>を事前にインストールしておいてください</li>
                         <li>DockerDesktopとWSLの接続には設定→Resource→WSL integrationで使用したいWSLをONにします</li>
                     </ul>
 
                 </section>
                 <section>
                     <h2>パッケージのクローン</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code data-trim class="bash">
-                                git clone -b develop https://github.com/quantumbeam/powder_grinding.git
-                                cd powder_grinding/env
-                        </code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>環境構築で使うリポジトリをクローンします</li>
-                                <li>今回はpowder_grindingのdevelopブランチです</li>
-                                <li>また、環境構築はenvディレクトリ内で行うので、事前に移動しておいてください</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <pre><code data-trim class="bash">
+user@user:~$ git clone -b develop https://github.com/quantumbeam/powder_grinding.git
+user@user:~$ cd powder_grinding/env
+                    </code></pre>
+                    <ul>
+                        <li>環境構築で使うリポジトリをクローンします</li>
+                        <li>今回はpowder_grindingのdevelopブランチです</li>
+                        <li>また、環境構築はenvディレクトリ内で行うので、事前に移動しておいてください</li>
+                    </ul>
                 </section>
                 <section>
                     <h2>Dockerイメージの作成</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code data-trim class="bash">
-                                export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
-                                ./BUILD-DOCKER-IMAGE.sh
-                        </code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>事前にUbuntuProのトークンの入力が必要です</li>
-                                <p style="font-size: 0.6em;">ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</p>
-                                <li>アカウント作成の後にダッシュボード(https://ubuntu.com/pro/dashboard)に表示されるトークンを環境変数(exportのコマンド)で登録しておきます
-                                </li>
-                                <li>その後、BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <pre><code data-trim class="bash">
+user@user:~/powder_grinding/env$ export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
+user@user:~/powder_grinding/env$ ./BUILD-DOCKER-IMAGE.sh
+                    </code></pre>
+                    <ul>
+                        <li>事前にUbuntuProのトークンの入力が必要です</li>
+                        <li style="font-size: 0.8em;">ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</li>
+                        <li>アカウント作成の後に<a href="https://ubuntu.com/pro/dashboard" target="_blank" style="color: #3b82f6; text-decoration: underline;">ダッシュボード</a>に表示されるトークンを環境変数(exportのコマンド)で登録しておきます</li>
+                        <li>その後、BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
+                    </ul>
                 </section>
                 <section>
-                    <h2>Dockerコンテナの起動</h2>
-                    <div class="slide-layout-code">
-                        <div class="code-section">
-                            <pre><code data-trim class="bash">
- ./RUN-DOCKER-CONTAINER.sh 
- ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
-source /opt/ros/noetic/setup.bash
- source devel/setup.bash
-                        </code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>Dockerイメージの作成が終わったらDockerコンテナを起動します(RUN-DOCKER-CONTAINER.shを実行)</li>
-                                <li>ターミナルの環境が自動的にDockerコンテナ内に移動しますので、ROSの環境のビルドをします(INITIAL_SETUP_ROS_ENVIROMENTS.shを実行)
-                                </li>
-                                <li>ROS環境をのビルド結果を反映するのが最後のコマンドになります(source /opt/ros/noetic/setup.bash source
-                                    devel/setup.bash)</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <h2>コンテナの起動とROSのビルド</h2>
+                    <pre><code data-trim class="bash">
+user@user:~/powder_grinding/env$ ./RUN-DOCKER-CONTAINER.sh
+root@powder_grinding_ros:~/catkin_ws$ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
+root@powder_grinding_ros:~/catkin_ws$ source /opt/ros/noetic/setup.bash
+root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
+                    </code></pre>
+                    <ul>
+                        <li>Dockerイメージの作成後にDockerコンテナを起動します(RUN-DOCKER-CONTAINER.sh)</li>
+                        <li>ターミナルの環境がDockerコンテナ内に移動しますので、ROSの環境のビルドをします(INITIAL_SETUP_ROS_ENVIROMENTS.sh)</li>
+                        <li>ROS環境のビルド結果を反映します(source /opt/ros/noetic/setup.bash, source devel/setup.bash)</li>
+                    </ul>
                 </section>
             </section>
             </section>
@@ -383,22 +362,22 @@ source /opt/ros/noetic/setup.bash
                     <ul>
                         <li>ROSビルド済みパッケージ（安定版）</li>
                         <li>コマンド1つで簡単インストール</li>
-                        <li><code>sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code></li>
+                        <li><code>root@powder_grinding_ros:~/catkin_ws# sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code></li>
                     </ul>
-                    <p><small>バージョン確認: <code>apt-cache policy ros-$ROS_DISTRO-realsense2-camera</code></small></p>
+                    <p><small>バージョン確認: <code>root@powder_grinding_ros:~/catkin_ws# apt-cache policy ros-$ROS_DISTRO-realsense2-camera</code></small></p>
                 </section>
                 <section>
                     <h2>公開パッケージの使い方(ソースビルド)</h2>
                     <p><strong>最新版使用時の手順</strong></p>
                     <ol>
                         <li><strong>Clone:</strong><br>
-                            <code>git clone https://github.com/IntelRealSense/realsense-ros.git</code>
+                            <code>root@powder_grinding_ros:~/catkin_ws# git clone https://github.com/IntelRealSense/realsense-ros.git</code>
                         </li>
                         <li><strong>依存関係:</strong><br>
-                            <code>rosdep install -i --from-paths src</code>
+                            <code>root@powder_grinding_ros:~/catkin_ws# rosdep install -i --from-paths src</code>
                         </li>
                         <li><strong>ビルド:</strong><br>
-                            <code>catkin build; source devel/setup.bash</code>
+                            <code>root@powder_grinding_ros:~/catkin_ws# catkin build; source devel/setup.bash</code>
                         </li>
                     </ol>
                 </section>
