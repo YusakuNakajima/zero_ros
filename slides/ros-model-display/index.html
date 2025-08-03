@@ -74,20 +74,15 @@
             <!-- パッケージ作成例 -->
             <section>
                 <h2>勉強用のパッケージ作成</h2>
-                <div class="slide-layout-code">
-                    <div class="code-section">
+               
                         <pre><code data-trim class="bash">
 catkin_create_pkg ros_study rospy 
                         </code></pre>
-                    </div>
-                    <div class="text-section">
                         <ul>
-                            <li>URDFを作成する前に、まずは作業用のパッケージを作成しましょう</li>
-                            <li>catkin_ws/src内で作ります</li>
-                            <li>パッケージ名は任意（ここでは"ros_study"を例としています）</li>
+                            <li>catkin_ws/src内でまずは作業用のパッケージを作成(名前は任意ですがここでは"ros_study"とします)</li>
+                            <li>これから先のスクリプトは全てこの中で作成します</li>
                         </ul>
-                    </div>
-                </div>
+      
             </section>
 
             <section>
@@ -98,8 +93,11 @@ catkin_create_pkg ros_study rospy
                             frameborder="0"></iframe>
                     </div>
                     <div class="text-section">
-                        <p>launchディレクトリを作成し、ur5e.launchという名前で保存</p>
-                        <p>ビルド後に次のコマンドで実行してください"roslaunch ros_study ur5e.launch"</p>
+                          <ul>
+                            <li>launchディレクトリを作成し、ur5e.launchという名前で保存</li>
+                            <li>ビルドします(小文字の"b"で自動的にビルドが走ります)</li>
+                            <li>次のコマンドで実行してください"roslaunch ros_study ur5e.launch"</li>
+                        </ul>
                     </div>
                 </div>
             </section>
