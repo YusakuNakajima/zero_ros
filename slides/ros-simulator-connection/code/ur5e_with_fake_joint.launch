@@ -1,5 +1,5 @@
 <launch>
-    <arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/>
+    <arg name="model" default="$(find ur_description)/urdf/ur5e.xacro"/>
     <arg name="controller_config_file" default="$(find grinding_robot_bringup)/config/ur5e_controllers_fake_joint.yaml" />
     <arg name="controllers" default="joint_state_controller scaled_pos_joint_traj_controller" />
     <arg name="rviz_config" default="$(find grinding_robot_bringup)/etc/display_for_grinding.rviz" />
