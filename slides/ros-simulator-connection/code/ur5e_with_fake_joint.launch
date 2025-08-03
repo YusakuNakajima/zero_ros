@@ -24,4 +24,7 @@
     <!--Run Fake joint driver -->
     <node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" />
 
+    <!--Run rqt_joint_trajectory_controller -->
+    <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" output="screen"/>
+
 </launch>
