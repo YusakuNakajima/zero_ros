@@ -202,7 +202,13 @@
                                 </div>
                                 <div class="code-highlight-green-bg">
                                     <pre><code data-trim class="xml">&lt;!--Run Fake joint driver --&gt;
-&lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;</code></pre>
+&lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
+
+&lt;!-- GUI for joint control --&gt;
+&lt;node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" output="screen"/&gt;
+
+&lt;!-- Plot for monitoring --&gt;
+&lt;node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" output="screen"/&gt;</code></pre>
                                 </div>
                             </div>
                         </div>
