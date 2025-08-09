@@ -1,0 +1,115 @@
+# Force Control Configuration for ROS2
+# Example configuration for admittance controller and force/torque sensor
+
+# Admittance Controller Configuration
+admittance_controller:
+  ros__parameters:
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+    
+    command_interfaces:
+      - position
+      - velocity
+    
+    state_interfaces:
+      - position
+      - velocity
+    
+    # Force/Torque Sensor Configuration
+    ft_sensor:
+      name: "tcp_fts_sensor"
+      frame:
+        id: "tool0"
+        external: true
+    
+    # Admittance Parameters
+    selected_axes:
+      - true   # x
+      - true   # y  
+      - true   # z
+      - true   # rx
+      - true   # ry
+      - true   # rz
+    
+    # Mass matrix (virtual inertia)
+    mass:
+      - 10.0   # x  [kg]
+      - 10.0   # y  [kg]  
+      - 10.0   # z  [kg]
+      - 1.0    # rx [kg*m^2]
+      - 1.0    # ry [kg*m^2]
+      - 1.0    # rz [kg*m^2]
+    
+    # Damping matrix (virtual damping)
+    damping:
+      - 100.0  # x  [N*s/m]
+      - 100.0  # y  [N*s/m]
+      - 100.0  # z  [N*s/m] 
+      - 10.0   # rx [N*m*s/rad]
+      - 10.0   # ry [N*m*s/rad]
+      - 10.0   # rz [N*m*s/rad]
+    
+    # Stiffness matrix (virtual spring)  
+    stiffness:
+      - 500.0  # x  [N/m]
+      - 500.0  # y  [N/m]
+      - 500.0  # z  [N/m]
+      - 50.0   # rx [N*m/rad]
+      - 50.0   # ry [N*m/rad] 
+      - 50.0   # rz [N*m/rad]
+    
+    # Safety Limits
+    force_limits:
+      - 50.0   # x  [N]
+      - 50.0   # y  [N]
+      - 50.0   # z  [N]
+      - 5.0    # rx [N*m]
+      - 5.0    # ry [N*m]
+      - 5.0    # rz [N*m]
+    
+    velocity_limits:
+      - 0.1    # x  [m/s]
+      - 0.1    # y  [m/s]
+      - 0.1    # z  [m/s]
+      - 0.1    # rx [rad/s]
+      - 0.1    # ry [rad/s]
+      - 0.1    # rz [rad/s]
+
+# Force/Torque Sensor Broadcaster
+force_torque_sensor_broadcaster:
+  ros__parameters:
+    sensor_name: tcp_fts_sensor
+    state_interface_names:
+      - tcp_fts_sensor/force.x
+      - tcp_fts_sensor/force.y  
+      - tcp_fts_sensor/force.z
+      - tcp_fts_sensor/torque.x
+      - tcp_fts_sensor/torque.y
+      - tcp_fts_sensor/torque.z
+    frame_id: tool0
+    topic_name: ~/wrench
+
+# Joint Trajectory Controller (for hybrid control)
+position_trajectory_controller:
+  ros__parameters:
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    constraints:
+      stopped_velocity_tolerance: 0.01
+      goal_time: 0.0
+    state_publish_rate: 100.0

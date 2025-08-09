@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逆ヤコビアンとインバースキネマティクスの可視化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+        .matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            border-left: 2px solid #6b7280;
+            border-right: 2px solid #6b7280;
+            padding: 10px;
+            border-radius: 8px;
+            width: 170px;
+            justify-items: center;
+        }
+        .matrix-cell {
+            background-color: #374151;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        .vector {
+            display: grid;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 8px;
+            border-left: 2px solid #6b7280;
+            border-right: 2px solid #6b7280;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100px;
+        }
+        .vector-cell {
+            background-color: #374151;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col lg:flex-row h-screen overflow-hidden">
+
+    <!-- コントロールパネル -->
+    <div class="w-full lg:w-1/3 p-6 bg-gray-800 shadow-lg overflow-y-auto">
+        <h1 class="text-2xl font-bold mb-2 text-cyan-400">逆ヤコビアンとIK可視化</h1>
+        <p class="text-sm text-gray-400 mb-6">
+            ヤコビアンベースIK（速度ベースIK）のデモです。3Dビュー内をクリックすると、その位置を目標点としてインバースキネマティクスが作動します。
+        </p>
+
+        <div class="space-y-6">
+            <!-- IK制御 -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                 <h2 class="text-lg font-semibold mb-3 text-gray-200">IK制御</h2>
+                 <p class="text-sm text-gray-400 mb-2">目標座標 (クリックで設定)</p>
+                 <p class="text-center font-mono text-red-400 text-lg">
+                    (<span id="target_x">---</span>, <span id="target_y">---</span>)
+                 </p>
+            </div>
+
+            <!-- 関節の角度制御 -->
+            <div>
+                <h2 class="text-lg font-semibold mb-3 text-gray-200">関節角度 (θ)</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="theta1" class="block text-sm font-medium text-gray-300">関節1 (θ1): <span id="theta1_val">0</span>°</label>
+                        <input type="range" id="theta1" min="-180" max="180" value="30" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="theta2" class="block text-sm font-medium text-gray-300">関節2 (θ2): <span id="theta2_val">0</span>°</label>
+                        <input type="range" id="theta2" min="-180" max="180" value="45" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+                <button id="reset-posture" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    姿勢をリセット
+                </button>
+            </div>
+
+            <!-- データ表示 -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-4 text-gray-200">計算結果 (dθ = J⁻¹(θ) v)</h2>
+                <div class="flex items-center justify-around space-x-2 text-center">
+                    <!-- 関節角速度ベクトル -->
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">関節速度<br>[dθ1, dθ2]</p>
+                        <div class="vector">
+                            <div id="d_theta1_vec" class="vector-cell bg-cyan-800">0.00</div>
+                            <div id="d_theta2_vec" class="vector-cell bg-cyan-800">0.00</div>
+                        </div>
+                    </div>
+                    <div class="text-2xl text-gray-500">=</div>
+                    <!-- 逆ヤコビアン -->
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">逆ヤコビアン J⁻¹(θ)</p>
+                        <div class="matrix">
+                            <div id="j_inv_11" class="matrix-cell">0.00</div>
+                            <div id="j_inv_12" class="matrix-cell">0.00</div>
+                            <div id="j_inv_21" class="matrix-cell">0.00</div>
+                            <div id="j_inv_22" class="matrix-cell">0.00</div>
+                        </div>
+                    </div>
+                    <div class="text-2xl text-gray-500">×</div>
+                    <!-- 手先速度ベクトル -->
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">手先速度<br>[vx, vy]</p>
+                        <div class="vector">
+                            <div id="vx_vec" class="vector-cell">0.00</div>
+                            <div id="vy_vec" class="vector-cell">0.00</div>
+                        </div>
+                    </div>
+                </div>
+                 <div id="singularity-warning" class="mt-4 text-center text-yellow-400 font-bold h-6"></div>
+            </div>
+
+             <!-- ヤコビアンと特異点指標 -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-2 text-gray-200">ヤコビアン J(θ) と 特異点指標</h2>
+                 <div class="flex items-center justify-center space-x-4 text-center">
+                     <div>
+                        <p class="text-sm text-gray-400 mb-2">ヤコビアン J(θ)</p>
+                        <div class="matrix">
+                            <div id="j11" class="matrix-cell">0.00</div>
+                            <div id="j12" class="matrix-cell">0.00</div>
+                            <div id="j21" class="matrix-cell">0.00</div>
+                            <div id="j22" class="matrix-cell">0.00</div>
+                        </div>
+                     </div>
+                    <div>
+                        <p class="text-sm text-gray-400 mb-2">行列式 det(J)</p>
+                        <div id="det_j" class="p-3 bg-gray-700 rounded-md font-mono">0.00</div>
+                    </div>
+                 </div>
+                 <p class="text-xs text-gray-500 text-center mt-2">※このデモでは |det(J)| が5000未満で「特異点に近い」、100未満で「特異点」と判定されます。</p>
+            </div>
+
+            <!-- ★追加: 関節速度プロット -->
+            <div class="bg-gray-900 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-2 text-gray-200">関節速度の履歴プロット</h2>
+                <canvas id="velocityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D表示エリア -->
+    <div id="canvas-container" class="w-full lg:w-2/3 h-full bg-black cursor-crosshair"></div>
+
+    <script type="module">
+        // --- Three.jsの初期設定 ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(
+            container.clientWidth / -2, container.clientWidth / 2,
+            container.clientHeight / 2, container.clientHeight / -2,
+            1, 1000
+        );
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        // --- DOM要素の取得 ---
+        const theta1Slider = document.getElementById('theta1');
+        const theta2Slider = document.getElementById('theta2');
+        const theta1Val = document.getElementById('theta1_val');
+        const theta2Val = document.getElementById('theta2_val');
+        
+        const targetXVal = document.getElementById('target_x');
+        const targetYVal = document.getElementById('target_y');
+
+        const j11 = document.getElementById('j11');
+        const j12 = document.getElementById('j12');
+        const j21 = document.getElementById('j21');
+        const j22 = document.getElementById('j22');
+        const detJVal = document.getElementById('det_j');
+
+        const j_inv_11 = document.getElementById('j_inv_11');
+        const j_inv_12 = document.getElementById('j_inv_12');
+        const j_inv_21 = document.getElementById('j_inv_21');
+        const j_inv_22 = document.getElementById('j_inv_22');
+
+        const vxVec = document.getElementById('vx_vec');
+        const vyVec = document.getElementById('vy_vec');
+        const dTheta1Vec = document.getElementById('d_theta1_vec');
+        const dTheta2Vec = document.getElementById('d_theta2_vec');
+        
+        const singularityWarning = document.getElementById('singularity-warning');
+        const resetPostureBtn = document.getElementById('reset-posture');
+
+        // --- 定数と変数 ---
+        const l1 = 100;
+        const l2 = 80;
+        const IK_GAIN = 0.5;
+        const IK_TOLERANCE = 1;
+        const SINGULARITY_THRESHOLD_STOP = 100;
+        const SINGULARITY_THRESHOLD_WARN = 5000;
+
+        let armGroup, targetMarker;
+        let targetPosition = new THREE.Vector3();
+        let isIkActive = false;
+
+        const clock = new THREE.Clock();
+        const logicUpdateRate = 10; 
+        const logicUpdateInterval = 1 / logicUpdateRate;
+        let timeSinceLastUpdate = 0;
+
+        // --- ★追加: プロット用の変数 ---
+        let velocityChart;
+        let dTheta1History = [];
+        let dTheta2History = [];
+        const MAX_HISTORY_LENGTH = 100;
+
+        // --- 初期化処理 ---
+        function init() {
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            camera.position.z = 500;
+            
+            const gridHelper = new THREE.GridHelper(1000, 20, 0x444444, 0x444444);
+            gridHelper.rotation.x = Math.PI / 2;
+            scene.add(gridHelper);
+            
+            const axesHelper = new THREE.AxesHelper(50);
+            scene.add(axesHelper);
+
+            createArm();
+            
+            const targetGeom = new THREE.SphereGeometry(5, 16, 16);
+            const targetMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.8 });
+            targetMarker = new THREE.Mesh(targetGeom, targetMat);
+            targetMarker.visible = false;
+            scene.add(targetMarker);
+
+            initChart(); // ★追加: チャートの初期化
+
+            // イベントリスナーの設定
+            theta1Slider.addEventListener('input', () => { isIkActive = false; clearPlotData(); });
+            theta2Slider.addEventListener('input', () => { isIkActive = false; clearPlotData(); });
+            container.addEventListener('mousedown', onCanvasMouseDown, false);
+            
+            resetPostureBtn.addEventListener('click', () => {
+                isIkActive = false;
+                theta1Slider.value = 30;
+                theta2Slider.value = 45;
+                clearPlotData();
+            });
+
+            window.addEventListener('resize', onWindowResize, false);
+
+            animate();
+        }
+
+        // --- ★追加: チャートの初期化 ---
+        function initChart() {
+            const ctx = document.getElementById('velocityChart').getContext('2d');
+            velocityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'dθ1 (関節1速度)',
+                        data: dTheta1History,
+                        borderColor: '#38bdf8', // light blue
+                        tension: 0.1
+                    }, {
+                        label: 'dθ2 (関節2速度)',
+                        data: dTheta2History,
+                        borderColor: '#fb923c', // orange
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    animation: { duration: 0 },
+                    scales: {
+                        y: {
+                            title: { display: true, text: '関節速度 (rad/step)', color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            title: { display: true, text: 'ステップ', color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+        
+        // --- ★追加: プロットデータのリセット ---
+        function clearPlotData() {
+            dTheta1History.length = 0;
+            dTheta2History.length = 0;
+            if (velocityChart) {
+                velocityChart.data.labels.length = 0;
+                velocityChart.update();
+            }
+        }
+
+        // --- アームのジオメトリ作成 ---
+        function createArm() {
+            armGroup = new THREE.Group();
+            const link1Geom = new THREE.BoxGeometry(l1, 10, 10);
+            const link1Mat = new THREE.MeshBasicMaterial({ color: 0x00aaff });
+            const link1Mesh = new THREE.Mesh(link1Geom, link1Mat);
+            link1Mesh.position.x = l1 / 2;
+            const link2Geom = new THREE.BoxGeometry(l2, 8, 8);
+            const link2Mat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const link2Mesh = new THREE.Mesh(link2Geom, link2Mat);
+            link2Mesh.position.x = l2 / 2;
+            const joint1Geom = new THREE.CircleGeometry(8, 32);
+            const joint1Mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const joint1Mesh = new THREE.Mesh(joint1Geom, joint1Mat);
+            const joint2Geom = new THREE.CircleGeometry(6, 32);
+            const joint2Mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const joint2Mesh = new THREE.Mesh(joint2Geom, joint2Mat);
+            const link2Group = new THREE.Group();
+            link2Group.position.x = l1;
+            link2Group.add(link2Mesh);
+            link2Group.add(joint2Mesh);
+            armGroup.add(joint1Mesh);
+            armGroup.add(link1Mesh);
+            armGroup.add(link2Group);
+            scene.add(armGroup);
+        }
+
+        // --- IK目標点の設定 ---
+        function onCanvasMouseDown(event) {
+            const rect = container.getBoundingClientRect();
+            const mouse = new THREE.Vector2();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+            const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+            vector.unproject(camera);
+            
+            targetPosition.set(vector.x, vector.y, 0);
+            targetMarker.position.copy(targetPosition);
+            targetMarker.visible = true;
+            
+            targetXVal.textContent = targetPosition.x.toFixed(1);
+            targetYVal.textContent = targetPosition.y.toFixed(1);
+
+            clearPlotData(); // ★追加: プロットをリセット
+            isIkActive = true;
+        }
+
+        // --- IKロジックの更新 ---
+        function updateArmIK() {
+            if (!isIkActive) return;
+
+            let t1_deg = parseFloat(theta1Slider.value);
+            let t2_deg = parseFloat(theta2Slider.value);
+            
+            const t1_rad = THREE.MathUtils.degToRad(t1_deg);
+            const t2_rad = THREE.MathUtils.degToRad(t2_deg);
+
+            const currentX = l1 * Math.cos(t1_rad) + l2 * Math.cos(t1_rad + t2_rad);
+            const currentY = l1 * Math.sin(t1_rad) + l2 * Math.sin(t1_rad + t2_rad);
+            
+            const errorX = targetPosition.x - currentX;
+            const errorY = targetPosition.y - currentY;
+            const distance = Math.sqrt(errorX * errorX + errorY * errorY);
+
+            if (distance < IK_TOLERANCE) {
+                isIkActive = false;
+                return;
+            }
+
+            const vx = errorX * IK_GAIN;
+            const vy = errorY * IK_GAIN;
+
+            const s1 = Math.sin(t1_rad), c1 = Math.cos(t1_rad);
+            const s12 = Math.sin(t1_rad + t2_rad), c12 = Math.cos(t1_rad + t2_rad);
+
+            const j11_val = -l1 * s1 - l2 * s12;
+            const j12_val = -l2 * s12;
+            const j21_val =  l1 * c1 + l2 * c12;
+            const j22_val =  l2 * c12;
+            const detJ = j11_val * j22_val - j12_val * j21_val;
+
+            if (Math.abs(detJ) < SINGULARITY_THRESHOLD_STOP) {
+                isIkActive = false;
+                return;
+            }
+            
+            const invDetJ = 1.0 / detJ;
+            const j_inv_11_val =  j22_val * invDetJ;
+            const j_inv_12_val = -j12_val * invDetJ;
+            const j_inv_21_val = -j21_val * invDetJ;
+            const j_inv_22_val =  j11_val * invDetJ;
+            
+            const dt1 = j_inv_11_val * vx + j_inv_12_val * vy;
+            const dt2 = j_inv_21_val * vx + j_inv_22_val * vy;
+            
+            t1_deg += THREE.MathUtils.radToDeg(dt1);
+            t2_deg += THREE.MathUtils.radToDeg(dt2);
+            theta1Slider.value = (t1_deg + 180) % 360 - 180;
+            theta2Slider.value = (t2_deg + 180) % 360 - 180;
+        }
+
+        // --- UI表示の更新 ---
+        function updateUIDisplay() {
+            const t1_deg = parseFloat(theta1Slider.value);
+            const t2_deg = parseFloat(theta2Slider.value);
+
+            theta1Val.textContent = t1_deg.toFixed(0);
+            theta2Val.textContent = t2_deg.toFixed(0);
+            
+            const t1_rad = THREE.MathUtils.degToRad(t1_deg);
+            const t2_rad = THREE.MathUtils.degToRad(t2_deg);
+            
+            const s1 = Math.sin(t1_rad), c1 = Math.cos(t1_rad);
+            const s12 = Math.sin(t1_rad + t2_rad), c12 = Math.cos(t1_rad + t2_rad);
+
+            const j11_val = -l1 * s1 - l2 * s12;
+            const j12_val = -l2 * s12;
+            const j21_val =  l1 * c1 + l2 * c12;
+            const j22_val =  l2 * c12;
+            
+            j11.textContent = j11_val.toFixed(2);
+            j12.textContent = j12_val.toFixed(2);
+            j21.textContent = j21_val.toFixed(2);
+            j22.textContent = j22_val.toFixed(2);
+
+            const detJ = j11_val * j22_val - j12_val * j21_val;
+            detJVal.textContent = detJ.toFixed(2);
+
+            let vx = 0, vy = 0;
+            if (isIkActive) {
+                const currentX = l1 * Math.cos(t1_rad) + l2 * Math.cos(t1_rad + t2_rad);
+                const currentY = l1 * Math.sin(t1_rad) + l2 * Math.sin(t1_rad + t2_rad);
+                const errorX = targetPosition.x - currentX;
+                const errorY = targetPosition.y - currentY;
+                vx = errorX * IK_GAIN;
+                vy = errorY * IK_GAIN;
+            }
+            vxVec.textContent = vx.toFixed(2);
+            vyVec.textContent = vy.toFixed(2);
+
+            let dt1_val = 0, dt2_val = 0;
+
+            if (Math.abs(detJ) < SINGULARITY_THRESHOLD_STOP) {
+                singularityWarning.textContent = "特異点！IKを停止しました。";
+                j_inv_11.textContent = "Inf"; j_inv_12.textContent = "Inf";
+                j_inv_21.textContent = "Inf"; j_inv_22.textContent = "Inf";
+                dTheta1Vec.textContent = "Inf";
+                dTheta2Vec.textContent = "Inf";
+            } else {
+                if (Math.abs(detJ) < SINGULARITY_THRESHOLD_WARN) {
+                    singularityWarning.textContent = "特異点に近いです！";
+                } else {
+                    singularityWarning.textContent = "";
+                }
+                
+                const invDetJ = 1.0 / detJ;
+                const j_inv_11_val = j22_val * invDetJ;
+                const j_inv_12_val = -j12_val * invDetJ;
+                const j_inv_21_val = -j21_val * invDetJ;
+                const j_inv_22_val = j11_val * invDetJ;
+
+                j_inv_11.textContent = j_inv_11_val.toFixed(2);
+                j_inv_12.textContent = j_inv_12_val.toFixed(2);
+                j_inv_21.textContent = j_inv_21_val.toFixed(2);
+                j_inv_22.textContent = j_inv_22_val.toFixed(2);
+
+                dt1_val = j_inv_11_val * vx + j_inv_12_val * vy;
+                dt2_val = j_inv_21_val * vx + j_inv_22_val * vy;
+                dTheta1Vec.textContent = dt1_val.toFixed(2);
+                dTheta2Vec.textContent = dt2_val.toFixed(2);
+            }
+            
+            // ★追加: プロットの更新
+            if (isIkActive) {
+                dTheta1History.push(dt1_val);
+                dTheta2History.push(dt2_val);
+                velocityChart.data.labels.push(dTheta1History.length);
+
+                if (dTheta1History.length > MAX_HISTORY_LENGTH) {
+                    dTheta1History.shift();
+                    dTheta2History.shift();
+                    velocityChart.data.labels.shift();
+                }
+                velocityChart.update();
+            }
+        }
+
+        // --- アニメーションループ ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            timeSinceLastUpdate += delta;
+
+            if (timeSinceLastUpdate > logicUpdateInterval) {
+                updateArmIK();
+                timeSinceLastUpdate -= logicUpdateInterval;
+            }
+            
+            updateUIDisplay();
+            
+            const t1 = THREE.MathUtils.degToRad(parseFloat(theta1Slider.value));
+            const t2 = THREE.MathUtils.degToRad(parseFloat(theta2Slider.value));
+            armGroup.rotation.z = t1;
+            armGroup.children[2].rotation.z = t2;
+
+            renderer.render(scene, camera);
+        }
+
+        // --- ウィンドウリサイズ処理 ---
+        function onWindowResize() {
+            camera.left = container.clientWidth / -2;
+            camera.right = container.clientWidth / 2;
+            camera.top = container.clientHeight / 2;
+            camera.bottom = container.clientHeight / -2;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // --- 実行 ---
+        init();
+
+    </script>
+</body>
+</html>

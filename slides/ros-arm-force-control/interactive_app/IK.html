@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4リンクロボット逆運動学デモ (CCD法)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            overscroll-behavior: none;
+        }
+        .info-label {
+            min-width: 130px;
+        }
+        .info-value {
+            font-weight: 600;
+            color: #3b82f6; /* text-blue-500 */
+        }
+        canvas {
+            cursor: crosshair;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden">
+
+    <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+        
+        <!-- Canvas for the robot arm -->
+        <div class="flex-grow flex flex-col items-center justify-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white mb-4 text-center">逆運動学デモ (4リンクロボット - CCD法)</h1>
+            <div class="w-full aspect-square bg-slate-800 rounded-2xl shadow-2xl border-2 border-slate-700 overflow-hidden">
+                <canvas id="robotCanvas"></canvas>
+            </div>
+             <p class="mt-4 text-sm text-slate-400 text-center">キャンバス内でマウスを動かして、アームの目標地点を指定してください。</p>
+        </div>
+
+        <!-- Controls and Info Panel -->
+        <div class="w-full lg:w-96 bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 flex flex-col gap-6">
+            <div>
+                <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-600 pb-2">コントロールパネル</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="link1" class="block text-sm font-medium text-slate-300 mb-1">リンク1: <span id="link1Value" class="font-bold text-cyan-400">100</span></label>
+                        <input type="range" id="link1" min="20" max="150" value="100" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="link2" class="block text-sm font-medium text-slate-300 mb-1">リンク2: <span id="link2Value" class="font-bold text-cyan-400">90</span></label>
+                        <input type="range" id="link2" min="20" max="150" value="90" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="link3" class="block text-sm font-medium text-slate-300 mb-1">リンク3: <span id="link3Value" class="font-bold text-cyan-400">80</span></label>
+                        <input type="range" id="link3" min="20" max="150" value="80" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="link4" class="block text-sm font-medium text-slate-300 mb-1">リンク4: <span id="link4Value" class="font-bold text-cyan-400">70</span></label>
+                        <input type="range" id="link4" min="20" max="150" value="70" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-600 pb-2">情報</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex">
+                        <span class="info-label text-slate-400">目標座標 (X, Y):</span>
+                        <span id="targetCoords" class="info-value">N/A</span>
+                    </div>
+                    <div class="flex">
+                        <span class="info-label text-slate-400">手先座標 (X, Y):</span>
+                        <span id="endEffectorCoords" class="info-value">N/A</span>
+                    </div>
+                    <div class="flex">
+                        <span class="info-label text-slate-400">角度 θ1:</span>
+                        <span id="theta1" class="info-value">N/A</span>
+                    </div>
+                    <div class="flex">
+                        <span class="info-label text-slate-400">角度 θ2:</span>
+                        <span id="theta2" class="info-value">N/A</span>
+                    </div>
+                    <div class="flex">
+                        <span class="info-label text-slate-400">角度 θ3:</span>
+                        <span id="theta3" class="info-value">N/A</span>
+                    </div>
+                     <div class="flex">
+                        <span class="info-label text-slate-400">角度 θ4:</span>
+                        <span id="theta4" class="info-value">N/A</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('robotCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- UI Elements ---
+        const sliders = [
+            document.getElementById('link1'), document.getElementById('link2'),
+            document.getElementById('link3'), document.getElementById('link4')
+        ];
+        const valueSpans = [
+            document.getElementById('link1Value'), document.getElementById('link2Value'),
+            document.getElementById('link3Value'), document.getElementById('link4Value')
+        ];
+        const thetaSpans = [
+            document.getElementById('theta1'), document.getElementById('theta2'),
+            document.getElementById('theta3'), document.getElementById('theta4')
+        ];
+        const targetCoordsSpan = document.getElementById('targetCoords');
+        const endEffectorCoordsSpan = document.getElementById('endEffectorCoords');
+
+        let width, height, centerX, centerY;
+        let scale = 1.0;
+
+        // --- Robot Arm State ---
+        const numLinks = 4;
+        let linkLengths = [100, 90, 80, 70];
+        let angles = [0, 0, 0, 0];
+        let jointPositions = Array(numLinks + 1).fill(null).map(() => ({x: 0, y: 0}));
+        
+        let target = { x: null, y: null };
+        
+        // --- IK Solver Parameters ---
+        const CCD_ITERATIONS = 1; // 1回の描画あたりの計算回数
+        const ANGLE_STEP_RATE = 0.02; // 角度の更新速度をさらに小さくして、より遅くする
+        const DISTANCE_THRESHOLD = 1;
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, container.clientHeight);
+            canvas.width = size;
+            canvas.height = size;
+            width = canvas.width;
+            height = canvas.height;
+            centerX = width / 2;
+            centerY = height / 2;
+            scale = width / 600; // Adjust scale factor for the new canvas size
+            updateLinkLengths();
+        }
+
+        function updateLinkLengths() {
+            for (let i = 0; i < numLinks; i++) {
+                linkLengths[i] = Number(sliders[i].value);
+                valueSpans[i].textContent = sliders[i].value;
+            }
+        }
+
+        // --- Forward Kinematics ---
+        // Calculates the position of each joint based on the current angles.
+        function forwardKinematics() {
+            let currentAngle = 0;
+            let currentPos = { x: centerX, y: centerY };
+            jointPositions[0] = currentPos;
+
+            for (let i = 0; i < numLinks; i++) {
+                currentAngle += angles[i];
+                const nextPos = {
+                    x: currentPos.x + (linkLengths[i] * scale) * Math.cos(currentAngle),
+                    y: currentPos.y + (linkLengths[i] * scale) * Math.sin(currentAngle)
+                };
+                jointPositions[i + 1] = nextPos;
+                currentPos = nextPos;
+            }
+        }
+
+        // --- Inverse Kinematics using CCD (Cyclic Coordinate Descent) ---
+        function solveIK_CCD() {
+            if (target.x === null) return;
+
+            const endEffector = jointPositions[numLinks];
+            const dist = Math.hypot(endEffector.x - target.x, endEffector.y - target.y);
+
+            // If we are already close enough, no need to iterate.
+            if (dist < DISTANCE_THRESHOLD) return;
+
+            // Iterate from the joint closest to the end-effector down to the base.
+            for (let i = numLinks - 1; i >= 0; i--) {
+                const currentJointPos = jointPositions[i];
+                const endEffectorPos = jointPositions[numLinks];
+
+                // Vector from current joint to the end-effector
+                const vec_to_end = { x: endEffectorPos.x - currentJointPos.x, y: endEffectorPos.y - currentJointPos.y };
+                // Vector from current joint to the target
+                const vec_to_target = { x: target.x - currentJointPos.x, y: target.y - currentJointPos.y };
+
+                // Calculate the angle between the two vectors
+                const angle_to_end = Math.atan2(vec_to_end.y, vec_to_end.x);
+                const angle_to_target = Math.atan2(vec_to_target.y, vec_to_target.x);
+                
+                let angle_diff = angle_to_target - angle_to_end;
+
+                // Normalize the angle difference to prevent large jumps
+                while (angle_diff > Math.PI) angle_diff -= 2 * Math.PI;
+                while (angle_diff < -Math.PI) angle_diff += 2 * Math.PI;
+
+                // Adjust the joint's angle by a fraction of the difference to slow it down
+                angles[i] += angle_diff * ANGLE_STEP_RATE;
+                
+                // After adjusting one angle, we must recalculate all joint positions
+                // for the next joint's calculation to be correct.
+                forwardKinematics();
+            }
+        }
+
+        // --- Drawing Logic ---
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw target
+            if (target.x !== null) {
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(52, 211, 153, 0.5)';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, 2, 0, 2 * Math.PI);
+                ctx.fillStyle = '#10b981';
+                ctx.fill();
+            }
+
+            // Draw arm
+            ctx.beginPath();
+            ctx.moveTo(jointPositions[0].x, jointPositions[0].y);
+            for (let i = 1; i <= numLinks; i++) {
+                ctx.lineTo(jointPositions[i].x, jointPositions[i].y);
+            }
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            // Draw joints
+            for (let i = 0; i <= numLinks; i++) {
+                ctx.beginPath();
+                const radius = (i === 0) ? 10 : (i === numLinks) ? 8 : 6;
+                const color = (i === 0) ? '#64748b' : (i === numLinks) ? '#3b82f6' : '#cbd5e1';
+                ctx.arc(jointPositions[i].x, jointPositions[i].y, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+            
+            updateInfo();
+        }
+        
+        function updateInfo() {
+            if (target.x !== null) {
+                targetCoordsSpan.textContent = `${(target.x - centerX).toFixed(1)}, ${-(target.y - centerY).toFixed(1)}`;
+            } else {
+                targetCoordsSpan.textContent = 'N/A';
+            }
+            
+            const endEffector = jointPositions[numLinks];
+            endEffectorCoordsSpan.textContent = `${(endEffector.x - centerX).toFixed(1)}, ${-(endEffector.y - centerY).toFixed(1)}`;
+            
+            for (let i = 0; i < numLinks; i++) {
+                // Normalize angle to be within -PI to PI for display
+                let displayAngle = angles[i] % (2 * Math.PI);
+                if (displayAngle > Math.PI) displayAngle -= 2 * Math.PI;
+                if (displayAngle < -Math.PI) displayAngle += 2 * Math.PI;
+                thetaSpans[i].textContent = `${(displayAngle * 180 / Math.PI).toFixed(1)}°`;
+            }
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            // Run CCD solver for a set number of iterations per frame
+            for(let i = 0; i < CCD_ITERATIONS; i++) {
+                solveIK_CCD();
+            }
+            
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners ---
+        function handleMove(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            target.x = clientX - rect.left;
+            target.y = clientY - rect.top;
+        }
+
+        canvas.addEventListener('mousemove', handleMove);
+        canvas.addEventListener('touchmove', handleMove, { passive: false });
+        
+        sliders.forEach(slider => {
+            slider.addEventListener('input', () => {
+                updateLinkLengths();
+            });
+        });
+        
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Initial setup ---
+        resizeCanvas();
+        forwardKinematics(); // Set initial joint positions
+        animate();
+    </script>
+</body>
+</html>

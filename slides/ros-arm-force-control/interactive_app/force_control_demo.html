@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Control Interactive Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        .demo-container {
+            text-align: center;
+            padding: 40px;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            background-color: #2d2d2d;
+        }
+        .demo-title {
+            font-size: 24px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .demo-description {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .demo-placeholder {
+            background-color: #333;
+            border: 1px dashed #666;
+            padding: 60px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-title">力制御インタラクティブデモ</div>
+        <div class="demo-description">
+            このデモでは、アドミッタンス制御の動作を体験できます。<br>
+            マウスで力を加えることで、ロボットアームが柔軟に応答する様子を確認できます。
+        </div>
+        <div class="demo-placeholder">
+            <p>📱 インタラクティブな力制御シミュレーター</p>
+            <p>マウスドラッグで力を加えてみてください</p>
+            <canvas id="forceCanvas" width="400" height="300" style="border: 1px solid #666; background: #222;"></canvas>
+        </div>
+        <div class="controls">
+            <button onclick="resetDemo()">リセット</button>
+            <button onclick="toggleMode()">インピーダンス/アドミッタンス切替</button>
+            <button onclick="adjustStiffness()">剛性調整</button>
+        </div>
+    </div>
+
+    <script>
+        let isDragging = false;
+        let mode = 'admittance'; // 'impedance' or 'admittance'
+        let stiffness = 0.5;
+        
+        const canvas = document.getElementById('forceCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function drawDemo() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw virtual robot arm
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(200, 250);
+            ctx.lineTo(200, 150);
+            ctx.lineTo(300, 100);
+            ctx.stroke();
+            
+            // Draw force vector if dragging
+            if (isDragging) {
+                ctx.strokeStyle = '#ff4444';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(300, 100);
+                ctx.lineTo(350, 50);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#ff4444';
+                ctx.font = '12px Arial';
+                ctx.fillText('Force Applied', 360, 55);
+            }
+            
+            // Draw mode indicator
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '14px Arial';
+            ctx.fillText(`Mode: ${mode}`, 10, 30);
+            ctx.fillText(`Stiffness: ${(stiffness * 100).toFixed(0)}%`, 10, 50);
+        }
+        
+        function resetDemo() {
+            isDragging = false;
+            drawDemo();
+        }
+        
+        function toggleMode() {
+            mode = mode === 'admittance' ? 'impedance' : 'admittance';
+            drawDemo();
+        }
+        
+        function adjustStiffness() {
+            stiffness = (stiffness + 0.25) % 1.25;
+            if (stiffness === 0) stiffness = 0.25;
+            drawDemo();
+        }
+        
+        // Mouse event handlers
+        canvas.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            drawDemo();
+        });
+        
+        canvas.addEventListener('mouseup', function(e) {
+            isDragging = false;
+            drawDemo();
+        });
+        
+        canvas.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                drawDemo();
+            }
+        });
+        
+        // Initial draw
+        drawDemo();
+    </script>
+</body>
+</html>

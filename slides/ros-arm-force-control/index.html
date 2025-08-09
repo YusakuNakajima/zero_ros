@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ゼロからのROS入門 ~アーム力制御とインピーダンス制御~</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- タイトルスライド -->
+            <section data-background-image="media/moveit.png" data-background-opacity="0.5">
+                <h1>ゼロからのROS入門</h1>
+                <h2>力制御とインピーダンス制御</h2>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- ロボット制御の書籍 -->
+            <section>
+                <h2>力制御参考資料</h2>
+                <p>本スライド(実践)、教科書(理論)の併用がおススメ</p>
+                <p>環境構築がまだの方は→<a href="../ros-introduction/index.html#/11"
+                        style="color: #3b82f6; text-decoration: underline;">環境構築はこちら</a></p>
+                <ol>
+                    <div style="display: flex; align-items: center;">
+                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>ロボット工学の基礎から力制御理論まで、分かりやすいイラストで解説<br>インピーダンス制御の基礎理論も含まれている</p>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <img src="media/実践ロボット制御.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>力制御、インピーダンス制御の理論と実装の詳細解説<br>実際の接触タスクに必要な制御理論が充実</p>
+                    </div>
+
+                </ol>
+            </section>
+
+            <!-- 力制御の必要性 -->
+            <section>
+                <h2>なぜ力制御が必要なのか？</h2>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <h4>位置制御の限界</h4>
+                        <ul>
+                            <li>硬い物体との接触で大きな力が発生</li>
+                            <li>組み立てや研削などの接触作業が困難</li>
+                            <li>安全性に問題（人間との協調作業）</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4>力制御の利点</h4>
+                        <ul>
+                            <li>接触力を制御して安全な作業が可能</li>
+                            <li>組み立て、研削、研磨などの接触タスク</li>
+                            <li>人間との協調作業や柔軟物との作業</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- アーム制御の前提知識 -->
+            <section>
+
+
+
+                <section>
+                    <p>本スライドでは力制御の実装を扱います</p>
+
+                    <div style="margin-top: 2em;">
+                        <ul>
+                            <li><strong>実装方法1: インピーダンス制御</strong><br>
+                                仮想スプリングダンパーシステムで柔軟性を実現<br>
+                                組み立てや研削作業に適している</li>
+                            <li><strong>実装方法2: アドミッタンス制御</strong><br>
+                                力入力から位置出力を生成<br>
+                                人間との協調作業や手動誘導に便利</li>
+                        </ul>
+                        <p>ROS2ではこれらのコントローラが標準で提供されている</p>
+                    </div>
+                </section>
+
+                <!-- 力制御の種類 -->
+                <section>
+                    <h2>力制御の種類と組み合わせ</h2>
+                    <style>
+                        .custom-table {
+                            margin: auto;
+                            border-collapse: collapse;
+                            font-weight: bold;
+                            color: #ffffff;
+                        }
+
+                        .custom-table th,
+                        .custom-table td {
+                            border: 2px solid #666;
+                            padding: 16px;
+                            text-align: center;
+                            vertical-align: middle;
+                            /* 上下中央揃え */
+                        }
+
+                        .custom-table th {
+                            background-color: #444;
+                            color: #ffffff;
+                        }
+
+                        /* 各列の背景色 - 黒背景対応 */
+                        .col-control {
+                            background-color: #2d3e5a;
+                            color: #87ceeb;
+                        }
+
+                        .col-coords {
+                            background-color: #5a2d2d;
+                            color: #ffb3b3;
+                        }
+
+                        .col-action {
+                            background-color: #2d5a3d;
+                            color: #90ee90;
+                        }
+
+                        .caption {
+                            margin-top: 20px;
+                            font-size: 0.8em;
+                            text-align: left;
+                            color: #ffffff;
+                        }
+                    </style>
+
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>制御方式</th>
+                                <th>座標系</th>
+                                <th>ユーザーが実現したい制御</th>
+                            </tr>
+                        <tbody>
+                            </thead>
+                            <tr>
+                                <td class="col-control">インピーダンス制御</td>
+                                <td class="col-coords">直交座標系</td>
+                                <td class="col-action">力(コンプライアンス)</td>
+                            </tr>
+                            <tr>
+                                <td class="col-control">アドミッタンス制御</td>
+                                <td class="col-coords">直交座標系</td>
+                                <td class="col-action">位置(柔軟性)</td>
+                            </tr>
+                            <tr>
+                                <td class="col-control">ハイブリッド制御</td>
+                                <td class="col-coords">直交座標系</td>
+                                <td class="col-action">位置+力</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="caption">
+
+                        <h4>ROS2力制御コントローラ命名則</h4>
+                        <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
+                            <span style="color: #87ceeb;">admittance_controller</span>/<span
+                                style="color: #ffb3b3;">Cartesian</span><span
+                                style="color: #90ee90;">ImpedanceController</span>
+                        </p>
+
+                    </div>
+                </section>
+
+                <!-- よく使うROS2の力制御コントローラ -->
+                <section>
+                    <h2>ROS2の力制御コントローラ</h2>
+                    <div style="margin-bottom: 2em;">
+                        <p style="font-size: 0.8em; margin-bottom: 0.5em;">
+                            参考: <a
+                                href="https://control.ros.org/rolling/doc/ros2_controllers/admittance_controller/doc/userdoc.html"
+                                target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                                Admittance Controller Documentation</a>
+                        </p>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>admittance_controller/AdmittanceController</strong></li>
+                            <li><strong>force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster</strong></li>
+                            <li><strong>joint_trajectory_controller/JointTrajectoryController</strong> (組み合わせ用)</li>
+                        </ul>
+                    </div>
+                </section> <!-- よく使うROSのアームコントローラ -->
+                <section>
+                    <h2>直交空間用力制御コントローラ</h2>
+                    <div>
+                        <p style="font-size: 0.8em; margin-bottom: 0.5em;">
+                            参考: <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers"
+                                target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                                cartesian_controllers (ROS2用)</a>
+                        </p>
+                        <p style="font-size: 0.8em; color: #ccc; margin-bottom: 0.5em;">
+                            力センサーのフィードバックを使った直交空間制御
+                        </p>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>cartesian_force_controller/CartesianForceController</strong></li>
+                            <li><strong>cartesian_compliance_controller/CartesianComplianceController</strong></li>
+                            <li><strong>cartesian_motion_controller/CartesianMotionController</strong> (ハイブリッド)</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 力センサーとロボット -->
+                <section>
+                    <h2>力制御に必要なハードウェア</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_robot.png" alt="力センサー付きロボット" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>力/トルクセンサー</h3>
+                            <p>手先や関節に取り付けて接触力を検出</p>
+                            <ul>
+                                <li>6軸力センサー（手先用）</li>
+                                <li>関節トルクセンサー</li>
+                                <li>コンプライアントロボット</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>力制御対応ロボット</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/franka_robot.png" alt="コンプライアントロボット" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>コンプライアントロボット</h3>
+                            <p>力制御やインピーダンス制御が可能</p>
+                            <ul>
+                                <li>Franka Robotics (Panda)</li>
+                                <li>KUKA (iiwa)</li>
+                                <li>URシリーズ（力センサー付き）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- インピーダンス制御理論 -->
+            <section>
+                <section data-background-image="media/moveit.png" data-background-opacity="0.5">
+                    <h2>インピーダンス制御理論</h2>
+                </section>
+
+                <!-- インピーダンス制御とは -->
+                <section>
+                    <h2>インピーダンス制御とは</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_structure.png" alt="インピーダンス制御の概念" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>仮想的なスプリング・ダンパー・質量システムを実現</li>
+                                <li>目標位置と現在位置の差から力を計算</li>
+                                <li>接触力を制限して安全な作業が可能</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- インピーダンス制御の基本方程式 -->
+                <section>
+                    <h2>インピーダンス制御の数式</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <div style="margin-top: 2em; font-size: 1.2em;">
+                                <p><strong>F = Mẍ + Dẋ + K(x - x_d)</strong></p>
+                                <ul style="font-size: 0.8em; margin-top: 1em;">
+                                    <li><strong>F</strong>: 発生する力</li>
+                                    <li><strong>M</strong>: 仮想悅性</li>
+                                    <li><strong>D</strong>: 仮想粘性</li>
+                                    <li><strong>K</strong>: 仮想弾性</li>
+                                    <li><strong>x - x_d</strong>: 位置誤差</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- インピーダンスパラメータの調整 -->
+                <section>
+                    <h2>インピーダンスパラメータの調整</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_structure.png" alt="パラメータ調整" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>K(弾性)</strong>: 大きい→硬い、小さい→柔らかい</li>
+                                <li><strong>D(粘性)</strong>: 振動を抑制、安定性向上</li>
+                                <li><strong>M(慣性)</strong>: 動的な応答を決定</li>
+                                <li>作業に応じてパラメータを調整</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- アドミッタンス制御とは -->
+                <section>
+                    <h2>アドミッタンス制御とは</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/force_control_demo.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/force_control_demo.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>インピーダンス制御の逆</strong>
+                                    <ul>
+                                        <li>力入力 → 位置出力</li>
+                                        <li>人間の手動誘導に適している</li>
+                                    </ul>
+                                </li>
+                                <li><strong>メリット</strong>
+                                    <ul>
+                                        <li>直感的な操作が可能</li>
+                                        <li>安全性が高い</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- アドミッタンス制御の数式 -->
+                <section>
+                    <h2>アドミッタンス制御の数式</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <div style="margin-top: 2em; font-size: 1.2em;">
+                                <p><strong>ẍ = M⁻¹[F - Dẋ - K(x - x_d)]</strong></p>
+                                <ul style="font-size: 0.8em; margin-top: 1em;">
+                                    <li>力入力から加速度を計算</li>
+                                    <li>加速度を積分して位置を求める</li>
+                                    <li>インピーダンス制御の逆関数</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>特徴</strong>
+                                    <ul>
+                                        <li>力を入力、位置を出力</li>
+                                        <li>人間の力に応じて動く</li>
+                                        <li>柔軟な動作が可能</li>
+                                    </ul>
+                                </li>
+                                <li><strong>適用例</strong>
+                                    <ul>
+                                        <li>手動誘導(ティーチング)</li>
+                                        <li>人間との協調作業</li>
+                                        <li>組み立て作業</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- インピーダンス vs アドミッタンス比較 -->
+                <section>
+                    <h2>インピーダンス vs アドミッタンス比較</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/impedance_vs_admittance.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/impedance_vs_admittance.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>インピーダンス制御</strong>
+                                    <ul>
+                                        <li>位置誤差から力を計算</li>
+                                        <li>精密位置決めに適している</li>
+                                        <li>硬い環境で不安定になりやすい</li>
+                                    </ul>
+                                </li>
+                                <li><strong>アドミッタンス制御</strong>
+                                    <ul>
+                                        <li>力から位置を計算</li>
+                                        <li>柔軟な動作に適している</li>
+                                        <li>人間とのインタラクションに最適</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>力/トルクセンサーの種類</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>6軸力センサー</strong>
+                                    <ul>
+                                        <li>手先に取り付け</li>
+                                        <li>Fx, Fy, Fz, Tx, Ty, Tzを測定</li>
+                                    </ul>
+                                </li>
+                                <li><strong>関節トルクセンサー</strong>
+                                    <ul>
+                                        <li>各関節に内蔵</li>
+                                        <li>コンプライアントロボットに搭載</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- 力制御の実装フロー -->
+                <section>
+                    <h2>力制御実装のフロー</h2>
+                    <ul>
+                        <li><strong>ステップ1:</strong> 力/トルクセンサーのセットアップ</li>
+                        <li><strong>ステップ2:</strong> インピーダンス/アドミッタンスパラメータの設定</li>
+                        <li><strong>ステップ3:</strong> コントローラの起動と安全性確認</li>
+                        <li><strong>ステップ4:</strong> 作業実行とモニタリング</li>
+                    </ul>
+
+                </section>
+
+
+
+                <!-- ROS2での力制御実装 -->
+                <section>
+                    <h2>ROS2での力制御実装</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/moveit_algorithm.png" alt="力制御アーキテクチャ" style="width: 100%;">
+                            <p style="font-size: 0.6em;">ROS2力制御システムの構成
+                            </p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>センサーブロードキャスター</strong>
+                                    <ul>
+                                        <li>force_torque_sensor_broadcaster</li>
+                                    </ul>
+                                </li>
+                                <li><strong>力制御コントローラ</strong>
+                                    <ul>
+                                        <li>admittance_controller</li>
+                                        <li>cartesian_compliance_controller</li>
+                                    </ul>
+                                </li>
+                                <li><strong>安全機能</strong>
+                                    <ul>
+                                        <li>力制限、緊急停止</li>
+                                        <li>衝突検出</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- 力/トルクセンサーのセットアップ -->
+                <section>
+                    <h2>力/トルクセンサーのセットアップ</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                data-src="https://www.youtube.com/embed/force_sensor_setup"
+                                title="Force Sensor Setup" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <p>力センサーの取り付けとキャリブレーション</p>
+                            <ul style="font-size: 0.9em;">
+                                <li>センサーの物理的取り付け</li>
+                                <li>オフセットキャリブレーション</li>
+                                <li>ROS2でのトピック配信確認</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- アドミッタンスコントローラの設定 -->
+                <section>
+                    <h2>アドミッタンスコントローラの設定</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                src="https://www.youtube.com/embed/admittance_controller_demo"
+                                title="Admittance Controller Demo" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>設定ファイル:</strong> YAMLでパラメータを定義</li>
+                                <li><strong>センサー連携:</strong> force_torque_sensorとの結合</li>
+                                <li><strong>安全設定:</strong> 力の上限値や速度制限</li>
+                                <li><strong>チューニング:</strong> M, D, Kパラメータの調整</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ハイブリッド位置/力制御 -->
+                <section>
+                    <h2>ハイブリッド位置/力制御</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                data-src="https://www.youtube.com/embed/hybrid_position_force_control"
+                                title="Hybrid Position/Force Control" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>最適アプローチ:</strong> 方向ごとに位置/力制御を切り替え</li>
+                                <li><strong>例:</strong> Z軸方向は力制御、XY平面は位置制御</li>
+                                <li><strong>用途:</strong> 研削、研磨、組み立て作業</li>
+                                <li><strong>実装:</strong> MoveIt + Admittance Controllerの組み合わせ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- アドミッタンスコントローラの実装 -->
+                <section>
+                    <h2>アドミッタンスコントローラの実装</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/admittance_demo_display.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>ROS2 Admittance Controllerを使った功制御実装例</li>
+                                <li>力/トルクセンサーデータの取得</li>
+                                <li>インピーダンスパラメータの設定</li>
+                                <li>安全性監視と緊急停止機能</li>
+                                <li>実際の力制御アプリケーションでの実装パターン</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+         
+            <!-- シリーズ一覧に戻る -->
+            <section>
+                <h2>ありがとうございました</h2>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/reveal.js@4.3.1/dist/reveal.js"></script>
+    <script src="https://unpkg.com/reveal.js@4.3.1/plugin/zoom/zoom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+
+    <script>
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
+
+            // プラグインの有効化
+            plugins: [
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+
+        // 全文選択機能
+        function selectAllCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const range = document.createRange();
+            range.selectNodeContents(codeElement);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            // 選択成功時のフィードバック
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '選択完了!';
+            button.style.background = '#48bb78';
+
+            setTimeout(function () {
+                button.textContent = '全文選択';
+                button.style.background = '#4299e1';
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>
