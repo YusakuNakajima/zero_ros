@@ -3,152 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Force Control Interactive Demo</title>
+    <title>力制御インタラクティブデモ v2 (解説付き)</title>
+    <!-- Tailwind CSSを読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter) を読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* フォント設定 */
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
         }
-        .demo-container {
-            text-align: center;
-            padding: 40px;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
-            background-color: #2d2d2d;
+        /* カスタムスタイル */
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .demo-title {
-            font-size: 24px;
-            color: #4CAF50;
-            margin-bottom: 20px;
+        /* スライダーのスタイル */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #4a5568; /* bg-gray-700 */
+            border-radius: 9999px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
         }
-        .demo-description {
-            font-size: 16px;
-            margin-bottom: 30px;
-            line-height: 1.6;
+        input[type="range"]:hover {
+            opacity: 1;
         }
-        .demo-placeholder {
-            background-color: #333;
-            border: 1px dashed #666;
-            padding: 60px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        .controls {
-            margin-top: 20px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            border-radius: 5px;
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4299e1; /* bg-blue-500 */
             cursor: pointer;
-            font-size: 14px;
+            border-radius: 50%;
+            border: 2px solid #1a202c; /* bg-gray-900 */
         }
-        button:hover {
-            background-color: #45a049;
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4299e1; /* bg-blue-500 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #1a202c; /* bg-gray-900 */
         }
     </style>
 </head>
-<body>
-    <div class="demo-container">
-        <div class="demo-title">力制御インタラクティブデモ</div>
-        <div class="demo-description">
-            このデモでは、アドミッタンス制御の動作を体験できます。<br>
-            マウスで力を加えることで、ロボットアームが柔軟に応答する様子を確認できます。
-        </div>
-        <div class="demo-placeholder">
-            <p>📱 インタラクティブな力制御シミュレーター</p>
-            <p>マウスドラッグで力を加えてみてください</p>
-            <canvas id="forceCanvas" width="400" height="300" style="border: 1px solid #666; background: #222;"></canvas>
-        </div>
-        <div class="controls">
-            <button onclick="resetDemo()">リセット</button>
-            <button onclick="toggleMode()">インピーダンス/アドミッタンス切替</button>
-            <button onclick="adjustStiffness()">剛性調整</button>
-        </div>
+<body class="bg-gray-900 text-white antialiased">
+
+    <div class="container mx-auto p-4 lg:p-8">
+        <!-- ヘッダー -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-400">力制御インタラクティブデモ</h1>
+            <p class="text-gray-400 mt-2 max-w-2xl mx-auto">
+                ロボットの「力制御」を直感的に体験できます。マウスでアームの先端をドラッグして、その柔軟な動きを確かめてみてください。
+            </p>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- シミュレーション表示エリア -->
+            <div class="lg:col-span-2 bg-gray-800 rounded-2xl p-4 shadow-2xl">
+                <canvas id="forceCanvas" class="w-full h-full rounded-lg"></canvas>
+            </div>
+
+            <!-- コントロールパネル -->
+            <div class="glassmorphism rounded-2xl p-6 flex flex-col space-y-6 shadow-lg">
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-4">コントロールパネル</h2>
+                </div>
+
+                <!-- モード切替 -->
+                <div class="space-y-2">
+                    <label class="font-semibold text-gray-300">制御モード</label>
+                    <div class="flex bg-gray-800 rounded-lg p-1">
+                        <button id="admittanceBtn" class="flex-1 p-2 rounded-md text-sm transition-colors duration-300">アドミッタンス</button>
+                        <button id="impedanceBtn" class="flex-1 p-2 rounded-md text-sm transition-colors duration-300">インピーダンス</button>
+                    </div>
+                </div>
+
+                <!-- 解説ボックス -->
+                <div id="explanationBox" class="bg-gray-800/50 rounded-lg p-4 text-sm">
+                    <div id="admittanceExplain" class="hidden">
+                        <h3 class="font-bold text-blue-300 mb-2">アドミッタンス制御とは？</h3>
+                        <p class="text-gray-300">ロボットが外部からの<strong class="text-yellow-400">力</strong>を検知し、その力に応じて「受け流す」ように<strong class="text-green-400">動き</strong>ます。</p>
+                        <p class="text-gray-400 mt-2">例：空中にある物体を軽く押しているような感覚。</p>
+                        <div class="mt-3 text-center font-mono text-xs bg-gray-900 p-2 rounded">
+                           入力：力 (Force) &rarr; 出力：動き (Motion)
+                        </div>
+                    </div>
+                     <div id="impedanceExplain" class="hidden">
+                        <h3 class="font-bold text-blue-300 mb-2">インピーダンス制御とは？</h3>
+                        <p class="text-gray-300">ロボットが仮想的なバネのように振る舞います。<strong class="text-green-400">位置のズレ</strong>に応じて、元に戻ろうとする<strong class="text-yellow-400">力</strong>を発生させます。</p>
+                        <p class="text-gray-400 mt-2">例：バネで繋がれた物体を引っ張るような感覚。</p>
+                         <div class="mt-3 text-center font-mono text-xs bg-gray-900 p-2 rounded">
+                           入力：動き (Motion) &rarr; 出力：力 (Force)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- パラメータ調整 -->
+                <div class="space-y-4">
+                    <!-- 剛性 -->
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label for="stiffness" class="font-semibold text-gray-300">剛性 (K)</label>
+                            <span id="stiffnessValue" class="text-blue-400 font-mono"></span>
+                        </div>
+                        <input type="range" id="stiffness" min="1" max="10" value="3" class="mt-2">
+                    </div>
+                    <!-- 減衰 -->
+                    <div>
+                         <div class="flex justify-between items-center">
+                            <label for="damping" class="font-semibold text-gray-300">減衰 (D)</label>
+                            <span id="dampingValue" class="text-blue-400 font-mono"></span>
+                        </div>
+                        <input type="range" id="damping" min="1" max="20" value="10" class="mt-2">
+                    </div>
+                    <!-- 質量 -->
+                    <div>
+                         <div class="flex justify-between items-center">
+                            <label for="mass" class="font-semibold text-gray-300">仮想質量 (M)</label>
+                            <span id="massValue" class="text-blue-400 font-mono"></span>
+                        </div>
+                        <input type="range" id="mass" min="1" max="20" value="5" class="mt-2">
+                    </div>
+                </div>
+                
+                <!-- リセットボタン -->
+                <div class="pt-4">
+                    <button id="resetBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
+                        リセット
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        let isDragging = false;
-        let mode = 'admittance'; // 'impedance' or 'admittance'
-        let stiffness = 0.5;
-        
+        // --- DOM要素の取得 ---
         const canvas = document.getElementById('forceCanvas');
         const ctx = canvas.getContext('2d');
-        
-        function drawDemo() {
+        const stiffnessSlider = document.getElementById('stiffness');
+        const dampingSlider = document.getElementById('damping');
+        const massSlider = document.getElementById('mass');
+        const stiffnessValue = document.getElementById('stiffnessValue');
+        const dampingValue = document.getElementById('dampingValue');
+        const massValue = document.getElementById('massValue');
+        const admittanceBtn = document.getElementById('admittanceBtn');
+        const impedanceBtn = document.getElementById('impedanceBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const admittanceExplain = document.getElementById('admittanceExplain');
+        const impedanceExplain = document.getElementById('impedanceExplain');
+
+        // --- シミュレーション変数 ---
+        let mode = 'admittance';
+        let arm, mouse, params;
+
+        // --- 初期化関数 ---
+        function init() {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight > 400 ? parent.clientHeight : 500;
+
+            arm = {
+                links: [canvas.width / 7, canvas.width / 7, canvas.width / 7],
+                angles: [-Math.PI / 2, Math.PI / 4, Math.PI / 4],
+                joints: Array(4).fill(0).map(() => ({x:0, y:0})),
+                base: { x: canvas.width / 2, y: canvas.height / 2 },
+                vel: { x: 0, y: 0 },
+                targetPos: { x: 0, y: 0},
+                anchorPos: { x: 0, y: 0}, // インピーダンス制御用のアンカー
+                isDragging: false
+            };
+            arm.joints[0] = arm.base;
+            
+            mouse = { x: 0, y: 0, isDown: false };
+            
+            params = {
+                K: stiffnessSlider.value / 1000,
+                D: dampingSlider.value / 100,
+                M: massSlider.value / 10,
+            };
+            
+            forwardKinematics();
+            const endEffector = arm.joints[arm.joints.length - 1];
+            arm.targetPos = { ...endEffector };
+            arm.anchorPos = { ...endEffector };
+            updateUI();
+            draw();
+        }
+
+        // --- UI更新関数 ---
+        function updateUI() {
+            stiffnessValue.textContent = (params.K * 1000).toFixed(1);
+            dampingValue.textContent = (params.D * 100).toFixed(1);
+            massValue.textContent = params.M.toFixed(1);
+
+            if (mode === 'admittance') {
+                admittanceBtn.classList.add('bg-blue-500', 'text-white');
+                admittanceBtn.classList.remove('text-gray-400');
+                impedanceBtn.classList.remove('bg-blue-500', 'text-white');
+                impedanceBtn.classList.add('text-gray-400');
+                admittanceExplain.classList.remove('hidden');
+                impedanceExplain.classList.add('hidden');
+            } else {
+                impedanceBtn.classList.add('bg-blue-500', 'text-white');
+                impedanceBtn.classList.remove('text-gray-400');
+                admittanceBtn.classList.remove('bg-blue-500', 'text-white');
+                admittanceBtn.classList.add('text-gray-400');
+                impedanceExplain.classList.remove('hidden');
+                admittanceExplain.classList.add('hidden');
+            }
+        }
+
+        // --- 順運動学 (FK) ---
+        function forwardKinematics() {
+            let currentAngle = 0;
+            for (let i = 0; i < arm.links.length; i++) {
+                const parentJoint = arm.joints[i];
+                currentAngle += arm.angles[i];
+                arm.joints[i+1].x = parentJoint.x + arm.links[i] * Math.cos(currentAngle);
+                arm.joints[i+1].y = parentJoint.y + arm.links[i] * Math.sin(currentAngle);
+            }
+        }
+
+        // --- 逆運動学 (IK) - CCD法 ---
+        function inverseKinematics(targetX, targetY) {
+            const endEffector = arm.joints[arm.joints.length - 1];
+            const maxIterations = 10;
+            const tolerance = 1;
+
+            for (let iter = 0; iter < maxIterations; iter++) {
+                if (Math.hypot(endEffector.x - targetX, endEffector.y - targetY) < tolerance) break;
+                for (let i = arm.joints.length - 2; i >= 0; i--) {
+                    const currentJoint = arm.joints[i];
+                    const vecToEffector = { x: endEffector.x - currentJoint.x, y: endEffector.y - currentJoint.y };
+                    const vecToTarget = { x: targetX - currentJoint.x, y: targetY - currentJoint.y };
+                    const angleToEffector = Math.atan2(vecToEffector.y, vecToEffector.x);
+                    const angleToTarget = Math.atan2(vecToTarget.y, vecToTarget.x);
+                    let deltaAngle = angleToTarget - angleToEffector;
+                    while (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+                    while (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
+                    arm.angles[i] += deltaAngle;
+                    forwardKinematics();
+                }
+            }
+        }
+
+        // --- 物理演算 ---
+        function updatePhysics() {
+            let force = { x: 0, y: 0 };
+            const endEffector = arm.joints[arm.joints.length - 1];
+
+            if (mode === 'admittance') {
+                if (arm.isDragging) {
+                    force.x = (mouse.x - endEffector.x) * 0.1;
+                    force.y = (mouse.y - endEffector.y) * 0.1;
+                }
+            } else { // impedance
+                // 仮想的なバネの力 (F = -k * x)
+                force.x = (arm.anchorPos.x - endEffector.x) * params.K;
+                force.y = (arm.anchorPos.y - endEffector.y) * params.K;
+                // ユーザーがドラッグしている場合は、その力も加える
+                if (arm.isDragging) {
+                    force.x += (mouse.x - endEffector.x) * params.K * 2; // バネを引っ張る力を強めに
+                    force.y += (mouse.y - endEffector.y) * params.K * 2;
+                }
+            }
+            
+            const dampingForce = { x: -arm.vel.x * params.D, y: -arm.vel.y * params.D };
+            force.x += dampingForce.x;
+            force.y += dampingForce.y;
+
+            const acc = { x: force.x / params.M, y: force.y / params.M };
+
+            arm.vel.x += acc.x;
+            arm.vel.y += acc.y;
+            const nextPos = { x: endEffector.x + arm.vel.x, y: endEffector.y + arm.vel.y };
+
+            inverseKinematics(nextPos.x, nextPos.y);
+            forwardKinematics();
+        }
+
+        // --- 描画関数 ---
+        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw virtual robot arm
-            ctx.strokeStyle = '#4CAF50';
-            ctx.lineWidth = 3;
+
+            // 背景グリッド
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+            for (let i = 0; i < canvas.height; i += 40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+
+            const endEffector = arm.joints[arm.joints.length - 1];
+
+            // --- 力の可視化 ---
+            if (arm.isDragging) {
+                if (mode === 'admittance') {
+                    // 加えている力を表示
+                    ctx.beginPath();
+                    ctx.moveTo(endEffector.x, endEffector.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.strokeStyle = 'rgba(236, 72, 153, 0.8)'; // pink
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                } else { // impedance
+                    // 仮想のバネを可視化
+                    ctx.beginPath();
+                    ctx.moveTo(arm.anchorPos.x, arm.anchorPos.y);
+                    ctx.lineTo(endEffector.x, endEffector.y);
+                    ctx.setLineDash([10, 5]);
+                    ctx.strokeStyle = 'rgba(250, 204, 21, 0.7)'; // yellow
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // アンカーポイントを表示
+                    ctx.beginPath();
+                    ctx.arc(arm.anchorPos.x, arm.anchorPos.y, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(250, 204, 21, 0.7)';
+                    ctx.fill();
+                }
+            }
+
+            // アームの描画
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#63b3ed'; // blue-300
+            ctx.lineWidth = 12;
             ctx.beginPath();
-            ctx.moveTo(200, 250);
-            ctx.lineTo(200, 150);
-            ctx.lineTo(300, 100);
+            ctx.moveTo(arm.joints[0].x, arm.joints[0].y);
+            for (let i = 1; i < arm.joints.length; i++) { ctx.lineTo(arm.joints[i].x, arm.joints[i].y); }
             ctx.stroke();
+
+            // 関節の描画
+            ctx.fillStyle = '#1a202c'; // gray-900
+            ctx.strokeStyle = '#90cdf4'; // blue-200
+            ctx.lineWidth = 4;
+            arm.joints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
             
-            // Draw force vector if dragging
-            if (isDragging) {
-                ctx.strokeStyle = '#ff4444';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(300, 100);
-                ctx.lineTo(350, 50);
-                ctx.stroke();
-                
-                ctx.fillStyle = '#ff4444';
-                ctx.font = '12px Arial';
-                ctx.fillText('Force Applied', 360, 55);
-            }
-            
-            // Draw mode indicator
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '14px Arial';
-            ctx.fillText(`Mode: ${mode}`, 10, 30);
-            ctx.fillText(`Stiffness: ${(stiffness * 100).toFixed(0)}%`, 10, 50);
+            // エンドエフェクタのハイライト
+            ctx.fillStyle = arm.isDragging ? 'rgba(236, 72, 153, 0.7)' : 'rgba(66, 153, 225, 0.7)';
+            ctx.beginPath();
+            ctx.arc(endEffector.x, endEffector.y, 20, 0, Math.PI * 2);
+            ctx.fill();
         }
-        
-        function resetDemo() {
-            isDragging = false;
-            drawDemo();
+
+        // --- アニメーションループ ---
+        function animate() {
+            updatePhysics();
+            draw();
+            requestAnimationFrame(animate);
         }
-        
-        function toggleMode() {
-            mode = mode === 'admittance' ? 'impedance' : 'admittance';
-            drawDemo();
+
+        // --- イベントリスナー ---
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         }
-        
-        function adjustStiffness() {
-            stiffness = (stiffness + 0.25) % 1.25;
-            if (stiffness === 0) stiffness = 0.25;
-            drawDemo();
-        }
-        
-        // Mouse event handlers
-        canvas.addEventListener('mousedown', function(e) {
-            isDragging = true;
-            drawDemo();
-        });
-        
-        canvas.addEventListener('mouseup', function(e) {
-            isDragging = false;
-            drawDemo();
-        });
-        
-        canvas.addEventListener('mousemove', function(e) {
-            if (isDragging) {
-                drawDemo();
+
+        canvas.addEventListener('mousedown', (e) => {
+            mouse.isDown = true;
+            const pos = getMousePos(e);
+            const endEffector = arm.joints[arm.joints.length - 1];
+            if (Math.hypot(pos.x - endEffector.x, pos.y - endEffector.y) < 30) {
+                arm.isDragging = true;
+                if (mode === 'impedance') {
+                    // ドラッグ開始点をアンカーにするのではなく、マウスで目標点を引っ張る
+                    arm.anchorPos = { ...mouse };
+                }
             }
         });
+
+        canvas.addEventListener('mouseup', () => {
+            mouse.isDown = false;
+            arm.isDragging = false;
+            // 力を解放したら、現在位置を新しいアンカー（目標）にする
+            arm.anchorPos = { ...arm.joints[arm.joints.length - 1] };
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+            mouse.x = pos.x;
+            mouse.y = pos.y;
+            if (arm.isDragging && mode === 'impedance') {
+                // マウスの位置をアンカー（目標）として更新し続ける
+                arm.anchorPos = { ...mouse };
+            }
+        });
         
-        // Initial draw
-        drawDemo();
+        stiffnessSlider.addEventListener('input', (e) => { params.K = e.target.value / 1000; updateUI(); });
+        dampingSlider.addEventListener('input', (e) => { params.D = e.target.value / 100; updateUI(); });
+        massSlider.addEventListener('input', (e) => { params.M = e.target.value / 10; updateUI(); });
+
+        admittanceBtn.addEventListener('click', () => { mode = 'admittance'; init(); });
+        impedanceBtn.addEventListener('click', () => { mode = 'impedance'; init(); });
+        resetBtn.addEventListener('click', init);
+        
+        window.addEventListener('resize', init);
+
+        // --- 初期化とアニメーション開始 ---
+        init();
+        animate();
     </script>
 </body>
 </html>
