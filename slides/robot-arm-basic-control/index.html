@@ -29,7 +29,7 @@
             <section data-background-image="media/teaching_image.jpg" data-background-opacity="0.3">
                 <h1>ゼロからのロボットアーム入門</h1>
                 <p>~ ロボットの基本操作 ~</p>
-                <p>大阪大学 中島優作</p>
+                <p>大阪大学 小野研究室 中島優作</p>
                 <br>
                 <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
@@ -454,7 +454,7 @@ finally:
                     </div>
                 </section>
                 <section>
-                    <h2>フォース制御とコンプライアンス制御の比較</h2>
+                    <h2>フォース制御とコンプライアンス制御の違い</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
@@ -466,8 +466,8 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>フォース制御 → ある力をかける</li>
-                                <li>コンプライアンス制御 → ばねのように柔らかく動く</li>
+                                <li>フォース制御 → 一定の力をかける</li>
+                                <li>コンプライアンス制御 → ばねのように柔らか</li>
                             </ul>
                         </div>
                     </div>
@@ -491,14 +491,14 @@ finally:
                         <div style="flex: 1;">
                             <ul>
                                 <li>オフライン(実機なし)のシミュレーション</li>
-                                <li>動作前の事前検討が可能</li>
+                                <li>動作前の事前検討</li>
                             </ul>
                         </div>
                     </div>
                     <p>シミュレーションはなぜ重要か↓</p>
                 </section>
                 <section>
-                    <h2>ロボットでありがちなトラブル</h2>
+                    <h2>ありがちなトラブル</h2>
                     <ul>
                         <li><strong>1. ロボットの手先が届かない</strong><br>
                             実際に設置するとロボットの可動範囲が思ったより狭く手先が届かなかった→配置の再検討</li>
@@ -548,6 +548,7 @@ finally:
                             </ul>
                         </div>
                     </div>
+                    <p>※RoboDKは位置制御にしか使えない点に注意</p>
                 </section>
 
             </section>
@@ -569,6 +570,7 @@ finally:
                         <div style="flex: 1;">
                             <ul>
                                 <li>オンライン、無料で使える</li>
+                                <li>25年8月時点では動作が遅いが後々改善されるはず</li>
                                 <li>機能はRoboDKの方が上だが、これで十分な場合も多いのでは</li>
                             </ul>
                         </div>
@@ -603,8 +605,8 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>URにおけるフォース制御</li>
-                                <li>特定の軸だけ力制御と位置制御を切り替え可能</li>
+                                <li>URのフォース制御</li>
+                                <li>位置&向きの6軸について位置/力の制御を選択可能</li>
                                 <li>一定の力で押し付ける作業が得意</li>
                             </ul>
                         </div>
@@ -625,10 +627,9 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>URの回転表現はデフォルトで回転ベクトル形式</li>
+                                <li>デフォルトの回転表現は回転ベクトル</li>
                                 <li>RPY（ロール、ピッチ、ヨー）で使うには変換が必要</li>
-                                <li>Pythonではscipy.spatial.transformのRotationクラスが便利</li>
-                                <li>左のアプリで回転ベクトルとRPYの関係を確認</li>
+                                <li>Pythonの場合scipy.spatial.transformのRotationが便利</li>
                             </ul>
                         </div>
                     </div>
@@ -646,13 +647,13 @@ finally:
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>servoJ/Lは最短経路で最速移動するため危険！</li>
-                                <li>意図しない軌道で高速移動する可能性</li>
-                                <li>事前にmoveJ/Lでゆっくり動かして軌道確認必須</li>
-                                <li>意図しない姿勢を取っていないか必ず事前確認</li>
+                                <li>servoJ/Lは最短&最速で移動するため危険！</li>
+                                <li>①事前にmoveJ/Lでゆっくり動かして軌道を確認</li>
+                                <li>②途中で意図しない姿勢を取っていないか必ず確認</li>
                             </ul>
                         </div>
                     </div>
+                    <li>※servoJ/Lは目で追えないくらい早いです、十分理解してから使ってください</li>
                 </section>
             </section>
 
@@ -680,7 +681,7 @@ finally:
                     <p>もう少し詳しく↓</p>
                 </section>
                 <section>
-                    <h2>ROSを使う利点</h2>
+                    <h2>ROSを動作生成で使う利点</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <h4>ROS生成モーション</h4>
@@ -694,6 +695,25 @@ finally:
                             <ul>
                                 <li>ロボットコントローラでモーションを計算する</li>
                                 <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            <section>
+                    <h2>ROSをシステム設計で使う利点</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <h4>ROSのシステム</h4>
+                            <ul>
+                                <li>分散・モジュール型なので並列で開発を進めやすい</li>
+                                <li>対応センサやアクチュエータは何でも接続できるが、どう使うのかは自分次第</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4>メーカー提供</h4>
+                            <ul>
+                                <li>並列での開発は難しい場合が多い</li>
+                                <li>メーカー提供品しか使えないが、GUIなどが整備されててすぐ使える</li>
                             </ul>
                         </div>
                     </div>
@@ -820,10 +840,10 @@ finally:
                 </section>
             </section>
             <section>
-                <h2>ロボットの基本動作は以上！</h2>
+                <h2>ロボットアームの基本動作は以上！</h2>
                 <p>Let's enjoy robot!</p>
                 <div style="padding: 20px; border-radius: 10px; margin: 20px 0;">
-                    <p style="margin-bottom: 15px;"><strong>もっと複雑な制御やセンサの統合をやりたい方は：</strong></p>
+                    <p style="margin-bottom: 15px;"><strong>複雑な制御やセンサの統合をやりたい方は：</strong></p>
                     <ul style="text-align: left; display: inline-block;">
                         <li><a href="../ros-introduction/index.html"
                                 style="color: #007bff; text-decoration: underline;">ゼロからのROS入門</a> - ROSの基礎概念

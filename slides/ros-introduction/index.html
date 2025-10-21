@@ -36,12 +36,23 @@
 
             <!-- スライド2: スライドの担当範囲 -->
             <section>
-                <h2>スライドの担当範囲</h2>
-                <ol>
-                    <li>ROSシステムの概要説明</li>
-                    <li>読み飛ばしてロボットを動かすのもOK</li>
-                    <li>必要に応じて選択的に学習</li>
-                </ol>
+                <h2>心構え①初めてからROSを学ぶのは大変</h2>
+                <p>ROSを使う=以下も同時に学ぶ必要があります</p>
+                <p>不慣れな人には長い道のりになります</p>
+                <ul>
+                    <li>ロボット制御の知識(ROSでは説明されない)</li>
+                    <li>Linuxのコマンド、システムの理解(ROSはLinuxで動かすのが基本)</li>
+                    <li>環境構築(基本的にDockerを使います)</li>
+                </ul>
+            </section>            
+            <section>
+                <h2>心構え②ROSは大規模で複雑</h2>
+                <p>一回で理解するのは不可能なので反復が大切です</p>
+                <ul>
+                    <li>まずはROSを動かす(モチベーションの維持)</li>
+                    <li>分からなくなったら立ち返って根本から理解</li>
+                </ul>
+                <p>最初は自分は何が分からないのかが分からないのでROSコミュニティを頼りましょう</p>
             </section>
 
             <!-- スライド3: 参考書籍 -->
@@ -98,24 +109,25 @@
             <section>
                 <h2>ROSではまりがちなこと</h2>
                 <ol>
-                    <li>使い方が分からない</li>
-                    <li>相談する人がいない</li>
+                    <li>オープンソースだけど使い方が分からない</li>
                     <li>ごちゃごちゃいじっている間に環境が壊れて動かなくなった</li>
-                    <li>中身がどうなっているのかブラックボックスで応用が利かない</li>
+                    <li>動いたけど中身がブラックボックスで応用が利かない</li>
+                    <li>上記で相談できる人がいない</li>
                 </ol>
             </section>
 
             <!-- スライド5: ROSを使った勉強の進め方 -->
             <section>
                 <section>
-                    <h2>ROSを使った勉強の進め方</h2>
+                    <h2>はまった時の対処法</h2>
                     <ol>
                         <li>使い方&nbsp;→&nbsp;チュートリアル or LLM</li>
                         <li>相談&nbsp;→&nbsp;コミュニティ or LLM</li>
-                        <li>環境&nbsp;→&nbsp;仮想環境</li>
+                        <li>環境&nbsp;→&nbsp;仮想環境でやり直せる</li>
                         <li>実装&nbsp;→&nbsp;個人や組織に依存。。。</li>
                     </ol>
-                    <p>実装を学ぶ場がない...→</p>
+                    <p>実装を学ぶ方法は組織でのOJTに依存してきた</p>
+                    <p>このスライドではなるべく実装を扱います→</p>
                     <p>1~3は以下↓</p>
                 </section>
 
@@ -128,7 +140,7 @@
                                 style="color: #3b82f6; text-decoration: underline;">http://wiki.ros.org/ja/ROS/Tutorials</a>
                         </li>
                         <li>ただし、チュートリアルだけでは動くロボットを作るのは難しい</li>
-                        <li>このスライドはその補完を目的としている</li>
+                        <li>このスライドは、よりリアルな実装を扱うことで補完するのが目的です</li>
                     </ul>
                 </section>
 
@@ -151,9 +163,9 @@
                     <h2>3. 環境構築</h2>
                     <ul>
                         <li>Dockerを使ってROSの環境を構築するのが便利</li>
-                        <li>勉強用なら<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
+                        <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
                                 style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です</li>
-                        <li>勉強だけならWSLでも良い(実機の制御は困難)</li>
+                        <li>後ほど詳しく書きます</li>
                     </ul>
                 </section>
             </section>
@@ -162,7 +174,7 @@
             <!-- スライド6: ROSで実際のロボットを動かすには -->
             <section>
                 <h2>本スライド集では実装を学ぶ</h2>
-                <p>ロボットアームの実装はざっくり以下の2ステップ</p>
+                <p>以下の2ステップを学ぶところから</p>
                 <ul>
                     <li><a href="../ros-model-display/index.html" style="color: #3b82f6; text-decoration: underline;">→
                             ステップ1：ロボットアームを表示</a></li>
@@ -174,19 +186,20 @@
 
             <!-- スライド7: ROSのプログラム基本単位：ノード -->
             <section>
+                <h2>ROSのプログラム単位：ノード</h2>
                 <div class="slide-layout-image">
                     <div class="image-section">
                         <img src="media/ros_nodes.svg" alt="ROSノード">
                     </div>
                     <div class="text-section">
-                        <h2>ROSのプログラム基本単位：ノード</h2>
                         <ul>
                             <li>1ノード=1プロセス</li>
-                            <li>機能ごとに分割可能</li>
-                            <li>柔軟なシステム構築</li>
+                            <li>ノードの設計はユーザー依存、プログラミングのクラス設計と同じ</li>
+                            <li>ROSを公式で使っているUniversalRobotやRealSenseの設計は非常に上手いので参考になります</li>
                         </ul>
                     </div>
                 </div>
+                <p>うまい設計をいきなり真似するのは無理なので最初はツギハギで良いと思います</p>
             </section>
 
             <!-- スライド8: ノード間の通信：トピック、サービス、アクション -->
@@ -210,12 +223,14 @@
                         <div class="text-section">
                             <h2>パラメータ管理</h2>
                             <ul>
-                                <li>ロボットには多数のパラメータが必要</li>
+                                <li>ロボットにはパラメータが山ほどある</li>
+                                <li>ROSでパラメータ管理の仕組みを提供してくれてます</li>
                                 <li>ROS1：一括管理</li>
                                 <li>ROS2：ノード別管理</li>
                             </ul>
                         </div>
                     </div>
+                    <p>ノード間でパラメータを共有できるのが便利です</p>
                 </section>
             </section>
 
@@ -248,9 +263,8 @@
                             <ul>
                                 <li><a href="https://github.com/facontidavide/PlotJuggler" target="_blank"
                                         style="color: #3b82f6; text-decoration: underline;">PlotJuggler</a>が便利</li>
-                                <li>bagファイル読み込み</li>
-                                <li>データのグラフ化</li>
-                                <li>CSVエクスポート</li>
+                                <li>公式のrqt_bagは最低限のReadとグラフ化しかなく使いにくいです</li>
+                                <li>PlotJugglerは柔軟なグラフ化とCSVエクスポートが便利です</li>
                             </ul>
                         </div>
                     </div>
@@ -260,8 +274,9 @@
                     <h2>データの再生</h2>
                     <ul>
                         <li><code>root@powder_grinding_ros:~/catkin_ws# rosbag play my_bag.bag</code></li>
-                        <li>Topicの完全再現は現実的でないので注意</li>
-                        <li>記録時に抜け落ちるデータ有</li>
+                        <li>再生する機能は正直ほぼ使いません</li>
+                        <li>保存したデータには抜けやディレイがあり、再生してもロボットが同じ動きにならない可能性があります</li>
+                        <li>ros_bagは記録と解析用だと割り切った方が良いと思います</li>
                     </ul>
                 </section>
             </section>
@@ -269,14 +284,14 @@
             <section>
                 <section>
                     <h2>環境構築</h2>
-                    <p>自力での環境構築はLinux,Docker,ROS,などの幅広い知識が(主にトラブル解決に)求められます</p>
-                    <p>まずは先人が作ったものを活用してください(僕も最初はそのように始めました)↓</p>
+                    <p>環境構築はトラブルが多く、解決にはLinux,Docker,ROSの知識を総動員します</p>
+                    <p>最初は先人が作ったものを活用してください(僕も最初はそのように始めました)↓</p>
                 </section>
                 <section>
                     <h2>必要な環境とソフトウェア</h2>
                     <ul>
                         <li>OS: Ubuntu 20.04以降(22.04, 24.04もok)</li>
-                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストールしておいてください</li>
+                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストール</li>
 
                     </ul>
                     </ul>
@@ -293,8 +308,18 @@
                     </ul>
 
                 </section>
+
                 <section>
-                    <h2>パッケージのクローン</h2>
+                    <h2>公開パッケージでのオススメ</h2>
+                    <ul>
+                    <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です</li>
+                    <li>トラブルはほぼないですが、VNC越しのため実機ロボットには使えないです(あくまで勉強用)</li>
+                    </ul>
+                </section>
+                    
+                <section>
+                    <h2>僕の公開パッケージ(powder_grinding)を使う場合</h2>
                     <pre><code data-trim class="bash">
 user@user:~$ git clone -b develop https://github.com/quantumbeam/powder_grinding.git
 user@user:~$ cd powder_grinding/env
@@ -306,7 +331,7 @@ user@user:~$ cd powder_grinding/env
                     </ul>
                 </section>
                 <section>
-                    <h2>Dockerイメージの作成</h2>
+                    <h2>powder_grindingでDockerイメージの作成</h2>
                     <pre><code data-trim class="bash">
 user@user:~/powder_grinding/env$ export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
 user@user:~/powder_grinding/env$ ./BUILD-DOCKER-IMAGE.sh
@@ -319,7 +344,7 @@ user@user:~/powder_grinding/env$ ./BUILD-DOCKER-IMAGE.sh
                     </ul>
                 </section>
                 <section>
-                    <h2>コンテナの起動とROSのビルド</h2>
+                    <h2>powder_grindingでコンテナの起動とROSのビルド</h2>
                     <pre><code data-trim class="bash">
 user@user:~/powder_grinding/env$ ./RUN-DOCKER-CONTAINER.sh
 root@powder_grinding_ros:~/catkin_ws$ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
@@ -364,11 +389,10 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
                         <li>コマンド1つで簡単インストール</li>
                         <li><code>root@powder_grinding_ros:~/catkin_ws# sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code></li>
                     </ul>
-                    <p><small>バージョン確認: <code>root@powder_grinding_ros:~/catkin_ws# apt-cache policy ros-$ROS_DISTRO-realsense2-camera</code></small></p>
                 </section>
                 <section>
-                    <h2>公開パッケージの使い方(ソースビルド)</h2>
-                    <p><strong>最新版使用時の手順</strong></p>
+                    <h2>公開パッケージのソースビルド</h2>
+                    <p><strong>例: Intel RealSense</strong></p>
                     <ol>
                         <li><strong>Clone:</strong><br>
                             <code>root@powder_grinding_ros:~/catkin_ws# git clone https://github.com/IntelRealSense/realsense-ros.git</code>
@@ -388,7 +412,7 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
 
             <!-- スライド11: 説明はここまで -->
             <section>
-                <h2>説明はここまで、あとは実際に作りながら学んでください</h2>
+                <h2>説明はここまで、あとは実際に動かしながら学んでください</h2>
                 <ul>
                     <li>モデルを作りたい<a href="../ros-model-display/index.html"
                             style="color: #3b82f6; text-decoration: underh4ne;">→ロボットモデル表示</a>
