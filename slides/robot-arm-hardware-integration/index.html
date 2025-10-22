@@ -92,6 +92,7 @@
                             <p>ロボットアームはアルミフレームや定盤に設置する場合がほとんど</p>
                         </div>
                     </div>
+                    <p><strong>アルミフレームの強度計算↓</strong></p>
                 </section> 
                 <section>
                     <h2>アルミフレームの耐荷重</h2>
@@ -106,10 +107,9 @@
                         </div>
                         <div class="right">
                             <ul>
-                                <li>アルミフレームはたわみやすい</li>
-                                <li>たわみはロボットの動作精度に影響する</li>
-                                <li>ロボットの可搬重量やアーム長に応じて適切なフレーム選定が必要</li>
-                                <li>剛性を確保するためには、補強や太いフレームの選択が重要</li>
+                                <li>アルミフレームはたわみやすく、ロボットの動作精度に影響する</li>
+                                <li>重たいロボットや力のかかる作業をする際はきちんと計算してからフレーム選定が必要</li>
+                                <li>長期の運用も見据えると剛性は余裕のある設計が安心</li>
                             </ul>
                         </div>
                     </div>
@@ -188,33 +188,69 @@
                     <h2>グリッパの配線</h2>
                     <div class="two-column">
                         <div class="left">
-                            <!-- 配線図 -->
+                            <img src="media/robotiq_hande.png" alt="Robotiq Hand-E" style="max-width: 70%;">
+                            <p style="font-size: 0.7em; text-align: center;">Robotiq Hand-E とユニバーサルロボットの接続例、ケーブル1本</p>
                         </div>
                         <div class="right">
-                            <p>グリッパの接続方法は、電源、グランド、通信の3つを接続します</p>
+                            <p>最近は対応メーカ同士だとケーブル1本で接続できることが多いです</p>
+                            <p>対応メーカでない場合は、電源と通信を個別に用意する必要があります</p>
                         </div>
                     </div>
-                    <p><strong>推奨電源↓</strong></p>
+                    <p><strong>推奨電源↓ 通信方式→</strong></p>
                 </section>
                 <section>
-                    <h2>電源の選定</h2>
+                    <h2>電源の選定（誘導性負荷への対応）</h2>
                     <div class="two-column">
                         <div class="left">
                             <div style="display: flex; gap: 1rem; align-items: center;">
-                                <img src="media/swichingAC.png" alt="スイッチング電源" style="max-width: 45%; border: none; box-shadow: none;">
-                                <img src="media/AC_adapter.png" alt="ACアダプタ" style="max-width: 45%; border: none; box-shadow: none;">
+                                <div style="text-align: center;">
+                                    <img src="media/swichingAC.png" alt="誘導性負荷対応電源" style="max-width: 100%; border: none; box-shadow: none;">
+                                    <p style="font-size: 0.7em;">誘導性負荷対応</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <img src="media/AC_adapter.png" alt="誘導性負荷非対応電源" style="max-width: 100%; border: none; box-shadow: none;">
+                                    <p style="font-size: 0.7em;">誘導性負荷非対応</p>
+                                </div>
                             </div>
                         </div>
                         <div class="right">
-                            <p>12V or 24Vの電源を用意することが多いです、電源はスイッチング電源が推奨です</p>
-                            <p>ACアダプタも使えますが、故障リスクがあるので注意してください</p>
+                            <p>モーターのような誘導性負荷を駆動する場合、対応した電源の選定が不可欠です</p>
+                            <p>非対応の電源を使用すると、故障の原因となります</p>
+                        </div>
+                    </div>
+                    <p><strong>↓ACアダプタが故障する理由</strong></p>
+                </section>
+                <section>
+                    <h2>誘導性負荷と電源</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <p>モーターはコイルでできているため、誘導性負荷となります。</p>
+                            <p>電源をOFFにした際などに逆起電力というエネルギーの逆流が発生します。</p>
+                        </div>
+                        <div class="right">
+                            <p>誘導性負荷に対応していない電源（安価なACアダプタなど）は、この逆起電力に対する保護回路を持たないため、故障の原因となります。</p>
                         </div>
                     </div>
                 </section>
             </section>
 
+            
+
             <!-- 4. RS485通信の概要 -->
             <section>
+                <section>
+                <h2>外部機器との通信</h2>
+                <div class="two-column">
+                    <div class="left">
+                        <img src="media/RS485_connector.png" alt="RS485コネクタ" style="max-width: 100%;">
+                    </div>
+                    <div class="right">
+                        <p>グリッパや外部機器との通信では、RS485という規格がよく使われます。</p>
+                        <p>特に、多くの産業用ロボットやコンポーネントで採用されています。</p>
+                    </div>
+                </div>
+                <p><strong>RS485の基礎↓</strong></p>
+            </section>
                 <section>
                     <h2>データ通信の基本</h2>
                     <div class="two-column">
@@ -222,11 +258,10 @@
                             <img src="media/digital_signal_illustration.svg" alt="デジタル信号図" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>電気信号でHigh(1)とLow(0)の2値の情報(ビット)を送ります<br>(これがRS232)</p>
-                            <p>文字は<a href="https://www3.nit.ac.jp/~tamura/ex2/ascii.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">ASCIIコード</a>と呼ばれる表でビットと文字の対応関係で送る</p>
+                            <p>電気信号でHigh(1)とLow(0)の2値の情報(ビット)を送ります</p>
+                            <p>文字は<a href="https://www3.nit.ac.jp/~tamura/ex2/ascii.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">ASCIIコード</a>と呼ばれる表でビットを文字に変換します</p>
                         </div>
                     </div>
-                    <p><strong>RS232を改良したRS485↓</strong></p>
                 </section>
                 <section>
                     <h2>RS485とは</h2>
@@ -240,7 +275,8 @@
                                 frameborder="0"></iframe>
                         </div>
                         <div class="right">
-                            <p>RS485はRS232の改良版で、<strong>長距離通信、複数台の機器接続、ノイズ耐性</strong>に優れています</p>
+                            <p>ビットのシンプルな通信について、基本的なプロトコルやコネクタの種類を決めたものがRS232</p>
+                            <p>現在はノイズ体制などを高めた改良版にあたるRS485が主流</p>
                         </div>
                     </div>
                     <p><strong>USB-RS485変換アダプタの選定↓</strong></p>
@@ -288,10 +324,6 @@
                         </div>
                     </div>
                 </section>
-                <section>
-                    <h2></h2>
-                    <!-- 空のスライド -->
-                </section>
             </section>
 
             <!-- 6. 治具の作成 -->
@@ -314,7 +346,7 @@
                             <img src="media/fusion360.png" alt="Fusion360" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>fusion360を使用して設計することが多いです</p>
+                            <p>fusion360がCAD初心者に使いやすいです</p>
                         </div>
                     </div>
                 </section>
@@ -325,7 +357,7 @@
                             <img src="media/creality_k1c.png" alt="Creality K1C" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>3Dプリンタを使用して作成することが多いです、現時点だとcrealityK1cはおススメ</p>
+                            <p>3Dプリンタで作成できます。何度も作り直すので印刷速度は重要です、2025年現時点だとcrealityK1cはおススメ</p>
                         </div>
                     </div>
                 </section>
@@ -335,13 +367,13 @@
             <!-- 7. ロボットと他の機器の接続 -->
             <section>
                 <section>
-                    <h2>ロボットと他の機器の接続</h2>
+                    <h2>ロボットと他の機器の接続方法</h2>
                     <div class="two-column">
                         <div class="left">
                             <img src="media/robot_integration.png" alt="ロボット統合システム" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>ロボット単体ではなく色々な装置をつなげる場合</p>
+                            <p>ロボット単体ではなく色々な装置をつなげる方法はいくつかあります</p>
                         </div>
                     </div>
                 </section>
@@ -352,7 +384,8 @@
                             <img src="media/ur_io.png" alt="URロボットIO" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>基本的にON or OFFの信号をやり取りします</p>
+                            <p>ロボットには基本的にIO(インプット/アウトプット)がついてきます</p>
+                            <p>ON or OFFの信号で外部のモータを制御したり、センサからアナログ電圧を受け取ります</p>
                         </div>
                     </div>
                 </section>
@@ -364,7 +397,7 @@
                                 alt="USB接続" style="max-width: 100%;">
                         </div>
                         <div class="right">
-                            <p>パソコンとの接続はUSBを使用することが多いです</p>
+                            <p>パソコンからロボットを制御する場合は、USBで他のセンサなどを接続して使うことも多いです</p>
                         </div>
                     </div>
                 </section>
@@ -386,13 +419,10 @@
             <!-- 8. 便利なデバイスの紹介 -->
             <section>
                 <section>
-                    <h2>便利なデバイスの紹介</h2>
+                    <h2>便利なプロトタイピング用デバイスの紹介</h2>
                     <div class="two-column">
                         <div class="left">
                             <!-- デバイス紹介 -->
-                        </div>
-                        <div class="right">
-                            <p>センサ、アクチュエータを紹介します</p>
                         </div>
                     </div>
                 </section>
