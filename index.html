@@ -1,285 +1,230 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ゼロからのロボットアーム入門シリーズ</title>
+    <title>ゼロからのROS入門</title>
+    <!-- Tailwind CSSを読み込みます -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google FontsからInterフォントを読み込みます -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* 日本語フォントと英語フォントを適切に指定します */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .slides-grid {
-            display: grid;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .slide-card {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 15px;
-            padding: 30px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slide-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .slide-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border-color: #667eea;
-        }
-
-        .slide-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .slide-title {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-
-        .slide-description {
-            color: #6c757d;
-            margin-bottom: 15px;
-        }
-
-        .slide-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9em;
-            color: #868e96;
-        }
-
-        .badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 500;
-        }
-
-        .icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 30px;
-            background: #f8f9fa;
-            color: #6c757d;
-            border-top: 1px solid #e9ecef;
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .header p {
-                font-size: 1em;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-            .slide-card {
-                padding: 20px;
-            }
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
         }
     </style>
 </head>
 
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🤖 ゼロからのロボットアーム入門</h1>
-            <p>大阪大学 中島優作</p>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- ヘッダーナビゲーション -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
+                🤖 ゼロからのROS入門
+            </a>
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#step1" class="text-slate-600 hover:text-indigo-500 transition-colors">基礎</a>
+                <a href="#step2" class="text-slate-600 hover:text-indigo-500 transition-colors">ROS</a>
+                <a href="#step3" class="text-slate-600 hover:text-indigo-500 transition-colors">応用</a>
+                <a href="slides/revealjs-usage-guide/index.html" target="_blank" class="bg-indigo-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-indigo-600 transition-all">
+                    📖 使い方ガイド
+                </a>
+            </nav>
+            <button class="md:hidden text-slate-600" id="mobile-menu-button">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- モバイル用メニュー -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+             <a href="#step1" class="block py-2 text-slate-600 hover:text-indigo-500 transition-colors">基礎</a>
+             <a href="#step2" class="block py-2 text-slate-600 hover:text-indigo-500 transition-colors">ROS</a>
+             <a href="#step3" class="block py-2 text-slate-600 hover:text-indigo-500 transition-colors">応用</a>
+             <a href="slides/revealjs-usage-guide/index.html" target="_blank" class="block mt-2 bg-indigo-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-indigo-600 transition-all text-center">
+                 📖 使い方ガイド
+             </a>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <div class="container mx-auto px-6 py-12">
+        
+        <!-- ヒーローセクション -->
+        <div class="text-center bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-12 mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">ゼロからのROS入門</h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">大阪大学 小野研究室 中島優作</p>
         </div>
 
-        <div class="content">
-            <p>ロボットアームの基礎から応用まで、実践的な内容を学べるスライド集です。</p>
-            <p
-                style="margin-top: 15px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; color: #856404; font-size: 0.9em;">
-                📋 このスライド資料は2025年7/28~7/31のロボット勉強会用に作成されました。無断転用・無断転載は禁止させていただきます。使いたい場合はご相談ください。(yusaku_nakajima@ap.eng.osaka-u.ac.jp)
-            </p>
+        <div class="lg:grid lg:grid-cols-12 lg:gap-12">
+            <!-- 左側メインエリア -->
+            <main class="lg:col-span-8">
 
-            <div class="slides-grid">
-                <a href="slides/revealjs-usage-guide/index.html" class="slide-card">
-                    <div class="slide-title">
-                        📖 RevealJSスライドの使い方
+                <!-- Step 1: 基礎 -->
+                <section id="step1" class="mb-12">
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800">基礎編 - ロボットアーム制御の基礎</h2>
+                    <p class="text-slate-500 mb-6">対象：全員。まずはここから！ロボットアームを動かすための物理的な接続と、基本的な操作方法を学びます。</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <a href="slides/robot-arm-hardware-integration/index.html" class="slide-card">
+                            <h3 class="slide-title">🔌 ハードウェアインテグレーション</h3>
+                            <p class="slide-description">ロボットアームとの接続、グリッパ制御、外部装置との接続など、物理的なセットアップを解説します。</p>
+                            <div class="slide-meta"><span class="badge bg-indigo-100 text-indigo-800">基礎</span></div>
+                        </a>
+                        <a href="slides/robot-arm-basic-control/index.html" class="slide-card">
+                            <h3 class="slide-title">🦿 ロボットの基本操作/制御</h3>
+                            <p class="slide-description">TCP制御、モーションの種類、シミュレーションの活用法など、アームを操作する上で必須の知識を解説します。</p>
+                            <div class="slide-meta"><span class="badge bg-indigo-100 text-indigo-800">基礎</span></div>
+                        </a>
                     </div>
-                    <div class="slide-description">
-                        このスライドはRevealJSで作られています。パワーポイントと少し使い勝手が違うので簡単なガイドを用意しました。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：全ユーザー</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
+                </section>
 
-                <a href="slides/robot-arm-hardware-integration/index.html" class="slide-card">
-                    <div class="slide-title">
-                        🔌 ロボットアーム入門 ~ ハードウェアインテグレーション ~
+                <!-- Step 2: ROS -->
+                <section id="step2" class="mb-12">
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800">実践編 - ROSによるアーム制御</h2>
+                    <p class="text-slate-500 mb-6">対象：ROSでアーム制御が必要な人。ROS(Robot Operating System)を使って、より高度な制御を行うための基礎を学びます。</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <a href="slides/ros-introduction/index.html" class="slide-card">
+                            <h3 class="slide-title">🌐 ゼロからのROS入門</h3>
+                            <p class="slide-description">ROSの学習戦略と、効果的な学習リソースの選択方法を紹介します。</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                        </a>
+                        <a href="slides/ros-model-display/index.html" class="slide-card">
+                            <h3 class="slide-title">📐 ロボットモデルの表示</h3>
+                            <p class="slide-description">URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます。</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                        </a>
+                        <a href="slides/ros-simulator-connection/index.html" class="slide-card">
+                            <h3 class="slide-title">🎮 シミュレータとの接続</h3>
+                            <p class="slide-description">fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます。</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                        </a>
+                        <a href="slides/ros-arm-position-control/index.html" class="slide-card">
+                            <h3 class="slide-title">🎯 アーム位置制御とモーションプランニング</h3>
+                            <p class="slide-description">MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します。</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                        </a>
                     </div>
-                    <div class="slide-description">
-                        ロボットアームを動かす前の準備として、ロボットとの接続方法、グリッパ制御、RS485通信を解説します。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：初心者〜中級者</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
+                </section>
 
-                <a href="slides/robot-arm-basic-control/index.html" class="slide-card">
-                    <div class="slide-title">
-                        🦿 ロボットアーム入門 ~ ロボットの基本操作 ~
+                <!-- Step 3: 応用 -->
+                <section id="step3" class="mb-12">
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800">応用編 - センサベース制御</h2>
+                    <p class="text-slate-500 mb-6">対象：より高度なアプリケーションを開発したい人。力覚や視覚情報を使ったフィードバック制御を学びます。</p>
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg mb-6" role="alert">
+                         <p class="font-bold">注意</p>
+                         <p>製作途中のスライドを多く含むのでご注意ください。</p>
+                     </div>
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-slate-700">👁️ Visionベース</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <a href="slides/ros-camera/index.html" class="slide-card">
+                                    <h3 class="slide-title">📷 カメラ/デプスカメラ</h3>
+                                    <p class="slide-description">ROSでのカメラ統合、画像処理、ポイントクラウド処理を学びます。</p>
+                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span></div>
+                                </a>
+                                <div class="slide-card-soon">
+                                    <h3 class="slide-title text-slate-500">🤖 Visionフィードバック制御</h3>
+                                    <p class="slide-description">（スライド準備中）</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-slate-700">💪 Forceベース</h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <a href="slides/ros-ft-sensor/index.html" class="slide-card">
+                                    <h3 class="slide-title">⚖️ フォーストルクセンサ</h3>
+                                    <p class="slide-description">6軸力・トルクの活用、ノイズ除去、座標変換などを学びます。</p>
+                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span></div>
+                                </a>
+                                <a href="slides/ros-arm-force-control/index.html" class="slide-card">
+                                    <h3 class="slide-title">🦾 アーム力制御</h3>
+                                    <p class="slide-description">インピーダンス/アドミッタンス制御など、力を使った高度な制御を学びます。</p>
+                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span></div>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="slide-description">
-                        ロボットアームの基礎知識、TCP制御、モーション種類、シミュレーション、ロボット選定方法を詳しく解説します。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：初心者〜中級者</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
+                </section>
+            </main>
 
-                <a href="slides/ros-introduction/index.html" class="slide-card">
-                    <div class="slide-title">
-                        🌐 ゼロからのROS入門
-                    </div>
-                    <div class="slide-description">
-                        ROS学習戦略と効果的な学習リソースの選択方法を紹介します。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：中級者〜上級者</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
+            <!-- 右側サイドバー -->
+            <aside class="lg:col-span-4 space-y-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <h3 class="text-lg font-bold mb-4">この教材について</h3>
+                    <p class="text-sm text-slate-600">
+                        ロボットアームを触ったことがあり、次のステップとしてROSを使ってみたい方に向けた構成となっています。
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <h3 class="text-lg font-bold mb-4">📢 お知らせ</h3>
+                     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg" role="alert">
+                         <p>本スライドはCC BY-NC-ND 4.0に従ってご利用ください。適切な表示を行い、非営利目的での利用に限り、改変せずにそのままの形での再配布が可能です。</p>
+                     </div>
+                </div>
 
-                <a href="slides/ros-model-display/index.html" class="slide-card">
-                    <div class="slide-title">
-                        📐 ゼロからのROS入門 - ロボットモデルの表示
-                    </div>
-                    <div class="slide-description">
-                        URDF/XACROによるロボットモデリング、TFシステム、RVizでの可視化を学習します。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：中級者〜上級者</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <h3 class="text-lg font-bold mb-4">🔗 関連リンク</h3>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="https://nano-ap.eng.osaka-u.ac.jp/" target="_blank" class="text-indigo-600 hover:underline">
+                                🌐 小野研究室ホームページ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:yusaku_nakajima@ap.eng.osaka-u.ac.jp" class="text-indigo-600 hover:underline">
+                                📧 問い合わせ(メール)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
 
-                <a href="slides/ros-simulator-connection/index.html" class="slide-card">
-                    <div class="slide-title">
-                        🎮 ゼロからのROS入門 - ROSにおけるシミュレータ
-                    </div>
-                    <div class="slide-description">
-                        fake_jointとGazeboシミュレータの使い方、軽量動作確認と物理シミュレーションを学習します。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：中級者〜上級者</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
-
-                <a href="slides/ros-arm-position-control/index.html" class="slide-card">
-                    <div class="slide-title">
-                        🎯 ゼロからのROS入門 ~アーム位置制御とモーションプランニング~
-                    </div>
-                    <div class="slide-description">
-                        MoveItフレームワーク、IKソルバー、JointTrajectoryController実装を詳解します。
-                    </div>
-                    <div class="slide-meta">
-                        <span>🎯 対象：中級者〜上級者</span>
-                        <span class="badge">Reveal.js</span>
-                    </div>
-                </a>
-
-          
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>© 2025 大阪大学 中島優作 | 小野研究室</p>
-            <p style="margin-top: 10px; font-size: 0.9em;">
-                🌐 小野研究室ホームページ: <a href="https://nano-ap.eng.osaka-u.ac.jp/" target="_blank"
-                    style="color: #667eea; text-decoration: none;">https://nano-ap.eng.osaka-u.ac.jp/</a>
-            </p>
-            <p style="margin-top: 10px; font-size: 0.9em;">
-                📧 お問い合わせ先: <a href="mailto:yusaku_nakajima@ap.eng.osaka-u.ac.jp"
-                    style="color: #667eea; text-decoration: none;">yusaku_nakajima@ap.eng.osaka-u.ac.jp</a>
-            </p>
         </div>
     </div>
+
+    <!-- フッター -->
+    <footer class="bg-slate-100 border-t border-slate-200 mt-12">
+        <div class="container mx-auto px-6 py-8 text-center text-slate-500">
+            <p>© 2025 大阪大学 中島優作 | 小野研究室</p>
+        </div>
+    </footer>
+
+    <!-- CSS (スライドカードのスタイル) -->
+    <style>
+        .slide-card {
+            @apply bg-white border border-slate-200/80 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col;
+        }
+        .slide-card-soon {
+             @apply bg-slate-100 border border-slate-200/80 rounded-xl p-6 flex flex-col text-center justify-center;
+        }
+        .slide-title {
+            @apply text-lg font-bold text-slate-800 mb-2;
+        }
+        .slide-description {
+            @apply text-slate-500 text-sm flex-grow mb-4;
+        }
+        .slide-meta {
+            @apply mt-auto pt-2 flex justify-end;
+        }
+        .badge {
+            @apply text-xs font-semibold px-3 py-1 rounded-full;
+        }
+    </style>
+    
+    <!-- JavaScript (モバイルメニュー用) -->
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
 </body>
 
 </html>
+
