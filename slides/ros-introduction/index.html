@@ -78,6 +78,110 @@
                 </div>
             </section>
 
+            <!-- スライド: 参考サイト -->
+            <section>
+                <h2>オンライン環境&教材</h2>
+                <div class="slide-layout-image">
+                    <div class="image-section dual-images">
+                        <div class="image-with-caption">
+                            <img src="media/theconstruct._rosject.png" alt="The Construct Rosject">
+                        </div>
+                        <div class="image-with-caption">
+                            <img src="media/theconstruct._cource.png" alt="The Construct Cource">
+                        </div>
+                    </div>
+                    <div class="text-section">
+                        <h2><a href="https://www.theconstruct.ai/" target="_blank" style="color: #3b82f6; text-decoration: underline;">The Construct</a></h2>
+                        <ul>
+                            <li>無料アカウントでも1日8時間まで仮想環境が利用でき、最初の学習には十分</li>
+                            <li>ROS1/2の両方に対応</li>
+                            <li>無料でも多くの教材があり、手を動かしながらROSを学べる</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+             <section>
+                <section>
+                    <h2>ローカル環境構築</h2>
+                    <p>手元のロボットを動かすにはローカル環境が必須です、オンライン教材でROSに慣れたらこっちに移行してください</p>
+                    <p>環境構築はトラブルが多く、解決にはLinux,Docker,ROSの知識を総動員します</p>
+                    <p>最初は先人が作ったものを活用してください(僕も最初はそのように始めました)↓</p>
+                </section>
+                <section>
+                    <h2>必要な環境とソフトウェア</h2>
+                    <ul>
+                        <li>OS: Ubuntu 20.04以降(22.04, 24.04もok)</li>
+                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストール</li>
+
+                    </ul>
+                    </ul>
+
+                </section>
+                <section>
+                    <h2>WSLを使いたい方への注意</h2>
+                    <ul>
+                        <li>Windows上のWSLでの構築も可能ですがメモリ消費が多くトラブルが多いので推奨しません</li>
+                        <li>どうしても使う場合はwin11以降,デスクトップPC,CPUはi7相当,メモリは32GBを推奨します</li>
+                        <li>それ未満の性能だとビルド中にフリーズするなどのトラブルがある可能性があります</li>
+                        <li><a href="https://www.docker.com/ja-jp/products/docker-desktop/" target="_blank" style="color: #3b82f6; text-decoration: underline;">DockerDesktop</a>を事前にインストールしておいてください</li>
+                        <li>DockerDesktopとWSLの接続には設定→Resource→WSL integrationで使用したいWSLをONにします</li>
+                    </ul>
+
+                </section>
+
+                <section>
+                    <h2>ひとまず勉強用のローカル環境が欲しい場合</h2>
+                    <ul>
+                    <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です</li>
+                    <li>トラブルはほぼないですが、VNC越しのため実機ロボットには使えないです(あくまで勉強用)</li>
+                    </ul>
+                </section>
+                    
+                <section>
+                    <h2>実機を動かすローカル環境が欲しい場合</h2>
+                    <p>(他にも色々ありますが)僕の公開パッケージpowder_grindingを使っても良いです</p>
+                    <pre><code data-trim class="bash">
+user@user:~$ git clone -b develop https://github.com/quantumbeam/powder_grinding.git
+user@user:~$ cd powder_grinding/env
+                    </code></pre>
+                    <ul>
+                        <li>環境構築で使うリポジトリをクローンします</li>
+                        <li>developブランチの方が機能が多いです</li>
+                        <li>また、環境構築はenvディレクトリ内で行うので、事前に移動しておいてください</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>powder_grindingでDockerイメージの作成</h2>
+                    <pre><code data-trim class="bash">
+user@user:~/powder_grinding/env$ export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
+user@user:~/powder_grinding/env$ ./BUILD-DOCKER-IMAGE.sh
+                    </code></pre>
+                    <ul>
+                        <li>事前にUbuntuProのトークンの入力が必要です</li>
+                        <li style="font-size: 0.8em;">ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</li>
+                        <li>アカウント作成の後に<a href="https://ubuntu.com/pro/dashboard" target="_blank" style="color: #3b82f6; text-decoration: underline;">ダッシュボード</a>に表示されるトークンを環境変数(exportのコマンド)で登録しておきます</li>
+                        <li>その後、BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>powder_grindingでコンテナの起動とROSのビルド</h2>
+                    <pre><code data-trim class="bash">
+user@user:~/powder_grinding/env$ ./RUN-DOCKER-CONTAINER.sh
+root@powder_grinding_ros:~/catkin_ws$ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
+root@powder_grinding_ros:~/catkin_ws$ source /opt/ros/noetic/setup.bash
+root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
+                    </code></pre>
+                    <ul>
+                        <li>Dockerイメージの作成後にDockerコンテナを起動します(RUN-DOCKER-CONTAINER.sh)</li>
+                        <li>ターミナルの環境がDockerコンテナ内に移動しますので、ROSの環境のビルドをします(INITIAL_SETUP_ROS_ENVIROMENTS.sh)</li>
+                        <li>ROS環境のビルド結果を反映します(source /opt/ros/noetic/setup.bash, source devel/setup.bash)</li>
+                    </ul>
+                </section>
+            </section>
+            </section>
+
             <!-- スライド4: ROSとは -->
             <section>
                 <div class="slide-layout-image">
@@ -121,7 +225,7 @@
                 <section>
                     <h2>はまった時の対処法</h2>
                     <ol>
-                        <li>使い方&nbsp;→&nbsp;チュートリアル or LLM</li>
+                        <li>使い方&nbsp;→&nbsp;チュートリアル or 教材 or LLM</li>
                         <li>相談&nbsp;→&nbsp;コミュニティ or LLM</li>
                         <li>環境&nbsp;→&nbsp;仮想環境でやり直せる</li>
                         <li>実装&nbsp;→&nbsp;個人や組織に依存。。。</li>
@@ -134,10 +238,16 @@
 
 
                 <section>
-                    <h2>1. チュートリアル</h2>
+                    <h2>1. チュートリアルと教材の例</h2>
                     <ul>
                         <li><a href="http://wiki.ros.org/ja/ROS/Tutorials" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">http://wiki.ros.org/ja/ROS/Tutorials</a>
+                                style="color: #3b82f6; text-decoration: underline;">ROS1公式チュートリアル</a>
+                        </li>
+                        <li><a href="https://docs.ros.org/en/rolling/Tutorials.html" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">ROS2公式チュートリアル(量が多く最初は困る)</a>
+                        </li>
+                        <li><a href="https://zenn.dev/array/books/5efdb438cf8be3" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">Ar-RayさんROS2教材(図が多い)</a>
                         </li>
                         <li>ただし、チュートリアルだけでは動くロボットを作るのは難しい</li>
                         <li>このスライドは、よりリアルな実装を扱うことで補完するのが目的です</li>
@@ -281,84 +391,7 @@
                 </section>
             </section>
 
-            <section>
-                <section>
-                    <h2>環境構築</h2>
-                    <p>環境構築はトラブルが多く、解決にはLinux,Docker,ROSの知識を総動員します</p>
-                    <p>最初は先人が作ったものを活用してください(僕も最初はそのように始めました)↓</p>
-                </section>
-                <section>
-                    <h2>必要な環境とソフトウェア</h2>
-                    <ul>
-                        <li>OS: Ubuntu 20.04以降(22.04, 24.04もok)</li>
-                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストール</li>
-
-                    </ul>
-                    </ul>
-
-                </section>
-                <section>
-                    <h2>WSLを使いたい方への注意</h2>
-                    <ul>
-                        <li>Windows上のWSLでの構築も可能ですがメモリ消費が多くトラブルが多いので推奨しません</li>
-                        <li>どうしても使う場合はwin11以降,デスクトップPC,CPUはi7相当,メモリは32GBを推奨します</li>
-                        <li>それ未満の性能だとビルド中にフリーズするなどのトラブルがある可能性があります</li>
-                        <li><a href="https://www.docker.com/ja-jp/products/docker-desktop/" target="_blank" style="color: #3b82f6; text-decoration: underline;">DockerDesktop</a>を事前にインストールしておいてください</li>
-                        <li>DockerDesktopとWSLの接続には設定→Resource→WSL integrationで使用したいWSLをONにします</li>
-                    </ul>
-
-                </section>
-
-                <section>
-                    <h2>公開パッケージでのオススメ</h2>
-                    <ul>
-                    <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です</li>
-                    <li>トラブルはほぼないですが、VNC越しのため実機ロボットには使えないです(あくまで勉強用)</li>
-                    </ul>
-                </section>
-                    
-                <section>
-                    <h2>僕の公開パッケージ(powder_grinding)を使う場合</h2>
-                    <pre><code data-trim class="bash">
-user@user:~$ git clone -b develop https://github.com/quantumbeam/powder_grinding.git
-user@user:~$ cd powder_grinding/env
-                    </code></pre>
-                    <ul>
-                        <li>環境構築で使うリポジトリをクローンします</li>
-                        <li>今回はpowder_grindingのdevelopブランチです</li>
-                        <li>また、環境構築はenvディレクトリ内で行うので、事前に移動しておいてください</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>powder_grindingでDockerイメージの作成</h2>
-                    <pre><code data-trim class="bash">
-user@user:~/powder_grinding/env$ export UBUNTU_PRO_TOKEN="YOUR_TOKEN_HERE"
-user@user:~/powder_grinding/env$ ./BUILD-DOCKER-IMAGE.sh
-                    </code></pre>
-                    <ul>
-                        <li>事前にUbuntuProのトークンの入力が必要です</li>
-                        <li style="font-size: 0.8em;">ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</li>
-                        <li>アカウント作成の後に<a href="https://ubuntu.com/pro/dashboard" target="_blank" style="color: #3b82f6; text-decoration: underline;">ダッシュボード</a>に表示されるトークンを環境変数(exportのコマンド)で登録しておきます</li>
-                        <li>その後、BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>powder_grindingでコンテナの起動とROSのビルド</h2>
-                    <pre><code data-trim class="bash">
-user@user:~/powder_grinding/env$ ./RUN-DOCKER-CONTAINER.sh
-root@powder_grinding_ros:~/catkin_ws$ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
-root@powder_grinding_ros:~/catkin_ws$ source /opt/ros/noetic/setup.bash
-root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
-                    </code></pre>
-                    <ul>
-                        <li>Dockerイメージの作成後にDockerコンテナを起動します(RUN-DOCKER-CONTAINER.sh)</li>
-                        <li>ターミナルの環境がDockerコンテナ内に移動しますので、ROSの環境のビルドをします(INITIAL_SETUP_ROS_ENVIROMENTS.sh)</li>
-                        <li>ROS環境のビルド結果を反映します(source /opt/ros/noetic/setup.bash, source devel/setup.bash)</li>
-                    </ul>
-                </section>
-            </section>
-            </section>
+           
 
             <section>
                 <section>
