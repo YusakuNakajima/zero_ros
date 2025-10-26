@@ -10,7 +10,7 @@
     <!-- Google FontsからInterフォントを読み込みます -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* 日本語フォントと英語フォントを適切に指定します */
         body {
@@ -83,45 +83,63 @@
 
                 <!-- Step 2: ROS -->
                 <section id="step2" class="mb-12">
-                    <h2 class="text-3xl font-bold mb-2 text-slate-800">実践編 - ROSによるアーム制御</h2>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-3xl font-bold text-slate-800">実践編 - ROSによるアーム制御</h2>
+                        <div class="ros-version-selector flex space-x-1 rounded-lg bg-slate-200 p-1">
+                            <button data-version="ros1" class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS1</button>
+                            <button data-version="ros2" class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS2</button>
+                        </div>
+                    </div>
                     <p class="text-slate-500 mb-6">対象：ROSでアーム制御が必要な人。ROS(Robot Operating System)を使って、より高度な制御を行うための基礎を学びます。</p>
+                    <div class="ros2-warning bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg my-4" role="alert" style="display: none;">
+                        <p><span class="font-bold">注意:</span> ROS2版のコードは現在修正中です。動作しない可能性があります。</p>
+                    </div>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <a href="slides/ros-introduction/index.html" class="slide-card">
+                        <a href="slides/ros-introduction/index_ros1.html" class="slide-card ros-version-link">
                             <h3 class="slide-title">🌐 ゼロからのROS入門</h3>
                             <p class="slide-description">ROSの学習戦略と、効果的な学習リソースの選択方法を紹介します。</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch" data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
-                        <a href="slides/ros-model-display/index.html" class="slide-card">
+                        <a href="slides/ros-model-display/index_ros1.html" class="slide-card ros-version-link">
                             <h3 class="slide-title">📐 ロボットモデルの表示</h3>
-                            <p class="slide-description">URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます。</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                            <p class="slide-description ros-text-switch" data-ros1-text="URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます." data-ros2-text="URDF/XACROでのロボットモデリング、TFツリー、RViz2での可視化を学びます.">URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます.</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch" data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
-                        <a href="slides/ros-simulator-connection/index.html" class="slide-card">
+                        <a href="slides/ros-simulator-connection/index_ros1.html" class="slide-card ros-version-link">
                             <h3 class="slide-title">🎮 シミュレータとの接続</h3>
-                            <p class="slide-description">fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます。</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                            <p class="slide-description ros-text-switch" data-ros1-text="fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます." data-ros2-text="Mock ComponentsやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます.">fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます.</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch" data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
-                        <a href="slides/ros-arm-position-control/index.html" class="slide-card">
+                        <a href="slides/ros-arm-position-control/index_ros1.html" class="slide-card ros-version-link">
                             <h3 class="slide-title">🎯 アーム位置制御とモーションプランニング</h3>
-                            <p class="slide-description">MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します。</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800">ROS</span></div>
+                            <p class="slide-description ros-text-switch" data-ros1-text="MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します." data-ros2-text="MoveIt2!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します.">MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します.</p>
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch" data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
                     </div>
                 </section>
 
                 <!-- Step 3: 応用 -->
                 <section id="step3" class="mb-12">
-                    <h2 class="text-3xl font-bold mb-2 text-slate-800">応用編 - センサベース制御</h2>
+                     <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-3xl font-bold text-slate-800">応用編 - センサベース制御</h2>
+                        <div class="ros-version-selector flex space-x-1 rounded-lg bg-slate-200 p-1">
+                            <button data-version="ros1" class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS1</button>
+                            <button data-version="ros2" class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS2</button>
+                        </div>
+                    </div>
                     <p class="text-slate-500 mb-6">対象：より高度なアプリケーションを開発したい人。力覚や視覚情報を使ったフィードバック制御を学びます。</p>
                     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg mb-6" role="alert">
                          <p class="font-bold">注意</p>
                          <p>製作途中のスライドを多く含むのでご注意ください。</p>
                      </div>
+                    <div class="ros2-warning bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg my-4" role="alert" style="display: none;">
+                        <p><span class="font-bold">注意:</span> ROS2版のコードは現在修正中です。動作しない可能性があります。</p>
+                    </div>
                     <div class="space-y-8">
                         <div>
                             <h3 class="text-xl font-bold mb-4 text-slate-700">👁️ Visionベース</h3>
                             <div class="grid md:grid-cols-2 gap-6">
-                                <a href="slides/ros-camera/index.html" class="slide-card">
+                                <a href="slides/ros-camera/index_ros1.html" class="slide-card ros-version-link">
                                     <h3 class="slide-title">📷 カメラ/デプスカメラ</h3>
                                     <p class="slide-description">ROSでのカメラ統合、画像処理、ポイントクラウド処理を学びます。</p>
                                     <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span></div>
@@ -135,12 +153,12 @@
                         <div>
                             <h3 class="text-xl font-bold mb-4 text-slate-700">💪 Forceベース</h3>
                             <div class="grid md:grid-cols-2 gap-6">
-                                <a href="slides/ros-ft-sensor/index.html" class="slide-card">
+                                <a href="slides/ros-ft-sensor/index_ros1.html" class="slide-card ros-version-link">
                                     <h3 class="slide-title">⚖️ フォーストルクセンサ</h3>
                                     <p class="slide-description">6軸力・トルクの活用、ノイズ除去、座標変換などを学びます。</p>
                                     <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span></div>
                                 </a>
-                                <a href="slides/ros-arm-force-control/index.html" class="slide-card">
+                                <a href="slides/ros-arm-force-control/index_ros1.html" class="slide-card ros-version-link">
                                     <h3 class="slide-title">🦾 アーム力制御</h3>
                                     <p class="slide-description">インピーダンス/アドミッタンス制御など、力を使った高度な制御を学びます。</p>
                                     <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span></div>
@@ -215,13 +233,74 @@
         }
     </style>
     
-    <!-- JavaScript (モバイルメニュー用) -->
+    <!-- JavaScript -->
     <script>
+        // モバイルメニュー
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
+        });
+
+        // ROSバージョン切り替え
+        document.addEventListener('DOMContentLoaded', function() {
+            const versionSelectors = document.querySelectorAll('.ros-version-selector');
+            const links = document.querySelectorAll('.ros-version-link');
+            const textElements = document.querySelectorAll('.ros-text-switch');
+            const warnings = document.querySelectorAll('.ros2-warning');
+
+            function updateUI(selectedVersion) {
+                const versionString = selectedVersion.substring(3); // "1" or "2"
+
+                // ボタンのスタイルを更新
+                versionSelectors.forEach(selector => {
+                    const buttons = selector.querySelectorAll('.ros-version-btn');
+                    buttons.forEach(button => {
+                        if (button.dataset.version === selectedVersion) {
+                            button.classList.add('bg-white', 'shadow');
+                            button.classList.remove('text-slate-700');
+                        } else {
+                            button.classList.remove('bg-white', 'shadow');
+                            button.classList.add('text-slate-700');
+                        }
+                    });
+                });
+
+                // リンクのhrefを更新
+                links.forEach(link => {
+                    const currentHref = link.getAttribute('href');
+                    link.setAttribute('href', currentHref.replace(/index_ros[12]\.html/, `index_ros${versionString}.html`));
+                });
+
+                // テキストを更新
+                textElements.forEach(el => {
+                    const text = el.dataset[selectedVersion + 'Text']; // el.dataset.ros1Text or el.dataset.ros2Text
+                    if (text) {
+                        el.innerText = text;
+                    }
+                });
+
+                // 注意書きの表示を更新
+                if (selectedVersion === 'ros2') {
+                    warnings.forEach(w => w.style.display = 'block');
+                } else {
+                    warnings.forEach(w => w.style.display = 'none');
+                }
+            }
+
+            // ボタンにクリックイベントを追加
+            versionSelectors.forEach(selector => {
+                selector.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('ros-version-btn')) {
+                        const selectedVersion = e.target.dataset.version;
+                        updateUI(selectedVersion);
+                    }
+                });
+            });
+
+            // 初期状態をROS2に設定
+            updateUI('ros2');
         });
     </script>
 </body>

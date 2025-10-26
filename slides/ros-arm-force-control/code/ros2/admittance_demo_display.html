@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admittance Control Demo</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            padding: 20px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .code-container {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .line-number {
+            color: #858585;
+            margin-right: 10px;
+            user-select: none;
+        }
+        .keyword {
+            color: #569cd6;
+            font-weight: bold;
+        }
+        .string {
+            color: #ce9178;
+        }
+        .comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+        .function {
+            color: #dcdcaa;
+        }
+        .class {
+            color: #4ec9b0;
+        }
+        .number {
+            color: #b5cea8;
+        }
+    </style>
+</head>
+<body>
+    <div class="code-container">
+        <pre><code><span class="line-number">1</span><span class="comment">#!/usr/bin/env python3</span>
+<span class="line-number">2</span><span class="comment"># -*- coding: utf-8 -*-</span>
+<span class="line-number">3</span><span class="comment">"""</span>
+<span class="line-number">4</span><span class="comment">Admittance Controller Demo for ROS2 Force Control</span>
+<span class="line-number">5</span><span class="comment">"""</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span><span class="keyword">import</span> rclpy
+<span class="line-number">8</span><span class="keyword">from</span> rclpy.node <span class="keyword">import</span> Node
+<span class="line-number">9</span><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Wrench, TwistStamped
+<span class="line-number">10</span><span class="keyword">from</span> sensor_msgs.msg <span class="keyword">import</span> JointState
+<span class="line-number">11</span><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="line-number">12</span><span class="keyword">import</span> math
+<span class="line-number">13</span>
+<span class="line-number">14</span><span class="keyword">class</span> <span class="class">AdmittanceControlDemo</span>(Node):
+<span class="line-number">15</span>    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+<span class="line-number">16</span>        super().__init__(<span class="string">'admittance_control_demo'</span>)
+<span class="line-number">17</span>        
+<span class="line-number">18</span>        <span class="comment"># Publishers</span>
+<span class="line-number">19</span>        <span class="keyword">self</span>.admittance_pub = <span class="keyword">self</span>.create_publisher(
+<span class="line-number">20</span>            TwistStamped, <span class="string">'/admittance_controller/reference'</span>, <span class="number">10</span>)
+<span class="line-number">21</span>        
+<span class="line-number">22</span>        <span class="comment"># Subscribers</span>
+<span class="line-number">23</span>        <span class="keyword">self</span>.ft_sub = <span class="keyword">self</span>.create_subscription(
+<span class="line-number">24</span>            Wrench, <span class="string">'/force_torque_sensor_broadcaster/wrench'</span>, 
+<span class="line-number">25</span>            <span class="keyword">self</span>.force_callback, <span class="number">10</span>)
+<span class="line-number">26</span>        
+<span class="line-number">27</span>        <span class="comment"># Admittance parameters (M, D, K matrices)</span>
+<span class="line-number">28</span>        <span class="keyword">self</span>.mass = np.diag([<span class="number">10.0</span>, <span class="number">10.0</span>, <span class="number">10.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>])
+<span class="line-number">29</span>        <span class="keyword">self</span>.damping = np.diag([<span class="number">100.0</span>, <span class="number">100.0</span>, <span class="number">100.0</span>, <span class="number">10.0</span>, <span class="number">10.0</span>, <span class="number">10.0</span>])
+<span class="line-number">30</span>        <span class="keyword">self</span>.stiffness = np.diag([<span class="number">500.0</span>, <span class="number">500.0</span>, <span class="number">500.0</span>, <span class="number">50.0</span>, <span class="number">50.0</span>, <span class="number">50.0</span>])
+<span class="line-number">31</span>        
+<span class="line-number">32</span>        <span class="comment"># Safety limits</span>
+<span class="line-number">33</span>        <span class="keyword">self</span>.max_force = <span class="number">50.0</span>  <span class="comment"># N</span>
+<span class="line-number">34</span>        <span class="keyword">self</span>.max_velocity = <span class="number">0.1</span>  <span class="comment"># m/s</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>    <span class="keyword">def</span> <span class="function">force_callback</span>(<span class="keyword">self</span>, msg):
+<span class="line-number">37</span>        <span class="comment">"""Force/torque sensor callback"""</span>
+<span class="line-number">38</span>        <span class="keyword">self</span>.current_wrench = msg
+<span class="line-number">39</span>        
+<span class="line-number">40</span>        <span class="comment"># Safety check</span>
+<span class="line-number">41</span>        force_magnitude = math.sqrt(
+<span class="line-number">42</span>            msg.force.x**<span class="number">2</span> + msg.force.y**<span class="number">2</span> + msg.force.z**<span class="number">2</span>)
+<span class="line-number">43</span>        
+<span class="line-number">44</span>        <span class="keyword">if</span> force_magnitude > <span class="keyword">self</span>.max_force:
+<span class="line-number">45</span>            <span class="keyword">self</span>.emergency_stop()
+<span class="line-number">46</span>            <span class="keyword">return</span>
+<span class="line-number">47</span>        
+<span class="line-number">48</span>        <span class="comment"># Compute admittance response</span>
+<span class="line-number">49</span>        <span class="keyword">self</span>.compute_admittance_response(msg)
+<span class="line-number">50</span>
+<span class="line-number">51</span>    <span class="keyword">def</span> <span class="function">compute_admittance_response</span>(<span class="keyword">self</span>, wrench):
+<span class="line-number">52</span>        <span class="comment">"""Calculate admittance response based on force input"""</span>
+<span class="line-number">53</span>        <span class="comment"># Admittance equation: M*ẍ + D*ẋ + K*x = F</span>
+<span class="line-number">54</span>        force_vector = np.array([
+<span class="line-number">55</span>            wrench.force.x, wrench.force.y, wrench.force.z,
+<span class="line-number">56</span>            wrench.torque.x, wrench.torque.y, wrench.torque.z
+<span class="line-number">57</span>        ])
+<span class="line-number">58</span>        
+<span class="line-number">59</span>        <span class="comment"># Calculate desired acceleration</span>
+<span class="line-number">60</span>        desired_acc = np.linalg.inv(<span class="keyword">self</span>.mass) @ (
+<span class="line-number">61</span>            force_vector - <span class="keyword">self</span>.damping @ current_vel - <span class="keyword">self</span>.stiffness @ current_pos
+<span class="line-number">62</span>        )
+<span class="line-number">63</span>        
+<span class="line-number">64</span>        <span class="comment"># Publish velocity command</span>
+<span class="line-number">65</span>        <span class="keyword">self</span>.publish_velocity_command(desired_vel)
+</code></pre>
+    </div>
+</body>
+</html>

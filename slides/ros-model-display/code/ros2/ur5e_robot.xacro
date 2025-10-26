@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<robot name="ur5e_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="DEG_TO_RAD" value="0.017453292519943295"/>
+  <xacro:property name="PI" value="3.14159265359"/>
+  <xacro:property name="PI_2" value="${PI / 2}"/>
+  <xacro:property name="PI_4" value="${PI / 4}"/>
+
+  <material name="LightGrey">
+    <color rgba="0.7 0.7 0.7 1.0"/>
+  </material>
+
+  <xacro:macro name="standard_link" params="name mass ixx iyy izz ixy ixz iyz *visual_origin *collision_origin *inertial_origin visual_mesh collision_mesh">
+    <link name="${name}">
+      <visual>
+        <xacro:insert_block name="visual_origin" />
+        <geometry>
+          <mesh filename="${visual_mesh}"/>
+        </geometry>
+        <material name="LightGrey"/>
+      </visual>
+      <collision>
+        <xacro:insert_block name="collision_origin" />
+        <geometry>
+          <mesh filename="${collision_mesh}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="${mass}"/>
+        <xacro:insert_block name="inertial_origin" />
+        <inertia ixx="${ixx}" ixy="${ixy}" ixz="${ixz}" iyy="${iyy}" iyz="${iyz}" izz="${izz}"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="revolute_joint" params="name parent child origin_xyz origin_rpy axis_xyz effort lower_limit upper_limit velocity damping friction">
+    <joint name="${name}" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${child}"/>
+      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+      <axis xyz="${axis_xyz}"/>
+      <limit effort="${effort}" lower="${lower_limit}" upper="${upper_limit}" velocity="${velocity}"/>
+      <dynamics damping="${damping}" friction="${friction}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="fixed_joint" params="name parent child origin_xyz origin_rpy">
+    <joint name="${name}" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${child}"/>
+      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:standard_link
+    name="base_link"
+    mass="4.0"
+    ixx="0.00443333156" iyy="0.00443333156" izz="0.0072"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/base.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/base.stl">
+    <visual_origin rpy="0 0 ${PI}" xyz="0 0 0"/>
+    <collision_origin rpy="0 0 ${PI}" xyz="0 0 0"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_link
+    name="shoulder_link"
+    mass="3.7"
+    ixx="0.010267495893" iyy="0.010267495893" izz="0.00666"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/shoulder.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/shoulder.stl">
+    <visual_origin rpy="0 0 ${PI}" xyz="0 0 0"/>
+    <collision_origin rpy="0 0 ${PI}" xyz="0 0 0"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_link
+    name="upper_arm_link"
+    mass="8.393"
+    ixx="0.138134736413" iyy="0.138134736413" izz="0.0236053125"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/upperarm.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/upperarm.stl">
+    <visual_origin rpy="${PI_2} 0 ${-PI_2}" xyz="0 0 0.138"/>
+    <collision_origin rpy="${PI_2} 0 ${-PI_2}" xyz="0 0 0.138"/>
+    <inertial_origin rpy="0 ${PI_2} 0" xyz="-0.2125 0.0 0.138"/>
+  </xacro:standard_link>
+
+  <xacro:standard_link
+    name="forearm_link"
+    mass="2.275"
+    ixx="0.0323610733889" iyy="0.0323610733889" izz="0.0063984375"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/forearm.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/forearm.stl">
+    <visual_origin rpy="${PI_2} 0 ${-PI_2}" xyz="0 0 0.007"/>
+    <collision_origin rpy="${PI_2} 0 ${-PI_2}" xyz="0 0 0.007"/>
+    <inertial_origin rpy="0 ${PI_2} 0" xyz="-0.2125 0.0 0.007"/>
+  </xacro:standard_link>
+
+  <xacro:standard_link
+    name="wrist_1_link"
+    mass="1.219"
+    ixx="0.00272396513625" iyy="0.00272396513625" izz="0.0034284375"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/wrist1.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/wrist1.stl">
+    <visual_origin rpy="${PI_2} 0 0" xyz="0 0 -0.127"/>
+    <collision_origin rpy="${PI_2} 0 0" xyz="0 0 -0.127"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_link
+    name="wrist_2_link"
+    mass="1.219"
+    ixx="0.00272194058122" iyy="0.00272194058122" izz="0.0034284375"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/wrist2.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/wrist2.stl">
+    <visual_origin rpy="0 0 0" xyz="0 0 -0.0997"/>
+    <collision_origin rpy="0 0 0" xyz="0 0 -0.0997"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </xacro:standard_link>
+
+  <xacro:standard_link
+    name="wrist_3_link"
+    mass="0.1879"
+    ixx="0.000134270154625" iyy="0.000134270154625" izz="0.00019024875"
+    ixy="0.0" ixz="0.0" iyz="0.0"
+    visual_mesh="package://ur_description/meshes/ur5e/visual/wrist3.dae"
+    collision_mesh="package://ur_description/meshes/ur5e/collision/wrist3.stl">
+    <visual_origin rpy="${PI_2} 0 0" xyz="0 0 -0.0989"/>
+    <collision_origin rpy="${PI_2} 0 0" xyz="0 0 -0.0989"/>
+    <inertial_origin rpy="0 0 0" xyz="0.0 0.0 -0.025"/>
+  </xacro:standard_link>
+
+  <link name="ee_link">
+    <collision>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="-0.01 0 0"/>
+    </collision>
+  </link>
+
+  <link name="base"/>
+  <link name="tool0"/>
+  <link name="world"/>
+
+  <xacro:revolute_joint
+    name="shoulder_pan_joint"
+    parent="base_link"
+    child="shoulder_link"
+    origin_xyz="0 0 0.1625"
+    origin_rpy="0 0 ${PI}"
+    axis_xyz="0 0 1"
+    effort="150.0"
+    lower_limit="${-PI}"
+    upper_limit="${PI}"
+    velocity="${PI}"
+    damping="0.0"
+    friction="0.0"/>
+
+  <xacro:revolute_joint
+    name="shoulder_lift_joint"
+    parent="shoulder_link"
+    child="upper_arm_link"
+    origin_xyz="0 0 0"
+    origin_rpy="${PI_2} 0 0"
+    axis_xyz="0 0 1"
+    effort="150.0"
+    lower_limit="${-PI}"
+    upper_limit="${PI}"
+    velocity="${PI}"
+    damping="0.0"
+    friction="0.0"/>
+
+  <xacro:revolute_joint
+    name="elbow_joint"
+    parent="upper_arm_link"
+    child="forearm_link"
+    origin_xyz="-0.425 0 0"
+    origin_rpy="0 0 0"
+    axis_xyz="0 0 1"
+    effort="150.0"
+    lower_limit="${-PI}"
+    upper_limit="${PI}"
+    velocity="${PI}"
+    damping="0.0"
+    friction="0.0"/>
+
+  <xacro:revolute_joint
+    name="wrist_1_joint"
+    parent="forearm_link"
+    child="wrist_1_link"
+    origin_xyz="-0.3922 0 0.1333"
+    origin_rpy="0 0 0"
+    axis_xyz="0 0 1"
+    effort="28.0"
+    lower_limit="${-PI}"
+    upper_limit="${PI}"
+    velocity="${2 * PI}"
+    damping="0.0"
+    friction="0.0"/>
+
+  <xacro:revolute_joint
+    name="wrist_2_joint"
+    parent="wrist_1_link"
+    child="wrist_2_link"
+    origin_xyz="0 -0.0997 -2.0448811823e-11"
+    origin_rpy="${PI_2} 0 0"
+    axis_xyz="0 0 1"
+    effort="28.0"
+    lower_limit="${-PI}"
+    upper_limit="${PI}"
+    velocity="${2 * PI}"
+    damping="0.0"
+    friction="0.0"/>
+
+  <xacro:revolute_joint
+    name="wrist_3_joint"
+    parent="wrist_2_link"
+    child="wrist_3_link"
+    origin_xyz="0 0.0996 -2.04283014801e-11"
+    origin_rpy="${PI_2} ${PI} ${PI}"
+    axis_xyz="0 0 1"
+    effort="28.0"
+    lower_limit="${-PI}"
+    upper_limit="${PI}"
+    velocity="${2 * PI}"
+    damping="0.0"
+    friction="0.0"/>
+
+  <xacro:fixed_joint
+    name="ee_fixed_joint"
+    parent="wrist_3_link"
+    child="ee_link"
+    origin_xyz="0.0 0.0 0.0"
+    origin_rpy="0.0 ${-PI_2} ${PI_2}"/>
+
+  <xacro:fixed_joint
+    name="base_link-base_fixed_joint"
+    parent="base_link"
+    child="base"
+    origin_xyz="0 0 0"
+    origin_rpy="0 0 ${-PI}"/>
+
+  <xacro:fixed_joint
+    name="wrist_3_link-tool0_fixed_joint"
+    parent="wrist_3_link"
+    child="tool0"
+    origin_xyz="0 0 0"
+    origin_rpy="0 0 0"/>
+
+  <xacro:fixed_joint
+    name="world_joint"
+    parent="world"
+    child="base_link"
+    origin_xyz="0.0 0.0 0.0"
+    origin_rpy="0.0 0.0 0.0"/>
+
+</robot>

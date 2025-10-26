@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>ゼロからのROS2 - カメラ/デプスカメラ</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- スライド1: タイトル -->
+            <section>
+                <h1>ゼロからのROS2</h1>
+                <h2>カメラ/デプスカメラ</h2>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- スライド2: カメラの用途 -->
+            <section>
+                <section>
+                    <h2>カメラの用途</h2>
+                    <ul>
+                        <li>物体検出と位置推定</li>
+                        <li>環境認識・マッピング</li>
+                        <li>品質検査・外観検査</li>
+                        <li>人物・顔認識</li>
+                        <li>動作解析・トラッキング</li>
+                        <li>自動運転・ナビゲーション</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>物体検出と位置推定</h2>
+                    <ul>
+                        <li>2Dカメラ：物体の識別・分類</li>
+                        <li>デプスカメラ：3D位置情報の取得</li>
+                        <li>ステレオカメラ：視差による距離計測</li>
+                        <li>RGB-Dカメラ：色情報＋深度情報</li>
+                        <li>用途：ピック&プレース、検査作業</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- スライド3: カメラの使い方(Webカメラ) -->
+            <section>
+                <section>
+                    <h2>カメラの使い方(Webカメラ)</h2>
+                    <ul>
+                        <li>最も一般的なカメラインターフェース</li>
+                        <li>USBで接続、プラグ&プレイ対応</li>
+                        <li>UVC(USB Video Class)規格</li>
+                        <li>ROSでの豊富なサポート</li>
+                        <li>開発・テスト用途に最適</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>UVCとは</h2>
+                    <ul>
+                        <li>USB Video Class の略</li>
+                        <li>USBカメラの標準規格</li>
+                        <li>ドライバ不要で動作</li>
+                        <li>Linux標準サポート</li>
+                        <li>多くのWebカメラが対応</li>
+                        <li>解像度・フレームレート調整可能</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>ROSで使えるパッケージ</h2>
+                    <p>以下をネットなどでよく見ますが、libuvc-cameraがおススメです</p>
+                </section>
+
+                <section>
+                    <h2>libuvc-camera(オススメ)</h2>
+                    <ul>
+                        <li>開発継続中</li>
+                        <li>nodeletも使えるのでマルチスレッドにデータを受け取れる</li>
+                        <li>ROS1/ROS2両方対応</li>
+                        <li>カメラパラメータ調整機能</li>
+                        <li>高いパフォーマンス</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>usb-cam</h2>
+                    <ul>
+                        <li>開発修了</li>
+                        <li>古いROSディストリビューションで使用</li>
+                        <li>シンプルな実装</li>
+                        <li>メンテナンス停止</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>uvc-camera</h2>
+                    <ul>
+                        <li>現状サポート無し</li>
+                        <li>過去のプロジェクトで使用</li>
+                        <li>新規開発には非推奨</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- スライド4: デプスカメラの使い方(Realsense) -->
+            <section>
+                <section>
+                    <h2>デプスカメラの使い方(RealSense)</h2>
+                    <ul>
+                        <li>Intel製の高性能深度カメラ</li>
+                        <li>RGB + Depth情報を同時取得</li>
+                        <li>ロボットビジョンの定番</li>
+                        <li>Python・C++両方対応</li>
+                        <li>ROS統合パッケージ有り</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>PyRealSense</h2>
+                    <ul>
+                        <li>Pythonでの直接制御</li>
+                        <li>シンプルなAPI</li>
+                        <li>プロトタイピングに最適</li>
+                        <li>リアルタイム処理</li>
+                        <li>カメラ設定の詳細制御</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>RealSense ROS</h2>
+                    <ul>
+                        <li>ROSノードとしてカメラ制御</li>
+                        <li>標準的なROSメッセージ形式</li>
+                        <li>他のROSノードとの連携</li>
+                        <li>Launch ファイルで簡単起動</li>
+                        <li>RVizでのリアルタイム可視化</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- スライド5: カメラの内部パラメータ調整 -->
+            <section>
+                <h2>カメラの内部パラメータ調整</h2>
+                <ul>
+                    <li>カメラキャリブレーション</li>
+                    <li>焦点距離・主点の補正</li>
+                    <li>レンズ歪み補正</li>
+                    <li>チェッカーボードパターン使用</li>
+                    <li>OpenCVキャリブレーション機能</li>
+                    <li>ROSでは camera_calibration パッケージ</li>
+                </ul>
+            </section>
+
+            <!-- スライド6: カメラの外部パラメータ調整 -->
+            <section>
+                <section>
+                    <h2>カメラの外部パラメータ調整</h2>
+                    <ul>
+                        <li>カメラとロボット間の位置関係</li>
+                        <li>座標系変換パラメータ</li>
+                        <li>Hand-Eye Calibration</li>
+                        <li>Eye-to-Hand / Eye-in-Hand</li>
+                        <li>TFによる座標系管理</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Hand-Eye Calibration</h2>
+                    <ul>
+                        <li>ロボットハンドとカメラの位置関係決定</li>
+                        <li>複数ポーズでの測定</li>
+                        <li>AX=XB問題の解法</li>
+                        <li>MoveItでのキャリブレーション</li>
+                        <li>easy_handeye パッケージ利用</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- スライド7: 画像処理 -->
+            <section>
+                <h2>画像処理</h2>
+                <ul>
+                    <li>OpenCVをよく使います</li>
+                    <li>フィルタリング・エッジ検出</li>
+                    <li>物体検出・特徴抽出</li>
+                    <li>機械学習による分類</li>
+                    <li>cv_bridge でROSメッセージ変換</li>
+                    <li>image_transport で効率的な画像転送</li>
+                </ul>
+            </section>
+
+            <!-- スライド8: ポイントクラウド -->
+            <section>
+                <section>
+                    <h2>ポイントクラウド</h2>
+                    <ul>
+                        <li>3次元点群データ</li>
+                        <li>デプスカメラ・LiDARから生成</li>
+                        <li>さすがに処理が重たいので、リアルタイムな処理は基本はC++で扱います</li>
+                        <li>フィルタリング・セグメンテーション</li>
+                        <li>物体認識・マッピング</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>PCL(Point Cloud Library)</h2>
+                    <ul>
+                        <li>ROSの発展と共に開発されてきたのがPCL(PointCloudLibrary)です</li>
+                        <li>C++用です</li>
+                        <li>豊富なアルゴリズム</li>
+                        <li>ROS標準のpoint_cloud2メッセージ対応</li>
+                        <li>リアルタイム処理に最適</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Open3D for Python</h2>
+                    <ul>
+                        <li>可視化くらいならpythonでもok</li>
+                        <li>Open3Dというライブラリで扱えます</li>
+                        <li>プロトタイピング・可視化に便利</li>
+                        <li>Jupyter Notebookでの解析</li>
+                        <li>機械学習との連携</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- 最終スライド: まとめ -->
+            <section>
+                <h2>まとめ</h2>
+                <ul>
+                    <li>用途に応じたカメラ選択</li>
+                    <li>ROSパッケージの適切な利用</li>
+                    <li>キャリブレーションの重要性</li>
+                    <li>処理性能とプログラミング言語の選択</li>
+                    <li>豊富なツール・ライブラリの活用</li>
+                </ul>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
+
+            // プラグインの有効化
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+    </script>
+</body>
+
+</html>

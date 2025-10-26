@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ゼロからのROS1 - アーム位置制御とモーションプランニング</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- タイトルスライド -->
+            <section data-background-image="media/moveit.png" data-background-opacity="0.5">
+                <h1>ゼロからのROS1</h1>
+                <h2>位置制御とモーションプランニング</h2>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- ロボット制御の書籍 -->
+            <section>
+                <h2>ロボット制御参考資料</h2>
+                <p>本スライド(実践)、教科書(理論)の併用がおススメ</p>
+                <p>環境構築がまだの方は→<a href="../ros-introduction/index.html#/11"
+                        style="color: #3b82f6; text-decoration: underline;">環境構築はこちら</a></p>
+                <ol>
+                    <div style="display: flex; align-items: center;">
+                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>イラストが豊富で分かりやすいながらも基礎的な数式を扱っていて最初に読むのにちょうど良い<br>最も基本の位置制御まで扱っている</p>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <img src="media/実践ロボット制御.jpg" style="width: 20%; margin-right: 20px;">
+                        <p>教科書「ロボット制御基礎論」を現在版にブラッシュアップ、理論的な詳しさと実装面までの手引きが充実</p>
+                    </div>
+
+                </ol>
+            </section>
+
+            <!-- アームの軌道制御とは -->
+            <section>
+                <h2>ROSを使う利点</h2>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <h4>ROS生成モーション</h4>
+                        <ul>
+                            <li>PC上で完全に動作を計算してロボットに送る</li>
+                            <li>0.1 mmくらい精密な動作をさせたいときはこっち</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4>メーカー提供モーション</h4>
+                        <ul>
+                            <li>ロボットコントローラでモーションを計算</li>
+                            <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- アーム制御の前提知識 -->
+            <section>
+
+
+
+                <section>
+                    <p>本スライドでは軌道制御の実装を扱います</p>
+
+                    <div style="margin-top: 2em;">
+                        <ul>
+                            <li><strong>実装方法1: MoveIt</strong><br>
+                                障害物回避ありのモーションプランニング<br>
+                                ピッキングなどで便利</li>
+                            <li><strong>実装方法2: JointTrajectoryController</strong><br>
+                                障害物回避なしのモーションプランニング<br>
+                                常に接触するタスクで便利</li>
+                        </ul>
+                        <p>JointTrajectoryControllerってどういう意味？<br>ROSのコントローラの命名則↓</p>
+                    </div>
+                </section>
+
+                <!-- アーム制御は組合せ -->
+                <section>
+                    <h2>アーム制御則は組合せ</h2>
+                    <style>
+                        .custom-table {
+                            margin: auto;
+                            border-collapse: collapse;
+                            font-weight: bold;
+                            color: #ffffff;
+                        }
+
+                        .custom-table th,
+                        .custom-table td {
+                            border: 2px solid #666;
+                            padding: 16px;
+                            text-align: center;
+                            vertical-align: middle;
+                            /* 上下中央揃え */
+                        }
+
+                        .custom-table th {
+                            background-color: #444;
+                            color: #ffffff;
+                        }
+
+                        /* 各列の背景色 - 黒背景対応 */
+                        .col-control {
+                            background-color: #2d3e5a;
+                            color: #87ceeb;
+                        }
+
+                        .col-coords {
+                            background-color: #5a2d2d;
+                            color: #ffb3b3;
+                        }
+
+                        .col-action {
+                            background-color: #2d5a3d;
+                            color: #90ee90;
+                        }
+
+                        .caption {
+                            margin-top: 20px;
+                            font-size: 0.8em;
+                            text-align: left;
+                            color: #ffffff;
+                        }
+                    </style>
+
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>ロボット関節の制御</th>
+                                <th>指定したい座標系</th>
+                                <th>ユーザーが実現したい制御</th>
+                            </tr>
+                        <tbody>
+                            </thead>
+                            <tr>
+                                <td class="col-control">位置</td>
+                                <td class="col-coords">関節座標系</td>
+                                <td class="col-action">位置</td>
+                            </tr>
+                            <tr>
+                                <td class="col-control">速度</td>
+                                <td class="col-coords" rowspan="2">直交座標系</td>
+                                <td class="col-action">速度</td>
+                            </tr>
+                            <tr>
+                                <td class="col-control">トルク</td>
+                                <td class="col-action">力(トルク)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="caption">
+
+                        <h4>ROSコントローラ命名則</h4>
+                        <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
+                            <span style="color: #87ceeb;">position_controllers</span>/<span
+                                style="color: #ffb3b3;">Joint</span><span
+                                style="color: #90ee90;">TrajectoryController</span>
+                        </p>
+
+                    </div>
+                </section>
+
+                <!-- よく使うROSのアームコントローラ -->
+                <section>
+                    <h2>よく使うROSの関節空間の<br>アームコントローラ</h2>
+                    <div style="margin-bottom: 2em;">
+                        <p style="font-size: 0.8em; margin-bottom: 0.5em;">
+                            参考: <a
+                                href="https://github.com/harumo11/moveit_start/blob/master/docs/docs/joint_trajectory_controller/joint_trajectory_controller.md"
+                                target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                                joint_trajectory_controller.md</a>
+                        </p>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>position_controllers/JointTrajectoryController</strong></li>
+                            <li><strong>velocity_controllers/JointTrajectoryController</strong></li>
+                            <li><strong>effort_controllers/JointTrajectoryController</strong></li>
+                        </ul>
+                    </div>
+                </section> <!-- よく使うROSのアームコントローラ -->
+                <section>
+                    <h2>よく使うROSの直交空間の<br>アームコントローラ</h2>
+                    <div>
+                        <p style="font-size: 0.8em; margin-bottom: 0.5em;">
+                            参考: <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers"
+                                target="_blank" style="color: #4CAF50; text-decoration: underline;">
+                                cartesian_controllers</a>
+                        </p>
+                        <p style="font-size: 0.8em; color: #ccc; margin-bottom: 0.5em;">
+                            position_controllers→velocity_controllersでも利用可能
+                        </p>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>position_controllers/CartesianMotionController</strong></li>
+                            <li><strong>position_controllers/CartesianForceController</strong></li>
+                            <li><strong>position_controllers/CartesianComplianceController</strong></li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- ロボットの制御種類 -->
+                <section>
+                    <h2>市販だと位置/速度制御が多い</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_robot.png" alt="代表的なロボット" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>位置/速度制御</h3>
+                            <p>position_controllers, velocity_controllersのみ使用可</p>
+                            <ul>
+                                <li>Universal Robot</li>
+                                <li>DENSO</li>
+                                <li>その他多数</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>トルク制御できるロボットもある</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/franka_robot.png" alt="代表的なロボット" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>トルク制御</h3>
+                            <p>effort_controllersも使用可</p>
+                            <ul>
+                                <li>Franka Robotics</li>
+                                <li>KUKA</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- MoveItによるアーム制御 (スライド10) -->
+            <section>
+                <section data-background-image="media/moveit.png" data-background-opacity="0.5">
+                    <h2>MoveItによるアーム制御</h2>
+                </section>
+
+                <!-- MoveItで何ができるか (縦スライド) -->
+                <section>
+                    <h2>MoveItとは</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="560" height="315"
+                                src="https://www.youtube.com/embed/ntJkRO_Z41I?si=UvyzDUo3avlFN_5m"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>障害物を避ける動作を自動生成</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MoveItのモーションプランニングの手順 (縦スライド) -->
+                <section>
+                    <h2>MoveIt 3 Steps</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <div style="margin-top: 2em;">
+                                <ol>
+                                    <li>目標姿勢を指定</li>
+                                    <li>モーションプランニング</li>
+                                    <li>実行！</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 手先の姿勢の表現 (縦スライド) -->
+                <section>
+                    <h2>ステップ1:手先姿勢の表現</h2>
+                    <p>位置(position)+向き(orientation)=姿勢(pose)</p>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>位置：</strong>XYZで表す</li>
+                                <li><strong>向き：</strong>オイラー角 or クオータニオン</li>
+                                <li>ROSでは内部計算でクオータニオンを使う</li>
+
+
+                            </ul>
+                        </div>
+                    </div>
+                    <p>実用上は最初と最後の姿勢をオイラー角で指定、クオータニオンに変換後に補完してROSに渡す</p>
+                </section>
+
+                <!-- オイラー角による表現 (縦スライド) -->
+                <section>
+                    <h2>オイラー角による表現と課題</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/gimbal_lock.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/gimbal_lock.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>利点</strong>
+                                    <ul>
+                                        <li>直観的</li>
+                                        <li>3つの角度（Roll, Pitch, Yaw）で表現</li>
+                                    </ul>
+                                </li>
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>ジンバルロックを避ける必要</li>
+                                        <li>軌道補間で不自然な動きになることがある</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- クォータニオンによる表現 (縦スライド) -->
+                <section>
+                    <h2>クォータニオンによる表現</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/euler_vs_quat.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/euler_vs_quat.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>利点</strong>
+                                    <ul>
+                                        <li>ジンバルロックが発生しない</li>
+                                        <li>回転軸と回転角で表現</li>
+                                        <li>数値的に安定</li>
+                                    </ul>
+                                </li>
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>直観的理解が困難</li>
+                                        <li>4つの要素（w, x, y, z）で表現</li>
+                                        <li>正規化が必要</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- クォータニオン補間の利点 (縦スライド) -->
+                <section>
+                    <h2>クォータニオン補間の利点</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/euler_vs_quat_interpolation.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/euler_vs_quat_interpolation.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>SLERP (Spherical Linear Interpolation)</strong>
+                                    <ul>
+                                        <li>球面上の最短経路で補間</li>
+                                        <li>角速度が一定</li>
+                                        <li>滑らかな軌道生成</li>
+                                    </ul>
+                                </li>
+                                <li><strong>オイラー角補間との比較</strong>
+                                    <ul>
+                                        <li>より自然な回転軌道</li>
+                                        <li>ジンバルロック回避</li>
+                                        <li>計算効率が良い</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>クォータニオンを扱う方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>TF</strong>
+                                    <ul>
+                                        <li>ROS標準</li>
+                                        <li>ROS専用の型を使えるのが便利</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Scipy Rotation</strong>
+                                    <ul>
+                                        <li>ROS不要でクオータニオンの計算が可能</li>
+                                        <li>SLERPもあるので僕はよく使う</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- 姿勢の表現 - オススメの実装 (縦スライド) -->
+                <section>
+                    <h2>姿勢の表現 - オススメの実装</h2>
+                    <ul>
+                        <li>最初と最後の姿勢は<strong>直観的にわかりやすいオイラー角</strong>で指定</li>
+                        <li>最初→最後の間のwaypointsの計算では<strong>オイラー角→クォータニオンに変換</strong>してSlerpで補完</li>
+                        <li>ROSはクオータニオンしか扱えない点に注意</li>
+                    </ul>
+
+                </section>
+
+
+
+                <!-- MoveIt2で使えるパスプランニング (縦スライド) -->
+                <section>
+                    <h2>Step2:モーションプランニング</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">
+                            <p style="font-size: 0.6em;">MoveItで使える手法一覧<br>https://opensource-robotics.tokyo.jp/?p=4313
+                            </p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>産業用モーション(PTP,LIN,CIRC)</strong>
+                                    <ul>
+                                        <li>Pilz Industrial Motion Planner</li>
+                                    </ul>
+                                </li>
+                                <li><strong>サンプリングベース</strong>
+                                    <ul>
+                                        <li>OMPLの中の手法</li>
+                                    </ul>
+                                </li>
+                                <li><strong>最適化ベース</strong>
+                                    <ul>
+                                        <li>CHOMP</li>
+                                        <li>STOMP</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- サンプリングベースの手法(RRT) (縦スライド) -->
+                <section>
+                    <h2>サンプリングベースの手法(RRT)</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                data-src="https://www.youtube.com/embed/bsbtR3cOMFU?si=uS_M9jZFcTctw2TW"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <p>MoveItのデフォルト</p>
+                            <ul style="font-size: 0.9em;">
+                                <li>ランダムにパスを伸ばして障害物がなかったら採用、を繰り返す</li>
+                                <li>実際は後処理をかけてスムーズに</li>
+                                <li>スタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最適化ベースの手法(CHOMP) (縦スライド) -->
+                <section>
+                    <h2>最適化ベースの手法(CHOMP)</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                src="https://www.youtube.com/embed/DX9jTBvWrl8?si=4xdRmSrUqBx81UL9"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>コスト：</strong>障害物の距離を遠く、軌道の距離を短く、など</li>
+                                <li><strong>最適化：</strong>勾配降下法</li>
+                                <li>コストの設計と初期軌道の引きの良さによって収束時間や得られた軌道の良しあしが決まる</li>
+                                <li>障害物が多い実用場面では正直使いにくい</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最適化ベースの手法(STOMP) (縦スライド) -->
+                <section>
+                    <h2>最適化ベースの手法(STOMP)</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <iframe width="100%" height="315"
+                                data-src="https://www.youtube.com/embed/QFz4V4Cnt7c?si=SXEbhh-7qx406g2b"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>コスト：</strong>障害物の距離を遠くなど</li>
+                                <li><strong>最適化：</strong>確率的最適化</li>
+                                <li>軌道は最適化で決めるけど、最適化はサンプリングベースというハイブリッドっぽい</li>
+                                <li>滑らかさはCHOMPより劣るが解が収束しやすく実用上は使いやすい</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MoveItCommanderによる実装 -->
+                <section>
+                    <h2>MoveItCommanderによる実装</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/moveit_demo_display.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>MoveItCommanderを使った基本的な実装例</li>
+                                <li>関節角度指定での移動</li>
+                                <li>姿勢指定での移動</li>
+                                <li>カルテシアン軌道での移動</li>
+                                <li>実際のロボット制御ではこのような流れでプログラムを組む</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- JointTrajectoryControllerによるアーム制御 (スライド23) -->
+            <section>
+                <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
+                    <h2>JointTrajectoryControllerによるアーム制御の基本</h2>
+                </section>
+
+                <!-- JTCでの実装の流れ (縦スライド) -->
+                <section>
+                    <h2>JTCの実装4ステップ</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+
+                        <div style="flex: 1;">
+                            <ol>
+                                <li>手先のwaypoints決定</li>
+                                <li>逆運動学</li>
+                                <li>軌道・軌跡生成</li>
+                                <li>実行</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 目標姿勢の計算 (縦スライド) -->
+                <section>
+                    <h2>step1:waypoimtsの計算</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/waypoints_example.png" alt="目標姿勢計算" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>位置とクオータニオンの7次元を並べてwaypointsを作成</li>
+                                <li>クオータニオンのSlerpを活用すると動作が滑らかになる</li>
+                                <li>詳しくはMoveItのスライドを確認</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- 逆運動学の必要性 (縦スライド) -->
+                <section>
+                    <h2>step2:逆運動学(IK)</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/ik_image.png" alt="逆運動学説明" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <p>XYZでロボットの手先姿勢を指定したい<br>
+                                ただ、動かせるのはロボットの関節<br>
+                                そこで手先姿勢→ロボットの関節の計算をする(逆運動学,IK=InverseKinematics)</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 逆運動学の解き方 (縦スライド) -->
+                <section>
+                    <h2>逆運動学の解き方(IKソルバー)</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/IK.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/IK.html" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>解析解</strong>
+                                    <ul>
+                                        <li>特定のロボット構造に基づいた数式</li>
+                                        <li>関節角度を直接計算</li>
+                                    </ul>
+                                </li>
+                                <li><strong>数値解</strong>
+                                    <ul>
+                                        <li>最適化計算による近似解法</li>
+                                        <li>左のアプリのように徐々に近づける</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>現在は汎用性が高く速度も精度も十分になったので数値解を使うことが多い</p>
+                </section>
+
+                <!-- MoveIt2で使えるIKソルバー (縦スライド) -->
+                <section>
+                    <h2>MoveItのIKソルバー</h2>
+                    <p>MoveItのIKソルバー(ROS Service)だけ使用可能</p>
+                    <p>通信時間がかかるので数点のIKなら実用的</p>
+                    <ul style="font-size: 0.8em;">
+                        <li><strong><a
+                                    href="https://moveit.github.io/moveit_tutorials/doc/kinematics_configuration/kinematics_configuration_tutorial.html"
+                                    target="_blank" style="color: #4CAF50; text-decoration: underline;">KDL</a></strong>
+                            -
+                            ニュートン法の数値解ソルバー, MoveItでデフォルト</li>
+
+                        <li><strong><a
+                                    href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
+                                    target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> -
+                            数値解ソルバーでニュートン法とSQP(逐次二次計画法)のハイブリッド, KDLより収束性が良い, Universal RobotのMoveItでデフォルト</li>
+                        <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html"
+                                    target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> -
+                            解析解ソルバー, 計算は早いが解を安定して得にくい</li>
+
+                    </ul>
+                </section>
+
+                <!-- Pythonで使えるIKソルバー (縦スライド) -->
+                <section>
+                    <h2>Pythonで使えるIKソルバー</h2>
+                    <p>大量のIKはIk用ライブラリを直接使うのが良い</p>
+                    <p>実際に使われている手法を紹介</p>
+
+                    <ul style="font-size: 0.8em;">
+                        <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong>
+                            - MoveItでも使われている手法, 安定性と計算速度のバランスが良い</li>
+                        <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> -
+                            最先端の剛体アルゴリズムを実装したライブラリ, Franka Roboticsのライブラリでデフォルト</li>
+                    </ul>
+                </section>
+
+                <!-- 軌跡・軌道生成 (縦スライド) -->
+                <section>
+                    <h2>軌跡・軌道生成</h2>
+
+                    <ul style="font-size: 0.9em;">
+                        <li><strong>軌跡：</strong>逆運動学で得た解, 時間情報なし</li>
+                        <li><strong>軌道：</strong>時間情報を加えたもの</li>
+                        <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
+                        <li>JointTrajectoryControllerでは、少なくともPositionとTimeFromStartを渡すと軌道計算と実行が可能</li>
+                        <li>振動を抑える場合は厳密な速度, 加速度が必要だが、実用上はpositionだけでも問題ないことも多い</li>
+                    </ul>
+
+                </section>
+
+                <!-- 実行 (縦スライド) -->
+                <section>
+                    <h2>JointTrajectoryの送信方法</h2>
+                    <ul style="font-size: 0.9em;">
+                        <li>Topic or Actionで軌跡(JointTrajectory)を送信し実行</li>
+                        <li><strong>Topic</strong></li>
+                        <ul>
+                            <li>/joint_trajectory_controller_name/commandに送信</li>
+                            <li>送ったら直ちに動作を実行、途中で止められない</li>
+                        </ul>
+                        <li><strong>Action</strong>
+                            <ul>
+                                <li>/joint_trajectory_controller_name/FollowJointTrajectoryに送信</li>
+                                <li>目標到達までの状態確認や途中変更も可能</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Actionで送った場合の利点</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/JTC_action.png" alt="実行方法" style="width: 100%;">
+                            <p style="font-size: 0.6em;">参考資料: joint_trajectory_controller.md</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li>途中でキャンセルしたり、軌道を変更して滑らかに繋ぐことができる</li>
+                                <li>即時に反映したいとき以外は基本的にActionを使うべき</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>JointTrajectoryControllerのテスト方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/JTC_GUI.png" alt="実行方法" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li>rqt_joint_trajectory_controller_guiが便利</li>
+                                <li>JointTrajectoryControllerが正常に動いているのかをテストするときなどに使える</li>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- JTCの実装例 (縦スライド) -->
+                <section>
+                    <h2>JTCの実装例</h2>
+                    <table style="font-size: 0.8em; margin: auto;">
+                        <tr>
+                            <td>目標姿勢の決定</td>
+                            <td>：Scipy Rotation Module</td>
+                        </tr>
+                        <tr>
+                            <td>逆運動学</td>
+                            <td>：MoveIt IK Solver(TrackIK)</td>
+                        </tr>
+                        <tr>
+                            <td>軌道生成</td>
+                            <td>：JointTrajectoryController</td>
+                        </tr>
+                        <tr>
+                            <td>軌跡生成</td>
+                            <td>：JointTrajectoryController</td>
+                        </tr>
+                        <tr>
+                            <td>実行</td>
+                            <td>：JointTrajectoryController</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- JointTrajectoryControllerの実装 -->
+                <section>
+                    <h2>JointTrajectoryControllerの実装</h2>
+                    <p>関節を指定して補間するだけのシンプルなデモ</p>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/jtc_demo_display.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ol>
+                                <li>保存してビルド<br>ros_study/scripts/JTC_demo.py</li>
+                                <li>実行権限付与<br><code>chmod +x src/ros_study/scripts/JTC_demo.py</code></li>
+                                <li>実行<br><code>rosrun ros_study JTC_demo.py</code></li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- JointTrajectoryControllerの実装 -->
+                <section>
+                    <h2>JTC + IKの実装</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/jtc_with_ik_demo_display.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>MoveItのIKソルバーを組み込んだデモ</li>
+                                <li>関節の限界を超える場合でもIKが得られるが、ロボットの軌道が大回りになるので注意</li>
+                                <p style="font-size: 0.6em;">※避けるにはwaypoints間の関節角度に許容量を持たせる等の実装をする</p>
+
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+      <!-- JointTrajectoryControllerでの補間設定 (縦スライド) -->
+                <section>
+                    <h2>JointTrajectoryControllerの設定例</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <pre
+                                style="font-size: 0.7em; background: #2d3748; color: #e2e8f0; padding: 1em; border-radius: 8px;">
+<code><span style="color: #718096;"># ur_joint_trajectory_controller.yaml</span>
+<span style="color: #4299e1;">pos_joint_traj_controller</span>:
+  <span style="color: #68d391;">type</span>: <span style="color: #f6e05e;">position_controllers/JointTrajectoryController</span>
+  <span style="color: #68d391;">joints</span>:
+    - <span style="color: #f6e05e;">shoulder_pan_joint</span>
+    - <span style="color: #f6e05e;">shoulder_lift_joint</span>
+    - <span style="color: #f6e05e;">elbow_joint</span>
+    - <span style="color: #f6e05e;">wrist_1_joint</span>
+    - <span style="color: #f6e05e;">wrist_2_joint</span>
+    - <span style="color: #f6e05e;">wrist_3_joint</span>
+  <span style="color: #68d391;">constraints</span>:
+    <span style="color: #68d391;">goal_time</span>: <span style="color: #fbb6ce;">0.6</span>
+    <span style="color: #68d391;">stopped_velocity_tolerance</span>: <span style="color: #fbb6ce;">0.05</span>
+    <span style="color: #68d391;">shoulder_pan_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+    <span style="color: #68d391;">shoulder_lift_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+    <span style="color: #68d391;">elbow_joint</span>: {<span style="color: #68d391;">trajectory</span>: <span style="color: #fbb6ce;">0.2</span>, <span style="color: #68d391;">goal</span>: <span style="color: #fbb6ce;">0.1</span>}
+  <span style="color: #68d391;">stop_trajectory_duration</span>: <span style="color: #fbb6ce;">0.5</span>
+  <span style="color: #68d391;">state_publish_rate</span>: <span style="color: #fbb6ce;">500</span>
+  <span style="color: #68d391;">action_monitor_rate</span>: <span style="color: #fbb6ce;">20</span></code>
+                            </pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- JointTrajectoryControllerによるアームの速度制御 (9枚目) -->
+            <section>
+                <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
+                    <h2>JointTrajectoryControllerによるアームの速度・加速度制御</h2>
+                </section>
+
+                <!-- 手先の速度制御はなぜ必要か？ (縦スライド) -->
+                <section>
+                    <h2>速度・加速度制御は必要か？</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p>ここまで紹介した手法の課題</p>
+                            <ul>
+                                <li>急加速、急減速</li>
+                                <li>動作に振動が出やすい</li>
+                            </ul>
+
+
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 軌道補間方法の詳細 (縦スライド) -->
+                <section>
+                    <h2>軌道補間の方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/interpolation_methods.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/interpolation_methods.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>主な補間方法</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>線形補間</strong> - 最も単純</li>
+                                <li><strong>3次スプライン</strong> - 滑らかな位置と速度</li>
+                                <li><strong>5次スプライン</strong> - 滑らかな位置、速度、加速度</li>
+                                <li><strong>台形</strong> - 動作が速い</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8em;">※教科書で出てくる時間多項式とスプラインは等価です<br>2点→時間多項式, 複数点→スプラインという違いです</p>
+                </section>
+
+                <!-- 補間方法の比較まとめ (縦スライド) -->
+                <section>
+                    <h2>補間方法の比較まとめ</h2>
+                    <style>
+                        .comparison-table {
+                            margin: auto;
+                            border-collapse: collapse;
+                            font-size: 0.8em;
+                            width: 90%;
+                            color: #ffffff;
+                        }
+
+                        .comparison-table th,
+                        .comparison-table td {
+                            border: 2px solid #666;
+                            padding: 12px;
+                            text-align: center;
+                            vertical-align: middle;
+                        }
+
+                        .comparison-table th {
+                            background-color: #444;
+                            font-weight: bold;
+                            color: #ffffff;
+                        }
+
+                        .good {
+                            background-color: #2d5a3d;
+                            color: #90ee90;
+                            font-weight: bold;
+                        }
+
+                        .medium {
+                            background-color: #5a4d2d;
+                            color: #ffeb3b;
+                            font-weight: bold;
+                        }
+
+                        .poor {
+                            background-color: #5a2d2d;
+                            color: #ff6b6b;
+                            font-weight: bold;
+                        }
+                    </style>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>補間方法</th>
+                                <th>計算コスト</th>
+                                <th>滑らかさ</th>
+                                <th>連続性</th>
+                                <th>適用場面</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>線形補間</strong></td>
+                                <td class="good">低</td>
+                                <td class="poor">低</td>
+                                <td>C⁰</td>
+                                <td>高速動作・簡単制御</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3次スプライン</strong></td>
+                                <td class="medium">中</td>
+                                <td class="medium">中</td>
+                                <td>C¹</td>
+                                <td>一般的なロボット制御</td>
+                            </tr>
+                            <tr>
+                                <td><strong>5次スプライン</strong></td>
+                                <td class="poor">高</td>
+                                <td class="good">高</td>
+                                <td>C²</td>
+                                <td>高精度作業・振動抑制</td>
+                            </tr>
+                            <tr>
+                                <td><strong>台形補間</strong></td>
+                                <td class="good">低</td>
+                                <td class="medium">中</td>
+                                <td>C⁰</td>
+                                <td>高速動作・効率重視</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1em; font-size: 0.9em;">
+                        <p>迷った場合は3次スプラインが無難</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>関節速度計算はなくても良い</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/5D_spline_with_ZEROvolocity_ZEROaccceralation.png" alt="速度0加速度0でのスプライン"
+                                style="width: 100%; margin-bottom: 5px;">
+                            <p style="font-size: 0.8em; margin-top: 0; margin-bottom: 10px;">waypointsが少ないと波打つ</p>
+                            <img src="media/5D_spline_with_ZEROvolocity_ZEROaccceralation_over_waypoints.png"
+                                alt="点を増やした場合" style="width: 100%; margin-bottom: 5px;">
+                            <p style="font-size: 0.8em; margin-top: 0;">waypointsを増やす滑らか</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>2点であれば「速度 and/or 加速度を0」</li>
+                                <li>3点以上であっても十分細かいwaypointsをとれば「速度 and/or 加速度を0」でも割となめらか</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8em; margin-top: 0; margin-bottom: 10px;">それでも厳密な速度計算が必要という方は↓</p>
+                </section>
+
+
+
+                <!-- ヤコビアン関節速度と手先速度の関係 (縦スライド) -->
+                <section>
+                    <h2>関節速度の計算方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/jacobian.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/jacobian.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>ヤコビアンとは</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>関節角度変化と手先位置変化の関係を表す行列</li>
+                                <li>微分の連鎖律から導出</li>
+                                <li>速度の関係式：<strong>v = J * q̇</strong></li>
+                            </ul>
+                            <h3>物理的意味</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li>v: 手先速度ベクトル（6次元）</li>
+                                <li>J: ヤコビアン行列（6×n）</li>
+                                <li>q̇: 関節角速度ベクトル（n次元）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 逆ヤコビアンによる手先速度の計算 (縦スライド) -->
+                <section>
+                    <h2>逆ヤコビアンによる手先速度の計算</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/jacobian_inverse_ik.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/jacobian_inverse_ik.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>逆ヤコビアンの計算</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>目標</strong>：手先速度 → 関節速度</li>
+                                <li><strong>式</strong>：q̇ = J⁻¹ * v</li>
+                                <li><strong>問題</strong>：Jが正方行列でない場合</li>
+                            </ul>
+                            <h3>解決方法</h3>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>疑似逆行列</strong>：J⁺ = Jᵀ(JJᵀ)⁻¹</li>
+                                <li><strong>特異点対策</strong>：Damped Least Squares</li>
+                                <li><strong>冗長性解決</strong>：Null Space制御</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+
+          
+
+            </section>
+
+            <!-- waypointsの表示 -->
+            <section>
+                <section>
+                    <h2>waypointsの表示</h2>
+                    <p>デバッグ用にwaypointsを表示したいことはよくある、方法を紹介</p>
+                </section>
+
+                <!-- VisualizationMarkerを使った表示 -->
+                <section>
+                    <h2>VisualizationMarkerを使った表示</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/marker_display_demo_display.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>RVizの可視化ツールであるVisualizationMarkerが便利</li>
+                                <li>球形、矢印、線などの形状で表示可能</li>
+                                <li>色やサイズも自由に設定可能</li>
+                                <li>軌道の確認やデバッグに最適</li>
+                                <li>複数のwaypointを配列として一括表示</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TFを使った表示 -->
+                <section>
+                    <h2>TFを使った表示</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <iframe src="code/tf_display_demo_display.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>座標管理のTFを使うことで位置+向きの姿勢を表示</li>
+                                <li>座標系として表示されるため、向きも直感的に理解できる</li>
+                                <li>RVizのTFディスプレイで簡単に確認可能</li>
+                                <li>時間の概念があるため、動的な表示も可能</li>
+                                <li>複数のwaypointをTFフレームとして管理</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- シリーズ一覧に戻る -->
+            <section>
+                <h2>ありがとうございました</h2>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/reveal.js@4.3.1/dist/reveal.js"></script>
+    <script src="https://unpkg.com/reveal.js@4.3.1/plugin/zoom/zoom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+
+    <script>
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
+
+            // プラグインの有効化
+            plugins: [
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+
+        // 全文選択機能
+        function selectAllCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const range = document.createRange();
+            range.selectNodeContents(codeElement);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            // 選択成功時のフィードバック
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '選択完了!';
+            button.style.background = '#48bb78';
+
+            setTimeout(function () {
+                button.textContent = '全文選択';
+                button.style.background = '#4299e1';
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>ゼロからのROS1 - フォーストルクセンサ</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- スライド1: タイトル -->
+            <section>
+                <h1>ゼロからのROS1</h1>
+                <h2>フォーストルクセンサ</h2>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- スライド2: 初めにフォーストルクセンサ -->
+            <section>
+                <h2>本スライドの担当範囲</h2>
+                <ul>
+                    <li>使い方は人それぞれなので詳細は触れず、例だけ紹介します</li>
+                    <li>全般で使える内容として、データの読み出し、ノイズ除去、座標変換を扱います</li>
+                    <li>実装の詳細よりも基本概念を重視</li>
+                    <li>ROSでの統合方法に焦点</li>
+                </ul>
+            </section>
+
+            <!-- スライド3: フォーストルクセンサの用途 -->
+            <section>
+                <section>
+                    <h2>フォーストルクセンサの用途</h2>
+                    <p>均一な力をかける制御や接触時のデータ収集に使います↓</p>
+                </section>
+
+                <section>
+                    <h2>フォース制御、コンプライアンス制御のために追加</h2>
+                    <ul>
+                        <li>位置制御だけでは不十分な作業</li>
+                        <li>柔軟な物体への対応</li>
+                        <li>過度な力の抑制</li>
+                        <li>繊細な作業の実現</li>
+                        <li>環境適応制御</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>力を均一にかけるためのセンシング</h2>
+                    <ul>
+                        <li>粉体粉砕ではXY軸の平均値を見て乳鉢中心推定などを行っています</li>
+                        <li>研磨・磨き作業での力分布</li>
+                        <li>表面処理の品質向上</li>
+                        <li>接触面の姿勢推定</li>
+                        <li>力のバランス制御</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>ロボット学習での活用</h2>
+                    <ul>
+                        <li>ロボット学習の情報として、位置だけでは分からない情報を追加することでより良いモーションにつながります</li>
+                        <li>触覚情報の学習データ化</li>
+                        <li>巧緻動作の習得支援</li>
+                        <li>環境認識の向上</li>
+                        <li>模倣学習への応用</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- スライド4: フォーストルクセンサの読み出し -->
+            <section>
+                <section>
+                    <h2>leptrinoフォーストルクセンサのROSパッケージの例</h2>
+                    <ul>
+                        <li>日本国内でよく使われるleptrinoのROSでの使い方を紹介↓</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Leptrinoフォーストルクセンサとは</h2>
+                    <ul>
+                        <li>安価で性能も十分</li>
+                        <li>USB接続で使いやすい</li>
+                        <li>ROSでの統合が簡単</li>
+                        <li>日本国内で広く使用されている</li>
+                        <li>高精度な6軸力・トルク測定</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>パッケージの使い方 3 Steps</h2>
+                    <ol>
+                        <li><strong>clone</strong><br>
+                            <code>git clone https://github.com/hiveground-ros-package/leptrino_force_torque</code>
+                        </li>
+                        <li><strong>rosdep</strong><br>
+                            <code>rosdep install -i --from-paths src</code>
+                        </li>
+                        <li><strong>build</strong><br>
+                            <code>catkin build; source devel/setup.bash</code>
+                        </li>
+                    </ol>
+                    <p>これで準備完了</p>
+                </section>
+
+                <section>
+                    <h2>USBのセンサのパスの指定方法</h2>
+                    <ul>
+                        <li><strong>基本的なパス:</strong><br>
+                            <code>/dev/ttyACM*</code> または <code>/dev/ttyUSB*</code>
+                        </li>
+                        <li><strong>製品固有のパス:</strong><br>
+                            チップによっては、<code>/dev/serial/by-id</code>で確認をすると製品ごとの固有のパスも可能
+                        </li>
+                        <li>デバイスの安定した識別が可能</li>
+                        <li>複数センサ使用時に便利</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>センサーデータの確認</h2>
+                    <ul>
+                        <li><strong>センサの起動:</strong><br>
+                            <code>roslaunch leptrino_force_torque leptrino.launch</code><br>
+                            <small>※COMポートは先ほど確認したものを指定する</small>
+                        </li>
+                        <li><strong>wrench_stampedのデバッグ表示:</strong></li>
+                        <li><code>rostopic echo</code> または <code>rqt_plot</code>で確認</li>
+                        <li>リアルタイムでの力・トルクデータ監視</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- スライド5: ノイズ除去 -->
+            <section>
+                <h2>ノイズ除去</h2>
+                <ul>
+                    <li>ホワイトノイズを除去します</li>
+                    <li>FTセンサに何も力を加えていないデータを撮って、FFTをかけて低周波領域をカットするフィルタをかけます</li>
+                    <li>フィルタにはscipy.signal.butterなどを使います</li>
+                    <li>移動平均フィルタの適用</li>
+                    <li>外れ値の除去</li>
+                    <li>周波数ドメインでのフィルタリング</li>
+                </ul>
+            </section>
+
+            <!-- スライド6: 座標変換 -->
+            <section>
+                <h2>座標変換</h2>
+                <ul>
+                    <li>TFを使って同姿変換行列を取得</li>
+                    <li>フォースはそのまま回転行列で座標変換をする</li>
+                    <li>トルクは回転行列で座標変換したもの+(旧位置-新位置)*新力で変換する</li>
+                    <li>センサ座標系からロボット座標系へ</li>
+                    <li>tf2_geometryライブラリの活用</li>
+                    <li>リアルタイム座標変換</li>
+                </ul>
+            </section>
+
+            <!-- 最終スライド: まとめ -->
+            <section>
+                <h2>まとめ</h2>
+                <ul>
+                    <li>フォーストルクセンサの基本的な活用方法</li>
+                    <li>データ読み出しとROSへの統合</li>
+                    <li>ノイズ除去の重要性</li>
+                    <li>座標変換の正しい実装</li>
+                    <li>用途に応じた適切な利用</li>
+                    <li>ロボット学習への応用可能性</li>
+                </ul>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
+                        シリーズ一覧に戻る</a></p>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
+
+            // プラグインの有効化
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+    </script>
+</body>
+
+</html>
