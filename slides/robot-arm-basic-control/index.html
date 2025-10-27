@@ -37,8 +37,7 @@
                 <h2>このスライドの担当範囲</h2>
                 <ul>
                     <ul>
-                        <li><a href="../robot-arm-basic-control">こちらのスライド</a>でロボットが動く状態になった前提で、ロボットをどう動かしていくのかを扱います。
-                        </li>
+                        <li>ロボットアームの動作生成でよく使われる仕組みを学んでいきます。</li>
                         <li>コードなどはUniversalRobotの例を扱います(他のメーカーでも概ね同じ機能があるはずです)。</li>
                     </ul>
 
@@ -550,113 +549,7 @@ finally:
                     </div>
                     <p>※RoboDKは位置制御にしか使えない点に注意</p>
                 </section>
-
             </section>
-            <section>
-                <section>
-                    <h2>UR Tips</h2>
-                    <ul>
-                        <li>Universal robotユーザが多いので</li>
-                        <li>Universal robotを使う上での便利機能の紹介</li>
-                        <li>主にシミュレータとモーションの話</li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>シミュレータ UR Studio</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/ur_studio.png">
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>オンライン、無料で使える</li>
-                                <li>25年8月時点では動作が遅いが後々改善されるはず</li>
-                                <li>機能はRoboDKの方が上だが、これで十分な場合も多いのでは</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>モーション ver2</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <img src="media/ur_motion_ver2.png">
-
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>Polyscope ver5.22から使えるように(今後はこれが標準)</li>
-                                <li>MoveJ(PTP),MoveL(LIN)ので振動が少なくなる</li>
-                                <li>ブレンド半径が大きすぎる場合は自動調整</li>
-                                <li>調整すればROSレベルで滑らかに動ける</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>フォースモード</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <iframe width="560" height="315"
-                                src="https://www.youtube.com/embed/FKR04ZJv-SE?si=9966698GmdDVbwdx"
-                                title="YouTube video player" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>URのフォース制御</li>
-                                <li>位置&向きの6軸について位置/力の制御を選択可能</li>
-                                <li>一定の力で押し付ける作業が得意</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <ul>
-                    </ul>
-                </section>
-                <section>
-                    <h2>URの回転表現について</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/rot_vector.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/rot_vector.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>デフォルトの回転表現は回転ベクトル</li>
-                                <li>RPY（ロール、ピッチ、ヨー）で使うには変換が必要</li>
-                                <li>Pythonの場合scipy.spatial.transformのRotationが便利</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>servoJ/Lの注意点</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/move_vs_servo.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/move_vs_servo.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li>servoJ/Lは最短&最速で移動するため危険！</li>
-                                <li>①事前にmoveJ/Lでゆっくり動かして軌道を確認</li>
-                                <li>②途中で意図しない姿勢を取っていないか必ず確認</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <li>※servoJ/Lは目で追えないくらい早いです、十分理解してから使ってください</li>
-                </section>
-            </section>
-
             <section>
                 <section>
                     <h2>ROSを使う？使わない？</h2>
@@ -678,7 +571,7 @@ finally:
                             </ul>
                         </div>
                     </div>
-                    <p>もう少し詳しく↓</p>
+                    <p>具体例↓</p>
                 </section>
                 <section>
                     <h2>ROSを動作生成で使う利点</h2>
@@ -687,25 +580,26 @@ finally:
                             <h4>ROS生成モーション</h4>
                             <ul>
                                 <li>PC上で完全に動作を計算してロボットに送る</li>
-                                <li>0.1 mmくらい精密な動作をさせたいときはこっち</li>
+                                <li>複雑な動作軌道を精密に制御したい場合</li>
                             </ul>
                         </div>
                         <div style="flex: 1;">
                             <h4>メーカー提供モーション</h4>
                             <ul>
                                 <li>ロボットコントローラでモーションを計算する</li>
-                                <li>複雑な動きを0.1mmくらい精密に動かすのは難しい</li>
+                                <li>動作軌道がシンプルor軌道が厳密でなくてよい場合</li>
                             </ul>
                         </div>
                     </div>
                 </section>
-            <section>
+                <section>
                     <h2>ROSをシステム設計で使う利点</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <h4>ROSのシステム</h4>
                             <ul>
                                 <li>分散・モジュール型なので並列で開発を進めやすい</li>
+                                <li>複雑なシステムを他社ロボットに移植しやすい</li>
                                 <li>対応センサやアクチュエータは何でも接続できるが、どう使うのかは自分次第</li>
                             </ul>
                         </div>
@@ -713,6 +607,7 @@ finally:
                             <h4>メーカー提供</h4>
                             <ul>
                                 <li>並列での開発は難しい場合が多い</li>
+                                <li>他社ロボットに移植不可だが、簡単な動作は問題にならない</li>
                                 <li>メーカー提供品しか使えないが、GUIなどが整備されててすぐ使える</li>
                             </ul>
                         </div>
@@ -722,7 +617,7 @@ finally:
 
             <section>
                 <section>
-                    <h2>ロボットアーム選定</h2>
+                    <h2>付録：ロボットアーム選定</h2>
                     <p>ロボットアームの選び方</p>
                     <p>ここでは協働ロボットを対象にしています</p>
                 </section>
@@ -839,17 +734,110 @@ finally:
                     </div>
                 </section>
             </section>
+
             <section>
-                <h2>ロボットアームの基本動作は以上！</h2>
-                <p>Let's enjoy robot!</p>
-                <div style="padding: 20px; border-radius: 10px; margin: 20px 0;">
-                    <p style="margin-bottom: 15px;"><strong>複雑な制御やセンサの統合をやりたい方は：</strong></p>
-                    <ul style="text-align: left; display: inline-block;">
-                        <li><a href="../ros-introduction/index.html"
-                                style="color: #007bff; text-decoration: underline;">ゼロからのROS入門</a> - ROSの基礎概念
-                        </li>
+                <section>
+                    <h2>付録：UR Tips</h2>
+                    <ul>
+                        <li>Universal robotユーザが多いので</li>
+                        <li>Universal robotを使う上での便利機能の紹介</li>
+                        <li>主にシミュレータとモーションの話</li>
                     </ul>
-                </div>
+                </section>
+                <section>
+                    <h2>シミュレータ UR Studio</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_studio.png">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>オンライン、無料で使える</li>
+                                <li>25年8月時点では動作が遅いが後々改善されるはず</li>
+                                <li>機能はRoboDKの方が上だが、これで十分な場合も多いのでは</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>モーション ver2</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/ur_motion_ver2.png">
+
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>Polyscope ver5.22から使えるように(今後はこれが標準)</li>
+                                <li>MoveJ(PTP),MoveL(LIN)ので振動が少なくなる</li>
+                                <li>ブレンド半径が大きすぎる場合は自動調整</li>
+                                <li>調整すればROSレベルで滑らかに動ける</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>フォースモード</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <iframe width="560" height="315"
+                                src="https://www.youtube.com/embed/FKR04ZJv-SE?si=9966698GmdDVbwdx"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>URのフォース制御</li>
+                                <li>位置&向きの6軸について位置/力の制御を選択可能</li>
+                                <li>一定の力で押し付ける作業が得意</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul>
+                    </ul>
+                </section>
+                <section>
+                    <h2>URの回転表現について</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/rot_vector.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/rot_vector.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>デフォルトの回転表現は回転ベクトル</li>
+                                <li>RPY（ロール、ピッチ、ヨー）で使うには変換が必要</li>
+                                <li>Pythonの場合scipy.spatial.transformのRotationが便利</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>servoJ/Lの注意点</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <strong>→ <a href="interactive_app/move_vs_servo.html" target="_blank"
+                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                            </p>
+                            <iframe data-src="interactive_app/move_vs_servo.html" width="100%" height="400px"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>servoJ/Lは最短&最速で移動するため危険！</li>
+                                <li>①事前にmoveJ/Lでゆっくり動かして軌道を確認</li>
+                                <li>②途中で意図しない姿勢を取っていないか必ず確認</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <li>※servoJ/Lは目で追えないくらい早いです、十分理解してから使ってください</li>
+                </section>
             </section>
 
             <!-- シリーズ一覧に戻る -->

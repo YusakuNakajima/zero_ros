@@ -183,10 +183,10 @@
                         </div>
                     </div>
                     <div class="text-section">
-                        <h2>参考書籍</h2>
+                        <h2>ROS2の教材1</h2>
                         <ol>
-                            <li>ROS 2の詳しい解説書</li>
-                            <li>初心者向け実践書</li>
+                            <li>ROS 2の詳しい解説書, アームの話はない</li>
+                            <li>初心者向け実践書, 内容が幅広い</li>
                         </ol>
                     </div>
                 </div>
@@ -194,7 +194,7 @@
 
             <!-- スライド: 参考サイト -->
             <section>
-                <h2>オンライン環境&教材</h2>
+                <h2>ROS2の教材2</h2>
                 <div class="slide-layout-image">
                     <div class="image-section dual-images">
                         <div class="image-with-caption">
@@ -215,10 +215,25 @@
                     </div>
                 </div>
             </section>
+            <section>
+                <h2>ROS2の教材3</h2>
+                <ul>
+                    <li>全部を網羅した資料はないので、必要に応じて色々調べる必要があります</li>
+                    <li><a href="https://qiita.com/koichi_baseball/items/b15783ced5df8d5e56a6" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">ROS2の初学者向け資料まとめ</a>
+                    </li>
+                    <li><a href="https://docs.ros.org/en/rolling/Tutorials.html" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">ROS2公式チュートリアル</a>
+                    </li>
+                    <li><a href="https://zenn.dev/array/books/5efdb438cf8be3" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">Ar-RayさんROS2教材(図が多い)</a>
+                    </li>
+                </ul>
+            </section>
 
             <section>
                 <section>
-                    <h2>ローカル環境構築</h2>
+                    <h2>ローカル環境(スキップ可)</h2>
                     <p>手元のロボットを動かすにはローカル環境が必須です、オンライン教材でROSに慣れたらこっちに移行してください</p>
                     <p>環境構築はトラブルが多く、解決にはLinux,Docker,ROSの知識を総動員します</p>
                     <p>最初は先人が作ったものを活用してください(僕も最初はそのように始めました)↓</p>
@@ -249,7 +264,7 @@
                 </section>
 
                 <section>
-                    <h2>ひとまず勉強用のローカル環境が欲しい場合</h2>
+                    <h2>①勉強用のローカル環境</h2>
                     <ul>
                         <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
                                 style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です</li>
@@ -258,7 +273,7 @@
                 </section>
 
                 <section>
-                    <h2>実機を動かすローカル環境が欲しい場合</h2>
+                    <h2>②実践用のローカル環境</h2>
                     <p>(他にも色々ありますが)僕の公開パッケージpowder_grindingを使っても良いです</p>
                     <pre><code data-trim class="bash">
 user@user:~$ git clone -b develop https://github.com/quantumbeam/powder_grinding.git
@@ -303,7 +318,35 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
             </section>
             </section>
 
-            <!-- スライド4: ROSとは -->
+            <section>
+                    <h2>困ったときの相談場所</h2>
+                    <ul>
+                        <li>コミュニティ内で質問（<a href="https://wiki.ros.org/ja/Support" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">https://wiki.ros.org/ja/Support</a>）することができる
+                        </li>
+                        <li>ただし、英語なので、日本コミュニティの方がハードルが低い</li>
+                        <li>ROS日本コミュニティ(ROSJP)：<a href="https://rosjp.connpass.com/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">https://rosjp.connpass.com/</a></li>
+                        <li>ROSJPのSlack<a
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1"
+                                target="_blank" style="color: #3b82f6; text-decoration: underline;">招待フォーム</a></li>
+                    </ul>
+                </section>
+
+
+            <!-- スライド6: ROSで実際のロボットを動かすには -->
+            <section>
+                <h2>ここから実装になり...ません</h2>
+                <p>実装やりたい人は別スライドへ</p>
+                <ul>
+                    <li><a href="../ros-model-display/index.html" style="color: #3b82f6; text-decoration: underline;">→
+                            ステップ1：ロボットアームを表示</a></li>
+                    <li><a href="../ros-arm-position-control/index.html"
+                            style="color: #3b82f6; text-decoration: underline;">→ ステップ2：ロボットアームを動かす</a></li>
+                </ul>
+                <p>本スライドの残りは前準備として<br>ROSのプログラムの基本的な仕組みを紹介 →</p>
+            </section>
+                        <!-- スライド4: ROSとは -->
             <section>
                 <div class="slide-layout-image">
                     <div class="image-section">
@@ -330,89 +373,55 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
                 </div>
             </section>
 
-
-            <section>
-                <h2>ROSではまりがちなこと</h2>
-                <ol>
-                    <li>オープンソースだけど使い方が分からない</li>
-                    <li>ごちゃごちゃいじっている間に環境が壊れて動かなくなった</li>
-                    <li>動いたけど中身がブラックボックスで応用が利かない</li>
-                    <li>上記で相談できる人がいない</li>
-                </ol>
-            </section>
-
-            <!-- スライド5: ROSを使った勉強の進め方 -->
             <section>
                 <section>
-                    <h2>はまった時の対処法</h2>
+
+                    <h2>公開パッケージの活用</h2>
+                    <p>ROSにはオープンソースのパッケージが多い</p>
+                    <p>動作やデータ取得が簡単で本当にやりたい開発に集中できる</p>
+                    <ul>
+                        <li>ROSと実機のロボットの接続：メーカー公式のロボットドライバ</li>
+                        <li>センサのデータ取得：メーカー公式 or ユーザーが公開</li>
+                    </ul>
+                    <p>公開パッケージの使い方↓</p>
+                </section>
+                <section>
+                    <h2>公開パッケージの探し方</h2>
+                    <ul>
+                        <li>「ROS + 製品名」「ROS + 会社名」で検索</li>
+                        <li>GitHub・ROS Wiki・ROS Index等で探索</li>
+                        <li>メーカー公式サイトでROS対応を確認</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>公開パッケージの使い方(Debian package)</h2>
+                    <p><strong>例: Intel RealSense</strong></p>
+                    <ul>
+                        <li>ROSビルド済みパッケージ（安定版）</li>
+                        <li>コマンド1つで簡単インストール</li>
+                        <li><code>root@powder_grinding_ros:~/catkin_ws# sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code>
+                        </li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>公開パッケージのソースビルド</h2>
+                    <p><strong>例: Intel RealSense</strong></p>
                     <ol>
-                        <li>使い方&nbsp;→&nbsp;チュートリアル or 教材 or LLM</li>
-                        <li>相談&nbsp;→&nbsp;コミュニティ or LLM</li>
-                        <li>環境&nbsp;→&nbsp;仮想環境でやり直せる</li>
-                        <li>実装&nbsp;→&nbsp;個人や組織に依存。。。</li>
+                        <li><strong>Clone:</strong><br>
+                            <code>root@powder_grinding_ros:~/catkin_ws# git clone https://github.com/IntelRealSense/realsense-ros.git</code>
+                        </li>
+                        <li><strong>依存関係:</strong><br>
+                            <code>root@powder_grinding_ros:~/catkin_ws# rosdep install -i --from-paths src</code>
+                        </li>
+                        <li><strong>ビルド:</strong><br>
+                            <code>root@powder_grinding_ros:~/catkin_ws# catkin build; source devel/setup.bash</code>
+                        </li>
                     </ol>
-                    <p>実装を学ぶ方法は組織でのOJTに依存してきた</p>
-                    <p>このスライドではなるべく実装を扱います→</p>
-                    <p>1~3は以下↓</p>
                 </section>
 
-
-
-                <section>
-                    <h2>1. チュートリアルと教材の例</h2>
-                    <ul>
-                        <li><a href="http://wiki.ros.org/ja/ROS/Tutorials" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">ROS1公式チュートリアル</a>
-                        </li>
-                        <li><a href="https://docs.ros.org/en/rolling/Tutorials.html" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">ROS2公式チュートリアル(量が多く最初は困る)</a>
-                        </li>
-                        <li><a href="https://zenn.dev/array/books/5efdb438cf8be3" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">Ar-RayさんROS2教材(図が多い)</a>
-                        </li>
-                        <li>ただし、チュートリアルだけでは動くロボットを作るのは難しい</li>
-                        <li>このスライドは、よりリアルな実装を扱うことで補完するのが目的です</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>2. 困ったときは</h2>
-                    <ul>
-                        <li>コミュニティ内で質問（<a href="https://wiki.ros.org/ja/Support" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">https://wiki.ros.org/ja/Support</a>）することができる
-                        </li>
-                        <li>ただし、英語なので、日本コミュニティの方がハードルが低い</li>
-                        <li>ROS日本コミュニティ：<a href="https://rosjp.connpass.com/" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">https://rosjp.connpass.com/</a></li>
-                        <li>Slackワークスペース：<a
-                                href="https://docs.google.com/forms/d/e/1FAIpQLSd30W9hv7eVeNP9qqUQCLGh_xiWsAd4346QQV1DCGwxYW4qjA/viewform?c=0&w=1"
-                                target="_blank" style="color: #3b82f6; text-decoration: underline;">招待フォーム</a></li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>3. 環境構築</h2>
-                    <ul>
-                        <li>Dockerを使ってROSの環境を構築するのが便利</li>
-                        <li>勉強用ならまずは<a href="https://www.theconstruct.ai/" target="_blank"
-                                style="color: #3b82f6; text-decoration: underline;">オンライン環境がオススメ</a>です</li>
-                    </ul>
-                </section>
             </section>
 
-
-            <!-- スライド6: ROSで実際のロボットを動かすには -->
-            <section>
-                <h2>本スライド集では実装を学ぶ</h2>
-                <p>以下の2ステップを学ぶところから</p>
-                <ul>
-                    <li><a href="../ros-model-display/index.html" style="color: #3b82f6; text-decoration: underline;">→
-                            ステップ1：ロボットアームを表示</a></li>
-                    <li><a href="../ros-arm-position-control/index.html"
-                            style="color: #3b82f6; text-decoration: underline;">→ ステップ2：ロボットアームを動かす</a></li>
-                </ul>
-                <p>本スライドでは前準備として<br>ROSのプログラムの基本的な仕組みを紹介 →</p>
-            </section>
 
             <!-- スライド7: ROSのプログラム基本単位：ノード -->
             <section>
@@ -435,6 +444,7 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
             <!-- スライド8: ノード間の通信：トピック、サービス、アクション -->
             <section>
                 <h2>ノード間の通信</h2>
+                <p>プログラム間でのデータのやりとりです</p>
                 <p style="text-align: center; margin-bottom: 10px;">
                     <strong>→ <a href="interactive_app/ros_communications.html" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
@@ -513,55 +523,7 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
 
 
 
-            <section>
-                <section>
-
-                    <h2>公開パッケージの活用</h2>
-                    <p>ROSの強みとして、オープンソースのパッケージが多い</p>
-                    <p>動作やデータ取得が簡単になるのでその後の本当にやりたい開発に集中できる</p>
-                    <ul>
-                        <li>ROSと実機のロボットの接続：メーカー公式のロボットドライバ</li>
-                        <li>センサのデータ取得：メーカー公式 or ユーザーが公開</li>
-                    </ul>
-                    <p>公開パッケージの使い方↓</p>
-                </section>
-                <section>
-                    <h2>公開パッケージの探し方</h2>
-                    <ul>
-                        <li>「ROS + 製品名」「ROS + 会社名」で検索</li>
-                        <li>GitHub・ROS Wiki・ROS Index等で探索</li>
-                        <li>メーカー公式サイトでROS対応を確認</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>公開パッケージの使い方(Debian package)</h2>
-                    <p><strong>例: Intel RealSense</strong></p>
-                    <ul>
-                        <li>ROSビルド済みパッケージ（安定版）</li>
-                        <li>コマンド1つで簡単インストール</li>
-                        <li><code>root@powder_grinding_ros:~/catkin_ws# sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code>
-                        </li>
-                    </ul>
-                </section>
-                <section>
-                    <h2>公開パッケージのソースビルド</h2>
-                    <p><strong>例: Intel RealSense</strong></p>
-                    <ol>
-                        <li><strong>Clone:</strong><br>
-                            <code>root@powder_grinding_ros:~/catkin_ws# git clone https://github.com/IntelRealSense/realsense-ros.git</code>
-                        </li>
-                        <li><strong>依存関係:</strong><br>
-                            <code>root@powder_grinding_ros:~/catkin_ws# rosdep install -i --from-paths src</code>
-                        </li>
-                        <li><strong>ビルド:</strong><br>
-                            <code>root@powder_grinding_ros:~/catkin_ws# catkin build; source devel/setup.bash</code>
-                        </li>
-                    </ol>
-                </section>
-
-            </section>
-
+            
 
 
             <!-- スライド11: 説明はここまで -->
