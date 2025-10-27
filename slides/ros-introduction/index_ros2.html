@@ -36,24 +36,137 @@
             </section>
 
             <!-- スライド2: スライドの担当範囲 -->
+            <!-- スライド2: スライドの担当範囲 -->
             <section>
-                <h2>心構え①初めてからROSを学ぶのは大変</h2>
-                <p>ROSを使う=以下も同時に学ぶ必要があります</p>
-                <p>不慣れな人には長い道のりになります</p>
-                <ul>
-                    <li>ロボット制御の知識(ROSでは説明されない)</li>
-                    <li>Linuxのコマンド、システムの理解(ROSはLinuxで動かすのが基本)</li>
-                    <li>環境構築(基本的にDockerを使います)</li>
-                </ul>
-            </section>            
+                <h2>ROSの要素分解</h2>
+                <p>ROSを使うには以下の知識が必要</p>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #d9534f; border-radius: 15px; padding: 20px; background-color: #f2dede;">
+                                <h4 style="color: #d9534f;">ROS環境構築</h4>
+                                <p style="font-size: 0.7em; color: black;">(Docker)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5bc0de; border-radius: 15px; padding: 20px; background-color: #eef7fa;">
+                                <h4 style="color: #5bc0de;">Linux</h4>
+                                <p style="font-size: 0.7em; color: black;">(コマンド,仕組み)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #f0ad4e; border-radius: 15px; padding: 20px; background-color: #fcf8e3;">
+                                <h4 style="color: #f0ad4e;">ロボット制御</h4>
+                                <p style="font-size: 0.7em; color: black;">(運動学,動力学)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #337ab7; border-radius: 15px; padding: 20px; background-color: #e8f0f7;">
+                                <h4 style="color: #337ab7;">リアルタイム処理</h4>
+                                <p style="font-size: 0.7em; color: black;">(優先度設定など)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5cb85c; border-radius: 15px; padding: 20px; background-color: #eff8ef;">
+                                <h4 style="color: #5cb85c;">プログラミング,実装</h4>
+                                <p style="font-size: 0.7em; color: black;">(Python, C++)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #757575; border-radius: 15px; padding: 20px; background-color: #f5f5f5;">
+                                <h4 style="color: #757575;">ROSの使い方</h4>
+                                <p style="font-size: 0.7em; color: black;">(ツール,コマンド)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
             <section>
-                <h2>心構え②ROSは大規模で複雑</h2>
-                <p>一回で理解するのは不可能なので反復が大切です</p>
-                <ul>
-                    <li>まずはROSを動かす(モチベーションの維持)</li>
-                    <li>分からなくなったら立ち返って根本から理解</li>
-                </ul>
-                <p>最初は自分は何が分からないのかが分からないのでROSコミュニティを頼りましょう</p>
+                <h2>ROSのはじめの一歩</h2>
+                <p>最初は飛ばし飛ばしでok</p>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%; opacity: 0.5;">
+                            <div
+                                style="border: 3px solid #d9534f; border-radius: 15px; padding: 20px; background-color: #f2dede; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #d9534f; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    スキップ(先人のを利用)</p>
+                                <h4 style="color: #d9534f;">ROS環境構築</h4>
+                                <p style="font-size: 0.7em; color: black;">(Docker)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5bc0de; border-radius: 15px; padding: 20px; background-color: #eef7fa; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #5bc0de; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    GPTに聞く</p>
+                                <h4 style="color: #5bc0de;">Linux</h4>
+                                <p style="font-size: 0.7em; color: black;">(コマンド,仕組み)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #f0ad4e; border-radius: 15px; padding: 20px; background-color: #fcf8e3; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #f0ad4e; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    本スライド+教科書</p>
+                                <h4 style="color: #f0ad4e;">ロボット制御</h4>
+                                <p style="font-size: 0.7em; color: black;">(運動学,動力学)</p>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%; opacity: 0.5;">
+                            <div
+                                style="border: 3px solid #337ab7; border-radius: 15px; padding: 20px; background-color: #e8f0f7; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #337ab7; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    スキップ(まずは使わないものを作る)</p>
+                                <h4 style="color: #337ab7;">リアルタイム処理</h4>
+                                <p style="font-size: 0.7em; color: black;">(優先度設定など)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5cb85c; border-radius: 15px; padding: 20px; background-color: #eff8ef; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #5cb85c; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    専門家に相談(どう作るかで難易度が変動)</p>
+                                <h4 style="color: #5cb85c;">プログラミング,実装</h4>
+                                <p style="font-size: 0.7em; color: black;">(Python, C++)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #757575; border-radius: 15px; padding: 20px; background-color: #f5f5f5; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #757575; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    本スライド+教材</p>
+                                <h4 style="color: #757575;">ROSの使い方</h4>
+                                <p style="font-size: 0.7em; color: black;">(ツール,コマンド)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </section>
 
             <!-- スライド3: 参考書籍 -->
@@ -92,7 +205,8 @@
                         </div>
                     </div>
                     <div class="text-section">
-                        <h2><a href="https://www.theconstruct.ai/" target="_blank" style="color: #3b82f6; text-decoration: underline;">The Construct</a></h2>
+                        <h2><a href="https://www.theconstruct.ai/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">The Construct</a></h2>
                         <ul>
                             <li>無料アカウントでも1日8時間まで仮想環境が利用でき、最初の学習には十分</li>
                             <li>ROS1/2の両方に対応</li>
@@ -102,7 +216,7 @@
                 </div>
             </section>
 
-             <section>
+            <section>
                 <section>
                     <h2>ローカル環境構築</h2>
                     <p>手元のロボットを動かすにはローカル環境が必須です、オンライン教材でROSに慣れたらこっちに移行してください</p>
@@ -113,7 +227,8 @@
                     <h2>必要な環境とソフトウェア</h2>
                     <ul>
                         <li>OS: Ubuntu 20.04以降(22.04, 24.04もok)</li>
-                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストール</li>
+                        <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストール</li>
 
                     </ul>
                     </ul>
@@ -125,7 +240,9 @@
                         <li>Windows上のWSLでの構築も可能ですがメモリ消費が多くトラブルが多いので推奨しません</li>
                         <li>どうしても使う場合はwin11以降,デスクトップPC,CPUはi7相当,メモリは32GBを推奨します</li>
                         <li>それ未満の性能だとビルド中にフリーズするなどのトラブルがある可能性があります</li>
-                        <li><a href="https://www.docker.com/ja-jp/products/docker-desktop/" target="_blank" style="color: #3b82f6; text-decoration: underline;">DockerDesktop</a>を事前にインストールしておいてください</li>
+                        <li><a href="https://www.docker.com/ja-jp/products/docker-desktop/" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">DockerDesktop</a>を事前にインストールしておいてください
+                        </li>
                         <li>DockerDesktopとWSLの接続には設定→Resource→WSL integrationで使用したいWSLをONにします</li>
                     </ul>
 
@@ -134,12 +251,12 @@
                 <section>
                     <h2>ひとまず勉強用のローカル環境が欲しい場合</h2>
                     <ul>
-                    <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
+                        <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/" target="_blank"
                                 style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です</li>
-                    <li>トラブルはほぼないですが、VNC越しのため実機ロボットには使えないです(あくまで勉強用)</li>
+                        <li>トラブルはほぼないですが、VNC越しのため実機ロボットには使えないです(あくまで勉強用)</li>
                     </ul>
                 </section>
-                    
+
                 <section>
                     <h2>実機を動かすローカル環境が欲しい場合</h2>
                     <p>(他にも色々ありますが)僕の公開パッケージpowder_grindingを使っても良いです</p>
@@ -161,8 +278,11 @@ user@user:~/powder_grinding/env$ ./BUILD-DOCKER-IMAGE.sh
                     </code></pre>
                     <ul>
                         <li>事前にUbuntuProのトークンの入力が必要です</li>
-                        <li style="font-size: 0.8em;">ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</li>
-                        <li>アカウント作成の後に<a href="https://ubuntu.com/pro/dashboard" target="_blank" style="color: #3b82f6; text-decoration: underline;">ダッシュボード</a>に表示されるトークンを環境変数(exportのコマンド)で登録しておきます</li>
+                        <li style="font-size: 0.8em;">
+                            ROS1を構築するUbuntu20.04はすでにサポートが終了しているのですが、UbuntuProを設定することでセキュリティリスクを避けることができます</li>
+                        <li>アカウント作成の後に<a href="https://ubuntu.com/pro/dashboard" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">ダッシュボード</a>に表示されるトークンを環境変数(exportのコマンド)で登録しておきます
+                        </li>
                         <li>その後、BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
                     </ul>
                 </section>
@@ -391,7 +511,7 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
                 </section>
             </section>
 
-           
+
 
             <section>
                 <section>
@@ -420,7 +540,8 @@ root@powder_grinding_ros:~/catkin_ws$ source devel/setup.bash
                     <ul>
                         <li>ROSビルド済みパッケージ（安定版）</li>
                         <li>コマンド1つで簡単インストール</li>
-                        <li><code>root@powder_grinding_ros:~/catkin_ws# sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code></li>
+                        <li><code>root@powder_grinding_ros:~/catkin_ws# sudo apt-get install ros-$ROS_DISTRO-realsense2-camera</code>
+                        </li>
                     </ul>
                 </section>
                 <section>

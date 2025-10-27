@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>イントロダクション</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+    <style>
+        .reveal {
+            font-family: "Noto Sans JP", sans-serif;
+            font-size: 42px;
+            font-weight: normal;
+        }
+
+        .reveal h1,
+        .reveal h2,
+        .reveal h3,
+        .reveal h4 {
+            text-transform: none;
+        }
+
+        .reveal img {
+            border: none;
+            box-shadow: none;
+        }
+
+        .key-combo {
+            background-color: #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- タイトルスライド -->
+            <section
+                data-background-image="https://images.unsplash.com/photo-1546146830-2cca596142b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+                data-background-opacity="0.3">
+                <h1>イントロダクション</h1>
+                <br>
+                <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- スライドの縦横構成 -->
+            <section>
+                <h2>スライドの操作方法</h2>
+                <ul>
+                    <li>縦横の2次元配置のスライドです</li>
+                    <li>横がスライドの概要です</li>
+                    <li>縦は各概要の詳細です</li>
+                    <li>"Esc"を押すとスライド全体が見えます</li>
+
+                </ul>
+            </section>
+
+            <!-- 便利ツール -->
+            <section>
+                <section>
+                    <h2>スライドの便利ツール↓</h2>
+                </section>
+
+                <section>
+                    <h3><span class="key-combo">C</span> キー</h3>
+                    <p>追記できます（描画モード）</p>
+                    <ul>
+                        <li>重要なポイントをマーク</li>
+                        <li>プレゼン中の補足説明に</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3><span class="key-combo">B</span> キー</h3>
+                    <p>黒板モードになります</p>
+                    <ul>
+                        <li>黒い背景で自由に描画</li>
+                        <li>ホワイトボード感覚で使用</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3><span class="key-combo">D</span> キー</h3>
+                    <p>追記した内容はダウンロードできます</p>
+                    <ul>
+                        <li>描画内容をjson形式で保存</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <h2>ROSの要素分解</h2>
+                <p>ROSを使うには以下の知識が必要</p>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #d9534f; border-radius: 15px; padding: 20px; background-color: #f2dede;">
+                                <h4 style="color: #d9534f;">ROS環境構築</h4>
+                                <p style="font-size: 0.7em; color: black;">(Docker)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5bc0de; border-radius: 15px; padding: 20px; background-color: #eef7fa;">
+                                <h4 style="color: #5bc0de;">Linux</h4>
+                                <p style="font-size: 0.7em; color: black;">(コマンド,仕組み)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #f0ad4e; border-radius: 15px; padding: 20px; background-color: #fcf8e3;">
+                                <h4 style="color: #f0ad4e;">ロボット制御</h4>
+                                <p style="font-size: 0.7em; color: black;">(運動学,動力学)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #337ab7; border-radius: 15px; padding: 20px; background-color: #e8f0f7;">
+                                <h4 style="color: #337ab7;">リアルタイム処理</h4>
+                                <p style="font-size: 0.7em; color: black;">(優先度設定など)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5cb85c; border-radius: 15px; padding: 20px; background-color: #eff8ef;">
+                                <h4 style="color: #5cb85c;">プログラミング,実装</h4>
+                                <p style="font-size: 0.7em; color: black;">(Python, C++)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #757575; border-radius: 15px; padding: 20px; background-color: #f5f5f5;">
+                                <h4 style="color: #757575;">ROSの使い方</h4>
+                                <p style="font-size: 0.7em; color: black;">(ツール,コマンド)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h2>ROSのはじめの一歩</h2>
+                <p>最初は飛ばし飛ばしでok</p>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%; opacity: 0.5;">
+                            <div
+                                style="border: 3px solid #d9534f; border-radius: 15px; padding: 20px; background-color: #f2dede; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #d9534f; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    スキップ(先人のを利用)</p>
+                                <h4 style="color: #d9534f;">ROS環境構築</h4>
+                                <p style="font-size: 0.7em; color: black;">(Docker)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5bc0de; border-radius: 15px; padding: 20px; background-color: #eef7fa; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #5bc0de; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    GPTに聞く</p>
+                                <h4 style="color: #5bc0de;">Linux</h4>
+                                <p style="font-size: 0.7em; color: black;">(コマンド,仕組み)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #f0ad4e; border-radius: 15px; padding: 20px; background-color: #fcf8e3; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #f0ad4e; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    本スライド+教科書</p>
+                                <h4 style="color: #f0ad4e;">ロボット制御</h4>
+                                <p style="font-size: 0.7em; color: black;">(運動学,動力学)</p>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-evenly; text-align: center; width: 100%; margin-top: 20px;">
+                        <div style="width: 30%; opacity: 0.5;">
+                            <div
+                                style="border: 3px solid #337ab7; border-radius: 15px; padding: 20px; background-color: #e8f0f7; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #337ab7; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    スキップ(まずは使わないものを作る)</p>
+                                <h4 style="color: #337ab7;">リアルタイム処理</h4>
+                                <p style="font-size: 0.7em; color: black;">(優先度設定など)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #5cb85c; border-radius: 15px; padding: 20px; background-color: #eff8ef; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #5cb85c; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    専門家に相談(どう作るかで難易度が変動)</p>
+                                <h4 style="color: #5cb85c;">プログラミング,実装</h4>
+                                <p style="font-size: 0.7em; color: black;">(Python, C++)</p>
+                            </div>
+                        </div>
+                        <div style="width: 30%;">
+                            <div
+                                style="border: 3px solid #757575; border-radius: 15px; padding: 20px; background-color: #f5f5f5; position: relative;">
+                                <p
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #757575; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
+                                    本スライド+教材</p>
+                                <h4 style="color: #757575;">ROSの使い方</h4>
+                                <p style="font-size: 0.7em; color: black;">(ツール,コマンド)</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,   // ナビゲーションUIを表示
+            progress: true,   // 進捗バーを表示
+            center: true,     // スライドを中央揃え
+            hash: true,       // URLにスライド番号を反映
+            slideNumber: true, // スライド番号を表示
+
+            // プラグインの有効化
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+
+                // その他のChalkboardショートカットはデフォルトで有効
+            }
+        });
+    </script>
+</body>
+
+</html>
