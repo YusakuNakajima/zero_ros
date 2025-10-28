@@ -55,7 +55,7 @@
 
                     <div style="display: flex; align-items: center;">
                         <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
-                        <p>イラストで学ぶロボット工学 - ロボットアームの初歩を網羅しつつも、数式もでくるので本格的</p>
+                        <p>イラストで学ぶロボット工学 - 学部生向けの教科書, 本格的な制御の本だが読みやすい</p>
                     </div>
 
                 </ol>
@@ -69,7 +69,7 @@
                             <img src="media/TP.png" style="width: 60%; margin-bottom: 20px;">
                             <p>ティーチングペンダント</p>
                             <ul>
-                                <li>各種設定や動作を記録、再生</li>
+                                <li>ロボット用の端末</li>
                                 <li>最近はLANを介してソフトウェアで行うものも多い</li>
                             </ul>
                         </div>
@@ -110,17 +110,52 @@
             </section>
             <section>
                 <section>
-
-                    <h2>ステップ①TCP(アームの手先)</h2>
-                    <p>TCP = Tool Center Point<br>複数登録して使うのが便利 </p>
+                    <h2>ステップ①TCPと重心</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
-                            <img src="media/Cone_ee.png" style="width: 100%;">
-                            <p>TCPは先端</p>
+                            <img src="media/robotic_powder_grinding.png" style="width: 60%;">
                         </div>
                         <div style="flex: 1;">
-                            <img src="media/Gripper_ee.png" style="width: 100%;">
-                            <p>TCPはグリッパの中央</p>
+                            <ul>
+                                <li>ロボットの手先に着けるツールをエンドエフェクタという</li>
+                                <li>エンドエフェクタの中で実際に動かす座標系のことをTCPという</li>
+                                <p>例)エンドエフェクタは乳棒とヘラ</p>
+                                <p>TCPは乳棒とヘラのそれぞれの先端</p>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                 <section>
+                    <h2>複数のTCP</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robotic_powder_grinding.png" style="width: 60%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>それぞれのツールに対してTCPを登録しておくと便利</li>
+                                <p>例)TCPを乳棒とヘラの先端に設定</p>
+                                <p>場面によってTCPを切り替えることで最小限のプログラムの変更で複数のツールが使える</p>
+
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+               <section>
+                    <h2>エンドエフェクタの重心設定</h2>
+                    <div style="display: flex;">
+                        <div style="flex: 1;">
+                            <img src="media/robotic_powder_grinding.png" style="width: 60%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <p>エンドエフェクタの重心設定は以下で役に立つ</p>
+                            <ul>
+                                <li>フリードライブでの重力補償</li>
+                                <li>手先のフォーストルクセンサ値の重力補償</li>
+                                <li>加減速の調整</li>
+                            <ul>
+                                
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -396,7 +431,7 @@ finally:
                             </ul>
                         </div>
                     </div>
-                    <p>工夫や手法を紹介↓</p>
+                    <p>どういった工夫があるのか↓</p>
                 </section>
                 <section>
                     <h2>RCC(Remote Center Compliance)</h2>
@@ -411,7 +446,7 @@ finally:
                         <div style="flex: 1;">
                             <ul>
                                 <li>部品を嵌め合わせるなどの作業のずれを機械的に補償するツール</li>
-                                <li>後述のコンプライアンス制御に置き換わっている印象</li>
+                                <li>RCC自体はコンプライアンス制御に置き換わっている印象だが、柔らかい部品で緩衝する考えは治具づくりで有用</li>
                             </ul>
                         </div>
                     </div>
