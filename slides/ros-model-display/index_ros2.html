@@ -82,24 +82,29 @@ ros2 pkg create --build-type ament_python ros_study
                 </ul>
             </section>
             <section>
-                <h2>ユニバーサルロボットのパッケージを取得</h2>
-                <p>ここでは例としてユニバーサルロボットのパッケージを扱います</p>
-                    <pre><code data-trim class="bash">
-git clone -b humble https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver.git src/Universal_Robots_ROS2_Driver
-vcs import src --skip-existing --input src/Universal_Robots_ROS2_Driver/Universal_Robots_ROS2_Driver-not-released.${ROS_DISTRO}.repos
-rosdep update
-rosdep install --ignore-src --from-paths src -y
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash                        
+                <h2>URのパッケージを取得</h2>
+                <ul>
+                    <li>ここではユニバーサルロボット(UR)を扱います</li>
+                    <li>キーが期限切れの場合があるので念のため更新します(1行目)</li>
+                    <li>2行目でパッケージをインストールします<br>詳細→ <a
+                            href="https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/tree/humble"
+                            target="_blank"
+                            style="color: #007bff; text-decoration: underline;">Universal_Robots_ROS2_Driver</a></li>
+                </ul>
+                <pre><code data-trim class="bash">
+# キーが期限切れの場合があるので念のため更新します
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+# ユニバーサルロボットのROSパッケージをインストールします
+sudo apt-get install ros-humble-ur                      
 </code></pre>
-                
+
             </section>
             <section>
                 <section>
                     <h2>まずはURDFを表示</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <iframe data-src="code/ros2/launch_example_display.html" width="100%" height="400px"
+                            <iframe data-src="code/ros2/launch_example_display.py" width="100%" height="400px"
                                 frameborder="0"></iframe>
                         </div>
                         <div class="text-section">
@@ -140,7 +145,7 @@ ros2 launch ros_study ur5e.launch.xml
                     </div>
                     <div class="text-section">
                         <p>右下のGUIで関節を動かせます</p>
-                        <p>ロボットコントローラはここでは動作していません、GUIは表示を直接操作しているだけです</p>
+                        <p>ただしここでは制御していません、GUI表示を直接操作しています</p>
                     </div>
                 </div>
             </section>

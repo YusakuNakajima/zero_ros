@@ -1,8 +1,0 @@
-<launch>
-  <arg name="model" default="$(find ur_description)/urdf/ur5e.xacro"/>
-  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
-  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-
-  <arg name="rviz_config" default="$(find grinding_descriptions)/rviz/ur5e.rviz" /> <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" required="true" />
-</launch>
