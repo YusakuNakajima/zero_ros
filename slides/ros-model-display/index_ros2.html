@@ -20,6 +20,27 @@
 
     <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
+    <style>
+        .reveal pre {
+            overflow-x: auto;
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .copy-button:hover {
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
@@ -102,18 +123,30 @@ sudo apt-get install ros-humble-ur
             <section>
                 <section>
                     <h2>まずはURDFを表示</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe data-src="code/ros2/launch_example_display.py" width="100%" height="400px"
-                                frameborder="0"></iframe>
-                        </div>
+                    <div class="slide-layout-code">
+                        <pre><code class="language-python external-code" data-src="code/ros2/view_ur.launch.py" data-trim></code></pre>
                         <div class="text-section">
                             <ul>
-                                <li>launchディレクトリを作成し、ur5e.launch.xmlという名前で左のコードを保存</li>
+                                <li>ros_studyにlaunchディレクトリを作成</li>
+                                <li>launchディレクトリ内にview_ur.launch.pyという名前で左のコードを保存</li>
+                            <li>setup.pyの修正↓</li>
                             </ul>
                         </div>
                     </div>
-                    <p>ビルドと実行↓</p>
+                </section>
+                 <section>
+                    <h2>setup.pyを修正</h2>
+                    <div class="slide-layout-code">
+                        <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
+                        <div class="text-section">
+                            <ul>
+                                <li>ros_studyのsetup.pyにlaunchの更新内容を追加</li>
+                                <li>これがないとビルド後にlaunchが使えない</li>
+                            <li>ビルドと実行↓</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
                 </section>
                 <section>
                     <h2>ビルドと実行</h2>
@@ -121,16 +154,14 @@ sudo apt-get install ros-humble-ur
                         <li>ビルドします</li>
 
                         <pre><code data-trim class="bash">
-colcon build 
-                        </code></pre>
-
-                        <pre><code data-trim class="bash">
-source devel detup.bash
+cd ~/ros2_ws
+colcon build --packages-select ros_study
+source install/setup.bash
                         </code></pre>
 
                         <li>次のコマンドで実行してください</li>
                         <pre><code data-trim class="bash">
-ros2 launch ros_study ur5e.launch.xml
+ros2 launch ros_study view_ur.launch.py
                         </code></pre>
                     </ul>
 
@@ -211,7 +242,7 @@ ros2 launch ros_study ur5e.launch.xml
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml external-urdf-code" data-trim>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim>
 <!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -242,7 +273,7 @@ ros2 launch ros_study ur5e.launch.xml
                     <h2>XACRO（XML Macros for Robots）</h2>
                     <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml external-xacro-code" data-trim>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.xacro" data-trim>
 <!-- XACROコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -262,7 +293,7 @@ ros2 launch ros_study ur5e.launch.xml
                     <h2>エンドエフェクタを追加したい</h2>
                     <div class="slide-layout-code">
                         <div class="code-section">
-                            <pre><code class="language-xml external-xacro-code" data-trim>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot_with_eef.xacro" data-trim>
 <!-- XACROコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
@@ -579,6 +610,7 @@ ros2 launch ros_study ur5e.launch.xml
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
     <script>
         function selectAllCode(elementId) {
             const codeElement = document.getElementById(elementId);
@@ -592,33 +624,15 @@ ros2 launch ros_study ur5e.launch.xml
         // 外部コードファイルを読み込む関数
         async function loadExternalCode() {
             try {
-                // URDFコードの読み込み（簡略版を使用）
-                const urdfResponse = await fetch('code/ros2/ur5e_robot.urdf');
-                const urdfText = await urdfResponse.text();
-                const urdfCodeElement = document.querySelector('.external-urdf-code');
-                if (urdfCodeElement) {
-                    urdfCodeElement.textContent = urdfText;
-                }
-
-                // XACROコードの読み込み
-                const xacroResponse = await fetch('code/ros2/ur5e_robot.xacro');
-                const xacroText = await xacroResponse.text();
-
-                // エンドエフェクタ付きXACROコードの読み込み
-                const xacroWithEefResponse = await fetch('code/ros2/ur5e_robot_with_eef.xacro');
-                const xacroWithEefText = await xacroWithEefResponse.text();
-
-                const xacroCodeElements = document.querySelectorAll('.external-xacro-code');
-                xacroCodeElements.forEach((element, index) => {
-                    if (index === 0) {
-                        // 最初のXACROブロック（通常のXACRO説明用）
-                        element.textContent = xacroText;
-                    } else {
-                        // 2番目のXACROブロック（エンドエフェクタ追加用）
-                        element.textContent = xacroWithEefText;
+                const codeElements = document.querySelectorAll('.external-code');
+                for (const element of codeElements) {
+                    const source = element.getAttribute('data-src');
+                    if (source) {
+                        const response = await fetch(source);
+                        const text = await response.text();
+                        element.textContent = text;
                     }
-                });
-
+                }
                 // コードハイライトを再適用
                 hljs.highlightAll();
             } catch (error) {
@@ -660,9 +674,36 @@ ros2 launch ros_study ur5e.launch.xml
             }
         });
 
+        function copyCodeToClipboard(button) {
+            const pre = button.closest('pre');
+            const code = pre.querySelector('code');
+            navigator.clipboard.writeText(code.innerText).then(function() {
+                button.innerText = 'Copied!';
+                setTimeout(function() {
+                    button.innerText = 'Copy';
+                }, 2000);
+            }, function(err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
+
         // Reveal.js初期化後に外部コードを読み込み
         Reveal.on('ready', function () {
-            loadExternalCode();
+            loadExternalCode().then(() => {
+                hljs.highlightAll();
+                
+                // Add copy buttons to all pre blocks
+                let preblocks = document.querySelectorAll('pre');
+                preblocks.forEach(function(pre) {
+                    let button = document.createElement('button');
+                    button.className = 'copy-button';
+                    button.innerText = 'Copy';
+                    button.addEventListener('click', function () {
+                        copyCodeToClipboard(this);
+                    });
+                    pre.appendChild(button);
+                });
+            });
         });
     </script>
 </body>
