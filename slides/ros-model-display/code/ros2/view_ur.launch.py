@@ -8,117 +8,105 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     declared_arguments = []
-    # UR specific arguments
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "ur_type",
-            description="Type/series of used UR robot.",
-            default_value=["ur5e"],
-        )
+
+    # 1. ロボットモデルが入っているパッケージ名 (自作パッケージ)
+    description_package_arg = DeclareLaunchArgument(
+        "description_package",
+        default_value="ros_study",
+        description="Description package with robot URDF/XACRO files.",
     )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "safety_limits",
-            default_value="true",
-            description="Enables the safety limits controller if true.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "safety_pos_margin",
-            default_value="0.15",
-            description="The margin to lower and upper limits in the safety controller.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "safety_k_position",
-            default_value="20",
-            description="k-position factor in the safety controller.",
-        )
-    )
+    declared_arguments.append(description_package_arg)
+
+    # 2. URDF/XACROファイル名
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value=PathJoinSubstitution(
-                [FindPackageShare("ur_description"), "urdf", "ur.urdf.xacro"]
-            ),
-            description="URDF/XACRO description file (absolute path) with the robot.",
+            default_value="ur5e.urdf",
+            description="URDF/XACRO description file with the robot.",
         )
     )
+    
+    # 3. xacroに渡すための一般的な必須引数を宣言
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "name", 
+            default_value="robot", 
+            description="Robot name/prefix passed to xacro.",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "tf_prefix", 
+            default_value='""', 
+            description="TF prefix for the robot model.",
+        )
+    )
+
+    # ★ 4. RViz設定ファイル名を追加
     declared_arguments.append(
         DeclareLaunchArgument(
             "rviz_config_file",
-            default_value=PathJoinSubstitution(
-                [FindPackageShare("ur_description"), "rviz", "view_robot.rviz"]
-            ),
-            description="RViz config file (absolute path) to use when launching rviz.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "tf_prefix",
-            default_value='""',
-            description="Prefix of the joint names, useful for "
-            "multi-robot setup. If changed than also joint names in the controllers' configuration "
-            "have to be updated.",
+            default_value="display.rviz", # あなたの .rviz ファイル名に設定
+            description="Rviz configuration file.",
         )
     )
 
-    # Initialize Arguments
-    ur_type = LaunchConfiguration("ur_type")
-    safety_limits = LaunchConfiguration("safety_limits")
-    safety_pos_margin = LaunchConfiguration("safety_pos_margin")
-    safety_k_position = LaunchConfiguration("safety_k_position")
+
+    # LaunchConfigurationの初期化
+    description_package = LaunchConfiguration("description_package")
     description_file = LaunchConfiguration("description_file")
+    name = LaunchConfiguration("name")
     tf_prefix = LaunchConfiguration("tf_prefix")
-    rviz_config_file = LaunchConfiguration("rviz_config_file")
+    rviz_config_file_name = LaunchConfiguration("rviz_config_file")
+    
+    # URDF/XACROファイルのパスを構築
+    robot_description_file = PathJoinSubstitution(
+        [FindPackageShare(description_package), "urdf", description_file]
+    )
 
+    # RViz設定ファイルのパスを構築 (rvizフォルダにあると仮定)
+    rviz_config_file = PathJoinSubstitution(
+        [FindPackageShare(description_package), "rviz", rviz_config_file_name]
+    )
+
+
+    # XACROコマンドを実行してURDFを生成
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            description_file,
+            robot_description_file,
             " ",
-            "safety_limits:=",
-            safety_limits,
+            "name:=", name,
             " ",
-            "safety_pos_margin:=",
-            safety_pos_margin,
-            " ",
-            "safety_k_position:=",
-            safety_k_position,
-            " ",
-            "name:=",
-            "ur",
-            " ",
-            "ur_type:=",
-            ur_type,
-            " ",
-            "tf_prefix:=",
-            tf_prefix,
+            "tf_prefix:=", tf_prefix,
         ]
     )
     robot_description = {
         "robot_description": ParameterValue(value=robot_description_content, value_type=str)
     }
 
+    # ノードの定義
+    
     joint_state_publisher_node = Node(
         package="joint_state_publisher_gui",
         executable="joint_state_publisher_gui",
     )
+    
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
-        output="both",
+        output="screen",
         parameters=[robot_description],
     )
+    
+    # ★ RViz2ノードを修正: '-d' オプションで設定ファイルを渡す
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        output="log",
-        arguments=["-d", rviz_config_file],
+        output="screen",
+        arguments=["-d", rviz_config_file], # 設定ファイルパスを追加
     )
 
     nodes_to_start = [

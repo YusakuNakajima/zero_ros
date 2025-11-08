@@ -115,6 +115,7 @@ ros2 pkg create --build-type ament_python ros_study
                 <pre><code data-trim class="bash">
 # キーが期限切れの場合があるので念のため更新します
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt-get update
 # ユニバーサルロボットのROSパッケージをインストールします
 sudo apt-get install ros-humble-ur                      
 </code></pre>
@@ -122,14 +123,42 @@ sudo apt-get install ros-humble-ur
             </section>
             <section>
                 <section>
-                    <h2>まずはURDFを表示</h2>
+                    <h2>まずはURDFを追記</h2>
+                    <p>Ur5eの例</p>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim>
+</code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>詳細は後程やります、まずは表示しましょう</li>
+                                <li>ros_studyにurdfディレクトリを作成</li>
+                                <li>urdfディレクトリ内にur5e.urdfという名前で左のコードを保存</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>launchを作成</h2>
                     <div class="slide-layout-code">
                         <pre><code class="language-python external-code" data-src="code/ros2/view_ur.launch.py" data-trim></code></pre>
                         <div class="text-section">
                             <ul>
                                 <li>ros_studyにlaunchディレクトリを作成</li>
                                 <li>launchディレクトリ内にview_ur.launch.pyという名前で左のコードを保存</li>
-                            <li>setup.pyの修正↓</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>rviz設定ファイルを作成</h2>
+                    <div class="slide-layout-code">
+                        <pre><code class="language-yaml external-code" data-src="code/ros2/display.rviz" data-trim></code></pre>
+                        <div class="text-section">
+                            <ul>
+                                <li>ros_studyにrvizディレクトリを作成</li>
+                                <li>launchディレクトリ内にdisplay.rvizという名前で左のコードを保存</li>
                             </ul>
                         </div>
                     </div>
@@ -243,7 +272,6 @@ ros2 launch ros_study view_ur.launch.py
                     <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim>
-<!-- URDFコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
                         <div class="text-section">
