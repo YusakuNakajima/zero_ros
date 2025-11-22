@@ -25,6 +25,7 @@
             overflow-x: auto;
             position: relative;
         }
+
         .copy-button {
             position: absolute;
             top: 5px;
@@ -37,6 +38,7 @@
             font-size: 12px;
             opacity: 0.7;
         }
+
         .copy-button:hover {
             opacity: 1;
         }
@@ -163,7 +165,7 @@ sudo apt-get install ros-humble-ur
                         </div>
                     </div>
                 </section>
-                 <section>
+                <section>
                     <h2>setup.pyを修正</h2>
                     <div class="slide-layout-code">
                         <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
@@ -171,19 +173,19 @@ sudo apt-get install ros-humble-ur
                             <ul>
                                 <li>ros_studyのsetup.pyにlaunchの更新内容を追加</li>
                                 <li>これがないとビルド後にlaunchが使えない</li>
-                            <li>ビルドと実行↓</li>
+                                <li>ビルドと実行↓</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
                     <h2>ファイル構造</h2>
-                         <img src="media/ros_study_file_structure.png" alt="ros_studyファイル構造例"
-                            style="display: block; max-width: 90%;">
-                       
-                            <p>このようなファイル構造になっていればOK</p>
+                    <img src="media/ros_study_file_structure.png" alt="ros_studyファイル構造例"
+                        style="display: block; max-width: 90%;">
+
+                    <p>このようなファイル構造になっていればOK</p>
                 </section>
-                
+
                 <section>
                     <h2>ビルドと実行</h2>
                     <ul>
@@ -212,7 +214,7 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                     <div class="text-section">
                         <p>右下のGUIで関節を動かせます</p>
-                        <p>ただしここでは制御していません、GUI表示を直接操作しています</p>
+                        <p>GUIはロボットの表示を直接変えているだけです、実際のロボットが動くわけではないので注意です</p>
                     </div>
                 </div>
             </section>
@@ -239,7 +241,7 @@ ros2 launch ros_study view_ur.launch.py
             <section>
                 <!-- そもそもロボットの構造(復習) -->
                 <section>
-                    <h2>ステップ1：URDFの書き方</h2>
+                    <h2>ステップ1-1：ロボットの構造を記述するURDFとは</h2>
                     <div style="position: relative; display: inline-block;">
                         <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
                             style="display: block; max-width: 100%;">
@@ -272,7 +274,6 @@ ros2 launch ros_study view_ur.launch.py
                     <p>この構造をファイルに落とし込んだのがURDF↓</p>
                 </section>
 
-
                 <section>
                     <h2>URDF（Unified Robot Description Format）</h2>
                     <p>Ur5eの例</p>
@@ -284,6 +285,7 @@ ros2 launch ros_study view_ur.launch.py
                         <div class="text-section">
                             <ul>
                                 <li>一見長くて分かりにくいが。。。</li>
+                                <li>実際はリンクとジョイントが並んでいるだけ</li>
                             </ul>
                         </div>
                     </div>
@@ -292,13 +294,13 @@ ros2 launch ros_study view_ur.launch.py
                 <!-- URDF -->
                 <section>
                     <h2>URDF（Unified Robot Description Format）</h2>
-                    <p>VS Codeで折りたたんだ</p>
+                    <p>Ur5eのVS Codeで折りたたんだ表示</p>
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <img src="media/urdf_folding.png" alt="URDF folding">
                         </div>
                         <div class="text-section">
-                            <p>←よく見るとlinkとjointが並んでいるだけ</p>
+                            <p>linkとjointが並んでいる様子が分かる</p>
                         </div>
                     </div>
                 </section>
@@ -316,7 +318,7 @@ ros2 launch ros_study view_ur.launch.py
                             <ul>
                                 <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
                                 <li>リンク→ジョイントの繰り返し構造をマクロで書けるので便利</li>
-                                <li>XACRO読み込み時に変数を渡す</li>
+                                <li>URDFよりXACROを使うことの方が多い</li>
                             </ul>
                         </div>
                     </div>
@@ -331,116 +333,336 @@ ros2 launch ros_study view_ur.launch.py
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot_with_eef.xacro" data-trim>
 <!-- XACROコードが外部ファイルから読み込まれます -->
 </code></pre>
+                            <p> pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</p>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>XACROのinclude機能が便利</li>
-                                <li>既にあるURDFやXACROを呼び出せるのでエンドエフェクタ部分だけ自分で追記すればよい</li>
-                                <li>pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</li>
+                                <li>XACROのinclude機能で既にあるURDFやXACROを呼び出せる</li>
+                                <li>アーム基本構造とエンドエフェクタ追記で別々のファイルを用意するのがおススメ</li>
+                                <li>エンドエフェクタ部分だけ追記すれば変更が用意</li>
                             </ul>
                         </div>
                     </div>
                 </section>
-                <!-- ROS-industrial標準リンク名 -->
+
+            </section>
+            <!-- ステップ1：URDFの書き方 -->
+            <section>
+                <!-- そもそもロボットの構造(復習) -->
                 <section>
-                    <h2>標準リンク名</h2>
-                    <p>ROSでよく使うリンク(慣習であって絶対ではない)</p>
-                    <ul>
-                        <li><strong>base_link</strong>: ROSのベース座標系</li>
-                        <li><strong>world</strong>: Gazebo等のシミュレータのベース座標系</li>
-                    </ul>
-                    <p>ROS-industrialの標準リンク(産業用ロボットとの互換性を持たせるために決められている)</p>
-                    <ul>
-                        <li><strong>base</strong>: 産業用コントローラのベース座標系</li>
-                        <li><strong>tool0</strong>: 産業用コントローラのデフォルトツール座標系</li>
-                        <li><strong>flange</strong>: エンドエフェクタ取り付け用フレーム（REP 103準拠、x+が前方）</li>
-                    </ul>
+                    <h2>ステップ1-2：URDFの中身</h2>
+                    <div style="position: relative; display: inline-block;">
+                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                            style="display: block; max-width: 100%;">
+                        <div style="position: absolute; 
+                                    top: 0; 
+                                    left: 0; 
+                                    width: 33.33%; 
+                                    height: 100%; 
+                                    border: 5px solid red; 
+                                    box-sizing: border-box; 
+                                    "></div>
+                    </div>
+                </section>
+
+                   <!-- UR5eのリンクとジョイントの例 -->
+                <section>
+                    <h2>UR5eの例</h2>
+                    <div style="display: flex; justify-content: space-around; width: 100%;">
+                        <div style="flex-basis: 48%;">
+                            <h3>リンク名</h3>
+                            <table style="width: 100%; font-size: 0.5em;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left;">名前</th>
+                                        <th style="text-align: left;">説明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>world</strong></td><td>シミュレータの座標系</td></tr>
+                                    <tr><td><strong>base</strong></td><td>URコントローラの座標系</td></tr>
+                                    <tr><td><strong>base_link</strong></td><td>ロボットの基部</td></tr>
+                                    <tr><td><strong>shoulder_link</strong></td><td>肩のリンク</td></tr>
+                                    <tr><td><strong>upper_arm_link</strong></td><td>上腕のリンク</td></tr>
+                                    <tr><td><strong>forearm_link</strong></td><td>前腕のリンク</td></tr>
+                                    <tr><td><strong>wrist_1_link</strong></td><td>手首1のリンク</td></tr>
+                                    <tr><td><strong>wrist_2_link</strong></td><td>手首2のリンク</td></tr>
+                                    <tr><td><strong>wrist_3_link</strong></td><td>手首3のリンク</td></tr>
+                                    <tr><td><strong>tool0</strong></td><td>URコントローラのデフォルトツール座標系</td></tr>
+                                    <tr><td><strong>ee_link</strong></td><td>エンドエフェクタのリンク</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="flex-basis: 48%;">
+                            <h3>ジョイント名</h3>
+                            <table style="width: 100%; font-size: 0.5em;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left;">名前</th>
+                                        <th style="text-align: left;">説明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>world_joint</strong></td><td>worldとbase_link間のジョイント</td></tr>
+                                    <tr><td><strong>shoulder_pan_joint</strong></td><td>1軸ジョイント</td></tr>
+                                    <tr><td><strong>shoulder_lift_joint</strong></td><td>2軸ジョイント</td></tr>
+                                    <tr><td><strong>elbow_joint</strong></td><td>3軸ジョイント</td></tr>
+                                    <tr><td><strong>wrist_1_joint</strong></td><td>4軸ジョイント</td></tr>
+                                    <tr><td><strong>wrist_2_joint</strong></td><td>5軸ジョイント</td></tr>
+                                    <tr><td><strong>wrist_3_joint</strong></td><td>6軸ジョイント</td></tr>
+                                    <tr><td><strong>ee_fixed_joint</strong></td><td>エンドエフェクタ固定ジョイント</td></tr>
+                                    <tr><td><strong>base_link-base_fixed_joint</strong></td><td>base_linkとbase間の固定ジョイント</td></tr>
+                                    <tr><td><strong>wrist_3_link-tool0_fixed_joint</strong></td><td>wrist_3_linkとtool0間の固定ジョイント</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ROSでよく使うリンク名 (慣習) -->
+                <section>
+                    <h2>ROSでよく使うリンク名<br>~慣習~</h2>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">リンク名</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>base_link</strong></td>
+                                <td>ROSのベース座標系</td>
+                            </tr>
+                            <tr>
+                                <td><strong>world</strong></td>
+                                <td>Gazebo等のシミュレータのワールド座標系</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ee_link</strong></td>
+                                <td>エンドエフェクタのリンク</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- ROSでよく使うリンク名 (ROS-industrial) -->
+                <section>
+                    <h2>ROSでよく使うリンク名<br>~ROS-industrial標準リンク~</h2>
+                    <p>産業用ロボットとの互換性を持たせるために決められている</p>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">リンク名</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>base</strong></td>
+                                <td>産業用コントローラのベース座標系</td>
+                            </tr>
+                            <tr>
+                                <td><strong>tool0</strong></td>
+                                <td>産業用コントローラのデフォルトツール座標系</td>
+                            </tr>
+                            <tr>
+                                <td><strong>flange</strong></td>
+                                <td>エンドエフェクタ取り付け用フレーム（REP 103準拠、x+が前方）</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~type(動作の種類)~</h2>
-                    <ul>
-                        <li>revolute: 回転関節（角度制限あり）</li>
-                        <li>continuous: 連続回転関節（角度制限なし）</li>
-                        <li>prismatic: 直動関節</li>
-                        <li>fixed: 固定関節(動かない手先とかで使用)</li>
-                    </ul>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 65%;">要素</th>
+                                <th style="text-align: left;">例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>revolute</strong>: 回転関節（角度制限あり）</td>
+                                <td>ロボットアーム</td>
+                            </tr>
+                            <tr>
+                                <td><strong>continuous</strong>: 連続回転関節（角度制限なし）</td>
+                                <td>タイヤ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>prismatic</strong>: 直動関節</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>fixed</strong>: 固定関節</td>
+                                <td>手先に固定したエンドエフェクタ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>ロボットアームではrevoluteとfixedしか使わない</p>
                 </section> <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~リンクとのつながりと制限~</h2>
-                    <ul>
-                        <li><strong>parent/child</strong>: 親リンクと子リンクの指定</li>
-                        <li><strong>origin</strong>: 親リンクからの位置・姿勢</li>
-                        <li><strong>axis</strong>: 回転軸の方向ベクトル</li>
-                        <li><strong>limit</strong>: 動作範囲、トルク、速度の制限</li>
-                    </ul>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">要素</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>parent/child</strong></td>
+                                <td>親リンクと子リンクの指定</td>
+                            </tr>
+                            <tr>
+                                <td><strong>origin</strong></td>
+                                <td>親リンクからの位置・姿勢</td>
+                            </tr>
+                            <tr>
+                                <td><strong>axis</strong></td>
+                                <td>回転軸の方向ベクトル</td>
+                            </tr>
+                            <tr>
+                                <td><strong>limit</strong></td>
+                                <td>動作範囲、トルク、速度の制限</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~visual(表示用)~</h2>
-                    <ul>
-                        <li>geometry: 形状（box, cylinder, sphere, mesh）</li>
-                        <li>CADデータ→daeやstlにしてmeshで表示することが多い</li>
-                        <li>material: 色・材質</li>
-                        <li>origin: リンク座標系からの位置・姿勢</li>
-                    </ul>
+                    <p>シミュレータで必要な項目、今は飛ばしてok</p>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">要素</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>geometry</strong></td>
+                                <td>形状（box, cylinder, sphere, mesh）。CADデータはdaeやstl形式で表示することが多いです。</td>
+                            </tr>
+                            <tr>
+                                <td><strong>material</strong></td>
+                                <td>色・材質</td>
+                            </tr>
+                            <tr>
+                                <td><strong>origin</strong></td>
+                                <td>リンク座標系からの位置・姿勢</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section> <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~collision(干渉計算用)~</h2>
-                    <ul>
-                        <li>干渉計算は重い！モーションプランニング計算量の半分以上は干渉計算</li>
-                        <li>通常はvisualより簡単な形状(よく使うのは円柱とか)を使用し計算量を削減</li>
-                    </ul>
+                    <p>MoveItの避けるモーション生成等で使います</p>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">Collisionに関する注意点</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>・干渉計算は重い！モーションプランニング計算量の半分以上は干渉計算</td>
+                            </tr>
+                            <tr>
+                                <td>・通常はvisualのgeometryをmeshにして、collisionは円柱などを使用し計算量を削減することが多い</td>
+                            </tr>
+                            <tr>
+                                <td>・collisionを設定していない場合はvisualのgeometryがcollisionとして自動で適用されます</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- 物理属性 -->
                 <section>
                     <h2>ジョイントの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <ul>
-                        <li>Dynamics
-                            <ul>
-                                <li>friction: 静摩擦[N or N/m]</li>
-                                <li>damping: 減衰値[Ns/m or Nms/rad]</li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">要素 (Dynamics)</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>friction</strong></td>
+                                <td>静摩擦[N or N/m]</td>
+                            </tr>
+                            <tr>
+                                <td><strong>damping</strong></td>
+                                <td>減衰値[Ns/m or Nms/rad]</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
                 <!-- 物理属性 -->
                 <section>
                     <h2>リンクの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <ul>
-                        <li>慣性パラメータ ~inertial~
-                            <ul>
-                                <li>mass: 質量</li>
-                                <li>ixx, iyy, izz: 主軸周りの慣性モーメント</li>
-                                <li>ixy, ixz, iyz: 慣性乗積（通常は0）</li>
-                                <li>CADソフトの計算値や実測値を使う</li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">要素 (Inertial)</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>mass</strong></td>
+                                <td>質量</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ixx, iyy, izz</strong></td>
+                                <td>主軸周りの慣性モーメント</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ixy, ixz, iyz</strong></td>
+                                <td>慣性乗積（通常は0）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.6em; margin-top: 10px;">※CADソフトの計算値や実測値を使う</p>
                 </section>
                 <!-- 物理属性 -->
                 <section>
                     <h2>リンク間相互作用</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
-                    <ul>
-                        <li>contact_coefficients
-                            <ul>
-                                <li>リンクが相互に接触している時のリンクの動作</li>
-                                <li>mu: 摩擦係数</li>
-                                <li>kp: 剛性係数</li>
-                                <li>kd: 減衰係数</li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <table style="width: 100%; font-size: 0.7em;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 30%;">要素 (Contact Coeffs)</th>
+                                <th style="text-align: left;">説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>mu</strong></td>
+                                <td>摩擦係数</td>
+                            </tr>
+                            <tr>
+                                <td><strong>kp</strong></td>
+                                <td>剛性係数</td>
+                            </tr>
+                            <tr>
+                                <td><strong>kd</strong></td>
+                                <td>減衰係数</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
-
-
-
             </section>
 
             <!-- ステップ2：URDFの表示launchコード例 -->
@@ -458,6 +680,29 @@ ros2 launch ros_study view_ur.launch.py
                                     border: 5px solid red; 
                                     box-sizing: border-box; 
                                     "></div>
+                    </div>
+                </section>
+                <section>
+                    <h2>URDF/XACROとrosparam</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
+                            <div style="position: absolute; 
+                                    top: 40%; 
+                                    left: 0; 
+                                    width: 30%; 
+                                    height: 50%; 
+                                    border: 5px solid rgb(0, 0, 255); 
+                                    box-sizing: border-box; 
+                                    "></div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>URDFやXACROファイルは、rosparamとして読み込まれる</li>
+                                <li>RVizはrosparamからロボットモデルの情報を取得し表示してる</li>
+                                
+                            </ul>
+                        </div>
                     </div>
                 </section>
                 <section>
@@ -713,12 +958,12 @@ ros2 launch ros_study view_ur.launch.py
         function copyCodeToClipboard(button) {
             const pre = button.closest('pre');
             const code = pre.querySelector('code');
-            navigator.clipboard.writeText(code.innerText).then(function() {
+            navigator.clipboard.writeText(code.innerText).then(function () {
                 button.innerText = 'Copied!';
-                setTimeout(function() {
+                setTimeout(function () {
                     button.innerText = 'Copy';
                 }, 2000);
-            }, function(err) {
+            }, function (err) {
                 console.error('Async: Could not copy text: ', err);
             });
         }
@@ -727,10 +972,10 @@ ros2 launch ros_study view_ur.launch.py
         Reveal.on('ready', function () {
             loadExternalCode().then(() => {
                 hljs.highlightAll();
-                
+
                 // Add copy buttons to all pre blocks
                 let preblocks = document.querySelectorAll('pre');
-                preblocks.forEach(function(pre) {
+                preblocks.forEach(function (pre) {
                     let button = document.createElement('button');
                     button.className = 'copy-button';
                     button.innerText = 'Copy';
