@@ -276,21 +276,69 @@ def generate_launch_description():
                 </section>
             </section>
 
-            <section>
-                <h2>Gazebo</h2>
-                <div class="slide-layout-image">
-                    <div class="slide-image">
-                        <img src="media/gazebo.png" alt="Gazebo詳細">
+           <section>
+                <section>
+                    <h2>Gazebo</h2>
+                    <div class="slide-layout-image">
+                        <div class="slide-image">
+                            <img src="media/gazebo.png" alt="Gazebo" style="max-height: 400px;">
+                        </div>
+                        <div class="slide-content">
+                            <ul>
+                                <li>Gazeboは、ROSで最も広く使われている<strong>3D物理シミュレータ</strong>です。</li>
+                                <li>Mock Hardwareとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。</li>
+                                <li>実機を動かす前の「最終確認」として不可欠なツールです。</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="slide-content">
-                        <ul>
-                            <li>Gazeboは物理エンジンを搭載した3Dシミュレータです。</li>
-                            <li>カメラ画像、LiDARの点群、接触センサなどのデータを取得できます。</li>
-                            <li>Mock Hardwareでロジックを確認した後、最終確認として使用するのが一般的です。</li>
-                        </ul>
+                </section>
+
+                <section>
+                    <h2>【注意】Gazeboは2種類ある</h2>
+                    <p style="font-size: 0.8em;">実は現在、世代交代の過渡期であり2つの「Gazebo」が存在します。<br>ネットで検索する際は区別に注意が必要です。</p>
+                    
+                    <div style="display: flex; gap: 30px; margin-top: 30px;">
+                        <div style="flex: 1; border: 2px solid #e55; border-radius: 10px; padding: 15px; background: rgba(220, 53, 69, 0.1);">
+                            <h3 style="color: #e55; font-size: 1.0em;">Gazebo Classic</h3>
+                            <p style="font-size: 0.7em; color: #aaa;">(通称: 旧Gazebo / Gazebo 11)</p>
+                            <hr style="border-color: #e55;">
+                            <ul style="font-size: 0.8em; text-align: left;">
+                                <li>長年使われてきたバージョン</li>
+                                <li>資料が豊富で安定している</li>
+                                <li>コマンドは <code>gazebo</code></li>
+                                <li><strong>2025年にサポート終了予定</strong></li>
+                            </ul>
+                        </div>
+
+                        <div style="flex: 1; border: 2px solid #d63384; border-radius: 10px; padding: 15px; background: rgba(214, 51, 132, 0.1);">
+                            <h3 style="color: #d63384; font-size: 1.0em;">Gazebo (New)</h3>
+                            <p style="font-size: 0.7em; color: #aaa;">(旧称: Ignition Gazebo)</p>
+                            <hr style="border-color: #d63384;">
+                            <ul style="font-size: 0.8em; text-align: left;">
+                                <li>次世代のモダンなシミュレータ</li>
+                                <li>画像が綺麗で動作も軽量化</li>
+                                <li>コマンドは <code>gz sim</code></li>
+                                <li><strong>今後の主流はこちら</strong></li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                <p>現在作成中ですm(__)m</p>
+                </section>
+
+                <section>
+                    <h2>ros2_controlとの連携</h2>
+                    <div class="slide-layout-text">
+                        <p>どちらのGazeboを使う場合でも、<strong>ros2_control経由で動かす</strong>という基本構成は変わりません。</p>
+                        <div style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                            <h4 style="color: #3b82f6;">切り替えの仕組み</h4>
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>Mock Hardware:</strong> 実機なし、物理演算なし</li>
+                                [cite_start]<li><strong>Gazebo Classic:</strong> <code>gazebo_ros2_control</code> プラグインを使用 [cite: 1]</li>
+                                [cite_start]<li><strong>Gazebo (New):</strong> <code>gz_ros2_control</code> プラグインを使用 [cite: 2]</li>
+                            </ul>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.8em; color: #aaa;">※本講座では、環境構築の手軽さから○○（使っている方）を使用します。</p>
+                    </div>
+                </section>
             </section>
 
             <section>
