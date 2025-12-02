@@ -773,51 +773,47 @@ ros2 launch ros_study view_ur.launch.py
                     <div class="slide-layout-image-code">
                         <div class="image-section">
                             <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
-                            <!-- Highlighting boxes can be adjusted or kept as is -->
                             <div
-                                style="position: absolute; top: 40%; left: 0; width: 30%; height: 50%; border: 5px solid rgb(0, 0, 255); box-sizing: border-box;">
+                                style="position: absolute; top: 35%; left: 0; width: 30%; height: 50%; border: 5px solid rgb(0, 0, 255); box-sizing: border-box;">
                             </div>
                             <div
-                                style="position: absolute; top: 37%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(255, 0, 0); box-sizing: border-box;">
+                                style="position: absolute; top: 35%; left: 31%; width: 15%; height: 12%; border: 5px solid rgb(255, 0, 0); box-sizing: border-box;">
                             </div>
                             <div
-                                style="position: absolute; top: 52%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(0, 255, 0); box-sizing: border-box;">
+                                style="position: absolute; top: 47%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(0, 255, 0); box-sizing: border-box;">
                             </div>
                             <div
-                                style="position: absolute; top: 67%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(255, 255, 0); box-sizing: border-box;">
+                                style="position: absolute; top: 64%; left: 31%; width: 15%; height: 22%; border: 5px solid rgb(255, 255, 0); box-sizing: border-box;">
                             </div>
                         </div>
                         <div class="code-section">
-                            <pre><code class="language-python" data-trim>
-# URDF/XACROを読み込み
+                            <pre><code class="nohighlight" data-trim data-noescape>
+<span style="display: block; background-color: rgba(0, 0, 255, 0.15); padding: 2px 5px;"># URDF/XACROを読み込み (青)
 robot_description = {
     "robot_description": ParameterValue(value=robot_description_content, value_type=str)
-}
-
-# ノードの定義
+}</span>
+<span style="display: block; background-color: rgba(255, 0, 0, 0.15); padding: 2px 5px;"># ノードの定義 (赤)
 joint_state_publisher_node = Node(
     package="joint_state_publisher_gui",
     executable="joint_state_publisher_gui",
-)
-
+)</span>
+<span style="display: block; background-color: rgba(0, 255, 0, 0.15); padding: 2px 5px;"># Robot State Publisher (緑)
 robot_state_publisher_node = Node(
     package="robot_state_publisher",
     executable="robot_state_publisher",
     parameters=[robot_description],
-)
-
+)</span>
+<span style="display: block; background-color: rgba(255, 255, 0, 0.15); padding: 2px 5px;"># RViz (黄)
 rviz_node = Node(
     package="rviz2",
     executable="rviz2",
     arguments=["-d", rviz_config_file],
-)
-</code></pre>
+)</span>
+            </code></pre>
                         </div>
                     </div>
-                    <p>Pythonコード内で各ノードを定義し、起動します。</p>
+                    
                 </section>
-
-
             </section>
 
             <!-- TF：モデルを「動かす」ための座標情報 -->
@@ -825,9 +821,9 @@ rviz_node = Node(
                 <section>
                     <h2>なぜTFが必要？</h2>
                     <ul>
-                        <li  >URDFだけでは「形状」と「関節がどう繋がっているか」しか分かりません。</li>
-                        <li  >「各関節が何度曲がった結果、手先がどこにあるか」という<strong>リアルタイムの位置・姿勢情報</strong>、それがTFです。</li>
-                        <li  >RvizはURDF（形）とTF（位置）を組み合わせて初めてモデルを表示できます。</li>
+                        <li>URDFだけでは「形状」と「関節がどう繋がっているか」しか分かりません。</li>
+                        <li>「各関節が何度曲がった結果、手先がどこにあるか」という<strong>リアルタイムの位置・姿勢情報</strong>、それがTFです。</li>
+                        <li>RvizはURDF（形）とTF（位置）を組み合わせて初めてモデルを表示できます。</li>
                     </ul>
                 </section>
                 <section>
@@ -839,7 +835,7 @@ rviz_node = Node(
                         <div class="text-section">
                             <ul>
                                 <li>TF (Transform) は、ロボットの各パーツ（Link）の相対的な位置関係を<strong>ツリー構造</strong>で管理します。</li>
-                                <li  >
+                                <li>
                                     そして、<strong><code>robot_state_publisher</code>ノードが、URDFを読み込み、このTFツリーを計算して配信する張本人です。</strong>
                                 </li>
                             </ul>
@@ -867,26 +863,29 @@ rviz_node = Node(
                 </section>
                 <section>
                     <h2>Rvizでの重要設定：Fixed Frame</h2>
-                                        <div class="slide-layout-image">
-                                            <div class="image-section" style="position: relative;">
-                                                <img src="media/robot_on_rviz.png" alt="Rviz画面">
-                                                <div style="position: absolute; top: 10%; left: 2%; width: 30%; height: 6%; border: 3px solid red; box-sizing: border-box;"></div>
-                                            </div>
-                                            <div class="text-section">
-                                                <ul>
-                                                    <li>Rvizでモデルを表示するには「どのリンクを座標の基準にするか」を指定する必要がある</li>
-                                                    <li>これが左側の設定パネルにある <strong>Fixed Frame</strong> で、通常は
-                                                        <code>base_link</code> や <code>world</code> を指定します。</li>
-                                                </ul>
-                                            </div>
-                                        </div>
+                    <div class="slide-layout-image">
+                        <div class="image-section" style="position: relative;">
+                            <img src="media/robot_on_rviz.png" alt="Rviz画面">
+                            <div
+                                style="position: absolute; top: 10%; left: 2%; width: 30%; height: 6%; border: 3px solid red; box-sizing: border-box;">
+                            </div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>Rvizでモデルを表示するには「どのリンクを座標の基準にするか」を指定する必要がある</li>
+                                <li>これが左側の設定パネルにある <strong>Fixed Frame</strong> で、通常は
+                                    <code>base_link</code> や <code>world</code> を指定します。
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
                 <section>
                     <h2>TFの役割2：座標管理（時間）</h2>
                     <ul>
                         <li>TFは「いつの時点」の座標かというタイムスタンプ情報も管理しています。</li>
-                        <li  >これは複数のセンサやPCが連携する複雑なシステムで重要になります。</li>
-                        <li   style="background-color: #555; padding: 10px; border-radius: 5px;">
+                        <li>これは複数のセンサやPCが連携する複雑なシステムで重要になります。</li>
+                        <li style="background-color: #555; padding: 10px; border-radius: 5px;">
                             <strong>今回のパートで気にする必要はありません。</strong><br>（詳細は <code>ros-arm-position-control</code> スライドで解説）
                         </li>
                     </ul>
