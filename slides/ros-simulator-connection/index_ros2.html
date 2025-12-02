@@ -18,45 +18,52 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
 
-    <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
-    
-    <!-- 追加のスタイル -->
+
     <style>
         .code-block-with-highlights {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        
+
         .code-highlight-red-bg {
             background-color: rgba(220, 53, 69, 0.3);
             padding: 10px;
             border-radius: 5px;
             margin: 5px 0;
         }
-        
+
         .code-highlight-blue-bg {
             background-color: rgba(0, 123, 255, 0.3);
             padding: 10px;
             border-radius: 5px;
             margin: 5px 0;
         }
-        
+
         .code-highlight-green-bg {
             background-color: rgba(40, 167, 69, 0.3);
             padding: 10px;
             border-radius: 5px;
             margin: 5px 0;
         }
-        
-        .code-block-with-highlights pre {
-            margin: 0;
-            background: transparent !important;
+
+        .slide-layout-text ul {
+            font-size: 0.9em;
+            line-height: 1.6;
         }
-        
-        .code-block-with-highlights code {
-            background: transparent !important;
+
+        /* 比較用ボックスのスタイル */
+        .comparison-box {
+            flex: 1;
+            border-radius: 10px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .comparison-box h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -64,7 +71,6 @@
 <body>
     <div class="reveal">
         <div class="slides">
-            <!-- タイトルスライド -->
             <section data-background-image="media/gazebo.png" data-background-opacity="0.3">
                 <h1>ゼロからのROS2</h1>
                 <p>ROS2におけるシミュレータ</p>
@@ -73,166 +79,220 @@
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
 
-            <!-- 本スライドの担当範囲 -->
             <section>
                 <h2>本スライドの担当範囲</h2>
-                <p>本スライドではシミュレータ上でロボットを動かす方法を説明します。</p>
+
+                <div style="margin-bottom: 30px;">
+                    <p style="font-size: 1.2em;">前章と本章の決定的な違いは<br>
+                        <strong style="color: #e55; font-size: 1.3em;">「制御」しているかどうか</strong> です。
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 40px;">
+
+                    <div
+                        style="flex: 1; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; color: #aaa;">
+                        <h3 style="font-size: 1.0em; color: #999; margin-bottom: 10px;">前回（モデル表示）</h3>
+                        <hr style="border-color: #555; margin: 15px 0;">
+                        <p style="font-size: 0.9em; text-align: left; line-height: 1.6;">
+                            GUIでパラメーターを変えて、<br>単に<strong>「表示」を動かしていただけ</strong>。
+                        </p>
+                    </div>
+
+                    <div
+                        style="flex: 1; padding: 20px; background: rgba(59, 130, 246, 0.15); border: 2px solid #3b82f6; border-radius: 10px;">
+                        <h3 style="font-size: 1.0em; color: #3b82f6; margin-bottom: 10px;">今回（シミュレータ）</h3>
+                        <hr style="border-color: #3b82f6; margin: 15px 0;">
+                        <p style="font-size: 0.9em; text-align: left; line-height: 1.6;">
+                            コントローラ（制御プログラム）が<br>計算して<strong>「ロボット」を制御します</strong>。
+                        </p>
+                    </div>
+
+                </div>
+
+                <div style="background: linear-gradient(90deg, #1e3a8a, #3b82f6); padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0; font-weight: bold; font-size: 1.0em; color: white;">
+                        💡 ここでのコードは、設定を切り替えるだけで「実機」でもそのまま動きます。
+                    </p>
+                </div>
+
             </section>
 
-            <!-- ROSで使われるシミュレータの種類 -->
             <section>
-                <h2>ROSのシミュレータの種類</h2>
+                <h2>ROS2のシミュレータの種類</h2>
                 <div class="slide-layout-text">
-                    <div class="text-column">
-                        <h3>動作確認</h3>
-                        <ul>
-                            <li><a href="https://github.com/tork-a/fake_joint" style="color: #3b82f6;">fake_joint</a>
-                            </li>
-                            <li>ロボットと周りの環境との接触は考慮されませんが動作が軽い</li>
-                            <li>位置制御のみ使える</li>
-                        </ul>
-                    </div>
-                    <div class="text-column">
-                        <h3>物理シミュレータ</h3>
-                        <ul>
-                            <li><a href="https://gazebosim.org/home" style="color: #3b82f6;">Gazebo</a></li>
-                            <li>ロボットと周りの環境との接触等を含めた物理シミュレータ</li>
-                            <li>物理計算が重いのでGPUがあった方が良いです</li>
-                        </ul>
-                    </div>
+                    <table style="font-size: 0.8em; margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="border-bottom: 2px solid #fff;">比較項目</th>
+                                <th style="border-bottom: 2px solid #3b82f6; color: #3b82f6;">簡易シミュレーション</th>
+                                <th style="border-bottom: 2px solid #e55; color: #e55;">物理シミュレータ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: bold;">ツール名</td>
+                                <td><strong>Mock Hardware</strong><br>(ros2_control)</td>
+                                <td><strong>Gazebo</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold;">仕組み</td>
+                                <td>物理演算 <span style="color: #3b82f6;">なし</span><br><span
+                                        style="font-size: 0.7em;">指令通りに動いたことにする</span></td>
+                                <td>物理演算 <span style="color: #e55;">あり</span><br><span
+                                        style="font-size: 0.7em;">重力・摩擦・衝突を計算</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold;">特徴・用途</td>
+                                <td>動作が非常に<strong>軽い</strong><br><span style="font-size: 0.7em;">ロジック・通信の確認に最適</span>
+                                </td>
+                                <td>処理が<strong>重い</strong><br><span style="font-size: 0.7em;">より現実に近い検証が可能</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
-            <!-- fake_joint vs Gazebo 比較 -->
             <section>
-                <h2>fake_joint vs Gazebo 比較</h2>
+                <h2>Mock Hardware vs Gazebo</h2>
                 <p style="text-align: center; margin-bottom: 10px;">
-                    <strong>→ <a href="interactive_app/fake_joint_vs_Gazebo.html" target="_blank"
+                    <strong>→ <a href="interactive_app/ros2_mock_hardware_vs_Gazebo.html" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                 </p>
-                <iframe data-src="interactive_app/fake_joint_vs_Gazebo.html" width="100%" height="500px" frameborder="0"
+                <iframe data-src="interactive_app/ros2_mock_hardware_vs_Gazebo.html" width="100%" height="500px" frameborder="0"
                     style="overflow: auto;" scrolling="yes"></iframe>
             </section>
 
-            <!-- fake_joint -->
             <section>
                 <section>
-                    <h2>fake_joint</h2>
-                    <img src="media/fake_joint.png" alt="fake_joint詳細">
-                    <p>使い方↓</p>
+                    <h2>Mock Hardware (ros2_control)</h2>
+                    <div class="slide-layout-text">
+                        <ul>
+                            <li><strong>ros2_control Mock Hardware</strong>は、実機を使わずにロボットの制御をテストするためのROS2標準機能です。</li>
+                            <li>物理演算（重力や摩擦など）は行いませんが、<strong>「コントローラからの指令を受け取り、動いたことにする」</strong>という振る舞いをシミュレートします。</li>
+                            <li>MoveItなどの動作確認によく使われます。</li>
+                        </ul>
+                    </div>
                 </section>
 
                 <section>
-                    <h2>fake_joint</h2>
-                    <ul>
-                        <li>fake_jointはTORK-A(東京オープンソースロボティクス協会)が開発したROS1のパッケージで、Rviz上で直接ロボットの動きをシミュレーションできます。</li>
-                        <li>元々ROSにはない仕組みでしたが、ROS2ではMockComponentという名前で公式から同様の機能が提供されています。</li>
-                    </ul>
-
-                </section>
-
-                <!-- ros_control_fake_joint.svg全画面表示 -->
-                <section>
-                    <h2>fake jointとロボットコントローラとのつながり</h2>
-                    <img src="media/ros_control_fake_joint.svg.svg" alt="ros_control構成図" style="width: 100%; height: auto;">
-                </section>
-
-                <!-- fake_jointを使うlaunchの例 -->
-                <section>
-                    <h2>fake_jointを使うlaunchの例</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe src="code/fake_joint_launch_display.html" width="100%" height="400px" 
-                                frameborder="0"></iframe>
+                    <h2>【重要】前のスライドとの違い</h2>
+                    <div style="display: flex; gap: 20px; align-items: stretch; height: 500px;">
+                        <div class="comparison-box" style="border: 2px solid #666;">
+                            <h3 style="color: #aaa;">前章：モデル表示</h3>
+                            <p style="font-size: 0.7em; color: #aaa;">(joint_state_publisher_gui)</p>
+                            <hr style="border-color: #666;">
+                            <ul style="font-size: 0.8em;">
+                                <li><strong>手動</strong>でスライダーを動かす</li>
+                                <li>ロボットは<strong>絵として表示</strong>されているだけ</li>
+                                <li>自律的に動く機能はない</li>
+                                <li>実機制御のプログラムは動かない</li>
+                            </ul>
                         </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>launchディレクトリにur5e_sim.launchという名前で左のコードを保存</li>
-                                <li>ビルドします(小文字の"b"で自動的にビルドが走ります)</li>
-                                <li>次のコマンドで実行してください"roslaunch ros_study ur5e_sim.launch"</li>
+
+                        <div
+                            style="flex: 0 0 50px; display: flex; align-items: center; justify-content: center; font-size: 2em; color: #3b82f6;">
+                            ➡
+                        </div>
+
+                        <div class="comparison-box"
+                            style="border: 2px solid #3b82f6; background: rgba(59, 130, 246, 0.1);">
+                            <h3 style="color: #3b82f6;">本章：制御シミュレーション</h3>
+                            <p style="font-size: 0.7em; color: #3b82f6;">(ros2_control Mock System)</p>
+                            <hr style="border-color: #3b82f6;">
+                            <ul style="font-size: 0.8em;">
+                                <li><strong>コントローラ</strong>が計算して指令を出す</li>
+                                <li>MoveItやナビゲーションが<strong>実際に使える</strong></li>
+                                <li><strong>実機と同じプログラム</strong>で動く</li>
                             </ul>
                         </div>
                     </div>
                 </section>
 
-                            <section>
-                <h3>このような画面になればok</h3>
-                <div class="slide-layout-image">
-                    <div class="image-section">
-                        <img src="media/fake_joint.png" alt="fake_joint表示デモ">
-                    </div>
-                    <div class="text-section">
-                        <p>GUIで関節を動かせます</p>
-                        <p>このGUIはJointTrajectoryControllerというロボットコントローラです</p>
-                        <p>GUIで関節を動かせます</p>
-                    </div>
-                </div>
-            </section>
-
-                <!-- 対応関係 -->
                 <section>
-                    <h2>対応関係</h2>
-                    <div class="slide-layout-image-code">
-                        <div class="image-section">
-                            <img src="media/ros_control_fake_joint.svg.svg" alt="ros_control構成図" style="width: 100%; height: auto;">
-                        </div>
-                        <div class="code-section">
-                            <div class="code-block-with-highlights">
-                                <div class="code-highlight-red-bg">
-                                    <pre><code data-trim class="xml">&lt;!-- Load URDF --&gt;
-&lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;
-&lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;
+                    <h3>Mock Hardware起動用Launch (Python)</h3>
+                    <div class="slide-layout-image">
+                        <div class="text-section" style="width: 100%;">
+                            <pre><code class="python" data-trim data-line-numbers="6-10|12-16|18-19">
+def generate_launch_description():
+    # ...必要なインポート記述...
 
-&lt;!-- launch rviz --&gt;
-&lt;node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(arg rviz_config)" output="screen"/&gt;</code></pre>
-                                </div>
-                                <div class="code-highlight-blue-bg">
-                                    <pre><code data-trim class="xml">&lt;!-- Load controllers --&gt;
-&lt;rosparam file="$(arg controller_config_file)" command="load"/&gt;
-&lt;node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
-      args="$(arg controllers)" output="screen" respawn="false" /&gt;
+    # 1. ros2_control (Mock) を含むURDFのロード
+    # "use_mock_hardware:=true" をxacro引数に渡すのがポイント
+    robot_description_content = Command(
+        [PathJoinSubstitution([FindPackageShare("xacro"), "xacro"]), " ", urdf_path, " ", "use_mock_hardware:=true"]
+    )
+    robot_description = {"robot_description": robot_description_content}
 
-&lt;!-- Launch moveit --&gt;
-&lt;include file="$(find ur5e_moveit_config)/launch/move_group.launch"&gt;
-  &lt;arg name="allow_trajectory_execution" default="true" /&gt;
-  &lt;arg name="fake_execution" value="false" /&gt;
-&lt;/include&gt;</code></pre>
-                                </div>
-                                <div class="code-highlight-green-bg">
-                                    <pre><code data-trim class="xml">&lt;!--Run Fake joint driver --&gt;
-&lt;node name="fake_joint_driver" pkg="fake_joint_driver" type="fake_joint_driver_node" /&gt;
+    # 2. コントローラマネージャ (ros2_control_node) の起動
+    control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[robot_description, controller_config],
+        output="screen",
+    )
 
-&lt;!-- GUI for joint control --&gt;
-&lt;node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" output="screen"/&gt;
+    # 3. 各コントローラのSpawner (起動用ノード)
+    joint_state_broadcaster = Node(package="controller_manager", executable="spawner", arguments=["joint_state_broadcaster"])
+    arm_controller = Node(package="controller_manager", executable="spawner", arguments=["joint_trajectory_controller"])
 
-&lt;!-- Plot for monitoring --&gt;
-&lt;node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" output="screen"/&gt;</code></pre>
-                                </div>
+    # 4. RVizの起動
+    rviz_node = Node(package="rviz2", executable="rviz2", arguments=["-d", rviz_config_path])
+
+    return LaunchDescription([control_node, joint_state_broadcaster, arm_controller, rviz_node])
+                            </code></pre>
+                            <div
+                                style="font-size: 0.7em; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                                <p><span style="color: #dc3545;">use_mock_hardware:=true</span> :
+                                    URDF内でMockプラグインを有効化します。</p>
+                                <p><span style="color: #0d6efd;">ros2_control_node</span> : 仮想的な制御ループを回すメインプロセスです。</p>
+                                <p><span style="color: #198754;">spawner</span> : 必要なコントローラを動的にロードします。</p>
                             </div>
                         </div>
                     </div>
                 </section>
+
+                <section>
+                    <h3>実行結果の確認</h3>
+                    <div class="slide-layout-text">
+                        <ul>
+                            <li><strong>見た目:</strong> RViz上の表示はモデル表示と同じに見えます。</li>
+                            <li><strong>動作:</strong> Motion Planningプラグイン（MoveIt）から「Plan &
+                                Execute」を押すと、計算された軌道に沿ってロボットが動きます。</li>
+                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code>
+                                から配信されます。</li>
+                        </ul>
+                        <div style="background: #333; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                            <p style="margin:0; font-family: monospace; font-size: 0.8em;">$ ros2 topic info
+                                /joint_states</p>
+                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Type:
+                                sensor_msgs/msg/JointState</p>
+                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Publisher count:
+                                1 (joint_state_broadcaster)</p>
+                        </div>
+                        <p style="font-size: 0.7em; margin-top: 20px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。
+                        </p>
+                    </div>
+                </section>
             </section>
-            <!-- gazebo -->
+
             <section>
-                <h2>gazebo</h2>
+                <h2>Gazebo</h2>
                 <div class="slide-layout-image">
                     <div class="slide-image">
                         <img src="media/gazebo.png" alt="Gazebo詳細">
                     </div>
                     <div class="slide-content">
                         <ul>
-                            <li>GazeboはROSの公式なシミュレータで、3D環境でロボットを動かすことができます。</li>
-                            <li>GazeboはROSと密接に統合されており、センサデータやロボットの状態をリアルタイムで取得できます。</li>
+                            <li>Gazeboは物理エンジンを搭載した3Dシミュレータです。</li>
+                            <li>カメラ画像、LiDARの点群、接触センサなどのデータを取得できます。</li>
+                            <li>Mock Hardwareでロジックを確認した後、最終確認として使用するのが一般的です。</li>
                         </ul>
                     </div>
                 </div>
                 <p>現在作成中ですm(__)m</p>
             </section>
 
-
-
-            <!-- 終了スライド -->
             <section>
                 <h2>ありがとうございました</h2>
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
@@ -247,17 +307,8 @@
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
     <script>
-        function selectAllCode(elementId) {
-            const codeElement = document.getElementById(elementId);
-            const range = document.createRange();
-            range.selectNodeContents(codeElement);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-        }
-
         Reveal.initialize({
             controls: true,
             progress: true,
