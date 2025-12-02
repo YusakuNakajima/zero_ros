@@ -171,19 +171,19 @@ sudo apt-get install ros-humble-ur
                         <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
                         <div class="text-section">
                             <ul>
-                                <li>ros_studyのsetup.pyにlaunchの更新内容を追加</li>
-                                <li>これがないとビルド後にlaunchが使えない</li>
+                                <li>ros_studyのsetup.pyはビルドの設定を記載します、launchの更新内容を追加</li>
+                                <li>data_files に launch/ や urdf/ ディレクトリを含めるのを忘れないでください。</li>
                                 <li>ビルドと実行↓</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>ファイルの配置</h2>
+                    <h2>ファイルの配置の確認</h2>
                     <img src="media/ros_study_file_structure.png" alt="ros_studyファイルの配置例"
                         style="display: block; max-width: 90%;">
 
-                    <p>このようなファイルの配置になっていればOK</p>
+                    <p>VsCodeで図と同じファイル配置であればOK</p>
                 </section>
 
                 <section>
