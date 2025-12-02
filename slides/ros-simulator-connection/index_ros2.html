@@ -159,8 +159,8 @@
                     <strong>→ <a href="interactive_app/ros2_mock_hardware_vs_Gazebo.html" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                 </p>
-                <iframe data-src="interactive_app/ros2_mock_hardware_vs_Gazebo.html" width="100%" height="500px" frameborder="0"
-                    style="overflow: auto;" scrolling="yes"></iframe>
+                <iframe data-src="interactive_app/ros2_mock_hardware_vs_Gazebo.html" width="100%" height="500px"
+                    frameborder="0" style="overflow: auto;" scrolling="yes"></iframe>
             </section>
 
             <section>
@@ -276,7 +276,7 @@ def generate_launch_description():
                 </section>
             </section>
 
-           <section>
+            <section>
                 <section>
                     <h2>Gazebo</h2>
                     <div class="slide-layout-image">
@@ -286,7 +286,8 @@ def generate_launch_description():
                         <div class="slide-content">
                             <ul>
                                 <li>Gazeboは、ROSで最も広く使われている<strong>3D物理シミュレータ</strong>です。</li>
-                                <li>Mock Hardwareとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。</li>
+                                <li>Mock Hardwareとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
+                                </li>
                                 <li>実機を動かす前の「最終確認」として不可欠なツールです。</li>
                             </ul>
                         </div>
@@ -296,9 +297,10 @@ def generate_launch_description():
                 <section>
                     <h2>【注意】Gazeboは2種類ある</h2>
                     <p style="font-size: 0.8em;">実は現在、世代交代の過渡期であり2つの「Gazebo」が存在します。<br>ネットで検索する際は区別に注意が必要です。</p>
-                    
+
                     <div style="display: flex; gap: 30px; margin-top: 30px;">
-                        <div style="flex: 1; border: 2px solid #e55; border-radius: 10px; padding: 15px; background: rgba(220, 53, 69, 0.1);">
+                        <div
+                            style="flex: 1; border: 2px solid #e55; border-radius: 10px; padding: 15px; background: rgba(220, 53, 69, 0.1);">
                             <h3 style="color: #e55; font-size: 1.0em;">Gazebo Classic</h3>
                             <p style="font-size: 0.7em; color: #aaa;">(通称: 旧Gazebo / Gazebo 11)</p>
                             <hr style="border-color: #e55;">
@@ -310,7 +312,8 @@ def generate_launch_description():
                             </ul>
                         </div>
 
-                        <div style="flex: 1; border: 2px solid #d63384; border-radius: 10px; padding: 15px; background: rgba(214, 51, 132, 0.1);">
+                        <div
+                            style="flex: 1; border: 2px solid #d63384; border-radius: 10px; padding: 15px; background: rgba(214, 51, 132, 0.1);">
                             <h3 style="color: #d63384; font-size: 1.0em;">Gazebo (New)</h3>
                             <p style="font-size: 0.7em; color: #aaa;">(旧称: Ignition Gazebo)</p>
                             <hr style="border-color: #d63384;">
@@ -325,18 +328,91 @@ def generate_launch_description():
                 </section>
 
                 <section>
+                    <h2>Gazebo環境のセットアップ</h2>
+                    <ul>
+                        <li>ROS 2とGazeboを通信させるためのパッケージをインストールします</li>
+                    </ul>
+
+                    <div style="margin-top: 20px; text-align: left;">
+                        <p style="font-size: 0.9em; margin-bottom: 10px;">
+                            <strong>1. モダンなGazebo (推奨) の場合</strong><br>
+                            <span style="font-size: 0.8em; color: #aaa;">本スライドではこっちを使います</span>
+                        </p>
+                        <pre><code data-trim class="bash">
+# ros_gz (ブリッジやシミュレータ本体を含むメタパッケージ)
+sudo apt-get install ros-${ROS_DISTRO}-ros-gz
+                    </code></pre>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: left;">
+                        <p style="font-size: 0.9em; margin-bottom: 10px;">
+                            <strong>2. Gazebo Classic (旧) の場合</strong>
+                        </p>
+                        <pre><code data-trim class="bash">
+# gazebo_ros_pkgs (Classic用の関連パッケージ)
+sudo apt-get install ros-${ROS_DISTRO}-gazebo-ros-pkgs
+                    </code></pre>
+                    </div>
+
+                </section>
+                <section>
+                    <h2>Gazeboの起動確認</h2>
+
+                    <div style="margin-bottom: 20px; text-align: left;">
+                        <p>インストールが完了したら、gazeboを起動</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+
+                        <div
+                            style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; padding: 20px; border-radius: 10px; text-align: left;">
+                            <h3 style="color: #3b82f6; font-size: 1.0em; margin-bottom: 10px;">Humble の場合</h3>
+                            <p style="font-size: 0.8em; color: #aaa; margin-bottom: 10px;">(Gazebo Fortress)</p>
+                            <pre style="width: 100%; margin: 0; box-shadow: none;"><code class="bash" data-trim>
+# コマンドは "ign" です
+ign gazebo shapes.sdf
+                        </code></pre>
+                        </div>
+
+                        <div
+                            style="background: rgba(214, 51, 132, 0.1); border: 2px solid #d63384; padding: 20px; border-radius: 10px; text-align: left;">
+                            <h3 style="color: #d63384; font-size: 1.0em; margin-bottom: 10px;">Jazzy の場合</h3>
+                            <p style="font-size: 0.8em; color: #aaa; margin-bottom: 10px;">(Gazebo Harmonic)</p>
+                            <pre style="width: 100%; margin: 0; box-shadow: none;"><code class="bash" data-trim>
+# コマンドは "gz" です
+gz sim shapes.sdf
+                        </code></pre>
+                        </div>
+
+                    </div>
+
+                    <div
+                        style="background: rgba(255, 193, 7, 0.15); border-left: 5px solid #ffc107; padding: 15px; text-align: left; border-radius: 0 5px 5px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: #ffc107; font-size: 1.0em;">⚠️ 初回起動時の注意</h4>
+                        <p style="font-size: 0.8em; margin: 0;">
+                            初めて起動する際はモデルデータのダウンロードが行われるため、
+                            <strong>画面が出るまでに数分間、真っ暗な状態が続くことがあります。</strong>
+                            故障ではないのでそのまま待ってください。
+                        </p>
+                    </div>
+                </section>
+                <section>
                     <h2>ros2_controlとの連携</h2>
                     <div class="slide-layout-text">
                         <p>どちらのGazeboを使う場合でも、<strong>ros2_control経由で動かす</strong>という基本構成は変わりません。</p>
-                        <div style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                        <div
+                            style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
                             <h4 style="color: #3b82f6;">切り替えの仕組み</h4>
                             <ul style="font-size: 0.9em;">
                                 <li><strong>Mock Hardware:</strong> 実機なし、物理演算なし</li>
-                                [cite_start]<li><strong>Gazebo Classic:</strong> <code>gazebo_ros2_control</code> プラグインを使用 [cite: 1]</li>
-                                [cite_start]<li><strong>Gazebo (New):</strong> <code>gz_ros2_control</code> プラグインを使用 [cite: 2]</li>
+                                [cite_start]<li><strong>Gazebo Classic:</strong> <code>gazebo_ros2_control</code>
+                                    プラグインを使用 [cite: 1]</li>
+                                [cite_start]<li><strong>Gazebo (New):</strong> <code>gz_ros2_control</code> プラグインを使用
+                                    [cite: 2]</li>
                             </ul>
                         </div>
-                        <p style="margin-top: 20px; font-size: 0.8em; color: #aaa;">※本講座では、環境構築の手軽さから○○（使っている方）を使用します。</p>
+                        <p style="margin-top: 20px; font-size: 0.8em; color: #aaa;">※本講座では、環境構築の手軽さから○○（使っている方）を使用します。
+                        </p>
                     </div>
                 </section>
             </section>
