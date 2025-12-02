@@ -825,9 +825,9 @@ rviz_node = Node(
                 <section>
                     <h2>なぜTFが必要？</h2>
                     <ul>
-                        <li class="fragment">URDFだけでは「形状」と「関節がどう繋がっているか」しか分かりません。</li>
-                        <li class="fragment">「各関節が何度曲がった結果、手先がどこにあるか」という<strong>リアルタイムの位置・姿勢情報</strong>、それがTFです。</li>
-                        <li class="fragment">RvizはURDF（形）とTF（位置）を組み合わせて初めてモデルを表示できます。</li>
+                        <li  >URDFだけでは「形状」と「関節がどう繋がっているか」しか分かりません。</li>
+                        <li  >「各関節が何度曲がった結果、手先がどこにあるか」という<strong>リアルタイムの位置・姿勢情報</strong>、それがTFです。</li>
+                        <li  >RvizはURDF（形）とTF（位置）を組み合わせて初めてモデルを表示できます。</li>
                     </ul>
                 </section>
                 <section>
@@ -839,7 +839,7 @@ rviz_node = Node(
                         <div class="text-section">
                             <ul>
                                 <li>TF (Transform) は、ロボットの各パーツ（Link）の相対的な位置関係を<strong>ツリー構造</strong>で管理します。</li>
-                                <li class="fragment">
+                                <li  >
                                     そして、<strong><code>robot_state_publisher</code>ノードが、URDFを読み込み、このTFツリーを計算して配信する張本人です。</strong>
                                 </li>
                             </ul>
@@ -867,25 +867,26 @@ rviz_node = Node(
                 </section>
                 <section>
                     <h2>Rvizでの重要設定：Fixed Frame</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <img src="media/robot_on_rviz.png" alt="Rviz画面">
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>Rvizでモデルを表示するには「どのリンクを座標の基準にするか」を指定する必要がある</li>
-                                <li class="fragment">これが左側の設定パネルにある <strong>Fixed Frame</strong> で、通常は
-                                    <code>base_link</code> や <code>world</code> を指定します。</li>
-                            </ul>
-                        </div>
-                    </div>
+                                        <div class="slide-layout-image">
+                                            <div class="image-section" style="position: relative;">
+                                                <img src="media/robot_on_rviz.png" alt="Rviz画面">
+                                                <div style="position: absolute; top: 10%; left: 2%; width: 30%; height: 6%; border: 3px solid red; box-sizing: border-box;"></div>
+                                            </div>
+                                            <div class="text-section">
+                                                <ul>
+                                                    <li>Rvizでモデルを表示するには「どのリンクを座標の基準にするか」を指定する必要がある</li>
+                                                    <li>これが左側の設定パネルにある <strong>Fixed Frame</strong> で、通常は
+                                                        <code>base_link</code> や <code>world</code> を指定します。</li>
+                                                </ul>
+                                            </div>
+                                        </div>
                 </section>
                 <section>
                     <h2>TFの役割2：座標管理（時間）</h2>
                     <ul>
                         <li>TFは「いつの時点」の座標かというタイムスタンプ情報も管理しています。</li>
-                        <li class="fragment">これは複数のセンサやPCが連携する複雑なシステムで重要になります。</li>
-                        <li class="fragment" style="background-color: #555; padding: 10px; border-radius: 5px;">
+                        <li  >これは複数のセンサやPCが連携する複雑なシステムで重要になります。</li>
+                        <li   style="background-color: #555; padding: 10px; border-radius: 5px;">
                             <strong>今回のパートで気にする必要はありません。</strong><br>（詳細は <code>ros-arm-position-control</code> スライドで解説）
                         </li>
                     </ul>
