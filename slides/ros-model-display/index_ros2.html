@@ -179,11 +179,11 @@ sudo apt-get install ros-humble-ur
                     </div>
                 </section>
                 <section>
-                    <h2>ファイル構造</h2>
-                    <img src="media/ros_study_file_structure.png" alt="ros_studyファイル構造例"
+                    <h2>ファイルの配置</h2>
+                    <img src="media/ros_study_file_structure.png" alt="ros_studyファイルの配置例"
                         style="display: block; max-width: 90%;">
 
-                    <p>このようなファイル構造になっていればOK</p>
+                    <p>このようなファイルの配置になっていればOK</p>
                 </section>
 
                 <section>
@@ -365,7 +365,7 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                   <!-- UR5eのリンクとジョイントの例 -->
+                <!-- UR5eのリンクとジョイントの例 -->
                 <section>
                     <h2>UR5eの例</h2>
                     <div style="display: flex; justify-content: space-around; width: 100%;">
@@ -379,17 +379,50 @@ ros2 launch ros_study view_ur.launch.py
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td><strong>world</strong></td><td>シミュレータの座標系</td></tr>
-                                    <tr><td><strong>base</strong></td><td>URコントローラの座標系</td></tr>
-                                    <tr><td><strong>base_link</strong></td><td>ロボットの基部</td></tr>
-                                    <tr><td><strong>shoulder_link</strong></td><td>肩のリンク</td></tr>
-                                    <tr><td><strong>upper_arm_link</strong></td><td>上腕のリンク</td></tr>
-                                    <tr><td><strong>forearm_link</strong></td><td>前腕のリンク</td></tr>
-                                    <tr><td><strong>wrist_1_link</strong></td><td>手首1のリンク</td></tr>
-                                    <tr><td><strong>wrist_2_link</strong></td><td>手首2のリンク</td></tr>
-                                    <tr><td><strong>wrist_3_link</strong></td><td>手首3のリンク</td></tr>
-                                    <tr><td><strong>tool0</strong></td><td>URコントローラのデフォルトツール座標系</td></tr>
-                                    <tr><td><strong>ee_link</strong></td><td>エンドエフェクタのリンク</td></tr>
+                                    <tr>
+                                        <td><strong>world</strong></td>
+                                        <td>シミュレータの座標系</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>base</strong></td>
+                                        <td>URコントローラの座標系</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>base_link</strong></td>
+                                        <td>ロボットの基部</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>shoulder_link</strong></td>
+                                        <td>肩のリンク</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>upper_arm_link</strong></td>
+                                        <td>上腕のリンク</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>forearm_link</strong></td>
+                                        <td>前腕のリンク</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_1_link</strong></td>
+                                        <td>手首1のリンク</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_2_link</strong></td>
+                                        <td>手首2のリンク</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_3_link</strong></td>
+                                        <td>手首3のリンク</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>tool0</strong></td>
+                                        <td>URコントローラのデフォルトツール座標系</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>ee_link</strong></td>
+                                        <td>エンドエフェクタのリンク</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -403,16 +436,46 @@ ros2 launch ros_study view_ur.launch.py
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td><strong>world_joint</strong></td><td>worldとbase_link間のジョイント</td></tr>
-                                    <tr><td><strong>shoulder_pan_joint</strong></td><td>1軸ジョイント</td></tr>
-                                    <tr><td><strong>shoulder_lift_joint</strong></td><td>2軸ジョイント</td></tr>
-                                    <tr><td><strong>elbow_joint</strong></td><td>3軸ジョイント</td></tr>
-                                    <tr><td><strong>wrist_1_joint</strong></td><td>4軸ジョイント</td></tr>
-                                    <tr><td><strong>wrist_2_joint</strong></td><td>5軸ジョイント</td></tr>
-                                    <tr><td><strong>wrist_3_joint</strong></td><td>6軸ジョイント</td></tr>
-                                    <tr><td><strong>ee_fixed_joint</strong></td><td>エンドエフェクタ固定ジョイント</td></tr>
-                                    <tr><td><strong>base_link-base_fixed_joint</strong></td><td>base_linkとbase間の固定ジョイント</td></tr>
-                                    <tr><td><strong>wrist_3_link-tool0_fixed_joint</strong></td><td>wrist_3_linkとtool0間の固定ジョイント</td></tr>
+                                    <tr>
+                                        <td><strong>world_joint</strong></td>
+                                        <td>worldとbase_link間のジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>shoulder_pan_joint</strong></td>
+                                        <td>1軸ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>shoulder_lift_joint</strong></td>
+                                        <td>2軸ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>elbow_joint</strong></td>
+                                        <td>3軸ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_1_joint</strong></td>
+                                        <td>4軸ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_2_joint</strong></td>
+                                        <td>5軸ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_3_joint</strong></td>
+                                        <td>6軸ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>ee_fixed_joint</strong></td>
+                                        <td>エンドエフェクタ固定ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>base_link-base_fixed_joint</strong></td>
+                                        <td>base_linkとbase間の固定ジョイント</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>wrist_3_link-tool0_fixed_joint</strong></td>
+                                        <td>wrist_3_linkとtool0間の固定ジョイント</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -700,145 +763,135 @@ ros2 launch ros_study view_ur.launch.py
                             <ul>
                                 <li>URDFやXACROファイルは、rosparamとして読み込まれる</li>
                                 <li>RVizはrosparamからロボットモデルの情報を取得し表示してる</li>
-                                
+
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>launchファイルの解説</h2>
+                    <h2>launchファイルの解説 (ROS2)</h2>
                     <div class="slide-layout-image-code">
                         <div class="image-section">
                             <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
-                            <div style="position: absolute; 
-                                    top: 25%; 
-                                    left: 0; 
-                                    width: 30%; 
-                                    height: 50%; 
-                                    border: 5px solid rgb(0, 0, 255); 
-                                    box-sizing: border-box; 
-                                    "></div>
-                            <div style="position: absolute; 
-                                    top: 25%; 
-                                    left: 31%; 
-                                    width: 15%; 
-                                    height: 12%; 
-                                    border: 5px solid rgb(255, 0, 0); 
-                                    box-sizing: border-box; 
-                                    "></div>
-                            <div style="position: absolute; 
-                                    top: 37%; 
-                                    left: 31%; 
-                                    width: 15%; 
-                                    height: 15%; 
-                                    border: 5px solid rgb(0, 255, 0); 
-                                    box-sizing: border-box; 
-                                    "></div>
+                            <!-- Highlighting boxes can be adjusted or kept as is -->
+                            <div
+                                style="position: absolute; top: 40%; left: 0; width: 30%; height: 50%; border: 5px solid rgb(0, 0, 255); box-sizing: border-box;">
+                            </div>
+                            <div
+                                style="position: absolute; top: 37%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(255, 0, 0); box-sizing: border-box;">
+                            </div>
+                            <div
+                                style="position: absolute; top: 52%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(0, 255, 0); box-sizing: border-box;">
+                            </div>
+                            <div
+                                style="position: absolute; top: 67%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(255, 255, 0); box-sizing: border-box;">
+                            </div>
                         </div>
                         <div class="code-section">
-                            <pre><code class="nohighlight" data-trim>
-&lt;launch&gt;
-  <mark class="code-highlight-blue">&lt;arg name="model" default="$(find grinding_descriptions)/urdf/ur/ur5e.urdf"/&gt;
-  &lt;param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" /&gt;</mark>
-  <mark class="code-highlight-red">&lt;node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" /&gt;</mark>
-  <mark class="code-highlight-green">&lt;node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /&gt;</mark>
-&lt;/launch&gt;
+                            <pre><code class="language-python" data-trim>
+# URDF/XACROを読み込み
+robot_description = {
+    "robot_description": ParameterValue(value=robot_description_content, value_type=str)
+}
+
+# ノードの定義
+joint_state_publisher_node = Node(
+    package="joint_state_publisher_gui",
+    executable="joint_state_publisher_gui",
+)
+
+robot_state_publisher_node = Node(
+    package="robot_state_publisher",
+    executable="robot_state_publisher",
+    parameters=[robot_description],
+)
+
+rviz_node = Node(
+    package="rviz2",
+    executable="rviz2",
+    arguments=["-d", rviz_config_file],
+)
 </code></pre>
                         </div>
                     </div>
-                    <p>このような対応関係になっている</p>
+                    <p>Pythonコード内で各ノードを定義し、起動します。</p>
                 </section>
 
 
             </section>
 
-            <!-- TFとは何か？ -->
+            <!-- TF：モデルを「動かす」ための座標情報 -->
             <section>
                 <section>
-                    <h2>TF</h2>
-                    <div style="position: relative; display: inline-block;">
-                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
-                            style="display: block; max-width: 100%;">
-                        <div style="position: absolute; 
-                                    top: 40%; 
-                                    right: 0%; 
-                                    width: 40%; 
-                                    height: 60%; 
-                                    border: 5px solid red; 
-                                    box-sizing: border-box; 
-                                    "></div>
-                    </div>
-                    <p>Rvizで表示しているTFとは？↓</p>
-                </section>
-                <!-- TFとは？ -->
-                <section>
-                    <h2>TFとは？</h2>
+                    <h2>なぜTFが必要？</h2>
                     <ul>
-                        <li>TF = Transformの略</li>
-                        <li>ROS標準搭載のシステムで、座標変換と座標管理の2つの機能がある</li>
-                        <li>実際はTFの改良版のTF2を使う</li>
+                        <li class="fragment">URDFだけでは「形状」と「関節がどう繋がっているか」しか分かりません。</li>
+                        <li class="fragment">「各関節が何度曲がった結果、手先がどこにあるか」という<strong>リアルタイムの位置・姿勢情報</strong>、それがTFです。</li>
+                        <li class="fragment">RvizはURDF（形）とTF（位置）を組み合わせて初めてモデルを表示できます。</li>
                     </ul>
                 </section>
-
-                <!-- 機能1：座標変換 -->
                 <section>
-                    <h2>機能1：座標変換</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section dual-images">
-                            <div class="image-with-caption">
-                                <img src="media/pestle_tip.png" alt="乳棒座標変換の例">
-                                <div class="image-caption">baseから見た乳棒手先</div>
-                            </div>
-                            <div class="image-with-caption">
-                                <img src="media/spatula_tip.png" alt="ヘラ座標変換の例">
-                                <div class="image-caption">baseから見たヘラの手先</div>
-                            </div>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>ここではTCPの座標変換を示したが、TFで管理された座標系であれば任意の座標変換が可能</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>座標変換の仕組み</h2>
+                    <h2>TFの役割1：座標変換 (ツリー構造)</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <img src="media/tf_viewer.png" alt="座標変換の例">
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>TFはツリー構造になっている</li>
-                                <li>同姿変換行列で順々にツリーを辿って座標変換を計算</li>
+                                <li>TF (Transform) は、ロボットの各パーツ（Link）の相対的な位置関係を<strong>ツリー構造</strong>で管理します。</li>
+                                <li class="fragment">
+                                    そして、<strong><code>robot_state_publisher</code>ノードが、URDFを読み込み、このTFツリーを計算して配信する張本人です。</strong>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </section>
-
                 <section>
-                    <h2>機能2：座標管理</h2>
+                    <h2>モデル表示のデータの流れ</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/tf_6d.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/tf_6d.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
+                            <img src="media/joint_states_workflow.png" alt="データフロー">
+                        </div>
+                        <div class="text-section">
+                            <ol>
+                                <li><strong><code>joint_state_publisher_gui</code></strong>: スライダーを動かすと、各関節の角度
+                                    (<code>/joint_states</code>) を配信。</li>
+                                <li><strong><code>robot_state_publisher</code></strong>: <code>/joint_states</code> と
+                                    URDF (<code>/robot_description</code>) を購読。</li>
+                                <li><strong><code>robot_state_publisher</code></strong>: 関節角度とリンク長から順運動学を計算し、結果を座標変換情報
+                                    (<code>/tf</code>) として配信。</li>
+                                <li><strong><code>Rviz</code></strong>: <code>/tf</code> を元に、URDFで定義されたモデルを動かす。</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>Rvizでの重要設定：Fixed Frame</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/robot_on_rviz.png" alt="Rviz画面">
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>TFは最新の座標を使わない、指定した時間 or 少しだけ前の座標を使うことで、座標系間での同期をとっている。</li>
-                                <li>アプリは雰囲気で正確ではありません</li>
-                                <li>実際の同期の仕組みは<a href="https://www.slideshare.net/slideshow/tftf2/46875007"
-                                        target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">TF完全理解</a>を参照</li>
+                                <li>Rvizでモデルを表示するには「どのリンクを座標の基準にするか」を指定する必要がある</li>
+                                <li class="fragment">これが左側の設定パネルにある <strong>Fixed Frame</strong> で、通常は
+                                    <code>base_link</code> や <code>world</code> を指定します。</li>
                             </ul>
                         </div>
                     </div>
                 </section>
+                <section>
+                    <h2>TFの役割2：座標管理（時間）</h2>
+                    <ul>
+                        <li>TFは「いつの時点」の座標かというタイムスタンプ情報も管理しています。</li>
+                        <li class="fragment">これは複数のセンサやPCが連携する複雑なシステムで重要になります。</li>
+                        <li class="fragment" style="background-color: #555; padding: 10px; border-radius: 5px;">
+                            <strong>今回のパートで気にする必要はありません。</strong><br>（詳細は <code>ros-arm-position-control</code> スライドで解説）
+                        </li>
+                    </ul>
+                </section>
             </section>
+
 
             <!-- 余談：ロボットモデルの数式表現 -->
             <section>
