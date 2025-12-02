@@ -18,7 +18,6 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
 
-    <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
     <style>
         .reveal pre {
@@ -42,13 +41,24 @@
         .copy-button:hover {
             opacity: 1;
         }
+        
+        /* 追加したスタイリング */
+        .terminal-output {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.7em;
+            text-align: left;
+            border: 1px solid #333;
+        }
     </style>
 </head>
 
 <body>
     <div class="reveal">
         <div class="slides">
-            <!-- タイトルスライド -->
             <section data-background-image="media/joint_state_publisher_on_rviz.png" data-background-opacity="0.3">
                 <h1>ゼロからのROS2</h1>
                 <h2>ロボットモデルの表示</h2>
@@ -57,7 +67,6 @@
                 <p><a href="../../index.html" style="color: #333; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
 
-            <!-- 本スライドのゴール -->
             <section>
                 <h2>本スライドのゴール</h2>
                 <div class="slide-layout-image">
@@ -73,9 +82,6 @@
                 <p>※本スライドではros2 humbleを使います</p>
             </section>
 
-
-
-            <!-- Rvizとは？ -->
             <section>
                 <h2>Rvizとは？</h2>
                 <div class="slide-layout-image">
@@ -92,8 +98,6 @@
                 </div>
             </section>
 
-
-            <!-- パッケージ作成例 -->
             <section>
                 <h2>勉強用のパッケージ作成</h2>
                 <pre><code data-trim class="bash">
@@ -104,6 +108,7 @@ ros2 pkg create --build-type ament_python ros_study
                     <li>これから先のスクリプトは全てこの中で作成します</li>
                 </ul>
             </section>
+            
             <section>
                 <h2>URのパッケージを取得</h2>
                 <ul>
@@ -121,8 +126,8 @@ sudo apt-get update
 # ユニバーサルロボットのROSパッケージをインストールします
 sudo apt-get install ros-humble-ur                      
 </code></pre>
-
             </section>
+
             <section>
                 <section>
                     <h2>まずはURDFを追記</h2>
@@ -205,7 +210,7 @@ ros2 launch ros_study view_ur.launch.py
 
                 </section>
             </section>
-            <!-- URDFの表示デモ -->
+            
             <section>
                 <h3>このような画面になればok</h3>
                 <div class="slide-layout-image">
@@ -218,10 +223,7 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </div>
             </section>
-            </section>
 
-
-            <!-- ロボットモデルを表示するまでの流れ -->
             <section>
                 <h2>ロボットモデルを表示するまでの流れ</h2>
                 <ol>
@@ -237,9 +239,8 @@ ros2 launch ros_study view_ur.launch.py
                 <div class="slide-content">
                 </div>
             </section>
-            <!-- ステップ1：URDFの書き方 -->
+            
             <section>
-                <!-- そもそもロボットの構造(復習) -->
                 <section>
                     <h2>ステップ1-1：ロボットの構造を記述するURDFとは</h2>
                     <div style="position: relative; display: inline-block;">
@@ -256,7 +257,6 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                <!-- ロボットモデル構造 -->
                 <section>
                     <h2>ロボットアームの構造</h2>
                     <div class="slide-layout-image">
@@ -291,7 +291,6 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                <!-- URDF -->
                 <section>
                     <h2>URDF（Unified Robot Description Format）</h2>
                     <p>Ur5eのVS Codeで折りたたんだ表示</p>
@@ -305,13 +304,11 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                <!-- XACRO -->
                 <section>
                     <h2>XACRO（XML Macros for Robots）</h2>
                     <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.xacro" data-trim>
-<!-- XACROコードが外部ファイルから読み込まれます -->
 </code></pre>
                         </div>
                         <div class="text-section">
@@ -324,14 +321,11 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                <!-- エンドエフェクタ追加 -->
-                <!-- XACRO -->
                 <section>
                     <h2>エンドエフェクタを追加したい</h2>
                     <div class="slide-layout-code">
                         <div class="code-section">
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot_with_eef.xacro" data-trim>
-<!-- XACROコードが外部ファイルから読み込まれます -->
 </code></pre>
                             <p> pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</p>
                         </div>
@@ -346,9 +340,7 @@ ros2 launch ros_study view_ur.launch.py
                 </section>
 
             </section>
-            <!-- ステップ1：URDFの書き方 -->
             <section>
-                <!-- そもそもロボットの構造(復習) -->
                 <section>
                     <h2>ステップ1-2：URDFの中身</h2>
                     <div style="position: relative; display: inline-block;">
@@ -365,7 +357,6 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                <!-- UR5eのリンクとジョイントの例 -->
                 <section>
                     <h2>UR5eの例</h2>
                     <div style="display: flex; justify-content: space-around; width: 100%;">
@@ -482,7 +473,6 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
 
-                <!-- ROSでよく使うリンク名 (慣習) -->
                 <section>
                     <h2>ROSでよく使うリンク名<br>~慣習~</h2>
                     <table style="width: 100%; font-size: 0.7em;">
@@ -509,7 +499,6 @@ ros2 launch ros_study view_ur.launch.py
                     </table>
                 </section>
 
-                <!-- ROSでよく使うリンク名 (ROS-industrial) -->
                 <section>
                     <h2>ROSでよく使うリンク名<br>~ROS-industrial標準リンク~</h2>
                     <p>産業用ロボットとの互換性を持たせるために決められている</p>
@@ -537,7 +526,6 @@ ros2 launch ros_study view_ur.launch.py
                     </table>
                 </section>
 
-                <!-- URDFジョイントの要素 -->
                 <section>
                     <h2>ジョイントの要素<br>~type(動作の種類)~</h2>
                     <table style="width: 100%; font-size: 0.7em;">
@@ -567,8 +555,7 @@ ros2 launch ros_study view_ur.launch.py
                         </tbody>
                     </table>
                     <p>ロボットアームではrevoluteとfixedしか使わない</p>
-                </section> <!-- URDFジョイントの要素 -->
-                <section>
+                </section> <section>
                     <h2>ジョイントの要素<br>~リンクとのつながりと制限~</h2>
                     <table style="width: 100%; font-size: 0.7em;">
                         <thead>
@@ -598,7 +585,6 @@ ros2 launch ros_study view_ur.launch.py
                     </table>
                 </section>
 
-                <!-- URDFリンクの要素 -->
                 <section>
                     <h2>リンクの要素<br>~visual(表示用)~</h2>
                     <p>シミュレータで必要な項目、今は飛ばしてok</p>
@@ -624,8 +610,7 @@ ros2 launch ros_study view_ur.launch.py
                             </tr>
                         </tbody>
                     </table>
-                </section> <!-- URDFリンクの要素 -->
-                <section>
+                </section> <section>
                     <h2>リンクの要素<br>~collision(干渉計算用)~</h2>
                     <p>MoveItの避けるモーション生成等で使います</p>
                     <table style="width: 100%; font-size: 0.7em;">
@@ -648,7 +633,6 @@ ros2 launch ros_study view_ur.launch.py
                     </table>
                 </section>
 
-                <!-- 物理属性 -->
                 <section>
                     <h2>ジョイントの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
@@ -671,7 +655,6 @@ ros2 launch ros_study view_ur.launch.py
                         </tbody>
                     </table>
                 </section>
-                <!-- 物理属性 -->
                 <section>
                     <h2>リンクの物理属性</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
@@ -699,7 +682,6 @@ ros2 launch ros_study view_ur.launch.py
                     </table>
                     <p style="font-size: 0.6em; margin-top: 10px;">※CADソフトの計算値や実測値を使う</p>
                 </section>
-                <!-- 物理属性 -->
                 <section>
                     <h2>リンク間相互作用</h2>
                     <p>※物理シミュレータを使わないなら記述不要</p>
@@ -728,7 +710,6 @@ ros2 launch ros_study view_ur.launch.py
                 </section>
             </section>
 
-            <!-- ステップ2：URDFの表示launchコード例 -->
             <section>
                 <section>
                     <h2>ステップ2：URDFの表示のlaunchファイル</h2>
@@ -816,7 +797,46 @@ rviz_node = Node(
                 </section>
             </section>
 
-            <!-- TF：モデルを「動かす」ための座標情報 -->
+            <section>
+                <h2>データの流れを目視確認</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin-top: 20px;">
+                    
+                    <div style="text-align: left;">
+                        <ul style="font-size: 0.9em; line-height: 1.5;">
+                            <li>GUIを動かすと、裏でどのようなデータが流れているか確認しましょう。</li>
+                            <li><strong>新しいターミナル</strong>を開いて以下のコマンドを実行します。</li>
+                        </ul>
+                        <div style="margin-top: 20px;">
+                            <p style="font-size: 0.8em; margin-bottom: 5px;">▼ コマンド</p>
+                            <pre style="width: 100%; margin: 0;"><code class="bash" data-trim style="font-size: 1.0em; line-height: 1.3;">
+# トピックの中身をリアルタイム表示
+ros2 topic echo /joint_states
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <div style="text-align: left;">
+                        <p style="font-size: 0.9em;">
+                            ↓ GUIのスライダーを動かすと<br>
+                            <span style="color: #4ec9b0; font-weight: bold;">position</span> の値が変化します
+                        </p>
+                        <div class="terminal-output" style="background-color: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.75em; line-height: 1.4; border: 1px solid #333; margin-top: 10px; max-height: 400px; overflow-y: auto;">
+                            header:<br>
+                            &nbsp;&nbsp;stamp: {sec: 169..., nanosec: ...}<br>
+                            &nbsp;&nbsp;frame_id: ''<br>
+                            name:<br>
+                            - shoulder_pan_joint<br>
+                            - shoulder_lift_joint<br>
+                            ...<br>
+                            <span style="color: #4ec9b0; font-weight: bold;">position: [0.0, -1.57, 0.0, ...]</span><br>
+                            <span style="color: #888;"># ↑ ここの数字が変わる！</span><br>
+                            velocity: []<br>
+                            effort: []
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section>
                 <section>
                     <h2>なぜTFが必要？</h2>
@@ -861,6 +881,37 @@ rviz_node = Node(
                         </div>
                     </div>
                 </section>
+
+                <section>
+                    <h2>ノードの接続関係を見る (rqt_graph)</h2>
+                    <p>設計図通りに通信がつながっているか確認できます</p>
+                    <pre><code class="bash" data-trim>
+# ノードグラフを表示するコマンド
+rqt_graph
+                    </code></pre>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            
+                            <div style="background: white; color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                                <p style="margin:0; font-weight:bold; font-size: 0.8em;">期待されるグラフ</p>
+                                <p style="font-size: 0.6em; margin-top: 5px;">
+                                    /joint_state_publisher_gui <br>
+                                    ↓ (/joint_states) <br>
+                                    /robot_state_publisher
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>丸＝ノード（プログラム）</li>
+                                <li>四角＝トピック（データ）</li>
+                                <li>矢印＝データの流れる向き</li>
+                                <li>GUIからPublisherへ、データが流れているのが分かります</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
                 <section>
                     <h2>Rvizでの重要設定：Fixed Frame</h2>
                     <div class="slide-layout-image">
@@ -893,7 +944,6 @@ rviz_node = Node(
             </section>
 
 
-            <!-- 余談：ロボットモデルの数式表現 -->
             <section>
                 <section>
                     <h2>ロボットモデルの数式表現</h2>
@@ -904,7 +954,6 @@ rviz_node = Node(
                     <p>DHパラメータとは？↓</p>
                 </section>
 
-                <!-- DHパラメータとは？ -->
                 <section>
                     <h2>DHパラメータとは？</h2>
                     <div class="slide-layout-image">
@@ -928,7 +977,35 @@ rviz_node = Node(
                 </section>
             </section>
 
-            <!-- シリーズ一覧に戻る -->
+           <section>
+                <h2>うまくいかない時は？<br><span style="font-size: 0.7em;">(トラブルシューティング)</span></h2>
+                
+                <div style="display: flex; gap: 40px; justify-content: center; margin-top: 30px;">
+                    
+                    <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
+                        <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. ロボットが表示されない</h3>
+                        <p style="font-weight: bold; font-size: 0.9em;">A. Fixed Frameを確認</p>
+                        <hr style="border-color: #555;">
+                        <ul style="font-size: 0.8em; margin-top: 10px;">
+                            <li>RViz左側のパネルを確認</li>
+                            <li>「Global Options」→「Fixed Frame」</li>
+                            <li>ここが <code>base_link</code> または <code>world</code> になっているか確認してください。</li>
+                        </ul>
+                    </div>
+
+                    <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
+                        <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. "No transform..." エラー</h3>
+                        <p style="font-weight: bold; font-size: 0.9em;">A. Publisherの確認</p>
+                        <hr style="border-color: #555;">
+                        <ul style="font-size: 0.8em; margin-top: 10px;">
+                            <li><code>robot_state_publisher</code> ノードは起動していますか？</li>
+                            <li>このノードがTF（位置情報）を配信していないとエラーになります。</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
             <section>
                 <h2>ありがとうございました</h2>
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
@@ -1005,7 +1082,10 @@ rviz_node = Node(
                 'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
 
                 // その他のChalkboardショートカットはデフォルトで有効
-            }
+            },
+            
+            // スライド遷移アニメーション
+            transition: 'slide',
         });
 
         function copyCodeToClipboard(button) {
