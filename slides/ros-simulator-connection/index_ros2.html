@@ -285,50 +285,48 @@
                     </div>
                 </section>
 
-                <section class="small-code">
-                    <h3>Mock Components起動用Launch (Python)</h3>
+<section class="small-code">
+                    <h3>MockComponents用Launchの例</h3>
                     <div style="text-align: left;">
-                        <pre><code class="python" data-trim>
+                        <pre><code class="nohighlight" data-trim data-noescape style="line-height: 1.15; font-size: 0.65em;">
 def generate_launch_description():
-    # ...必要なインポート記述...
+    
+<span style="display: block; background-color: rgba(220, 53, 69, 0.15); padding: 2px 5px; border-radius: 4px;">    # 1. Load URDF ("use_mock_hardware:=true" を渡すのがポイント)
+    rd_content = Command([PathJoinSubstitution([FindPackageShare("xacro"), "xacro"]), 
+                          " ", urdf_path, " ", "use_mock_hardware:=true"])
+    robot_desc = {"robot_description": rd_content}</span>
 
-    # 1. ros2_control (Mock) を含むURDFのロード
-    # "use_mock_hardware:=true" をxacro引数に渡すのがポイント
-    robot_description_content = Command(
-        [PathJoinSubstitution([FindPackageShare("xacro"), "xacro"]), 
-         " ", urdf_path, " ", "use_mock_hardware:=true"]
-    )
-    robot_description = {"robot_description": robot_description_content}
+<span style="display: block; background-color: rgba(13, 110, 253, 0.15); padding: 2px 5px; border-radius: 4px; margin-top: 5px;">    # 2. Control Node (ros2_control_node)
+    control_node = Node(package="controller_manager", executable="ros2_control_node",
+                        parameters=[robot_desc, controller_config], output="screen")</span>
 
-    # 2. コントローラマネージャ (ros2_control_node) の起動
-    control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[robot_description, controller_config],
-        output="screen",
-    )
+<span style="display: block; background-color: rgba(25, 135, 84, 0.15); padding: 2px 5px; border-radius: 4px; margin-top: 5px;">    # 3. Spawners (各コントローラをロード)
+    # 行数を節約するため、引数を一行にまとめて記述
+    jsb = Node(package="controller_manager", executable="spawner", 
+               arguments=["joint_state_broadcaster"])
+    
+    arm = Node(package="controller_manager", executable="spawner", 
+               arguments=["joint_trajectory_controller"])</span>
 
-    # 3. 各コントローラのSpawner (起動用ノード)
-    joint_state_broadcaster = Node(package="controller_manager", 
-                                   executable="spawner", 
-                                   arguments=["joint_state_broadcaster"])
-    arm_controller = Node(package="controller_manager", 
-                          executable="spawner", 
-                          arguments=["joint_trajectory_controller"])
+<span style="display: block; background-color: rgba(255, 193, 7, 0.15); padding: 2px 5px; border-radius: 4px; margin-top: 5px;">    # 4. RViz
+    rviz = Node(package="rviz2", executable="rviz2", arguments=["-d", rviz_config])</span>
 
-    # 4. RVizの起動
-    rviz_node = Node(package="rviz2", executable="rviz2", 
-                     arguments=["-d", rviz_config_path])
-
-    return LaunchDescription([control_node, joint_state_broadcaster, 
-                              arm_controller, rviz_node])
+    return LaunchDescription([control_node, jsb, arm, rviz])
                         </code></pre>
-                        <div
-                            style="font-size: 0.7em; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
-                            <p><span style="color: #dc3545;">use_mock_hardware:=true</span> : URDF内でMockプラグインを有効化します。
+
+                        <div style="font-size: 0.7em; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                            <p style="margin: 5px 0;">
+                                <span style="color: #dc3545; font-weight: bold;">■ use_mock_hardware:=true</span> : 
+                                URDFのMockプラグインを有効化
                             </p>
-                            <p><span style="color: #0d6efd;">ros2_control_node</span> : 仮想的な制御ループを回すメインプロセスです。</p>
-                            <p><span style="color: #198754;">spawner</span> : 必要なコントローラを動的にロードします。</p>
+                            <p style="margin: 5px 0;">
+                                <span style="color: #0d6efd; font-weight: bold;">■ ros2_control_node</span> : 
+                                仮想的な制御ループを回すメインプロセス
+                            </p>
+                            <p style="margin: 5px 0;">
+                                <span style="color: #198754; font-weight: bold;">■ spawner</span> : 
+                                必要なコントローラを動的にロード
+                            </p>
                         </div>
                     </div>
                 </section>
