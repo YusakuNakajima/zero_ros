@@ -55,7 +55,8 @@
         .reveal pre {
             width: 100%;
             margin: 0 auto;
-            box-shadow: none; /* デフォルトの影を消す */
+            box-shadow: none;
+            /* デフォルトの影を消す */
         }
 
         .reveal pre code {
@@ -76,7 +77,7 @@
             display: flex;
             gap: 20px;
             align-items: stretch;
-            min-height: 400px;
+            min-height: auto;
         }
 
         .comparison-box {
@@ -96,15 +97,21 @@
         /* --- 【重要】コード折り返し対策 --- */
         /* 比較ボックス内のコードは強制的に折り返す */
         .comparison-box pre code {
-            white-space: pre-wrap !important;   /* 折り返しを有効化 */
-            word-break: break-all !important;   /* 長い単語も途中で改行 */
-            overflow-wrap: anywhere !important; /* URLなども改行 */
-            font-size: 0.65em !important;       /* 文字サイズを少し小さく */
+            white-space: pre-wrap !important;
+            /* 折り返しを有効化 */
+            word-break: break-all !important;
+            /* 長い単語も途中で改行 */
+            overflow-wrap: anywhere !important;
+            /* URLなども改行 */
+            font-size: 0.65em !important;
+            /* 文字サイズを少し小さく */
             line-height: 1.25 !important;
-            max-height: none !important;        /* 高さ制限解除 */
+            max-height: none !important;
+            /* 高さ制限解除 */
         }
 
-        .reveal ul, .reveal ol {
+        .reveal ul,
+        .reveal ol {
             font-size: 0.9em;
             line-height: 1.6;
         }
@@ -175,7 +182,8 @@
                         <thead>
                             <tr>
                                 <th style="border-bottom: 2px solid #fff; width: 20%;">比較項目</th>
-                                <th style="border-bottom: 2px solid #3b82f6; color: #3b82f6; width: 40%;">簡易シミュレーション</th>
+                                <th style="border-bottom: 2px solid #3b82f6; color: #3b82f6; width: 40%;">簡易シミュレーション
+                                </th>
                                 <th style="border-bottom: 2px solid #e55; color: #e55; width: 40%;">物理シミュレータ</th>
                             </tr>
                         </thead>
@@ -295,8 +303,10 @@ def generate_launch_description():
     return LaunchDescription([control_node, joint_state_broadcaster, 
                               arm_controller, rviz_node])
                         </code></pre>
-                        <div style="font-size: 0.7em; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
-                            <p><span style="color: #dc3545;">use_mock_hardware:=true</span> : URDF内でMockプラグインを有効化します。</p>
+                        <div
+                            style="font-size: 0.7em; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                            <p><span style="color: #dc3545;">use_mock_hardware:=true</span> : URDF内でMockプラグインを有効化します。
+                            </p>
                             <p><span style="color: #0d6efd;">ros2_control_node</span> : 仮想的な制御ループを回すメインプロセスです。</p>
                             <p><span style="color: #198754;">spawner</span> : 必要なコントローラを動的にロードします。</p>
                         </div>
@@ -308,15 +318,21 @@ def generate_launch_description():
                     <div style="text-align: left;">
                         <ul>
                             <li><strong>見た目:</strong> RViz上の表示はモデル表示と同じに見えます。</li>
-                            <li><strong>動作:</strong> Motion Planningプラグイン（MoveIt）から「Plan & Execute」を押すと、計算された軌道に沿ってロボットが動きます。</li>
-                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code> から配信されます。</li>
+                            <li><strong>動作:</strong> Motion Planningプラグイン（MoveIt）から「Plan &
+                                Execute」を押すと、計算された軌道に沿ってロボットが動きます。</li>
+                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code>
+                                から配信されます。</li>
                         </ul>
                         <div style="background: #333; padding: 15px; border-radius: 5px; margin-top: 20px;">
-                            <p style="margin:0; font-family: monospace; font-size: 0.8em;">$ ros2 topic info /joint_states</p>
-                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Type: sensor_msgs/msg/JointState</p>
-                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Publisher count: 1 (joint_state_broadcaster)</p>
+                            <p style="margin:0; font-family: monospace; font-size: 0.8em;">$ ros2 topic info
+                                /joint_states</p>
+                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Type:
+                                sensor_msgs/msg/JointState</p>
+                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Publisher count:
+                                1 (joint_state_broadcaster)</p>
                         </div>
-                        <p style="font-size: 0.7em; margin-top: 20px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。</p>
+                        <p style="font-size: 0.7em; margin-top: 20px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。
+                        </p>
                     </div>
                 </section>
             </section>
@@ -331,7 +347,8 @@ def generate_launch_description():
                         <div class="slide-content">
                             <ul>
                                 <li>Gazeboは、ROSで最も広く使われている<strong>3D物理シミュレータ</strong>です。</li>
-                                <li>Mock Hardwareとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。</li>
+                                <li>Mock Hardwareとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
+                                </li>
                                 <li>実機を動かす前の「最終確認」として不可欠なツールです。</li>
                             </ul>
                         </div>
@@ -469,7 +486,8 @@ gz sim shapes.sdf
                                 </code></pre>
                             </div>
                             <div style="flex: 0 0 40px; text-align: center; color:#aaa; font-size: 1.5em;">▶</div>
-                            <div class="comparison-box" style="border: 2px solid #d63384; padding: 10px; background: rgba(214, 51, 132, 0.1);">
+                            <div class="comparison-box"
+                                style="border: 2px solid #d63384; padding: 10px; background: rgba(214, 51, 132, 0.1);">
                                 <pre style="box-shadow: none; margin: 0;"><code class="xml" data-trim data-noescape>
 &lt;hardware&gt;
   &lt;plugin&gt;gz_ros2_control/GazeboSimSystem&lt;/plugin&gt;
@@ -478,7 +496,8 @@ gz sim shapes.sdf
                             </div>
                         </div>
                         <p style="font-size: 0.8em; line-height: 1.5;">
-                            <span style="color: #d63384; font-weight: bold;">GazeboSimSystem</span> というプラグインを指定することで、<br>
+                            <span style="color: #d63384; font-weight: bold;">GazeboSimSystem</span>
+                            というプラグインを指定することで、<br>
                             「実在しないハードウェア」ではなく「Gazebo上のロボット」として認識されます。
                         </p>
                     </div>
@@ -643,7 +662,8 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                             style="width: 35%; background: #333; border: 2px dashed #fff; padding: 15px; border-radius: 15px; position: relative;">
                             <div
                                 style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #222; padding: 0 10px; font-size: 0.8em; color: #fff;">
-                                ros_gz_bridge</div>
+                                ros_gz_bridge
+                            </div>
 
                             <div style="display: flex; flex-direction: column; gap: 30px; margin-top: 10px;">
                                 <div
@@ -672,28 +692,32 @@ ros2 launch my_robot_description gazebo_sim.launch.py
 
                     </div>
                 </section>
-
-               <section>
+                <section>
                     <h3>Launchファイルの引数の書き方</h3>
                     <div style="text-align: left; font-size: 0.9em; width: 100%;">
 
                         <div
                             style="background: #222; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.9em; margin: 20px 0; border: 1px solid #555;">
-                            /topic_name<span style="color: #facc15;">@</span>ros_type<span style="color: #facc15;">[</span>gz_type
+                            /topic_name<span style="color: #facc15;">@</span>ros_type<span
+                                style="color: #facc15;">[</span>gz_type
                         </div>
 
                         <ul style="line-height: 1.8;">
                             <li><span style="color: #4ade80; font-weight: bold;">/topic_name</span> : 通信したいトピック名</li>
-                            <li><span style="color: #facc15; font-weight: bold;">@</span> : <strong>ROS 2の型</strong> を指定する区切り文字</li>
+                            <li><span style="color: #facc15; font-weight: bold;">@</span> : <strong>ROS 2の型</strong>
+                                を指定する区切り文字</li>
                             <li><span style="color: #3b82f6; font-weight: bold;">ros_type</span> : ROS側のメッセージ型</li>
-                            <li><span style="color: #facc15; font-weight: bold;">[</span> : <strong>Gazeboの型</strong> を指定する区切り文字</li>
+                            <li><span style="color: #facc15; font-weight: bold;">[</span> : <strong>Gazeboの型</strong>
+                                を指定する区切り文字</li>
                             <li><span style="color: #d63384; font-weight: bold;">gz_type</span> : Gazebo側のメッセージ型</li>
                         </ul>
 
                         <div
                             style="margin-top: 20px; background: rgba(59, 130, 246, 0.15); padding: 15px; border-radius: 8px; border-left: 5px solid #3b82f6;">
-                            <p style="margin: 0 0 5px 0; font-size: 0.9em; font-weight: bold; color: #3b82f6;">実際の記述例（関節の状態）</p>
-                            <code style="font-family: monospace; color: #fff; background: none; word-break: break-all; font-size: 0.85em;">/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model</code>
+                            <p style="margin: 0 0 5px 0; font-size: 0.9em; font-weight: bold; color: #3b82f6;">
+                                実際の記述例（関節の状態）</p>
+                            <code
+                                style="font-family: monospace; color: #fff; background: none; word-break: break-all; font-size: 0.85em;">/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model</code>
                         </div>
                     </div>
                 </section>
@@ -782,7 +806,8 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                     <h3>B. Worldファイルの作成 (SDF)</h3>
                     <div style="text-align: left;">
                         <p>Launchファイルで <code>empty.sdf</code> の代わりに読み込ませる<br>オリジナルの世界ファイル（例:
-                            <code>my_world.sdf</code>）を作ります。</p>
+                            <code>my_world.sdf</code>）を作ります。
+                        </p>
                         <pre><code class="xml" data-trim>
 &lt;sdf version="1.6"&gt;
   &lt;world name="my_custom_world"&gt;
