@@ -1,16 +1,14 @@
-/* ゼロからのROS入門シリーズ 共通スタイル */
+/* ゼロからのROS入門シリーズ 共通スタイル (改良版) */
 
-/* フォント設定 */
+/* --- 基本設定 --- */
 .reveal {
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 42px;
     font-weight: normal;
+    color: #eee; /* 基本文字色を明るく設定 */
 }
 
-.reveal h1,
-.reveal h2,
-.reveal h3,
-.reveal h4 {
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
     text-transform: none;
     font-family: 'Noto Sans JP', sans-serif;
 }
@@ -19,77 +17,153 @@
 .reveal img {
     border: none;
     box-shadow: none;
+    max-width: 100%;
 }
 
-/* 画像とテキストの横並びレイアウト */
+/* --- レイアウト: 画像とテキストの横並び --- */
 .slide-layout-image {
     display: flex;
-    align-items: center;
+    align-items: center; 
     justify-content: space-between;
     height: 100%;
+    gap: 30px; /* 要素間の隙間 */
 }
 
 .image-section {
-    flex: 0 0 50%;
-    margin-right: 0%;
+    flex: 1;
+    text-align: center;
 }
 
 .text-section {
-    flex: 0 0 50%;
+    flex: 1;
     text-align: left;
 }
 
 .image-section img {
-    width: 100%;
-    height: auto;
+    max-height: 80vh; /* 画面からはみ出さないように制限 */
+    width: auto;
 }
 
-/* コードとテキストの横並びレイアウト */
+/* --- レイアウト: コードとテキストの横並び --- */
 .slide-layout-code {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     height: 100%;
-    gap: 2%;
+    gap: 20px;
 }
 
-.slide-layout-code-image {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    height: 100%;
-    gap: 2%;
-}
-
-/* 画像とコードの横並びレイアウト */
+/* --- レイアウト: 画像とコードの横並び --- */
 .slide-layout-image-code {
     display: flex;
     align-items: stretch;
     justify-content: space-between;
     height: 100%;
-    gap: 2%;
+    gap: 20px;
 }
 
-.slide-layout-image-code .image-section {
-    flex: 0 0 48%;
+/* --- レイアウト: テキストのみの横並び --- */
+.slide-layout-text {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: space-between;
+    height: 100%;
+    gap: 30px;
 }
 
-.slide-layout-image-code .code-section {
-    flex: 0 0 48%;
+.slide-layout-text .text-column {
+    flex: 1;
+    text-align: left;
+}
+
+/* --- コードセクション設定 (改良) --- */
+.code-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* Flexbox内でのはみ出し防止 */
+}
+
+/* デフォルトのコードブロック設定 */
+.reveal pre {
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.reveal pre code {
+    font-family: 'Source Code Pro', monospace; /* 等幅フォント推奨 */
+    font-size: 0.85em; /* 見やすいサイズに調整 */
+    line-height: 1.35;
+    max-height: 60vh; /* 高さ制限 */
+    overflow: auto;   /* スクロール許可 */
+    tab-size: 4;
+}
+
+/* 今回の問題に対処：長いコードを強制的に枠内に収めるクラス */
+.wrap-code pre code {
+    white-space: pre-wrap !important; /* 折り返し有効 */
+    word-break: break-all !important; /* 長い単語も改行 */
+    overflow-x: hidden; /* 横スクロール禁止 */
+}
+
+/* さらに文字を小さくしたい場合用 */
+.small-code pre code {
+    font-size: 0.6em !important;
+    line-height: 1.2 !important;
+}
+
+/* --- 比較用レイアウト (NEW) --- */
+/* Mock vs Gazebo や コード比較用 */
+.comparison-container {
+    display: flex;
+    gap: 20px;
+    align-items: stretch; /* 高さを揃える */
+    justify-content: center;
+    width: 100%;
+}
+
+.comparison-box {
+    flex: 1;
+    border-radius: 10px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
 }
 
-.slide-layout-image-code .code-section pre {
-    flex: 1;
-    display: flex;
-    align-items: center;
+/* 比較ボックス内のコードは自動で折り返す設定にする */
+.comparison-box pre {
+    width: 100%;
+    margin: 10px 0;
+    box-shadow: none;
+    background: rgba(0,0,0,0.3);
 }
 
-/* コードハイライト */
+.comparison-box pre code {
+    font-size: 0.65em; /* 比較時はスペースがないので小さく */
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    max-height: none;
+}
+
+/* --- 図解用レイアウト (NEW) --- */
+/* 通信フロー図など */
+.diagram-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8em;
+    gap: 10px;
+}
+
+.diagram-box {
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* --- コードハイライト (維持) --- */
 mark.code-highlight-blue {
     background-color: rgba(0, 123, 255, 0.4);
     color: inherit;
@@ -111,22 +185,7 @@ mark.code-highlight-green {
     border-radius: 3px;
 }
 
-/* 複数画像レイアウト */
-.image-section.dual-images {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 15px;
-    height: 100%;
-    justify-content: space-between;
-}
-
-.image-section.dual-images img {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 60vh !important;
-    object-fit: contain !important;
-}
-
+/* --- 画像キャプションなど (維持) --- */
 .image-with-caption {
     display: flex;
     flex-direction: column;
@@ -136,50 +195,16 @@ mark.code-highlight-green {
 }
 
 .image-caption {
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 5px;
-    text-align: center;
-    font-style: italic;
+    font-size: 0.6em;
+    color: #aaa;
+    margin-top: 10px;
 }
 
-/* テキストのみの横並びレイアウト */
-.slide-layout-text {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    height: 100%;
-    gap: 2%;
-}
-
-.slide-layout-text .text-column {
-    flex: 0 0 48%;
-    text-align: left;
-}
-
-/* コードセクション設定 */
-.code-section {
-    flex: 0 0 45%;
-}
-
-.text-section {
-    flex: 0 0 50%;
-    text-align: left;
-}
-
-.code-section pre {
-    width: 100%;
-    font-size: 0.35em;
-    line-height: 1.0em;
-    margin: 0;
-    max-height: 65vh;
-    overflow-y: auto;
-    overflow-x: auto;
-    white-space: pre-wrap;
-}
-
-.code-section code {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+/* --- CSS修正: 長いコードを強制的に折り返す設定 --- */
+.comparison-box pre code {
+    white-space: pre-wrap !important;     /* 折り返しを有効化 */
+    word-break: break-all !important;     /* 単語の途中でも改行する（これが重要！） */
+    overflow-wrap: anywhere !important;   /* URLなどの長い文字列も改行 */
+    font-size: 0.65em !important;         /* 文字サイズ調整 */
+    line-height: 1.25 !important;
 }
