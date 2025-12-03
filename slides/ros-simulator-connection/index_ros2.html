@@ -143,17 +143,37 @@
                 <br>
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
-
             <section>
-                <h2>本スライドの担当範囲</h2>
+                <h2>本スライドのゴール</h2>
+                <div class="slide-layout-image">
+                    <div class="slide-image">
+                        <img src="media/fake_joint.png" alt="Robot_on_simulator"
+                            style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+
+                        <p class="image-caption">
+                            ↑ シミュレータで表示した例。一見、前章のモデル表示と同じに見えますが、中身はまったく違います
+                        </p>
+                    </div>
+
+                    <div class="slide-content">
+                        <ul>
+                            <li>ROS 2標準の簡易シミュレータ（Mock Components）と物理シミュレータGazeboの違いを理解します</li>
+                            <li>シミュレータ上でロボットを実際に動かす仕組みを理解します</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <section>
                 <div style="margin-bottom: 30px;">
+                    <h2>前章との違い</h2>
+
                     <p style="font-size: 1.2em;">前章と本章の決定的な違いは<br>
                         <strong style="color: #e55; font-size: 1.3em;">「制御」しているかどうか</strong> です。
                     </p>
                 </div>
                 <div class="comparison-container" style="min-height: auto; margin-bottom: 40px;">
                     <div class="comparison-box" style="border: 2px solid #555;">
-                        <h3 style="color: #999;">前回（モデル表示）</h3>
+                        <h3 style="font-size: 1em; color: #999;">前回（モデル表示）</h3>
                         <hr style="border-color: #555; margin: 15px 0;">
                         <p style="font-size: 0.9em; text-align: left; line-height: 1.6;">
                             GUIでパラメーターを変えて、<br>単に<strong>「表示」を動かしていただけ</strong>。
@@ -161,7 +181,7 @@
                     </div>
                     <div class="comparison-box"
                         style="border: 2px solid #3b82f6; background: rgba(59, 130, 246, 0.15);">
-                        <h3 style="color: #3b82f6;">今回（シミュレータ）</h3>
+                        <h3 style="font-size: 1em; color: #3b82f6;">今回（シミュレータ）</h3>
                         <hr style="border-color: #3b82f6; margin: 15px 0;">
                         <p style="font-size: 0.9em; text-align: left; line-height: 1.6;">
                             コントローラ（制御プログラム）が<br>計算して<strong>「ロボット」を制御します</strong>。
@@ -190,7 +210,7 @@
                         <tbody>
                             <tr>
                                 <td style="font-weight: bold;">ツール名</td>
-                                <td><strong>Mock Hardware</strong><br>(ros2_control)</td>
+                                <td><strong>Mock Components</strong><br>(ros2_control)</td>
                                 <td><strong>Gazebo</strong></td>
                             </tr>
                             <tr>
@@ -202,7 +222,7 @@
                             </tr>
                             <tr>
                                 <td style="font-weight: bold;">特徴・用途</td>
-                                <td>動作が非常に<strong>軽い</strong><br><span style="font-size: 0.7em;">ロジック・通信の確認に最適</span>
+                                <td>動作が非常に<strong>軽い</strong><br><span style="font-size: 0.7em;">動作・通信の確認に最適</span>
                                 </td>
                                 <td>処理が<strong>重い</strong><br><span style="font-size: 0.7em;">より現実に近い検証が可能</span></td>
                             </tr>
@@ -212,21 +232,21 @@
             </section>
 
             <section>
-                <h2>Mock Hardware vs Gazebo</h2>
+                <h2>Mock Components vs Gazebo</h2>
                 <p style="text-align: center; margin-bottom: 10px;">
-                    <strong>→ <a href="interactive_app/ros2_mock_hardware_vs_Gazebo.html" target="_blank"
+                    <strong>→ <a href="interactive_app/ros2_mock_components_vs_Gazebo.html" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                 </p>
-                <iframe data-src="interactive_app/ros2_mock_hardware_vs_Gazebo.html" width="100%" height="500px"
+                <iframe data-src="interactive_app/ros2_mock_components_vs_Gazebo.html" width="100%" height="500px"
                     frameborder="0" style="overflow: hidden; border-radius: 8px;"></iframe>
             </section>
 
             <section>
                 <section>
-                    <h2>Mock Hardware (ros2_control)</h2>
+                    <h2>Mock Components (ros2_control)</h2>
                     <div style="text-align: left;">
                         <ul>
-                            <li><strong>ros2_control Mock Hardware</strong>は、実機を使わずにロボットの制御をテストするためのROS2標準機能です。</li>
+                            <li><strong>ros2_control Mock Components</strong>は、実機を使わずにロボットの制御をテストするためのROS2標準機能です。</li>
                             <li>物理演算（重力や摩擦など）は行いませんが、<strong>「コントローラからの指令を受け取り、動いたことにする」</strong>という振る舞いをシミュレートします。</li>
                             <li>MoveItなどの動作確認によく使われます。</li>
                         </ul>
@@ -266,7 +286,7 @@
                 </section>
 
                 <section class="small-code">
-                    <h3>Mock Hardware起動用Launch (Python)</h3>
+                    <h3>Mock Components起動用Launch (Python)</h3>
                     <div style="text-align: left;">
                         <pre><code class="python" data-trim>
 def generate_launch_description():
@@ -347,7 +367,7 @@ def generate_launch_description():
                         <div class="slide-content">
                             <ul>
                                 <li>Gazeboは、ROSで最も広く使われている<strong>3D物理シミュレータ</strong>です。</li>
-                                <li>Mock Hardwareとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
+                                <li>Mock Componentsとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
                                 </li>
                                 <li>実機を動かす前の「最終確認」として不可欠なツールです。</li>
                             </ul>
@@ -455,7 +475,7 @@ gz sim shapes.sdf
                             style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
                             <h4 style="color: #3b82f6;">切り替えの仕組み</h4>
                             <ul style="font-size: 0.9em;">
-                                <li><strong>Mock Hardware:</strong> 実機なし、物理演算なし</li>
+                                <li><strong>Mock Components:</strong> 実機なし、物理演算なし</li>
                                 <li><strong>Gazebo Classic:</strong> <code>gazebo_ros2_control</code> プラグインを使用</li>
                                 <li><strong>Gazebo (New):</strong> <code>gz_ros2_control</code> プラグインを使用</li>
                             </ul>
