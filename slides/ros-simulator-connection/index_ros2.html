@@ -341,7 +341,7 @@ def generate_launch_description():
                         <pre><code data-trim class="bash">
 # ros_gz (ブリッジやシミュレータ本体を含むメタパッケージ)
 sudo apt-get install ros-${ROS_DISTRO}-ros-gz
-                    </code></pre>
+                        </code></pre>
                     </div>
 
                     <div style="margin-top: 20px; text-align: left;">
@@ -351,19 +351,16 @@ sudo apt-get install ros-${ROS_DISTRO}-ros-gz
                         <pre><code data-trim class="bash">
 # gazebo_ros_pkgs (Classic用の関連パッケージ)
 sudo apt-get install ros-${ROS_DISTRO}-gazebo-ros-pkgs
-                    </code></pre>
+                        </code></pre>
                     </div>
-
                 </section>
+
                 <section>
                     <h2>Gazeboの起動確認</h2>
-
                     <div style="margin-bottom: 20px; text-align: left;">
                         <p>インストールが完了したら、gazeboを起動</p>
                     </div>
-
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-
                         <div
                             style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; padding: 20px; border-radius: 10px; text-align: left;">
                             <h3 style="color: #3b82f6; font-size: 1.0em; margin-bottom: 10px;">Humble の場合</h3>
@@ -371,7 +368,7 @@ sudo apt-get install ros-${ROS_DISTRO}-gazebo-ros-pkgs
                             <pre style="width: 100%; margin: 0; box-shadow: none;"><code class="bash" data-trim>
 # コマンドは "ign" です
 ign gazebo shapes.sdf
-                        </code></pre>
+                            </code></pre>
                         </div>
 
                         <div
@@ -381,9 +378,8 @@ ign gazebo shapes.sdf
                             <pre style="width: 100%; margin: 0; box-shadow: none;"><code class="bash" data-trim>
 # コマンドは "gz" です
 gz sim shapes.sdf
-                        </code></pre>
+                            </code></pre>
                         </div>
-
                     </div>
 
                     <div
@@ -396,6 +392,7 @@ gz sim shapes.sdf
                         </p>
                     </div>
                 </section>
+
                 <section>
                     <h2>ros2_controlとの連携</h2>
                     <div class="slide-layout-text">
@@ -405,16 +402,319 @@ gz sim shapes.sdf
                             <h4 style="color: #3b82f6;">切り替えの仕組み</h4>
                             <ul style="font-size: 0.9em;">
                                 <li><strong>Mock Hardware:</strong> 実機なし、物理演算なし</li>
-                                [cite_start]<li><strong>Gazebo Classic:</strong> <code>gazebo_ros2_control</code>
-                                    プラグインを使用 [cite: 1]</li>
-                                [cite_start]<li><strong>Gazebo (New):</strong> <code>gz_ros2_control</code> プラグインを使用
-                                    [cite: 2]</li>
+                                <li><strong>Gazebo Classic:</strong> <code>gazebo_ros2_control</code> プラグインを使用</li>
+                                <li><strong>Gazebo (New):</strong> <code>gz_ros2_control</code> プラグインを使用</li>
                             </ul>
                         </div>
-                        <p style="margin-top: 20px; font-size: 0.8em; color: #aaa;">※本講座では、環境構築の手軽さから○○（使っている方）を使用します。
+                        <p style="margin-top: 20px; font-size: 0.8em; color: #aaa;">
+                            ※本講座では、環境構築の手軽さから Gazebo (New) を使用します。
                         </p>
                     </div>
                 </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>[実践] Gazeboでロボットを動かす</h2>
+                    <p>ここからは実際に、ロボットの記述（URDF）に<br><strong>「Gazebo用の設定」</strong>を追記して動かしていきます。</p>
+                </section>
+
+                <section>
+                    <h2>1. URDFの修正</h2>
+                    <div class="slide-layout-text">
+                        <p>まず、Mock用の設定をGazebo用に書き換えます。</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>ros2_controlタグの書き換え</h3>
+                    <div class="slide-layout-text">
+                        <p>urdf/ros2_control.xacro</p>
+                        <div class="comparison-box" style="border: 2px solid #555; margin-bottom: 20px;">
+                            <pre><code class="xml" data-trim data-line-numbers="1-3|6-8">
+&lt;hardware&gt;
+    &lt;plugin&gt;mock_components/GenericSystem&lt;/plugin&gt;
+&lt;/hardware&gt;
+
+&lt;hardware&gt;
+    &lt;plugin&gt;gz_ros2_control/GazeboSimSystem&lt;/plugin&gt;
+&lt;/hardware&gt;
+                            </code></pre>
+                        </div>
+                        <p style="font-size: 0.8em;">
+                            <span style="color: #d63384;">GazeboSimSystem</span> というプラグインを指定することで、<br>
+                            「実在しないハードウェア」ではなく「Gazebo上のロボット」として認識されます。
+                        </p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Gazeboプラグインの追加</h3>
+                    <div class="slide-layout-text">
+                        <p>さらに、<code>robot.urdf.xacro</code>の末尾（<code>&lt;/robot&gt;</code>の直前）に、<br>
+                            Gazebo側からROS 2制御を呼び出すためのタグを追加します。</p>
+
+                        <pre><code class="xml" data-trim>
+&lt;gazebo&gt;
+    &lt;plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin"&gt;
+        &lt;parameters&gt;$(find my_robot_description)/config/controllers.yaml&lt;/parameters&gt;
+    &lt;/plugin&gt;
+&lt;/gazebo&gt;
+                        </code></pre>
+
+                        <div
+                            style="background: rgba(255, 193, 7, 0.15); border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px;">
+                            <p style="font-size: 0.7em; margin: 0;">
+                                <strong>⚠️ 初心者がハマるポイント</strong><br>
+                                このタグがないと、ロボットは表示されますが<strong>「力が抜けたようにダラっとして動かない」</strong>状態になります。<br>
+                                コントローラマネージャが起動しないためです。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>2. Launchファイルの作成</h2>
+                    <p>Gazeboを起動し、そこにロボットを登場させる（Spawn）<br>ためのLaunchファイルを作成します。</p>
+                </section>
+
+                <section>
+                    <h3>Gazebo起動とSpawn (Python)</h3>
+                    <div class="slide-layout-text">
+                        <pre><code class="python" data-trim data-line-numbers="1-5|7-12|14-20">
+# 1. Gazebo Sim の起動
+gazebo = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(
+        [PathJoinSubstitution([FindPackageShare("ros_gz_sim"), "launch", "gz_sim.launch.py"])]
+    ),
+    launch_arguments={"gz_args": "-r empty.sdf"}.items(),
+)
+
+# 2. ロボットのSpawn (出現させる)
+spawn_entity = Node(
+    package="ros_gz_sim",
+    executable="create",
+    arguments=[
+        "-topic", "robot_description", # このトピックのURDFを読み込む
+        "-name", "my_robot",
+        "-z", "0.1", # 少し浮かせると地面へのめり込みを防げる
+    ],
+    output="screen",
+)
+
+# 3. ブリッジ (ROS2 <-> Gazebo 通信)
+bridge = Node(
+    package="ros_gz_bridge",
+    executable="parameter_bridge",
+    arguments=[
+        # クロック(時間)の同期
+        "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
+    ],
+    output="screen",
+)
+                            </code></pre>
+                        <p style="font-size: 0.7em; text-align: right; margin-top: -10px;">
+                            ※コントローラの起動部分はMockの時と同じなので省略しています</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>「ブリッジ」とは？</h3>
+                    <div class="slide-layout-text">
+                        <p>ROS 2とGazebo (New) は、実は<strong>通信方式が異なるため直接会話できません</strong>。<br>
+                            そこで「通訳」となる<strong>ros_gz_bridge</strong>が必要です。</p>
+
+                        <div
+                            style="display: flex; align-items: center; justify-content: center; margin: 30px 0; gap: 10px;">
+                            <div style="background: #3b82f6; color: white; padding: 15px; border-radius: 10px;">ROS
+                                2<br>(DDS)</div>
+                            <div style="font-size: 2em;">↔</div>
+                            <div
+                                style="background: #e55; color: white; padding: 15px; border-radius: 10px; border: 2px dashed white;">
+                                <strong>Bridge</strong><br><span style="font-size:0.6em">ros_gz_bridge</span>
+                            </div>
+                            <div style="font-size: 2em;">↔</div>
+                            <div style="background: #d63384; color: white; padding: 15px; border-radius: 10px;">
+                                Gazebo<br>(Gz Transport)</div>
+                        </div>
+
+                        <ul>
+                            <li><strong>/clock</strong>: シミュレーション時間をROS2に伝える（重要）</li>
+                            <li><strong>/scan</strong>: LiDARデータをROS2に送る</li>
+                            <li><strong>/cmd_vel</strong>: 移動指令をGazeboに送る</li>
+                        </ul>
+                    </div>
+                </section>
+
+
+                <section>
+                    <h2>実行と確認</h2>
+                    <div class="slide-layout-text">
+                        <p>作成したLaunchファイルを実行します。</p>
+                        <pre><code class="bash" data-trim>
+ros2 launch my_robot_description gazebo_sim.launch.py
+                        </code></pre>
+
+                        <h4 style="margin-top: 20px;">成功のサイン</h4>
+                        <ul>
+                            <li>Gazeboの画面が立ち上がり、ロボットが表示される</li>
+                            <li>ターミナルに <span style="color: #28a745;">"Configured and activated"</span> と表示される</li>
+                            <li>RVizのMoveItパネルで「Plan & Execute」をすると、<br><strong>Gazebo上のロボットも連動して動く</strong></li>
+                        </ul>
+
+                        <div style="margin-top: 20px; padding: 15px; border: 1px solid #aaa; border-radius: 8px;">
+                            <p style="font-size: 0.8em; margin: 0;">
+                                <strong>動かない場合：</strong><br>
+                                「再生ボタン(▶)」が押されているか確認してください。<br>
+                                Gazeboは起動直後、一時停止状態の場合があります。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>Gazeboでの環境（障害物）の構築</h2>
+                    <p>ロボットを何もない空間（Empty World）ではなく、<br>
+                        <strong>障害物や壁がある環境</strong>で動かす方法を学びます。
+                    </p>
+                </section>
+
+                <section>
+                    <h3>環境を作る2つの方法</h3>
+                    <div class="slide-layout-text">
+                        <div style="display: flex; gap: 30px; margin-top: 30px;">
+                            <div
+                                style="flex: 1; border: 2px solid #28a745; border-radius: 10px; padding: 15px; background: rgba(40, 167, 69, 0.1);">
+                                <h4 style="color: #28a745; margin: 0;">A. GUIで配置</h4>
+                                <hr style="border-color: #28a745; margin: 10px 0;">
+                                <ul style="font-size: 0.8em;">
+                                    <li>画面上でドラッグ＆ドロップ</li>
+                                    <li>直感的で簡単</li>
+                                    <li>一時的なテスト向き</li>
+                                </ul>
+                            </div>
+                            <div
+                                style="flex: 1; border: 2px solid #fd7e14; border-radius: 10px; padding: 15px; background: rgba(253, 126, 20, 0.1);">
+                                <h4 style="color: #fd7e14; margin: 0;">B. Worldファイル</h4>
+                                <hr style="border-color: #fd7e14; margin: 10px 0;">
+                                <ul style="font-size: 0.8em;">
+                                    <li>コード（SDF）で記述</li>
+                                    <li>毎回同じ環境を再現できる</li>
+                                    <li>本格的な開発・検証向き</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>A. GUIでの配置 (Gazebo Fuel)</h3>
+                    <div class="slide-layout-text">
+                        <p>Gazebo (New) には<strong>「Resource Browser」</strong>があり、<br>オンライン上のモデルライブラリ（Fuel）から物体を呼び出せます。
+                        </p>
+
+                        <ol style="font-size: 0.9em; margin-top: 20px;">
+                            <li>画面右側のタブから <strong>[Resource Browser]</strong> を開く</li>
+                            <li>検索窓に「table」や「box」と入力</li>
+                            <li>好きなモデルをメイン画面に<strong>ドラッグ＆ドロップ</strong></li>
+                        </ol>
+
+                        <div
+                            style="background: rgba(59, 130, 246, 0.15); border-left: 5px solid #3b82f6; padding: 15px; margin-top: 20px;">
+                            <p style="font-size: 0.8em; margin: 0;">
+                                <strong>💡 Tips:</strong><br>
+                                配置した環境は、左上のメニューから<br>
+                                <code>File > Save World as...</code> で保存（.sdfファイル）できます。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>B. Worldファイルの作成 (SDF)</h3>
+                    <div class="slide-layout-text">
+                        <p>Launchファイルで <code>empty.sdf</code> の代わりに読み込ませる<br>オリジナルの世界ファイル（例:
+                            <code>my_world.sdf</code>）を作ります。
+                        </p>
+
+                        <pre><code class="xml" data-trim data-line-numbers="1|3-8|10-17">
+&lt;sdf version="1.6"&gt;
+  &lt;world name="my_custom_world"&gt;
+    &lt;physics name="1ms" type="ignored"&gt;
+      &lt;max_step_size&gt;0.001&lt;/max_step_size&gt;
+      &lt;real_time_factor&gt;1.0&lt;/real_time_factor&gt;
+    &lt;/physics&gt;
+    &lt;plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"&gt;&lt;/plugin&gt;
+
+    &lt;include&gt;
+      &lt;uri&gt;https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun&lt;/uri&gt;
+    &lt;/include&gt;
+    &lt;include&gt;
+      &lt;uri&gt;https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane&lt;/uri&gt;
+    &lt;/include&gt;
+
+    &lt;model name="box_obstacle"&gt;
+      &lt;pose&gt;2.0 0 0.5 0 0 0&lt;/pose&gt;
+      &lt;link name="box_link"&gt;
+        &lt;collision name="collision"&gt;
+          &lt;geometry&gt;&lt;box&gt;&lt;size&gt;1 1 1&lt;/size&gt;&lt;/box&gt;&lt;/geometry&gt;
+        &lt;/collision&gt;
+        &lt;visual name="visual"&gt;
+          &lt;geometry&gt;&lt;box&gt;&lt;size&gt;1 1 1&lt;/size&gt;&lt;/box&gt;&lt;/geometry&gt;
+          &lt;material&gt;&lt;ambient&gt;1 0 0 1&lt;/ambient&gt;&lt;/material&gt;
+        &lt;/visual&gt;
+      &lt;/link&gt;
+    &lt;/model&gt;
+  &lt;/world&gt;
+&lt;/sdf&gt;
+                        </code></pre>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Launchファイルの変更</h3>
+                    <div class="slide-layout-text">
+                        <p>作ったWorldファイルを読み込むように変更します。</p>
+                        <pre><code class="python" data-trim data-line-numbers="6">
+# launch/gazebo_sim.launch.py
+
+gazebo = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource([... "gz_sim.launch.py"]]),
+    launch_arguments={
+        # "empty.sdf" を自作ファイルに変更
+        "gz_args": "-r " + os.path.join(get_package_share_directory('my_pkg'), 'worlds', 'my_world.sdf')
+    }.items(),
+)
+                        </code></pre>
+                        <p style="font-size: 0.7em; color: #aaa;">※ <code>worlds</code> フォルダを <code>setup.py</code>
+                            でインストールする設定を忘れずに！</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>【重要】ロボットは障害物が見えるか？</h3>
+                    <div class="slide-layout-text">
+                        <p>Gazeboに障害物を置いただけでは、<br>
+                            <strong>ROS 2（Navigationなど）は障害物に気づきません。</strong>
+                        </p>
+
+                        <div class="comparison-box"
+                            style="margin-top: 20px; background: rgba(220, 53, 69, 0.1); border: 2px solid #dc3545;">
+                            <h4 style="color: #dc3545; font-size: 1.0em; margin-bottom: 10px;">必要なもの：センサー</h4>
+                            <p style="font-size: 0.9em; text-align: left;">
+                                ロボットが障害物を避けるためには、以下の流れが必要です。
+                            </p>
+                            <ol style="font-size: 0.9em;">
+                                <li>Gazebo上で<strong>LiDAR</strong>や<strong>カメラ</strong>をシミュレートする</li>
+                                <li>センサーデータをROSトピック（<code>/scan</code>等）として出す</li>
+                                <li>ROS側のNavigation Stackがそれを受け取ってマップを作る</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
             </section>
 
             <section>
