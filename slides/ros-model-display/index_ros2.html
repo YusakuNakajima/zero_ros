@@ -41,7 +41,7 @@
         .copy-button:hover {
             opacity: 1;
         }
-        
+
         /* 追加したスタイリング */
         .terminal-output {
             background-color: #1e1e1e;
@@ -52,6 +52,17 @@
             font-size: 0.7em;
             text-align: left;
             border: 1px solid #333;
+        }
+
+        .slide-layout-code {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .code-section {
+            flex: 2;
+            min-width: 0;
         }
     </style>
 </head>
@@ -108,7 +119,7 @@ ros2 pkg create --build-type ament_python ros_study
                     <li>これから先のスクリプトは全てこの中で作成します</li>
                 </ul>
             </section>
-            
+
             <section>
                 <h2>URのパッケージを取得</h2>
                 <ul>
@@ -160,18 +171,7 @@ sudo apt install ros-${ROS_DISTRO}-ur
                         </div>
                     </div>
                 </section>
-                <section>
-                    <h2>rviz設定ファイルを作成</h2>
-                    <div class="slide-layout-code">
-                        <pre><code class="language-yaml external-code" data-src="code/ros2/display.rviz" data-trim></code></pre>
-                        <div class="text-section">
-                            <ul>
-                                <li>ros_studyにrvizディレクトリを作成</li>
-                                <li>launchディレクトリ内にdisplay.rvizという名前で左のコードを保存</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
+
                 <section>
                     <h2>setup.pyを修正</h2>
                     <div class="slide-layout-code">
@@ -211,20 +211,65 @@ ros2 launch ros_study view_ur.launch.py
                     </ul>
 
                 </section>
+
+
             </section>
-            
+
             <section>
-                <h3>このような画面になればok</h3>
-                <div class="slide-layout-image">
-                    <div class="image-section">
-                        <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
+                <section>
+                    <h3>このような画面になればok</h3>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/joint_state_publisher_on_rviz.png" alt="URDF表示デモ">
+                        </div>
+                        <div class="text-section">
+                            <p>右下のGUIで関節を動かせます</p>
+                            <p>GUIはロボットの表示を直接変えているだけです、実際のロボットが動くわけではないので注意です</p>
+                        </div>
                     </div>
-                    <div class="text-section">
-                        <p>右下のGUIで関節を動かせます</p>
-                        <p>GUIはロボットの表示を直接変えているだけです、実際のロボットが動くわけではないので注意です</p>
+                    <p>↓ならない場合は</p>
+                </section>
+                <section>
+                    <h2>表示されない時のRvizの設定</h2>
+                    <div class="slide-layout-image">
+                        <div class="slide-image">
+                            <img src="media/rviz_setting.png" alt="Robot_on_simulator"
+                                style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+
+                            <p class="image-caption">
+                                ↑ RVizの設定例
+                            </p>
+                        </div>
+
+                        <div class="slide-content">
+                            <ul>
+                                <li>Rvizでロボットが表示されない場合、「Fixed Frame」と「RobotModel」の設定を確認</li>
+                                <li>Mock Componentsでは、<code>world</code>や<code>base_link</code>フレームがデフォルト</li>
+                                <li>RobotModelの「Description Topic」は<code>robot_description</code>に設定</li>
+                            </ul>
+
+
+                        </div>
                     </div>
-                </div>
+                    <p>↓Rvizの設定を保存する場合</p>
+
+                </section>
+                <section>
+                    <h2>rviz設定ファイルの保存</h2>
+                    <div class="slide-layout-code">
+                        <pre><code class="language-yaml external-code" data-src="code/ros2/display.rviz" data-trim></code></pre>
+                        <div class="text-section">
+                            <ul>
+                                <li>ros_studyにrvizディレクトリを作成</li>
+                                <li>launchディレクトリ内にdisplay.rvizという名前で左のコードを保存、もしはRvizのGUIから保存</li>
+                                <li>launchファイルのRvizノードにdisplay.rvizの引数を追加して読み込むようになっています</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
             </section>
+
+
 
             <section>
                 <h2>ロボットモデルを表示するまでの流れ</h2>
@@ -241,7 +286,7 @@ ros2 launch ros_study view_ur.launch.py
                 <div class="slide-content">
                 </div>
             </section>
-            
+
             <section>
                 <section>
                     <h2>ステップ1-1：ロボットの構造を記述するURDFとは</h2>
@@ -557,7 +602,8 @@ ros2 launch ros_study view_ur.launch.py
                         </tbody>
                     </table>
                     <p>ロボットアームではrevoluteとfixedしか使わない</p>
-                </section> <section>
+                </section>
+                <section>
                     <h2>ジョイントの要素<br>~リンクとのつながりと制限~</h2>
                     <table style="width: 100%; font-size: 0.7em;">
                         <thead>
@@ -612,7 +658,8 @@ ros2 launch ros_study view_ur.launch.py
                             </tr>
                         </tbody>
                     </table>
-                </section> <section>
+                </section>
+                <section>
                     <h2>リンクの要素<br>~collision(干渉計算用)~</h2>
                     <p>MoveItの避けるモーション生成等で使います</p>
                     <table style="width: 100%; font-size: 0.7em;">
@@ -795,14 +842,15 @@ rviz_node = Node(
             </code></pre>
                         </div>
                     </div>
-                    
+
                 </section>
             </section>
 
             <section>
                 <h2>データの流れを目視確認</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin-top: 20px;">
-                    
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin-top: 20px;">
+
                     <div style="text-align: left;">
                         <ul style="font-size: 0.9em; line-height: 1.5;">
                             <li>GUIを動かすと、裏でどのようなデータが流れているか確認しましょう。</li>
@@ -822,7 +870,8 @@ ros2 topic echo /joint_states
                             ↓ GUIのスライダーを動かすと<br>
                             <span style="color: #4ec9b0; font-weight: bold;">position</span> の値が変化します
                         </p>
-                        <div class="terminal-output" style="background-color: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.75em; line-height: 1.4; border: 1px solid #333; margin-top: 10px; max-height: 400px; overflow-y: auto;">
+                        <div class="terminal-output"
+                            style="background-color: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.75em; line-height: 1.4; border: 1px solid #333; margin-top: 10px; max-height: 400px; overflow-y: auto;">
                             header:<br>
                             &nbsp;&nbsp;stamp: {sec: 169..., nanosec: ...}<br>
                             &nbsp;&nbsp;frame_id: ''<br>
@@ -893,8 +942,9 @@ rqt_graph
                     </code></pre>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            
-                            <div style="background: white; color: black; padding: 10px; text-align: center; border-radius: 5px;">
+
+                            <div
+                                style="background: white; color: black; padding: 10px; text-align: center; border-radius: 5px;">
                                 <p style="margin:0; font-weight:bold; font-size: 0.8em;">期待されるグラフ</p>
                                 <p style="font-size: 0.6em; margin-top: 5px;">
                                     /joint_state_publisher_gui <br>
@@ -979,12 +1029,13 @@ rqt_graph
                 </section>
             </section>
 
-           <section>
+            <section>
                 <h2>うまくいかない時は？<br><span style="font-size: 0.7em;">(トラブルシューティング)</span></h2>
-                
+
                 <div style="display: flex; gap: 40px; justify-content: center; margin-top: 30px;">
-                    
-                    <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
+
+                    <div
+                        style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
                         <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. ロボットが表示されない</h3>
                         <p style="font-weight: bold; font-size: 0.9em;">A. Fixed Frameを確認</p>
                         <hr style="border-color: #555;">
@@ -995,7 +1046,8 @@ rqt_graph
                         </ul>
                     </div>
 
-                    <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
+                    <div
+                        style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
                         <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. "No transform..." エラー</h3>
                         <p style="font-weight: bold; font-size: 0.9em;">A. Publisherの確認</p>
                         <hr style="border-color: #555;">
@@ -1085,7 +1137,7 @@ rqt_graph
 
                 // その他のChalkboardショートカットはデフォルトで有効
             },
-            
+
             // スライド遷移アニメーション
             transition: 'slide',
         });
