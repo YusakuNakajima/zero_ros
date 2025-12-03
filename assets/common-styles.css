@@ -45,7 +45,7 @@
 }
 
 /* --- レイアウト: コードとテキストの横並び --- */
-.slide-layout-code {
+.slide-layout-code-text {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
