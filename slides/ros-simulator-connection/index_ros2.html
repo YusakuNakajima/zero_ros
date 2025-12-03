@@ -147,7 +147,7 @@
                 <h2>本スライドのゴール</h2>
                 <div class="slide-layout-image">
                     <div class="slide-image">
-                        <img src="media/fake_joint.png" alt="Robot_on_simulator"
+                        <img src="media/mock_components.png" alt="Robot_on_simulator"
                             style="background: rgba(255,255,255,0.1); border-radius: 8px;">
 
                         <p class="image-caption">
@@ -244,48 +244,107 @@
             <section>
                 <section>
                     <h2>Mock Components (ros2_control)</h2>
+                    <div class="slide-layout-image">
+                        <div class="slide-image">
+                            <img src="media/mock_components.png" alt="Robot_on_simulator"
+                                style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+
+                            <p class="image-caption">
+                                ↑ 見かけは実機のロボットを動かすときと全く同じです
+                            </p>
+                        </div>
+
+                        <div class="slide-content">
+                            <ul>
+                                <li><strong>ros2_control Mock Components</strong>は、実機を使わずにロボットの制御をテストするためのROS2標準機能です。
+                                </li>
+                            </ul>
+
+                            <p style="margin-top: 20px; font-size: 0.8em;">
+                                <a href="https://control.ros.org/humble/doc/ros2_control/hardware_interface/doc/mock_components_userdoc.html"
+                                    target="_blank" style="color: #3b82f6; text-decoration: underline;">
+                                    📖 公式ドキュメント: Mock Components User Doc
+                                </a>
+                            </p>
+                        </div>
+                </section>
+
+
+            </section>
+            <section>
+                <section>
+                    <h2>Mock Components の実践</h2>
                     <div style="text-align: left;">
                         <ul>
-                            <li><strong>ros2_control Mock Components</strong>は、実機を使わずにロボットの制御をテストするためのROS2標準機能です。</li>
-                            <li>物理演算（重力や摩擦など）は行いませんが、<strong>「コントローラからの指令を受け取り、動いたことにする」</strong>という振る舞いをシミュレートします。</li>
-                            <li>MoveItなどの動作確認によく使われます。</li>
+                            <li>モデル表示に加えて、ロボット制御部分のコードを追記する必要があります</li>
                         </ul>
+                        <p>↓以下で説明</p>
+
                     </div>
                 </section>
 
                 <section>
-                    <h2>【重要】前のスライドとの違い</h2>
-                    <div class="comparison-container">
-                        <div class="comparison-box" style="border: 2px solid #666;">
-                            <h3 style="color: #aaa;">前章：モデル表示</h3>
-                            <p style="font-size: 0.7em; color: #aaa;">(joint_state_publisher_gui)</p>
-                            <hr style="border-color: #666;">
-                            <ul style="font-size: 0.8em;">
-                                <li><strong>手動</strong>でスライダーを動かす</li>
-                                <li>ロボットは<strong>絵として表示</strong>されているだけ</li>
-                                <li>自律的に動く機能はない</li>
-                                <li>実機制御のプログラムは動かない</li>
-                            </ul>
+                    <h2>まずはLaunchを作成</h2>
+                    <p>Ur5eの例</p>
+                    <div class="slide-layout-code">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
                         </div>
-                        <div
-                            style="flex: 0 0 50px; display: flex; align-items: center; justify-content: center; font-size: 2em; color: #3b82f6;">
-                            ➡
-                        </div>
-                        <div class="comparison-box"
-                            style="border: 2px solid #3b82f6; background: rgba(59, 130, 246, 0.1);">
-                            <h3 style="color: #3b82f6;">本章：制御シミュレーション</h3>
-                            <p style="font-size: 0.7em; color: #3b82f6;">(ros2_control Mock System)</p>
-                            <hr style="border-color: #3b82f6;">
-                            <ul style="font-size: 0.8em;">
-                                <li><strong>コントローラ</strong>が計算して指令を出す</li>
-                                <li>MoveItやナビゲーションが<strong>実際に使える</strong></li>
-                                <li><strong>実機と同じプログラム</strong>で動く</li>
+                        <div class="text-section">
+                            <ul>
+                                <li>詳細は後程やります、まずは表示しましょう</li>
+                                <li>launchディレクトリ内にur5e_bringup_with_mock_components.launch.pyという名前で名前で左のコードを保存</li>
                             </ul>
                         </div>
                     </div>
                 </section>
+                <section>
+                    <h2>ビルドと実行</h2>
+                    <ul>
+                        <li>ビルドします</li>
 
-<section class="small-code">
+                        <pre><code data-trim class="bash">
+cd ~/ros2_ws
+colcon build --packages-select ros_study
+source install/setup.bash
+                        </code></pre>
+
+                        <li>次のコマンドで実行してください</li>
+                        <pre><code data-trim class="bash">
+ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
+                        </code></pre>
+                    </ul>
+
+                </section>
+
+
+
+                <section>
+                    <h2>表示されない時のRvizの設定</h2>
+                    <div class="slide-layout-image">
+                        <div class="slide-image">
+                            <img src="media/rviz_setting.png" alt="Robot_on_simulator"
+                                style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+
+                            <p class="image-caption">
+                                ↑ RVizの設定例
+                            </p>
+                        </div>
+
+                        <div class="slide-content">
+                            <ul>
+                                <li>Rvizでロボットが表示されない場合、「Fixed Frame」と「RobotModel」の設定を確認</li>
+                                <li>Mock Componentsでは、<code>world</code>や<code>base_link</code>フレームがデフォルト</li>
+                                <li>RobotModelの「Description Topic」は<code>robot_description</code>に設定</li>
+                            </ul>
+
+
+                        </div>
+                </section>
+
+
+
+                <section class="small-code">
                     <h3>MockComponents用Launchの例</h3>
                     <div style="text-align: left;">
                         <pre><code class="nohighlight" data-trim data-noescape style="line-height: 1.15; font-size: 0.65em;">
@@ -314,17 +373,18 @@ def generate_launch_description():
     return LaunchDescription([control_node, jsb, arm, rviz])
                         </code></pre>
 
-                        <div style="font-size: 0.7em; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                        <div
+                            style="font-size: 0.7em; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
                             <p style="margin: 5px 0;">
-                                <span style="color: #dc3545; font-weight: bold;">■ use_mock_hardware:=true</span> : 
+                                <span style="color: #dc3545; font-weight: bold;">■ use_mock_hardware:=true</span> :
                                 URDFのMockプラグインを有効化
                             </p>
                             <p style="margin: 5px 0;">
-                                <span style="color: #0d6efd; font-weight: bold;">■ ros2_control_node</span> : 
+                                <span style="color: #0d6efd; font-weight: bold;">■ ros2_control_node</span> :
                                 仮想的な制御ループを回すメインプロセス
                             </p>
                             <p style="margin: 5px 0;">
-                                <span style="color: #198754; font-weight: bold;">■ spawner</span> : 
+                                <span style="color: #198754; font-weight: bold;">■ spawner</span> :
                                 必要なコントローラを動的にロード
                             </p>
                         </div>
