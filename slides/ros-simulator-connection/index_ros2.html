@@ -130,6 +130,17 @@
             border-radius: 10px;
             text-align: center;
         }
+
+        .slide-layout-code {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .code-section {
+            flex: 2;
+            min-width: 0;
+        }
     </style>
 </head>
 
@@ -287,13 +298,14 @@
                     <h2>まずはLaunchを作成</h2>
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code">
-                        <div class="code-section">
+                        <div class="code-section" style="flex: 3;">
                             <pre><code class="language-python external-code" data-src="code/ros2/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
                         </div>
-                        <div class="text-section">
+
+                        <div class="text-section" style="flex: 1;">
                             <ul>
                                 <li>詳細は後程やります、まずは表示しましょう</li>
-                                <li>launchディレクトリ内にur5e_bringup_with_mock_components.launch.pyという名前で名前で左のコードを保存</li>
+                                <li>launchディレクトリ内にur5e_bringup_with_mock_components.launch.pyという名前で左のコードを保存</li>
                             </ul>
                         </div>
                     </div>
@@ -342,8 +354,42 @@ ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
                         </div>
                 </section>
 
+                <section>
+                    <h3>実行結果の確認</h3>
+                    <div style="text-align: left;">
+                        <ul>
+                            <li><strong>見た目:</strong> RViz上の表示はモデル表示と同じに見えます。</li>
+                            <li><strong>動作:</strong> Motion Planningプラグイン（MoveIt）から「Plan &
+                                Execute」を押すと、計算された軌道に沿ってロボットが動きます。</li>
+                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code>
+                                から配信されます。</li>
+                        </ul>
+                        <div style="background: #333; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                            <p style="margin:0; font-family: monospace; font-size: 0.8em;">$ ros2 topic info
+                                /joint_states</p>
+                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Type:
+                                sensor_msgs/msg/JointState</p>
+                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Publisher count:
+                                1 (joint_state_broadcaster)</p>
+                        </div>
+                        <p style="font-size: 0.7em; margin-top: 20px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。
+                        </p>
+                    </div>
+                </section>
+            </section>
 
+            <section>
 
+                <section>
+                    <h2>Mock Components のLaunchの解説</h2>
+                    <div style="text-align: left;">
+                        <ul>
+                            <li>ros2_controlの全体像を含めて、どういう通信が行われているのかの理解が必要です</li>
+                        </ul>
+                        <p>↓以下で説明</p>
+
+                    </div>
+                </section>
                 <section class="small-code">
                     <h3>MockComponents用Launchの例</h3>
                     <div style="text-align: left;">
@@ -388,29 +434,6 @@ def generate_launch_description():
                                 必要なコントローラを動的にロード
                             </p>
                         </div>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>実行結果の確認</h3>
-                    <div style="text-align: left;">
-                        <ul>
-                            <li><strong>見た目:</strong> RViz上の表示はモデル表示と同じに見えます。</li>
-                            <li><strong>動作:</strong> Motion Planningプラグイン（MoveIt）から「Plan &
-                                Execute」を押すと、計算された軌道に沿ってロボットが動きます。</li>
-                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code>
-                                から配信されます。</li>
-                        </ul>
-                        <div style="background: #333; padding: 15px; border-radius: 5px; margin-top: 20px;">
-                            <p style="margin:0; font-family: monospace; font-size: 0.8em;">$ ros2 topic info
-                                /joint_states</p>
-                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Type:
-                                sensor_msgs/msg/JointState</p>
-                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Publisher count:
-                                1 (joint_state_broadcaster)</p>
-                        </div>
-                        <p style="font-size: 0.7em; margin-top: 20px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。
-                        </p>
                     </div>
                 </section>
             </section>
@@ -1013,6 +1036,34 @@ gazebo = IncludeLaunchDescription(
             keyboard: {
                 'm': function () { RevealMenu.toggle(); }
             }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const codeBlocks = document.querySelectorAll('pre code.external-code');
+
+            const fetchCode = async (block) => {
+                const src = block.dataset.src;
+                if (!src) return;
+
+                try {
+                    const response = await fetch(src);
+                    if (!response.ok) {
+                        block.textContent = `Error: Could not load ${src} (${response.status})`;
+                        return;
+                    }
+                    let text = await response.text();
+                    if (block.hasAttribute('data-trim')) {
+                        text = text.trim();
+                    }
+                    block.textContent = text;
+                    hljs.highlightElement(block);
+                } catch (e) {
+                    block.textContent = `Error: Could not fetch ${src}. ${e.message}`;
+                }
+            };
+
+            Promise.all(Array.from(codeBlocks).map(fetchCode));
         });
     </script>
 </body>
