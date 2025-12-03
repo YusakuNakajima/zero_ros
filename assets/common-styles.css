@@ -53,6 +53,18 @@
     gap: 20px;
 }
 
+/* ▼▼▼ 追加: このレイアウト内のテキストエリアはデフォルトで強力に折り返す ▼▼▼ */
+.slide-layout-code-text .text-section {
+    /* これがないとFlexアイテムは中身より小さくなれない */
+    min-width: 0;
+    
+    /* 長い単語やURL、ファイルパスを強制的に折り返す */
+    overflow-wrap: anywhere; 
+    
+    /* 必要に応じて単語の途中でも切る (念のため入れておくのが無難) */
+    word-break: break-word; 
+}
+
 /* --- レイアウト: 画像とコードの横並び --- */
 .slide-layout-image-code {
     display: flex;
@@ -88,7 +100,9 @@
 .reveal pre {
     width: 100%;
     margin: 0 auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    box-shadow: none;
+    overflow-x: auto;
+    position: relative;
 }
 
 .reveal pre code {

@@ -51,22 +51,6 @@
             object-fit: contain;
         }
 
-        /* --- コードブロック設定 --- */
-        .reveal pre {
-            width: 100%;
-            margin: 0 auto;
-            box-shadow: none;
-            /* デフォルトの影を消す */
-        }
-
-        .reveal pre code {
-            max-height: 500px;
-            font-size: 0.8em;
-            line-height: 1.35;
-            border-radius: 8px;
-            font-family: 'Source Code Pro', monospace;
-        }
-
         .small-code pre code {
             font-size: 0.7em;
             line-height: 1.2;
@@ -294,15 +278,15 @@
                     </div>
                 </section>
 
-                <section>
+<section>
                     <h2>まずはLaunchを作成</h2>
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
-                        <div class="code-section" style="flex: 3;">
+                        <div class="code-section">
                             <pre><code class="language-python external-code" data-src="code/ros2/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
                         </div>
 
-                        <div class="text-section" style="flex: 1;">
+                        <div class="text-section">
                             <ul>
                                 <li>詳細は後程やります、まずは表示しましょう</li>
                                 <li>launchディレクトリ内にur5e_bringup_with_mock_components.launch.pyという名前で左のコードを保存</li>

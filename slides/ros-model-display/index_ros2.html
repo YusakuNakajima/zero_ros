@@ -20,11 +20,6 @@
 
     <link rel="stylesheet" href="../../assets/common-styles.css">
     <style>
-        .reveal pre {
-            overflow-x: auto;
-            position: relative;
-        }
-
         .copy-button {
             position: absolute;
             top: 5px;
@@ -147,8 +142,7 @@ sudo apt install ros-${ROS_DISTRO}-ur
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim>
-</code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -162,7 +156,9 @@ sudo apt install ros-${ROS_DISTRO}-ur
                 <section>
                     <h2>launchを作成</h2>
                     <div class="slide-layout-code-text">
-                        <pre><code class="language-python external-code" data-src="code/ros2/view_ur.launch.py" data-trim></code></pre>
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/view_ur.launch.py" data-trim></code></pre>
+                        </div>
                         <div class="text-section">
                             <ul>
                                 <li>ros_studyにlaunchディレクトリを作成</li>
@@ -175,7 +171,9 @@ sudo apt install ros-${ROS_DISTRO}-ur
                 <section>
                     <h2>setup.pyを修正</h2>
                     <div class="slide-layout-code-text">
-                        <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
+                        </div>
                         <div class="text-section">
                             <ul>
                                 <li>ros_studyのsetup.pyはビルドの設定を記載します、launchの更新内容を追加</li>
@@ -257,7 +255,9 @@ ros2 launch ros_study view_ur.launch.py
                 <section>
                     <h2>rviz設定ファイルの保存</h2>
                     <div class="slide-layout-code-text">
-                        <pre><code class="language-yaml external-code" data-src="code/ros2/display.rviz" data-trim></code></pre>
+                        <div class="code-section">
+                            <pre><code class="language-yaml external-code" data-src="code/ros2/display.rviz" data-trim></code></pre>
+                        </div>
                         <div class="text-section">
                             <ul>
                                 <li>ros_studyにrvizディレクトリを作成</li>
@@ -326,8 +326,7 @@ ros2 launch ros_study view_ur.launch.py
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim>
-</code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -355,8 +354,7 @@ ros2 launch ros_study view_ur.launch.py
                     <h2>XACRO（XML Macros for Robots）</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.xacro" data-trim>
-</code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.xacro" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -372,8 +370,7 @@ ros2 launch ros_study view_ur.launch.py
                     <h2>エンドエフェクタを追加したい</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot_with_eef.xacro" data-trim>
-</code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot_with_eef.xacro" data-trim></code></pre>
                             <p> pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</p>
                         </div>
                         <div class="text-section">
