@@ -388,9 +388,57 @@ ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
                         <img src="media/ros2_control_simplify_with_model_display.drawio.svg" alt="ロボットモデル表示フロー"
                             style="max-height: 60vh; width: auto; cursor: zoom-in; border: 1px solid #ccc;">
                     </a>
-
-
                 </section>
+                <section>
+    <h3>Launchファイルと構成図の対応</h3>
+    <div class="slide-layout-image-code">
+        <div class="image-section">
+            <img src="media/ros2_control_simplify_with_model_display.drawio.svg" alt="ros2_control概念図" style="max-height: 600px; width: auto;">
+        </div>
+
+        <div class="code-section">
+            <pre><code class="nohighlight" data-trim data-noescape style="font-size: 14px; line-height: 1.2;">
+<span style="display: block; background-color: rgba(180, 230, 50, 0.15); padding: 4px;"># [A-1] Mock用 (緑: Simulator)
+control_node_mock = Node(
+    package="controller_manager",
+    executable="ros2_control_node",
+    parameters=[robot_description, controllers_file_param],
+    condition=IfCondition(use_fake_hardware),
+)</span>
+
+<span style="display: block; background-color: rgba(220, 100, 255, 0.15); padding: 4px; margin-top: 5px;"># [A-2] 実機用 (紫: Real Robot)
+control_node_real = Node(
+    package="ur_robot_driver",
+    executable="ur_ros2_control_node",
+    parameters=[robot_description, controllers_file_param],
+    condition=UnlessCondition(use_fake_hardware),
+)</span>
+
+<span style="display: block; background-color: rgba(0, 230, 255, 0.15); padding: 4px; margin-top: 5px;"># [D/E] コントローラ起動 (水色: Controller)
+joint_state_broadcaster_spawner = Node(
+    package="controller_manager",
+    executable="spawner",
+    arguments=["joint_state_broadcaster", ...],
+)
+initial_joint_controller_spawner = Node(
+    package="controller_manager",
+    executable="spawner",
+    arguments=[initial_joint_controller, ...],
+)</span>
+
+<span style="display: block; background-color: rgba(255, 80, 80, 0.15); padding: 4px; margin-top: 5px;"># [B/C] ロボット表示・RViz (赤: Display)
+robot_state_publisher_node = Node(
+    package="robot_state_publisher",
+    parameters=[robot_description],
+)
+rviz_node = Node(
+    package="rviz2",
+    arguments=["-d", rviz_config_file],
+)</span>
+            </code></pre>
+        </div>
+    </div>
+</section>
 
             </section>
 
