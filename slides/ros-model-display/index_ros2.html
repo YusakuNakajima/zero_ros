@@ -800,22 +800,22 @@ ros2 launch ros_study view_ur.launch.py
                         </div>
                         <div class="code-section">
                             <pre><code class="nohighlight" data-trim data-noescape>
-<span style="display: block; background-color: rgba(0, 0, 255, 0.15); padding: 2px 5px;"># URDF/XACROを読み込み (青)
+<span style="display: block; background-color: rgb(70, 130, 180,0.15); padding: 2px 5px;"># URDF/XACROを読み込み (青)
 robot_description = {
     "robot_description": ParameterValue(value=robot_description_content, value_type=str)
 }</span>
-<span style="display: block; background-color: rgba(255, 0, 0, 0.15); padding: 2px 5px;"># ノードの定義 (赤)
+<span style="display: block; background-color: rgba(205, 92, 92, 0.15); padding: 2px 5px;"># ノードの定義 (赤)
 joint_state_publisher_node = Node(
     package="joint_state_publisher_gui",
     executable="joint_state_publisher_gui",
 )</span>
-<span style="display: block; background-color: rgba(0, 255, 0, 0.15); padding: 2px 5px;"># Robot State Publisher (緑)
+<span style="display: block; background-color: rgba(60, 179, 113, 0.15); padding: 2px 5px;"># Robot State Publisher (緑)
 robot_state_publisher_node = Node(
     package="robot_state_publisher",
     executable="robot_state_publisher",
     parameters=[robot_description],
 )</span>
-<span style="display: block; background-color: rgba(255, 255, 0, 0.15); padding: 2px 5px;"># RViz (黄)
+<span style="display: block; background-color: rgba(200, 200, 46, 0.15); padding: 2px 5px;"># RViz (黄)
 rviz_node = Node(
     package="rviz2",
     executable="rviz2",
