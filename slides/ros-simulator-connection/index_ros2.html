@@ -278,7 +278,7 @@
                     </div>
                 </section>
 
-<section>
+                <section>
                     <h2>まずはLaunchを作成</h2>
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
@@ -363,7 +363,6 @@ ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
             </section>
 
             <section>
-
                 <section>
                     <h2>Mock Components のLaunchの解説</h2>
                     <div style="text-align: left;">
@@ -374,6 +373,76 @@ ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
 
                     </div>
                 </section>
+                  <section>
+                    <h2>ros2_controlの全体像</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
+                            <div style="position: absolute; 
+                                    top: 40%; 
+                                    left: 0; 
+                                    width: 30%; 
+                                    height: 50%; 
+                                    border: 5px solid rgb(0, 0, 255); 
+                                    box-sizing: border-box; 
+                                    "></div>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                  <section>
+                    <h2>launchファイルの解説 (ROS2)</h2>
+                    <div class="slide-layout-image-code">
+                        <div class="image-section">
+                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
+                            <div
+                                style="position: absolute; top: 35%; left: 0; width: 30%; height: 50%; border: 5px solid rgb(0, 0, 255); box-sizing: border-box;">
+                            </div>
+                            <div
+                                style="position: absolute; top: 35%; left: 31%; width: 15%; height: 12%; border: 5px solid rgb(255, 0, 0); box-sizing: border-box;">
+                            </div>
+                            <div
+                                style="position: absolute; top: 47%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(0, 255, 0); box-sizing: border-box;">
+                            </div>
+                            <div
+                                style="position: absolute; top: 64%; left: 31%; width: 15%; height: 22%; border: 5px solid rgb(255, 255, 0); box-sizing: border-box;">
+                            </div>
+                        </div>
+                        <div class="code-section">
+                            <pre><code class="nohighlight" data-trim data-noescape>
+<span style="display: block; background-color: rgba(0, 0, 255, 0.15); padding: 2px 5px;"># URDF/XACROを読み込み (青)
+robot_description = {
+    "robot_description": ParameterValue(value=robot_description_content, value_type=str)
+}</span>
+<span style="display: block; background-color: rgba(255, 0, 0, 0.15); padding: 2px 5px;"># ノードの定義 (赤)
+joint_state_publisher_node = Node(
+    package="joint_state_publisher_gui",
+    executable="joint_state_publisher_gui",
+)</span>
+<span style="display: block; background-color: rgba(0, 255, 0, 0.15); padding: 2px 5px;"># Robot State Publisher (緑)
+robot_state_publisher_node = Node(
+    package="robot_state_publisher",
+    executable="robot_state_publisher",
+    parameters=[robot_description],
+)</span>
+<span style="display: block; background-color: rgba(255, 255, 0, 0.15); padding: 2px 5px;"># RViz (黄)
+rviz_node = Node(
+    package="rviz2",
+    executable="rviz2",
+    arguments=["-d", rviz_config_file],
+)</span>
+            </code></pre>
+                        </div>
+                    </div>
+
+                </section>
+            </section>
+
                 <section class="small-code">
                     <h3>MockComponents用Launchの例</h3>
                     <div style="text-align: left;">

@@ -281,7 +281,7 @@ ros2 launch ros_study view_ur.launch.py
             <section>
                 <h2>ロボットモデル表示の全体像</h2>
                 <div class="slide-image">
-                    <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー">
+                    <img src="media/ros2_display_robot_model.drawio.png" alt="Rvizワークフロー">
                 </div>
                 <div class="slide-content">
                 </div>
@@ -291,7 +291,7 @@ ros2 launch ros_study view_ur.launch.py
                 <section>
                     <h2>ステップ1-1：ロボットの構造を記述するURDFとは</h2>
                     <div style="position: relative; display: inline-block;">
-                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                        <img src="media/ros2_display_robot_model.drawio.png" alt="Rvizワークフロー"
                             style="display: block; max-width: 100%;">
                         <div style="position: absolute; 
                                     top: 0; 
@@ -388,7 +388,7 @@ ros2 launch ros_study view_ur.launch.py
                 <section>
                     <h2>ステップ1-2：URDFの中身</h2>
                     <div style="position: relative; display: inline-block;">
-                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                        <img src="media/ros2_display_robot_model.drawio.png" alt="Rvizワークフロー"
                             style="display: block; max-width: 100%;">
                         <div style="position: absolute; 
                                     top: 0; 
@@ -758,9 +758,9 @@ ros2 launch ros_study view_ur.launch.py
 
             <section>
                 <section>
-                    <h2>ステップ2：URDFの表示のlaunchファイル</h2>
+                    <h2>ステップ2：URDFからRVizで表示するLaunchファイル</h2>
                     <div style="position: relative; display: inline-block;">
-                        <img src="media/display_robot_model.drawio.png" alt="Rvizワークフロー"
+                        <img src="media/ros2_display_robot_model.drawio.png" alt="Rvizワークフロー"
                             style="display: block; max-width: 100%;">
                         <div style="position: absolute; 
                                     top: 0; 
@@ -773,45 +773,27 @@ ros2 launch ros_study view_ur.launch.py
                     </div>
                 </section>
                 <section>
-                    <h2>URDF/XACROとrosparam</h2>
+                    <h2>URDFからRVizまでの流れ</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
-                            <div style="position: absolute; 
-                                    top: 40%; 
-                                    left: 0; 
-                                    width: 30%; 
-                                    height: 50%; 
-                                    border: 5px solid rgb(0, 0, 255); 
-                                    box-sizing: border-box; 
-                                    "></div>
+                            <img src="media/ros2_display_robot_model_with_frame.drawio.png" alt="ロボットモデル表示フロー">
                         </div>
                         <div class="text-section">
-                            <ul>
-                                <li>URDFやXACROファイルは、rosparamとして読み込まれる</li>
-                                <li>RVizはrosparamからロボットモデルの情報を取得し表示してる</li>
-
-                            </ul>
+                            <ol>
+                               <li style="color: rgb(70, 130, 180); font-weight: bold;">robot_state_publisherがURDFを受け取る</li>
+                
+                <li style="color: rgb(205, 92, 92); font-weight: bold;">robot_state_publisherがjoint_statesを受け取る</li>
+                
+                <li style="color: rgb(60, 179, 113); font-weight: bold;">robot_state_publisherがRVizにロボットモデルとTFを送る</li>
+                            </ol>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>launchファイルの解説 (ROS2)</h2>
+                    <h2>launchファイルとの対応</h2>
                     <div class="slide-layout-image-code">
                         <div class="image-section">
-                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
-                            <div
-                                style="position: absolute; top: 35%; left: 0; width: 30%; height: 50%; border: 5px solid rgb(0, 0, 255); box-sizing: border-box;">
-                            </div>
-                            <div
-                                style="position: absolute; top: 35%; left: 31%; width: 15%; height: 12%; border: 5px solid rgb(255, 0, 0); box-sizing: border-box;">
-                            </div>
-                            <div
-                                style="position: absolute; top: 47%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(0, 255, 0); box-sizing: border-box;">
-                            </div>
-                            <div
-                                style="position: absolute; top: 64%; left: 31%; width: 15%; height: 22%; border: 5px solid rgb(255, 255, 0); box-sizing: border-box;">
-                            </div>
+                            <img src="media/ros2_display_robot_model_with_frame.drawio.png" alt="ロボットモデル表示フロー">
                         </div>
                         <div class="code-section">
                             <pre><code class="nohighlight" data-trim data-noescape>
