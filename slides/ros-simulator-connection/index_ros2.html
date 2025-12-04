@@ -373,80 +373,31 @@ ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
 
                     </div>
                 </section>
-                  <section>
-                    <h2>ros2_controlの全体像</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
-                            <div style="position: absolute; 
-                                    top: 40%; 
-                                    left: 0; 
-                                    width: 30%; 
-                                    height: 50%; 
-                                    border: 5px solid rgb(0, 0, 255); 
-                                    box-sizing: border-box; 
-                                    "></div>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>
-
-                            </ul>
-                        </div>
-                    </div>
+                <section>
+                    <h2>ros2_controlの概要</h2>
+                    <img src="media/ros2_control_simplify.drawio.svg" alt="ロボットモデル表示フロー">
                 </section>
-                  <section>
-                    <h2>launchファイルの解説 (ROS2)</h2>
-                    <div class="slide-layout-image-code">
-                        <div class="image-section">
-                            <img src="media/display_robot_model.drawio.png" alt="ロボットモデル表示フロー">
-                            <div
-                                style="position: absolute; top: 35%; left: 0; width: 30%; height: 50%; border: 5px solid rgb(0, 0, 255); box-sizing: border-box;">
-                            </div>
-                            <div
-                                style="position: absolute; top: 35%; left: 31%; width: 15%; height: 12%; border: 5px solid rgb(255, 0, 0); box-sizing: border-box;">
-                            </div>
-                            <div
-                                style="position: absolute; top: 47%; left: 31%; width: 15%; height: 15%; border: 5px solid rgb(0, 255, 0); box-sizing: border-box;">
-                            </div>
-                            <div
-                                style="position: absolute; top: 64%; left: 31%; width: 15%; height: 22%; border: 5px solid rgb(255, 255, 0); box-sizing: border-box;">
-                            </div>
-                        </div>
-                        <div class="code-section">
-                            <pre><code class="nohighlight" data-trim data-noescape>
-<span style="display: block; background-color: rgba(0, 0, 255, 0.15); padding: 2px 5px;"># URDF/XACROを読み込み (青)
-robot_description = {
-    "robot_description": ParameterValue(value=robot_description_content, value_type=str)
-}</span>
-<span style="display: block; background-color: rgba(255, 0, 0, 0.15); padding: 2px 5px;"># ノードの定義 (赤)
-joint_state_publisher_node = Node(
-    package="joint_state_publisher_gui",
-    executable="joint_state_publisher_gui",
-)</span>
-<span style="display: block; background-color: rgba(0, 255, 0, 0.15); padding: 2px 5px;"># Robot State Publisher (緑)
-robot_state_publisher_node = Node(
-    package="robot_state_publisher",
-    executable="robot_state_publisher",
-    parameters=[robot_description],
-)</span>
-<span style="display: block; background-color: rgba(255, 255, 0, 0.15); padding: 2px 5px;"># RViz (黄)
-rviz_node = Node(
-    package="rviz2",
-    executable="rviz2",
-    arguments=["-d", rviz_config_file],
-)</span>
-            </code></pre>
-                        </div>
-                    </div>
+                <section>
+                    <h2>モデル表示も含めたros2_controlの全体像</h2>
+                    <p style="font-size: 0.5em; color: gray; margin-top: 10px;">
+                        ※図をクリックすると拡大表示されます
+                    </p>
+
+                    <a href="media/ros2_control_simplify_with_model_display.drawio.svg" target="_blank">
+
+                        <img src="media/ros2_control_simplify_with_model_display.drawio.svg" alt="ロボットモデル表示フロー"
+                            style="max-height: 60vh; width: auto; cursor: zoom-in; border: 1px solid #ccc;">
+                    </a>
+
 
                 </section>
+
             </section>
 
-                <section class="small-code">
-                    <h3>MockComponents用Launchの例</h3>
-                    <div style="text-align: left;">
-                        <pre><code class="nohighlight" data-trim data-noescape style="line-height: 1.15; font-size: 0.65em;">
+            <section class="small-code">
+                <h3>MockComponents用Launchの例</h3>
+                <div style="text-align: left;">
+                    <pre><code class="nohighlight" data-trim data-noescape style="line-height: 1.15; font-size: 0.65em;">
 def generate_launch_description():
     
 <span style="display: block; background-color: rgba(220, 53, 69, 0.15); padding: 2px 5px; border-radius: 4px;">    # 1. Load URDF ("use_mock_hardware:=true" を渡すのがポイント)
@@ -472,23 +423,23 @@ def generate_launch_description():
     return LaunchDescription([control_node, jsb, arm, rviz])
                         </code></pre>
 
-                        <div
-                            style="font-size: 0.7em; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
-                            <p style="margin: 5px 0;">
-                                <span style="color: #dc3545; font-weight: bold;">■ use_mock_hardware:=true</span> :
-                                URDFのMockプラグインを有効化
-                            </p>
-                            <p style="margin: 5px 0;">
-                                <span style="color: #0d6efd; font-weight: bold;">■ ros2_control_node</span> :
-                                仮想的な制御ループを回すメインプロセス
-                            </p>
-                            <p style="margin: 5px 0;">
-                                <span style="color: #198754; font-weight: bold;">■ spawner</span> :
-                                必要なコントローラを動的にロード
-                            </p>
-                        </div>
+                    <div
+                        style="font-size: 0.7em; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                        <p style="margin: 5px 0;">
+                            <span style="color: #dc3545; font-weight: bold;">■ use_mock_hardware:=true</span> :
+                            URDFのMockプラグインを有効化
+                        </p>
+                        <p style="margin: 5px 0;">
+                            <span style="color: #0d6efd; font-weight: bold;">■ ros2_control_node</span> :
+                            仮想的な制御ループを回すメインプロセス
+                        </p>
+                        <p style="margin: 5px 0;">
+                            <span style="color: #198754; font-weight: bold;">■ spawner</span> :
+                            必要なコントローラを動的にロード
+                        </p>
                     </div>
-                </section>
+                </div>
+            </section>
             </section>
 
             <section>
