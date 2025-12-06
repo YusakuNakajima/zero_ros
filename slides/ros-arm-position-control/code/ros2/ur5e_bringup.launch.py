@@ -2,10 +2,10 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, RegisterEventHandler
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue, ParameterFile # ParameterFileが必須
+from launch_ros.parameter_descriptions import ParameterValue, ParameterFile
 
 def generate_launch_description():
     declared_arguments = []
@@ -28,11 +28,10 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "robot_ip",
-            default_value="0.0.0.0",
+            default_value="192.168.1.102", # 実機使用時のデフォルトIP
             description="IP address by which the robot can be reached.",
         )
     )
-    # コントローラ設定ファイル内で使われているため必須
     declared_arguments.append(
         DeclareLaunchArgument(
             "tf_prefix",
@@ -40,6 +39,8 @@ def generate_launch_description():
             description="tf_prefix of the joint names.",
         )
     )
+    
+    # RVizの設定ファイルパス
     rviz_config_path = PathJoinSubstitution(
         [FindPackageShare("ros_study"), "rviz", "ur5e.rviz"]
     )
@@ -50,20 +51,12 @@ def generate_launch_description():
             description="Rviz configuration file.",
         )
     )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "initial_joint_controller",
-            default_value="joint_trajectory_controller",
-            description="Initially loaded robot controller.",
-        )
-    )
 
     # --- 2. 変数の取得 ---
     ur_type = LaunchConfiguration("ur_type")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
     robot_ip = LaunchConfiguration("robot_ip")
-    tf_prefix = LaunchConfiguration("tf_prefix") # ★取得
-    initial_joint_controller = LaunchConfiguration("initial_joint_controller")
+    tf_prefix = LaunchConfiguration("tf_prefix")
     rviz_config_file = LaunchConfiguration("rviz_config_file")
 
     # --- 3. 設定ファイルのパス ---
@@ -79,11 +72,11 @@ def generate_launch_description():
         [robot_driver_package, "config", "ur5e_update_rate.yaml"]
     )
 
-    # URDF生成用ファイル
+    # URDF生成用ファイル (ros_studyパッケージ内のxacro)
     description_package = FindPackageShare("ros_study")
     description_file = PathJoinSubstitution([description_package, "urdf", "ur5e_with_ee.xacro"])
     
-    # 実機接続用のスクリプトファイルなど
+    # 実機通信用スクリプト (ur_client_library)
     script_filename = PathJoinSubstitution(
         [FindPackageShare("ur_client_library"), "resources", "external_control.urscript"]
     )
@@ -109,7 +102,7 @@ def generate_launch_description():
             " ",
             "robot_ip:=", robot_ip,
             " ",
-            "tf_prefix:=", tf_prefix, # ★URDF生成時にも渡す
+            "tf_prefix:=", tf_prefix,
             " ",
             "script_filename:=", script_filename, " ",
             "input_recipe_filename:=", input_recipe_filename, " ",
@@ -118,32 +111,31 @@ def generate_launch_description():
     )
     robot_description = {"robot_description": ParameterValue(robot_description_content, value_type=str)}
 
-    # ★重要: 設定ファイル内の $(var ...) を展開するために ParameterFile でラップする
     controllers_file_param = ParameterFile(controllers_file, allow_substs=True)
 
     # --- 5. ノードの定義 ---
 
-    # [A-1] Mock用: 標準の ros2_control_node
+    # [A-1] Mock用: controller_manager/ros2_control_node
     control_node_mock = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[
             robot_description,
             update_rate_config_file,
-            controllers_file_param, # ★修正: 生のパスではなくParameterFileオブジェクトを渡す
+            controllers_file_param,
         ],
         output="screen",
         condition=IfCondition(use_fake_hardware),
     )
 
-    # [A-2] 実機用: UR専用の ur_ros2_control_node
+    # [A-2] 実機用: ur_robot_driver/ur_ros2_control_node
     control_node_real = Node(
         package="ur_robot_driver",
         executable="ur_ros2_control_node",
         parameters=[
             robot_description,
             update_rate_config_file,
-            controllers_file_param, # ★修正
+            controllers_file_param,
         ],
         output="screen",
         condition=UnlessCondition(use_fake_hardware),
@@ -184,15 +176,22 @@ def generate_launch_description():
         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
     )
 
-    # [E] Spawner: Trajectory Controller
+    # [E] Spawner: Trajectory Controller (自動切り替えロジック)
+    # use_fake_hardware="true"  -> joint_trajectory_controller
+    # use_fake_hardware="false" -> scaled_joint_trajectory_controller (安全のため)
+    target_controller = PythonExpression([
+        '"joint_trajectory_controller" if "true" == "', use_fake_hardware, 
+        '" else "scaled_joint_trajectory_controller"'
+    ])
+
     initial_joint_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=[initial_joint_controller, "--controller-manager", "/controller_manager"],
+        arguments=[target_controller, "--controller-manager", "/controller_manager"],
     )
 
     # 遅延実行の設定
-    delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
+    delay_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[initial_joint_controller_spawner],
@@ -209,6 +208,6 @@ def generate_launch_description():
             robot_state_publisher_node,
             rviz_node,
             joint_state_broadcaster_spawner,
-            delay_rviz_after_joint_state_broadcaster_spawner,
+            delay_controller_spawner_after_joint_state_broadcaster_spawner,
         ]
     )
