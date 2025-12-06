@@ -854,11 +854,9 @@ rviz_node = Node(
                 </section>
             </section>
 
-            <section>
-                <h2>データの流れを目視確認</h2>
-                <div
-                    style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-top: 20px;">
-
+            <section> <!-- Parent section for vertical slides -->
+                <section>
+                    <h2>データの流れを目視確認</h2>
                     <div style="text-align: left;">
                         <ul style="font-size: 0.9em; line-height: 1.5;">
                             <li>GUIを動かすと、裏でどのようなデータが流れているか確認しましょう。</li>
@@ -871,8 +869,14 @@ rviz_node = Node(
 ros2 topic echo /joint_states
                             </code></pre>
                         </div>
+                        <p style="font-size: 0.9em; margin-top: 20px;">
+                            ↓ 次のスライドで変化する値を確認しましょう
+                        </p>
                     </div>
+                </section>
 
+                <section>
+                    <h2>データの流れを目視確認 (続き)</h2>
                     <div style="text-align: left;">
                         <p style="font-size: 0.9em;">
                             ↓ GUIのスライダーを動かすと<br>
@@ -893,7 +897,7 @@ ros2 topic echo /joint_states
                             effort: []
                         </div>
                     </div>
-                </div>
+                </section>
             </section>
 
             <section>
