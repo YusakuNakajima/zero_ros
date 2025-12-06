@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5e_with_tools">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur">
 
     <xacro:include filename="$(find ros_study)/urdf/ur5e.xacro" />
 
     <xacro:arg name="pestle_length" default="0.1092" />
     <xacro:arg name="spatula_length" default="0.089" />
-    
-    <xacro:arg name="use_fake_hardware" default="true" />
-    <xacro:arg name="robot_ip" default="192.168.1.101" />
 
     <link name="world" />
     <joint name="world_joint" type="fixed">
@@ -16,26 +13,16 @@
         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
     </joint>
 
-    <ros2_control name="UR5eSystem" type="system">
-        
+    <ros2_control name="UR5eMockSystem" type="system">
         <hardware>
-            <xacro:if value="$(arg use_fake_hardware)">
-                <plugin>mock_components/GenericSystem</plugin>
-            </xacro:if>
-
-            <xacro:unless value="$(arg use_fake_hardware)">
-                <plugin>ur_robot_driver/URPositionHardwareInterface</plugin>
-                <param name="robot_ip">$(arg robot_ip)</param>
-                <param name="script_filename">$(find ur_robot_driver)/resources/ros_control.urscript</param>
-                <param name="output_recipe_filename">$(find ur_robot_driver)/resources/rtde_output_recipe.txt</param>
-                <param name="input_recipe_filename">$(find ur_robot_driver)/resources/rtde_input_recipe.txt</param>
-                <param name="headless_mode">false</param>
-                <param name="reverse_port">50001</param>
-                <param name="script_sender_port">50002</param>
-                <param name="tf_prefix"></param>
-            </xacro:unless>
+            <plugin>mock_components/GenericSystem</plugin>
         </hardware>
         
+        <sensor name="speed_scaling">
+            <state_interface name="speed_scaling_factor">
+                <param name="initial_value">1.0</param>
+            </state_interface>
+        </sensor>
         <joint name="shoulder_pan_joint">
             <command_interface name="position" />
             <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
@@ -66,29 +53,6 @@
             <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
             <state_interface name="velocity"/>
         </joint>
-
-        <xacro:unless value="$(arg use_fake_hardware)">
-            <sensor name="speed_scaling">
-                <state_interface name="speed_scaling_factor"/>
-            </sensor>
-            
-            <sensor name="tcp_fts_sensor">
-                <state_interface name="force.x"/>
-                <state_interface name="force.y"/>
-                <state_interface name="force.z"/>
-                <state_interface name="torque.x"/>
-                <state_interface name="torque.y"/>
-                <state_interface name="torque.z"/>
-            </sensor>
-
-            <gpio name="gpio">
-                <command_interface name="standard_digital_output_cmd_0"/>
-                <command_interface name="standard_digital_output_cmd_1"/>
-                <state_interface name="digital_output_0"/>
-                <state_interface name="digital_output_1"/>
-            </gpio>
-        </xacro:unless>
-
     </ros2_control>
 
     <link name="pestle">
@@ -108,11 +72,13 @@
             </geometry>
         </collision>
     </link>
+
     <joint name="joint_pestle" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 0" />
         <parent link="tool0" /> 
         <child link="pestle" />
     </joint>
+
     <link name="pestle_tip" />
     <joint name="joint_pestle_tip" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 $(arg pestle_length)" />
@@ -135,11 +101,13 @@
             </geometry>
         </collision>
     </link>
+
     <joint name="joint_spatula" type="fixed">
         <origin rpy="0 ${-pi/2} 0" xyz="-0.03655 0 0.0135" />
         <parent link="tool0" /> 
         <child link="spatula" />
     </joint>
+
     <link name="spatula_tip" />
     <joint name="joint_spatula_tip" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 $(arg spatula_length)" />
