@@ -1,11 +1,12 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler, IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue, ParameterFile # ParameterFileが必須
+from launch_ros.parameter_descriptions import ParameterValue, ParameterFile
 
 def generate_launch_description():
     declared_arguments = []
@@ -32,7 +33,6 @@ def generate_launch_description():
             description="IP address by which the robot can be reached.",
         )
     )
-    # コントローラ設定ファイル内で使われているため必須
     declared_arguments.append(
         DeclareLaunchArgument(
             "tf_prefix",
@@ -40,20 +40,11 @@ def generate_launch_description():
             description="tf_prefix of the joint names.",
         )
     )
-    rviz_config_path = PathJoinSubstitution(
-        [FindPackageShare("ros_study"), "rviz", "ur5e.rviz"]
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "rviz_config_file",
-            default_value=rviz_config_path,
-            description="Rviz configuration file.",
-        )
-    )
+    # MoveItを使用する場合、コントローラは scaled_joint_trajectory_controller が推奨されることが多いです
     declared_arguments.append(
         DeclareLaunchArgument(
             "initial_joint_controller",
-            default_value="joint_trajectory_controller",
+            default_value="scaled_joint_trajectory_controller", 
             description="Initially loaded robot controller.",
         )
     )
@@ -62,9 +53,8 @@ def generate_launch_description():
     ur_type = LaunchConfiguration("ur_type")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
     robot_ip = LaunchConfiguration("robot_ip")
-    tf_prefix = LaunchConfiguration("tf_prefix") # ★取得
+    tf_prefix = LaunchConfiguration("tf_prefix")
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
-    rviz_config_file = LaunchConfiguration("rviz_config_file")
 
     # --- 3. 設定ファイルのパス ---
     robot_driver_package = FindPackageShare("ur_robot_driver")
@@ -79,9 +69,13 @@ def generate_launch_description():
         [robot_driver_package, "config", "ur5e_update_rate.yaml"]
     )
 
-    # URDF生成用ファイル
-    description_package = FindPackageShare("ros_study")
-    description_file = PathJoinSubstitution([description_package, "urdf", "ur5e_with_ee.xacro"])
+    # URDF生成用ファイル (ros_studyパッケージを使用)
+    # ここで指定したパッケージ名とファイル名は MoveIt の起動ファイルにも渡します
+    description_package_name = "ros_study"
+    description_file_name = "ur5e_with_ee.xacro"
+    
+    description_package = FindPackageShare(description_package_name)
+    description_file = PathJoinSubstitution([description_package, "urdf", description_file_name])
     
     # 実機接続用のスクリプトファイルなど
     script_filename = PathJoinSubstitution(
@@ -94,7 +88,9 @@ def generate_launch_description():
         [robot_driver_package, "resources", "rtde_output_recipe.txt"]
     )
 
-    # --- 4. Robot Description (URDF) の生成 ---
+    # --- 4. Robot Description (URDF) の生成 (ドライバ/ros2_control用) ---
+    # 公式MoveIt launchも内部でrobot_descriptionを生成しますが、
+    # ここではドライバノードがパラメータとして必要とするため、生成を残します。
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
@@ -109,7 +105,7 @@ def generate_launch_description():
             " ",
             "robot_ip:=", robot_ip,
             " ",
-            "tf_prefix:=", tf_prefix, # ★URDF生成時にも渡す
+            "tf_prefix:=", tf_prefix,
             " ",
             "script_filename:=", script_filename, " ",
             "input_recipe_filename:=", input_recipe_filename, " ",
@@ -118,7 +114,6 @@ def generate_launch_description():
     )
     robot_description = {"robot_description": ParameterValue(robot_description_content, value_type=str)}
 
-    # ★重要: 設定ファイル内の $(var ...) を展開するために ParameterFile でラップする
     controllers_file_param = ParameterFile(controllers_file, allow_substs=True)
 
     # --- 5. ノードの定義 ---
@@ -130,7 +125,7 @@ def generate_launch_description():
         parameters=[
             robot_description,
             update_rate_config_file,
-            controllers_file_param, # ★修正: 生のパスではなくParameterFileオブジェクトを渡す
+            controllers_file_param,
         ],
         output="screen",
         condition=IfCondition(use_fake_hardware),
@@ -143,7 +138,7 @@ def generate_launch_description():
         parameters=[
             robot_description,
             update_rate_config_file,
-            controllers_file_param, # ★修正
+            controllers_file_param,
         ],
         output="screen",
         condition=UnlessCondition(use_fake_hardware),
@@ -168,13 +163,21 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
-    # [C] RViz2
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="screen",
-        arguments=["-d", rviz_config_file],
+    # [C] MoveItの起動 (公式のur_moveit.launch.pyをインクルード)
+    # 独自のRVizノードは削除し、ここで起動されるRVizを使用します。
+    ur_moveit_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([FindPackageShare("ur_moveit_config"), "launch", "ur_moveit.launch.py"])
+        ),
+        launch_arguments={
+            "ur_type": ur_type,
+            "launch_rviz": "true",
+            "description_package": description_package_name, # カスタムパッケージを指定
+            "description_file": description_file_name,       # カスタムURDFファイルを指定
+            "prefix": tf_prefix,                             # tf_prefixを渡す
+            # 独自のMoveIt Configパッケージがある場合はここで "moveit_config_package" を指定
+            # "use_sim_time": "false", 
+        }.items(),
     )
 
     # [D] Spawner: Joint State Broadcaster
@@ -207,7 +210,7 @@ def generate_launch_description():
             control_node_real,
             dashboard_client_node,
             robot_state_publisher_node,
-            rviz_node,
+            ur_moveit_launch, # 修正: RVizノードの代わりにMoveIt Launchを追加
             joint_state_broadcaster_spawner,
             delay_rviz_after_joint_state_broadcaster_spawner,
         ]
