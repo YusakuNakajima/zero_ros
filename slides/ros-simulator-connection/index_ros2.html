@@ -21,6 +21,26 @@
     <link rel="stylesheet" href="../../assets/common-styles.css">
 
     <style>
+        .copy-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .copy-button:hover {
+            opacity: 1;
+        }
+
+        pre {
+            position: relative;
+        }
         /* --- 基本設定 --- */
         .reveal {
             font-family: 'Noto Sans JP', sans-serif;
@@ -1199,6 +1219,19 @@ gazebo = IncludeLaunchDescription(
                 'm': function () { RevealMenu.toggle(); }
             }
         });
+
+        function copyCodeToClipboard(button) {
+            const pre = button.closest('pre');
+            const code = pre.querySelector('code');
+            navigator.clipboard.writeText(code.innerText).then(function () {
+                button.innerText = 'Copied!';
+                setTimeout(function () {
+                    button.innerText = 'Copy';
+                }, 2000);
+            }, function (err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1225,7 +1258,21 @@ gazebo = IncludeLaunchDescription(
                 }
             };
 
-            Promise.all(Array.from(codeBlocks).map(fetchCode));
+            Promise.all(Array.from(codeBlocks).map(fetchCode)).then(() => {
+                 // Add copy buttons to all pre blocks
+                let preblocks = document.querySelectorAll('pre');
+                preblocks.forEach(function (pre) {
+                    if (pre.querySelector('code')) {
+                        let button = document.createElement('button');
+                        button.className = 'copy-button';
+                        button.innerText = 'Copy';
+                        button.addEventListener('click', function () {
+                            copyCodeToClipboard(this);
+                        });
+                        pre.appendChild(button);
+                    }
+                });
+            });
         });
     </script>
 </body>
