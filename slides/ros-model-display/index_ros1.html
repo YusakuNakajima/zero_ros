@@ -576,7 +576,7 @@ source devel detup.bash
                 const xacroText = await xacroResponse.text();
 
                 // エンドエフェクタ付きXACROコードの読み込み
-                const xacroWithEefResponse = await fetch('code/ros1/ur5e_robot_with_eef.xacro');
+                const xacroWithEefResponse = await fetch('code/ros1/ur5e_robot_with_ee.xacro');
                 const xacroWithEefText = await xacroWithEefResponse.text();
 
                 const xacroCodeElements = document.querySelectorAll('.external-xacro-code');

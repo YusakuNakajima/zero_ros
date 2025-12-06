@@ -359,7 +359,7 @@ ros2 launch ros_study view_ur.launch.py
                     <h2>エンドエフェクタを追加</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_eef.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_ee.xacro" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -379,11 +379,11 @@ ros2 launch ros_study view_ur.launch.py
                     <h2>変更後のxacroを呼び出すLaunch</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="code/ros2/view_ur_with_eef.launch.py" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="code/ros2/view_ur_with_ee.launch.py" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>launchディレクトリ内にview_ur_with_eef.launch.pyという名前で左のコードを保存</li>
+                                <li>launchディレクトリ内にview_ur_with_ee.launch.pyという名前で左のコードを保存</li>
                                 <li>前回のlaunchからURDFをXACROに置き換えただけ</li>
                             </ul>
                         </div>
@@ -403,7 +403,7 @@ source install/setup.bash
 
                         <li>次のコマンドで実行してください</li>
                         <pre><code data-trim class="bash">
-ros2 launch ros_study view_ur_with_eef.launch.py
+ros2 launch ros_study view_ur_with_ee.launch.py
                         </code></pre>
                     </ul>
 
