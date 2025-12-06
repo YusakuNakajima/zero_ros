@@ -372,27 +372,30 @@
                     </div>
                 </section>
                 <section>
-                    <h2>URのMoveIt!で使うコントローラ</h2>
+                    <h2>MoveIt!で使うコントローラ</h2>
                     <div style="display: flex; gap: 20px; align-items: stretch; margin-top: 20px;">
-                        <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+
+                        <div
+                            style="flex: 1; width: 50%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; box-sizing: border-box;">
                             <h4 style="margin:0 0 10px 0;">JointTrajectoryController</h4>
                             <ul style="font-size: 0.8em;">
                                 <li>ROSを使ったロボットアーム制御で一般に使われるコントローラです</li>
                             </ul>
                         </div>
-                        <div
-                            style="flex: 1; background: rgba(74, 222, 128, 0.1); padding: 15px; border-radius: 8px; border: 2px solid #4ade80;">
-                            <h4 style="margin:0 0 10px 0; color: #4ade80;">ScaledJointTrajectoryController</h4>
-                            <ul style="font-size: 0.8em;">
-                                <li>URの<strong>速度スライダー</strong>に対応コントローラ</li>
 
-                                <li>これがないと、速度スライダーが1%でもROSは100%の速度で計算するので制御がおかしくなります</li>
-                                <li>UR限定、URデフォルトです</li>
+                        <div
+                            style="flex: 1; width: 50%; background: rgba(74, 222, 128, 0.1); padding: 15px; border-radius: 8px; border: 2px solid #4ade80; box-sizing: border-box;">
+                            <h4 style="margin:0 0 10px 0; color: #4ade80; word-break: break-all;">
+                                ScaledJointTrajectoryController</h4>
+                            <ul style="font-size: 0.8em;">
+                                <li>URの<strong>速度スライダー</strong>に対応したUR専用コントローラ</li>
+                                <li>例えば速度スライダーが1%の場合、これがないとROSは100%の速度で計算し制御がずれます</li>
+                                <li>URではデフォルトで使われます</li>
                             </ul>
                         </div>
+
                     </div>
                 </section>
-
                 <section>
                     <h2>xacroファイルの更新</h2>
                     <div class="slide-layout-code-text">
@@ -419,7 +422,7 @@
                         <div class="text-section">
                             <ul>
                                 <li><code>ur5e_bringup_with_moveit.launch.py</code>という名前で左のコードを保存します。</li>
-                                <li><code>initial_joint_controller</code>がMoveItで使われる<code>scaled_joint_trajectory_controller</code>に設定されています。
+                                <li><code>initial_joint_controller</code>が<code>scaled_joint_trajectory_controller</code>に更新され、必要な設定も追加されています。
                                 </li>
                             </ul>
                         </div>
