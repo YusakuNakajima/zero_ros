@@ -18,7 +18,6 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
 
-    <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
     <style>
         .copy-button {
@@ -37,6 +36,7 @@
         .copy-button:hover {
             opacity: 1;
         }
+
         pre {
             position: relative;
         }
@@ -47,7 +47,6 @@
     <div class="reveal">
         <div class="slides">
 
-            <!-- タイトルスライド -->
             <section data-background-image="media/moveit.png" data-background-opacity="0.5">
                 <h1>ゼロからのROS2</h1>
                 <h2>位置制御とモーションプランニング</h2>
@@ -56,7 +55,6 @@
                 <p><a href="../../index.html" style="color: #fff; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
 
-            <!-- ロボット制御の書籍 -->
             <section>
                 <h2>ロボット制御参考資料</h2>
                 <p>本スライド(実践)、教科書(理論)の併用がおススメ</p>
@@ -73,7 +71,6 @@
                 </ol>
             </section>
 
-            <!-- アームの軌道制御とは -->
             <section>
                 <h2>ROSを使う利点</h2>
                 <div style="display: flex;">
@@ -94,7 +91,6 @@
                 </div>
             </section>
 
-            <!-- アーム制御の前提知識 -->
             <section>
 
 
@@ -115,7 +111,6 @@
                     </div>
                 </section>
 
-                <!-- アーム制御は組合せ -->
                 <section>
                     <h2>アーム制御則は組合せ</h2>
                     <style>
@@ -202,7 +197,6 @@
                     </div>
                 </section>
 
-                <!-- よく使うROSのアームコントローラ -->
                 <section>
                     <h2>よく使うROSの関節空間の<br>アームコントローラ</h2>
                     <div style="margin-bottom: 2em;">
@@ -218,7 +212,7 @@
                             <li><strong>effort_controllers/JointTrajectoryController</strong></li>
                         </ul>
                     </div>
-                </section> <!-- よく使うROSのアームコントローラ -->
+                </section>
                 <section>
                     <h2>よく使うROSの直交空間の<br>アームコントローラ</h2>
                     <div>
@@ -238,7 +232,6 @@
                     </div>
                 </section>
 
-                <!-- ロボットの制御種類 -->
                 <section>
                     <h2>市販だと位置/速度制御が多い</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -292,7 +285,6 @@
                     </div>
                     <p>Rvizで表示しているTFとは？↓</p>
                 </section>
-                <!-- TFとは？ -->
                 <section>
                     <h2>TFとは？</h2>
                     <ul>
@@ -302,7 +294,6 @@
                     </ul>
                 </section>
 
-                <!-- 機能1：座標変換 -->
                 <section>
                     <h2>機能1：座標変換</h2>
                     <div class="slide-layout-image">
@@ -362,14 +353,113 @@
                 </section>
             </section>
 
+            <section>
+                <section>
+                    <h2>MoveIt!を使うための準備</h2>
+                    <div class="slide-layout-image">
+                        <div class="slide-image">
+                            <img src="../ros-simulator-connection/media/mock_components.png" alt="Robot_on_simulator"
+                                style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+                        </div>
 
-            <!-- MoveItによるアーム制御 (スライド10) -->
+                        <div class="slide-content">
+                            <ul>
+                                <li>前章と同様に、まずは<strong style="color: #3b82f6;">Mock
+                                        Components</strong>を使って、MoveIt!をシミュレーション環境で動かす準備をします。</li>
+                                <li>設定方法はほとんど同じですが、MoveIt!特有のコントローラ設定が追加されます。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>MoveIt!で使うコントローラ</h2>
+                    <p style="text-align: left;">MoveIt!のプランナは基本的に関節の目標角度列(軌跡)を生成します。<br>しかし、それだけではロボットは動けません。</p>
+                    <div style="display: flex; gap: 20px; align-items: stretch; margin-top: 20px;">
+                        <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                            <h4 style="margin:0 0 10px 0;">JointTrajectoryController</h4>
+                            <ul style="font-size: 0.8em;">
+                                <li>各点での時刻指定が<strong style="color: #f87171;">必須</strong></li>
+                                <li>時刻通りに動こうとする</li>
+                            </ul>
+                        </div>
+                        <div
+                            style="flex: 1; background: rgba(74, 222, 128, 0.1); padding: 15px; border-radius: 8px; border: 2px solid #4ade80;">
+                            <h4 style="margin:0 0 10px 0; color: #4ade80;">ScaledJointTrajectoryController</h4>
+                            <ul style="font-size: 0.8em;">
+                                <li>ロボットの<strong>速度スライダー(スピードスケーリング)</strong>に対応</li>
+                                <li>実機側で速度を落とした場合、軌道の進行も合わせて<strong>自動で遅く調整</strong>してくれる</li>
+                                <li>通常のコントローラで発生する経路からの逸脱を防ぐことができる</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="text-align: left; margin-top: 20px;">このため、MoveIt!では<strong
+                            style="color: #4ade80;">ScaledJointTrajectoryController</strong>を使うのが一般的です。</p>
+                </section>
+
+                <section>
+                    <h2>xacroファイルの確認</h2>
+                    <p>前章と同様に、ros2_controlタグでMock Componentsを読み込みます。<br>このファイルは既に設定済みです。</p>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_ee.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                        </div>
+
+                        <div class="text-section">
+                            <ul>
+                                <li><code>slides/ros-arm-position-control/code/ros2/ur5e_with_ee.xacro</code></li>
+                                <li><code>mock_components/GenericSystem</code>プラグインが指定されています。</li>
+                                <li>これにより、シミュレーション用の仮想ハードウェアが有効になります。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>起動用Launchの作成</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/ur5e_bringup_with_moveit.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                        </div>
+
+                        <div class="text-section">
+                            <ul>
+                                <li><code>ur5e_bringup_with_moveit.launch.py</code>という名前で左のコードを保存します。</li>
+                                <li><code>initial_joint_controller</code>がMoveItで使われる<code>scaled_joint_trajectory_controller</code>に設定されています。
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>ビルドと実行</h2>
+                    <ul>
+                        <li>ビルドします</li>
+
+                        <pre><code data-trim class="bash">
+cd ~/ros2_ws
+colcon build --symlink-install --packages-select ros_study
+source install/setup.bash
+                        </code></pre>
+
+                        <li>次のコマンドで実行してください</li>
+                        <pre><code data-trim class="bash">
+ros2 launch ros_study ur5e_bringup_with_moveit.launch.py
+                        </code></pre>
+                        <li>もう一つ別のターミナルで制御用GUIを起動</li>
+                        <pre><code data-trim class="bash">  
+ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
+</code></pre>
+                        <p>GUIのスライダーを動かして、RViz上のロボットが動くことを確認できれば成功です。</p>
+                    </ul>
+                </section>
+            </section>
+
+
             <section>
                 <section data-background-image="media/moveit.png" data-background-opacity="0.5">
                     <h2>MoveItによるアーム制御</h2>
                 </section>
 
-                <!-- MoveItで何ができるか (縦スライド) -->
                 <section>
                     <h2>MoveItとは</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -388,7 +478,6 @@
                     </div>
                 </section>
 
-                <!-- MoveItのモーションプランニングの手順 (縦スライド) -->
                 <section>
                     <h2>MoveIt 3 Steps</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -404,7 +493,6 @@
                     </div>
                 </section>
 
-                <!-- 手先の姿勢の表現 (縦スライド) -->
                 <section>
                     <h2>ステップ1:手先姿勢の表現</h2>
                     <p>位置(position)+向き(orientation)=姿勢(pose)</p>
@@ -425,7 +513,6 @@
                     <p>実用上は最初と最後の姿勢をオイラー角で指定、クオータニオンに変換後に補完してROSに渡す</p>
                 </section>
 
-                <!-- オイラー角による表現 (縦スライド) -->
                 <section>
                     <h2>オイラー角による表現と課題</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -456,7 +543,6 @@
                     </div>
                 </section>
 
-                <!-- クォータニオンによる表現 (縦スライド) -->
                 <section>
                     <h2>クォータニオンによる表現</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -489,7 +575,6 @@
                     </div>
                 </section>
 
-                <!-- クォータニオン補間の利点 (縦スライド) -->
                 <section>
                     <h2>クォータニオン補間の利点</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -542,7 +627,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- 姿勢の表現 - オススメの実装 (縦スライド) -->
                 <section>
                     <h2>姿勢の表現 - オススメの実装</h2>
                     <ul>
@@ -555,7 +639,6 @@
 
 
 
-                <!-- MoveIt2で使えるパスプランニング (縦スライド) -->
                 <section>
                     <h2>Step2:モーションプランニング</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -586,7 +669,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- サンプリングベースの手法(RRT) (縦スライド) -->
                 <section>
                     <h2>サンプリングベースの手法(RRT)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -608,7 +690,6 @@
                     </div>
                 </section>
 
-                <!-- 最適化ベースの手法(CHOMP) (縦スライド) -->
                 <section>
                     <h2>最適化ベースの手法(CHOMP)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -630,7 +711,6 @@
                     </div>
                 </section>
 
-                <!-- 最適化ベースの手法(STOMP) (縦スライド) -->
                 <section>
                     <h2>最適化ベースの手法(STOMP)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -652,7 +732,6 @@
                     </div>
                 </section>
 
-                <!-- MoveItCommanderによる実装 -->
                 <section>
                     <h2>MoveItCommanderによる実装</h2>
                     <div class="slide-layout-image">
@@ -674,13 +753,11 @@
 
             </section>
 
-            <!-- JointTrajectoryControllerによるアーム制御 (スライド23) -->
             <section>
                 <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
                     <h2>JointTrajectoryControllerによるアーム制御の基本</h2>
                 </section>
 
-                <!-- JTCでの実装の流れ (縦スライド) -->
                 <section>
                     <h2>JTCの実装4ステップ</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -696,7 +773,6 @@
                     </div>
                 </section>
 
-                <!-- 目標姿勢の計算 (縦スライド) -->
                 <section>
                     <h2>step1:waypoimtsの計算</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -712,7 +788,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- 逆運動学の必要性 (縦スライド) -->
                 <section>
                     <h2>step2:逆運動学(IK)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -727,7 +802,6 @@
                     </div>
                 </section>
 
-                <!-- 逆運動学の解き方 (縦スライド) -->
                 <section>
                     <h2>逆運動学の解き方(IKソルバー)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -758,7 +832,6 @@
                     <p>現在は汎用性が高く速度も精度も十分になったので数値解を使うことが多い</p>
                 </section>
 
-                <!-- MoveIt2で使えるIKソルバー (縦スライド) -->
                 <section>
                     <h2>MoveItのIKソルバー</h2>
                     <p>MoveItのIKソルバー(ROS Service)だけ使用可能</p>
@@ -783,7 +856,6 @@
                     </ul>
                 </section>
 
-                <!-- Pythonで使えるIKソルバー (縦スライド) -->
                 <section>
                     <h2>Pythonで使えるIKソルバー</h2>
                     <p>大量のIKはIk用ライブラリを直接使うのが良い</p>
@@ -799,7 +871,6 @@
                     </ul>
                 </section>
 
-                <!-- 軌跡・軌道生成 (縦スライド) -->
                 <section>
                     <h2>軌跡・軌道生成</h2>
 
@@ -813,7 +884,6 @@
 
                 </section>
 
-                <!-- 実行 (縦スライド) -->
                 <section>
                     <h2>JointTrajectoryの送信方法</h2>
                     <ul style="font-size: 0.9em;">
@@ -863,7 +933,6 @@
                     </div>
                 </section>
 
-                <!-- JTCの実装例 (縦スライド) -->
                 <section>
                     <h2>JTCの実装例</h2>
                     <table style="font-size: 0.8em; margin: auto;">
@@ -890,7 +959,6 @@
                     </table>
                 </section>
 
-                <!-- JointTrajectoryControllerの実装 -->
                 <section>
                     <h2>JointTrajectoryControllerの実装</h2>
                     <p>関節を指定して補間するだけのシンプルなデモ</p>
@@ -910,7 +978,6 @@
                 </section>
 
 
-                <!-- JointTrajectoryControllerの実装 -->
                 <section>
                     <h2>JTC + IKの実装</h2>
                     <div class="slide-layout-image">
@@ -928,7 +995,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- JointTrajectoryControllerでの補間設定 (縦スライド) -->
                 <section>
                     <h2>JointTrajectoryControllerの設定例</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -960,13 +1026,11 @@
                 </section>
             </section>
 
-            <!-- JointTrajectoryControllerによるアームの速度制御 (9枚目) -->
             <section>
                 <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
                     <h2>JointTrajectoryControllerによるアームの速度・加速度制御</h2>
                 </section>
 
-                <!-- 手先の速度制御はなぜ必要か？ (縦スライド) -->
                 <section>
                     <h2>速度・加速度制御は必要か？</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -983,7 +1047,6 @@
                     </div>
                 </section>
 
-                <!-- 軌道補間方法の詳細 (縦スライド) -->
                 <section>
                     <h2>軌道補間の方法</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -1008,7 +1071,6 @@
                     <p style="font-size: 0.8em;">※教科書で出てくる時間多項式とスプラインは等価です<br>2点→時間多項式, 複数点→スプラインという違いです</p>
                 </section>
 
-                <!-- 補間方法の比較まとめ (縦スライド) -->
                 <section>
                     <h2>補間方法の比較まとめ</h2>
                     <style>
@@ -1121,7 +1183,6 @@
 
 
 
-                <!-- ヤコビアン関節速度と手先速度の関係 (縦スライド) -->
                 <section>
                     <h2>関節速度の計算方法</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -1150,7 +1211,6 @@
                     </div>
                 </section>
 
-                <!-- 逆ヤコビアンによる手先速度の計算 (縦スライド) -->
                 <section>
                     <h2>逆ヤコビアンによる手先速度の計算</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -1184,14 +1244,12 @@
 
             </section>
 
-            <!-- waypointsの表示 -->
             <section>
                 <section>
                     <h2>waypointsの表示</h2>
                     <p>デバッグ用にwaypointsを表示したいことはよくある、方法を紹介</p>
                 </section>
 
-                <!-- VisualizationMarkerを使った表示 -->
                 <section>
                     <h2>VisualizationMarkerを使った表示</h2>
                     <div class="slide-layout-image">
@@ -1211,7 +1269,6 @@
                     </div>
                 </section>
 
-                <!-- TFを使った表示 -->
                 <section>
                     <h2>TFを使った表示</h2>
                     <div class="slide-layout-image">
@@ -1233,7 +1290,6 @@
 
             </section>
 
-            <!-- シリーズ一覧に戻る -->
             <section>
                 <h2>ありがとうございました</h2>
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
@@ -1335,6 +1391,47 @@
                     });
                     pre.appendChild(button);
                 }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const codeBlocks = document.querySelectorAll('pre code.external-code');
+
+            const fetchCode = async (block) => {
+                const src = block.dataset.src;
+                if (!src) return;
+
+                try {
+                    const response = await fetch(src);
+                    if (!response.ok) {
+                        block.textContent = `Error: Could not load ${src} (${response.status})`;
+                        return;
+                    }
+                    let text = await response.text();
+                    if (block.hasAttribute('data-trim')) {
+                        text = text.trim();
+                    }
+                    block.textContent = text;
+                    hljs.highlightElement(block);
+                } catch (e) {
+                    block.textContent = `Error: Could not fetch ${src}. ${e.message}`;
+                }
+            };
+
+            Promise.all(Array.from(codeBlocks).map(fetchCode)).then(() => {
+                // Add copy buttons to all pre blocks
+                let preblocks = document.querySelectorAll('pre');
+                preblocks.forEach(function (pre) {
+                    if (pre.querySelector('code')) {
+                        let button = document.createElement('button');
+                        button.className = 'copy-button';
+                        button.innerText = 'Copy';
+                        button.addEventListener('click', function () {
+                            copyCodeToClipboard(this);
+                        });
+                        pre.appendChild(button);
+                    }
+                });
             });
         });
     </script>
