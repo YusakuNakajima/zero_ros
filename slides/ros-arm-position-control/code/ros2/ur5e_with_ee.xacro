@@ -1,125 +1,105 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur">
 
-    <xacro:include filename="$(find ros_study)/urdf/ur5e.xacro" />
+   <xacro:arg name="name" default="ur"/>
+   <xacro:arg name="ur_type" default="ur5e"/>
+   <xacro:arg name="tf_prefix" default="" />
+   <xacro:arg name="use_fake_hardware" default="true"/>
+   <xacro:arg name="fake_sensor_commands" default="true"/>
+   <xacro:arg name="robot_ip" default="0.0.0.0"/>
+   <xacro:arg name="script_filename" default=""/>
+   <xacro:arg name="output_recipe_filename" default=""/>
+   <xacro:arg name="input_recipe_filename" default=""/>
+   
+   <xacro:arg name="pestle_length" default="0.1092" />
+   <xacro:arg name="spatula_length" default="0.089" />
 
-    <xacro:arg name="pestle_length" default="0.1092" />
-    <xacro:arg name="spatula_length" default="0.089" />
+   <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
 
-    <link name="world" />
-    <joint name="world_joint" type="fixed">
-        <parent link="world" />
-        <child link="base_link" /> 
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-    </joint>
+   <xacro:ur_robot
+     name="$(arg name)"
+     tf_prefix="$(arg tf_prefix)"
+     parent="world"
+     joint_limits_parameters_file="$(find ur_description)/config/$(arg ur_type)/joint_limits.yaml"
+     kinematics_parameters_file="$(find ur_description)/config/$(arg ur_type)/default_kinematics.yaml"
+     physical_parameters_file="$(find ur_description)/config/$(arg ur_type)/physical_parameters.yaml"
+     visual_parameters_file="$(find ur_description)/config/$(arg ur_type)/visual_parameters.yaml"
+     use_fake_hardware="$(arg use_fake_hardware)"
+     fake_sensor_commands="$(arg fake_sensor_commands)"
+     robot_ip="$(arg robot_ip)"
+     script_filename="$(arg script_filename)"
+     output_recipe_filename="$(arg output_recipe_filename)"
+     input_recipe_filename="$(arg input_recipe_filename)">
+     <origin xyz="0 0 0" rpy="0 0 0" />
+   </xacro:ur_robot>
 
-    <ros2_control name="UR5eMockSystem" type="system">
-        <hardware>
-            <plugin>mock_components/GenericSystem</plugin>
-        </hardware>
-        
-        <sensor name="speed_scaling">
-            <state_interface name="speed_scaling_factor">
-                <param name="initial_value">1.0</param>
-            </state_interface>
-        </sensor>
-        <joint name="shoulder_pan_joint">
-            <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
-            <state_interface name="velocity"/>
-        </joint>
-        <joint name="shoulder_lift_joint">
-            <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">-1.57</param></state_interface>
-            <state_interface name="velocity"/>
-        </joint>
-        <joint name="elbow_joint">
-            <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
-            <state_interface name="velocity"/>
-        </joint>
-        <joint name="wrist_1_joint">
-            <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">-1.57</param></state_interface>
-            <state_interface name="velocity"/>
-        </joint>
-        <joint name="wrist_2_joint">
-            <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
-            <state_interface name="velocity"/>
-        </joint>
-        <joint name="wrist_3_joint">
-            <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
-            <state_interface name="velocity"/>
-        </joint>
-    </ros2_control>
+   <link name="world" />
 
-    <link name="pestle">
-        <visual>
-            <origin xyz="0 0 0.0001" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
-            </geometry>
-            <material name="LightGrey">
-                <color rgba="0.7 0.7 0.7 1.0"/>
-            </material>
-        </visual>
-        <collision>
-            <origin xyz="0 0 0.0001" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
-            </geometry>
-        </collision>
-    </link>
+   <link name="pestle">
+       <visual>
+           <origin xyz="0 0 0.0001" rpy="0 0 0" />
+           <geometry>
+               <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
+           </geometry>
+           <material name="LightGrey">
+               <color rgba="0.7 0.7 0.7 1.0"/>
+           </material>
+       </visual>
+       <collision>
+           <origin xyz="0 0 0.0001" rpy="0 0 0" />
+           <geometry>
+               <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
+           </geometry>
+       </collision>
+   </link>
 
-    <joint name="joint_pestle" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0" />
-        <parent link="tool0" /> 
-        <child link="pestle" />
-    </joint>
+   <joint name="joint_pestle" type="fixed">
+       <origin rpy="0 0 0" xyz="0 0 0" />
+       <parent link="tool0" /> 
+       <child link="pestle" />
+   </joint>
 
-    <link name="pestle_tip" />
-    <joint name="joint_pestle_tip" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 $(arg pestle_length)" />
-        <parent link="pestle" />
-        <child link="pestle_tip" />
-    </joint>
+   <link name="pestle_tip" />
+   <joint name="joint_pestle_tip" type="fixed">
+       <origin rpy="0 0 0" xyz="0 0 $(arg pestle_length)" />
+       <parent link="pestle" />
+       <child link="pestle_tip" />
+   </joint>
 
-    <link name="spatula">
-        <visual>
-            <origin xyz="0 0 0.0001" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="package://ros_study/meshes/spatula.stl" />
-            </geometry>
-            <material name="LightGrey"/>
-        </visual>
-        <collision>
-            <origin xyz="0 0 0.0001" rpy="0 0 0" />
-            <geometry>
-                <mesh filename="package://ros_study/meshes/spatula.stl" />
-            </geometry>
-        </collision>
-    </link>
+   <link name="spatula">
+       <visual>
+           <origin xyz="0 0 0.0001" rpy="0 0 0" />
+           <geometry>
+               <mesh filename="package://ros_study/meshes/spatula.stl" />
+           </geometry>
+           <material name="LightGrey"/>
+       </visual>
+       <collision>
+           <origin xyz="0 0 0.0001" rpy="0 0 0" />
+           <geometry>
+               <mesh filename="package://ros_study/meshes/spatula.stl" />
+           </geometry>
+       </collision>
+   </link>
 
-    <joint name="joint_spatula" type="fixed">
-        <origin rpy="0 ${-pi/2} 0" xyz="-0.03655 0 0.0135" />
-        <parent link="tool0" /> 
-        <child link="spatula" />
-    </joint>
+   <joint name="joint_spatula" type="fixed">
+       <origin rpy="0 ${-pi/2} 0" xyz="-0.03655 0 0.0135" />
+       <parent link="tool0" /> 
+       <child link="spatula" />
+   </joint>
 
-    <link name="spatula_tip" />
-    <joint name="joint_spatula_tip" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 $(arg spatula_length)" />
-        <parent link="spatula" />
-        <child link="spatula_tip" />
-    </joint>
+   <link name="spatula_tip" />
+   <joint name="joint_spatula_tip" type="fixed">
+       <origin rpy="0 0 0" xyz="0 0 $(arg spatula_length)" />
+       <parent link="spatula" />
+       <child link="spatula_tip" />
+   </joint>
 
-    <link name="dummy_ee" />
-    <joint name="joint_dummy_ee" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0" />
-        <parent link="tool0" /> 
-        <child link="dummy_ee" />
-    </joint>
+   <link name="dummy_ee" />
+   <joint name="joint_dummy_ee" type="fixed">
+       <origin rpy="0 0 0" xyz="0 0 0" />
+       <parent link="tool0" /> 
+       <child link="dummy_ee" />
+   </joint>
 
 </robot>

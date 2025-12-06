@@ -28,6 +28,13 @@ def generate_launch_description():
     )
     declared_arguments.append(
         DeclareLaunchArgument(
+            "use_fake_sensor_commands",
+            default_value="true",
+            description="Use fake sensor commands if true.",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
             "robot_ip",
             default_value="0.0.0.0",
             description="IP address by which the robot can be reached.",
@@ -40,7 +47,6 @@ def generate_launch_description():
             description="tf_prefix of the joint names.",
         )
     )
-    # MoveItを使用する場合、コントローラは scaled_joint_trajectory_controller が推奨されることが多いです
     declared_arguments.append(
         DeclareLaunchArgument(
             "initial_joint_controller",
@@ -52,6 +58,7 @@ def generate_launch_description():
     # --- 2. 変数の取得 ---
     ur_type = LaunchConfiguration("ur_type")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
+    use_fake_sensor_commands = LaunchConfiguration("use_fake_sensor_commands")
     robot_ip = LaunchConfiguration("robot_ip")
     tf_prefix = LaunchConfiguration("tf_prefix")
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
@@ -70,7 +77,6 @@ def generate_launch_description():
     )
 
     # URDF生成用ファイル (ros_studyパッケージを使用)
-    # ここで指定したパッケージ名とファイル名は MoveIt の起動ファイルにも渡します
     description_package_name = "ros_study"
     description_file_name = "ur5e_with_ee.xacro"
     
@@ -88,9 +94,7 @@ def generate_launch_description():
         [robot_driver_package, "resources", "rtde_output_recipe.txt"]
     )
 
-    # --- 4. Robot Description (URDF) の生成 (ドライバ/ros2_control用) ---
-    # 公式MoveIt launchも内部でrobot_descriptionを生成しますが、
-    # ここではドライバノードがパラメータとして必要とするため、生成を残します。
+    # --- 4. Robot Description (URDF) の生成 ---
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
@@ -102,6 +106,8 @@ def generate_launch_description():
             "ur_type:=", ur_type,
             " ",
             "use_fake_hardware:=", use_fake_hardware,
+            " ",
+            "fake_sensor_commands:=", use_fake_sensor_commands, 
             " ",
             "robot_ip:=", robot_ip,
             " ",
@@ -118,7 +124,7 @@ def generate_launch_description():
 
     # --- 5. ノードの定義 ---
 
-    # [A-1] Mock用: 標準の ros2_control_node
+    # [A-1] Mock用
     control_node_mock = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -131,7 +137,7 @@ def generate_launch_description():
         condition=IfCondition(use_fake_hardware),
     )
 
-    # [A-2] 実機用: UR専用の ur_ros2_control_node
+    # [A-2] 実機用
     control_node_real = Node(
         package="ur_robot_driver",
         executable="ur_ros2_control_node",
@@ -144,7 +150,7 @@ def generate_launch_description():
         condition=UnlessCondition(use_fake_hardware),
     )
 
-    # [A-3] 実機用: Dashboard Client
+    # [A-3] Dashboard Client
     dashboard_client_node = Node(
         package="ur_robot_driver",
         executable="dashboard_client",
@@ -163,8 +169,7 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
-    # [C] MoveItの起動 (公式のur_moveit.launch.pyをインクルード)
-    # 独自のRVizノードは削除し、ここで起動されるRVizを使用します。
+    # [C] MoveItの起動
     ur_moveit_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([FindPackageShare("ur_moveit_config"), "launch", "ur_moveit.launch.py"])
@@ -210,7 +215,7 @@ def generate_launch_description():
             control_node_real,
             dashboard_client_node,
             robot_state_publisher_node,
-            ur_moveit_launch, # 修正: RVizノードの代わりにMoveIt Launchを追加
+            ur_moveit_launch,
             joint_state_broadcaster_spawner,
             delay_rviz_after_joint_state_broadcaster_spawner,
         ]
