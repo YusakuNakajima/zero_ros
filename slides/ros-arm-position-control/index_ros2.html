@@ -1302,6 +1302,8 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.1.5/chalkboard/plugin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 
@@ -1374,49 +1376,29 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 console.error('Async: Could not copy text: ', err);
             });
         }
+        
+        // 外部コードファイルを読み込む関数
+        async function loadExternalCode() {
+            try {
+                const codeElements = document.querySelectorAll('.external-code');
+                for (const element of codeElements) {
+                    const source = element.getAttribute('data-src');
+                    if (source) {
+                        const response = await fetch(source);
+                        const text = await response.text();
+                        element.textContent = text;
+                    }
+                }
+            } catch (error) {
+                console.error('コードファイルの読み込みに失敗しました:', error);
+            }
+        }
 
+        // Reveal.js初期化後に外部コードを読み込み
         Reveal.on('ready', function () {
-            hljs.highlightAll();
-            // Add copy buttons to all pre blocks
-            let preblocks = document.querySelectorAll('pre');
-            preblocks.forEach(function (pre) {
-                if (pre.querySelector('code')) {
-                    let button = document.createElement('button');
-                    button.className = 'copy-button';
-                    button.innerText = 'Copy';
-                    button.addEventListener('click', function () {
-                        copyCodeToClipboard(this);
-                    });
-                    pre.appendChild(button);
-                }
-            });
-        });
+            loadExternalCode().then(() => {
+                hljs.highlightAll();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const codeBlocks = document.querySelectorAll('pre code.external-code');
-
-            const fetchCode = async (block) => {
-                const src = block.dataset.src;
-                if (!src) return;
-
-                try {
-                    const response = await fetch(src);
-                    if (!response.ok) {
-                        block.textContent = `Error: Could not load ${src} (${response.status})`;
-                        return;
-                    }
-                    let text = await response.text();
-                    if (block.hasAttribute('data-trim')) {
-                        text = text.trim();
-                    }
-                    block.textContent = text;
-                    hljs.highlightElement(block);
-                } catch (e) {
-                    block.textContent = `Error: Could not fetch ${src}. ${e.message}`;
-                }
-            };
-
-            Promise.all(Array.from(codeBlocks).map(fetchCode)).then(() => {
                 // Add copy buttons to all pre blocks
                 let preblocks = document.querySelectorAll('pre');
                 preblocks.forEach(function (pre) {
