@@ -40,10 +40,13 @@ def generate_launch_description():
             description="tf_prefix of the joint names.",
         )
     )
+    rviz_config_path = PathJoinSubstitution(
+        [FindPackageShare("ros_study"), "rviz", "ur5e.rviz"]
+    )
     declared_arguments.append(
         DeclareLaunchArgument(
             "rviz_config_file",
-            default_value="display.rviz",
+            default_value=rviz_config_path,
             description="Rviz configuration file.",
         )
     )
@@ -77,8 +80,8 @@ def generate_launch_description():
     )
 
     # URDF生成用ファイル
-    description_package = FindPackageShare("ur_description")
-    description_file = PathJoinSubstitution([description_package, "urdf", "ur.urdf.xacro"])
+    description_package = FindPackageShare("ros_study")
+    description_file = PathJoinSubstitution([description_package, "urdf", "ur5e_with_ee.xacro"])
     
     # 実機接続用のスクリプトファイルなど
     script_filename = PathJoinSubstitution(
