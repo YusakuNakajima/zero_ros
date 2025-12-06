@@ -93,8 +93,6 @@
 
             <section>
 
-
-
                 <section>
                     <p>本スライドでは軌道制御の実装を扱います</p>
 
@@ -647,10 +645,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>MoveItCommanderによる実装</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe src="code/moveit_demo_display.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/moveit_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -750,20 +747,18 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <p>MoveItのIKソルバー(ROS Service)だけ使用可能</p>
                     <p>通信時間がかかるので数点のIKなら実用的</p>
                     <ul style="font-size: 0.8em;">
-                        <li><strong><a
-                                    href="https://moveit.github.io/moveit_tutorials/doc/kinematics_configuration/kinematics_configuration_tutorial.html"
+                        <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/kinematics_configuration/kinematics_configuration_tutorial.html"
                                     target="_blank" style="color: #4CAF50; text-decoration: underline;">KDL</a></strong>
                             -
                             ニュートン法の数値解ソルバー, MoveItでデフォルト</li>
 
-                        <li><strong><a
-                                    href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
-                                    target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong> -
+                        <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
+                                    target="_blank" style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong>
+                            -
                             数値解ソルバーでニュートン法とSQP(逐次二次計画法)のハイブリッド, KDLより収束性が良い, Universal RobotのMoveItでデフォルト</li>
                         <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html"
-                                    target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong> -
+                                    target="_blank" style="color: #4CAF50; text-decoration: underline;">IKFast</a></strong>
+                            -
                             解析解ソルバー, 計算は早いが解を安定して得にくい</li>
 
                     </ul>
@@ -875,10 +870,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 <section>
                     <h2>JointTrajectoryControllerの実装</h2>
                     <p>関節を指定して補間するだけのシンプルなデモ</p>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe src="code/jtc_demo_display.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/jtc_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ol>
@@ -893,10 +887,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>JTC + IKの実装</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe src="code/jtc_with_ik_demo_display.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/jtc_with_ik_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -1144,10 +1137,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>VisualizationMarkerを使った表示</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe src="code/marker_display_demo_display.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/marker_display_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -1163,10 +1155,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>TFを使った表示</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <iframe src="code/tf_display_demo_display.html" width="100%" height="400px"
-                                frameborder="0"></iframe>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/tf_display_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -1181,7 +1172,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
             </section>
 
-                <section>
+            <section>
                 <section>
                     <h2>TFについて</h2>
                     <ul>
