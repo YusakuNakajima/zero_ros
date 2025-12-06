@@ -305,6 +305,22 @@
                     </div>
                 </section>
                 <section>
+                    <h2>xacroを更新</h2>
+                    <p>次に、xacroファイルを更新してros2_controlを使えるようにします</p>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_ee.xacro" data-trim></code></pre>
+                        </div>
+
+                        <div class="text-section">
+                            <ul>
+                                <li><code>ur5e_with_ee.xacro</code>に<code>ros2_control</code>タグを追加します。</li>
+                                <li>これにより、mock_components(仮想ハードウェア)が読み込まれ、ロボットを制御できるようになります。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
                     <h2>ビルドと実行</h2>
                     <ul>
                         <li>ビルドします</li>
