@@ -46,7 +46,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "rviz_config_file",
-            default_value="display.rviz", # あなたの .rviz ファイル名に設定
+            default_value="ur5e.rviz", # あなたの .rviz ファイル名に設定
             description="Rviz configuration file.",
         )
     )
