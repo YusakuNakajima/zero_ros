@@ -6,6 +6,13 @@
     <xacro:arg name="pestle_length" default="0.1092" />
     <xacro:arg name="spatula_length" default="0.089" />
 
+    <link name="world" />
+    <joint name="world_joint" type="fixed">
+        <parent link="world" />
+        <child link="base_link" /> 
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    </joint>
+
     <link name="pestle">
         <visual>
             <origin xyz="0 0 0.0001" rpy="0 0 0" />
