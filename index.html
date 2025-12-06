@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="ja" class="scroll-smooth">
-
+<html lang="ja" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ゼロからのROS</title>
-    <!-- Tailwind CSSを読み込みます -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google FontsからInterフォントを読み込みます -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -21,33 +23,41 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 transition-colors duration-300">
 
-    <!-- ヘッダーナビゲーション -->
-    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm border-b border-transparent dark:border-slate-800 transition-colors duration-300">
         <div class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="#"
-                class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
+                class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 hover:to-indigo-500 transition-all">
                 🤖 ゼロからのROS
             </a>
-            <nav class="hidden md:flex items-center space-x-6">
-                <a href="#step1" class="text-slate-600 hover:text-indigo-500 transition-colors">基礎</a>
-                <a href="#step2" class="text-slate-600 hover:text-indigo-500 transition-colors">ROS</a>
-                <a href="#step3" class="text-slate-600 hover:text-indigo-500 transition-colors">応用</a>
-            </nav>
-            <button class="md:hidden text-slate-600" id="mobile-menu-button">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7">
-                    </path>
-                </svg>
-            </button>
+            
+            <div class="flex items-center gap-4">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#step1" class="text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">基礎</a>
+                    <a href="#step2" class="text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">ROS</a>
+                    <a href="#step3" class="text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">応用</a>
+                </nav>
+
+                <button id="theme-toggle" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none">
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                </button>
+
+                <button class="md:hidden text-slate-600 dark:text-slate-400" id="mobile-menu-button">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7">
+                        </path>
+                    </svg>
+                </button>
+            </div>
         </div>
-        <!-- モバイル用メニュー -->
-        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
-            <a href="#step1" class="block py-2 text-slate-600 hover:text-indigo-500 transition-colors">基礎</a>
-            <a href="#step2" class="block py-2 text-slate-600 hover:text-indigo-500 transition-colors">ROS</a>
-            <a href="#step3" class="block py-2 text-slate-600 hover:text-indigo-500 transition-colors">応用</a>
+        
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 border-t dark:border-slate-800">
+            <a href="#step1" class="block py-2 text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">基礎</a>
+            <a href="#step2" class="block py-2 text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">ROS</a>
+            <a href="#step3" class="block py-2 text-slate-600 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">応用</a>
             <a href="slides/introduction/index.html" target="_blank"
                 class="block mt-2 bg-indigo-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-indigo-600 transition-all text-center">
                 📖 使い方ガイド
@@ -55,151 +65,144 @@
         </div>
     </header>
 
-    <!-- メインコンテンツ -->
     <div class="container mx-auto px-6 py-12">
 
-        <!-- ヒーローセクション -->
-        <div class="text-center bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-12 mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">ゼロからのROS</h1>
-            <p class="text-lg text-slate-600 max-w-2xl mx-auto">大阪大学 小野研究室 中島優作</p>
+        <div class="text-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-12 mb-12 border dark:border-slate-800 transition-colors duration-300">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4 transition-colors">ゼロからのROS</h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors">大阪大学 小野研究室 中島優作</p>
         </div>
 
         <div class="lg:grid lg:grid-cols-12 lg:gap-12">
-            <!-- 左側メインエリア -->
             <main class="lg:col-span-8">
 
-                <!-- イントロダクション -->
                 <section id="introduction" class="mb-12">
-                    <h2 class="text-3xl font-bold mb-2 text-slate-800">イントロダクション</h2>
-                    <p class="text-slate-500 mb-6">この教材を初めて使う方はまずはこちらをご覧ください。</p>
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800 dark:text-slate-100 transition-colors">イントロダクション</h2>
+                    <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">この教材を初めて使う方はまずはこちらをご覧ください。</p>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <a href="slides/introduction/index.html" class="slide-card">
-                            <h3 class="slide-title">📖 教材の使い方</h3>
+                        <a href="slides/introduction/index.html" class="slide-card group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">📖 教材の使い方</h3>
                             <p class="slide-description">この教材の構成、ROS学び方について解説します。</p>
-                            <div class="slide-meta"><span class="badge bg-gray-100 text-gray-800">Start</span></div>
+                            <div class="slide-meta"><span class="badge bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-gray-300">Start</span></div>
                         </a>
                     </div>
                 </section>
 
-                <!-- Step 1: 基礎 -->
                 <section id="step1" class="mb-12">
-                    <h2 class="text-3xl font-bold mb-2 text-slate-800">基礎編 - ロボットアーム制御の基礎</h2>
-                    <p class="text-slate-500 mb-6">対象：全員。まずはここから！ROSを使わずに基礎を学びます。また、ROSが必要な場合と不要な場合についても説明します。</p>
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800 dark:text-slate-100 transition-colors">基礎編 - ロボットアーム制御の基礎</h2>
+                    <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">対象：全員。まずはここから！ROSを使わずに基礎を学びます。また、ROSが必要な場合と不要な場合についても説明します。</p>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <a href="slides/robot-arm-hardware-integration/index.html" class="slide-card">
-                            <h3 class="slide-title">🔌 ハードウェアインテグレーション</h3>
+                        <a href="slides/robot-arm-hardware-integration/index.html" class="slide-card group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🔌 ハードウェアインテグレーション</h3>
                             <p class="slide-description">ロボットアームとの接続、グリッパ制御、外部装置との接続など、物理的なセットアップを解説します。</p>
-                            <div class="slide-meta"><span class="badge bg-indigo-100 text-indigo-800">基礎</span></div>
+                            <div class="slide-meta"><span class="badge bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">基礎</span></div>
                         </a>
-                        <a href="slides/robot-arm-basic-control/index.html" class="slide-card">
-                            <h3 class="slide-title">🦿 ロボットの基本操作/制御</h3>
+                        <a href="slides/robot-arm-basic-control/index.html" class="slide-card group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🦿 ロボットの基本操作/制御</h3>
                             <p class="slide-description">TCP制御、モーションの種類、シミュレーションの活用法など、アームを操作する上で必須の知識を解説します。</p>
-                            <div class="slide-meta"><span class="badge bg-indigo-100 text-indigo-800">基礎</span></div>
+                            <div class="slide-meta"><span class="badge bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">基礎</span></div>
                         </a>
                     </div>
                 </section>
 
-                <!-- Step 2: ROS -->
                 <section id="step2" class="mb-12">
                     <div class="flex justify-between items-center mb-2">
-                        <h2 class="text-3xl font-bold text-slate-800">実践編 - ROSによるアーム制御</h2>
-                        <div class="ros-version-selector flex space-x-1 rounded-lg bg-slate-200 p-1">
+                        <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">実践編 - ROSによるアーム制御</h2>
+                        <div class="ros-version-selector flex space-x-1 rounded-lg bg-slate-200 dark:bg-slate-700 p-1">
                             <button data-version="ros1"
-                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS1</button>
+                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 dark:text-slate-300 transition-all">ROS1</button>
                             <button data-version="ros2"
-                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS2</button>
+                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 dark:text-slate-300 transition-all">ROS2</button>
                         </div>
                     </div>
-                    <p class="text-slate-500 mb-6">対象：ROSでアーム制御が必要な人。ROS(Robot Operating
+                    <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">対象：ROSでアーム制御が必要な人。ROS(Robot Operating
                         System)を使って、より高度な制御を行うための基礎を学びます。</p>
-                    <div class="ros2-warning bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg my-4"
+                    <div class="ros2-warning bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-600 p-4 rounded-r-lg my-4"
                         role="alert" style="display: none;">
                         <p><span class="font-bold">注意:</span> ROS2版のスライド、コードは現在修正中です。</p>
                     </div>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <a href="slides/ros-introduction/index_ros1.html" class="slide-card ros-version-link">
-                            <h3 class="slide-title">🌐 ROSの全体像</h3>
+                        <a href="slides/ros-introduction/index_ros1.html" class="slide-card ros-version-link group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🌐 ROSの全体像</h3>
                             <p class="slide-description">ROSの学習戦略と、効果的な学習リソースの選択方法を紹介します。</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch"
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300 ros-text-switch"
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
-                        <a href="slides/ros-model-display/index_ros1.html" class="slide-card ros-version-link">
-                            <h3 class="slide-title">📐 ロボットモデルの表示</h3>
+                        <a href="slides/ros-model-display/index_ros1.html" class="slide-card ros-version-link group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">📐 ロボットモデルの表示</h3>
                             <p class="slide-description ros-text-switch"
                                 data-ros1-text="URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます."
                                 data-ros2-text="URDF/XACROでのロボットモデリング、TFツリー、RViz2での可視化を学びます.">
                                 URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます.</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch"
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300 ros-text-switch"
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
-                        <a href="slides/ros-simulator-connection/index_ros1.html" class="slide-card ros-version-link">
-                            <h3 class="slide-title">🎮 シミュレータとの接続</h3>
+                        <a href="slides/ros-simulator-connection/index_ros1.html" class="slide-card ros-version-link group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🎮 シミュレータとの接続</h3>
                             <p class="slide-description ros-text-switch"
                                 data-ros1-text="fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます."
                                 data-ros2-text="Mock ComponentsやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます.">
                                 fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます.</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch"
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300 ros-text-switch"
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
-                        <a href="slides/ros-arm-position-control/index_ros1.html" class="slide-card ros-version-link">
-                            <h3 class="slide-title">🎯 アーム位置制御とモーションプランニング</h3>
+                        <a href="slides/ros-arm-position-control/index_ros1.html" class="slide-card ros-version-link group">
+                            <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🎯 アーム位置制御とモーションプランニング</h3>
                             <p class="slide-description ros-text-switch"
                                 data-ros1-text="MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します."
                                 data-ros2-text="MoveIt2!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します.">
                                 MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します.</p>
-                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 ros-text-switch"
+                            <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300 ros-text-switch"
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
                     </div>
                 </section>
 
-                <!-- Step 3: 応用 -->
                 <section id="step3" class="mb-12">
                     <div class="flex justify-between items-center mb-2">
-                        <h2 class="text-3xl font-bold text-slate-800">応用編 - センサベース制御</h2>
-                        <div class="ros-version-selector flex space-x-1 rounded-lg bg-slate-200 p-1">
+                        <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">応用編 - センサベース制御</h2>
+                        <div class="ros-version-selector flex space-x-1 rounded-lg bg-slate-200 dark:bg-slate-700 p-1">
                             <button data-version="ros1"
-                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS1</button>
+                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 dark:text-slate-300 transition-all">ROS1</button>
                             <button data-version="ros2"
-                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 transition-all">ROS2</button>
+                                class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 dark:text-slate-300 transition-all">ROS2</button>
                         </div>
                     </div>
-                    <p class="text-slate-500 mb-6">対象：より高度なアプリケーションを開発したい人。力覚や視覚情報を使ったフィードバック制御を学びます。</p>
-                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg mb-6"
+                    <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">対象：より高度なアプリケーションを開発したい人。力覚や視覚情報を使ったフィードバック制御を学びます。</p>
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-600 p-4 rounded-r-lg mb-6"
                         role="alert">
                         <p class="font-bold">注意</p>
                         <p>製作途中のスライドを多く含むのでご注意ください。</p>
                     </div>
                     <div class="space-y-8">
                         <div>
-                            <h3 class="text-xl font-bold mb-4 text-slate-700">👁️ Visionベース</h3>
+                            <h3 class="text-xl font-bold mb-4 text-slate-700 dark:text-slate-300 transition-colors">👁️ Visionベース</h3>
                             <div class="grid md:grid-cols-2 gap-6">
-                                <a href="slides/ros-camera/index_ros1.html" class="slide-card ros-version-link">
-                                    <h3 class="slide-title">📷 カメラ/デプスカメラ</h3>
+                                <a href="slides/ros-camera/index_ros1.html" class="slide-card ros-version-link group">
+                                    <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">📷 カメラ/デプスカメラ</h3>
                                     <p class="slide-description">ROSでのカメラ統合、画像処理、ポイントクラウド処理を学びます。</p>
-                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span>
+                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">応用</span>
                                     </div>
                                 </a>
                                 <div class="slide-card-soon">
-                                    <h3 class="slide-title text-slate-500">🤖 Visionフィードバック制御</h3>
+                                    <h3 class="slide-title text-slate-500 dark:text-slate-400">🤖 Visionフィードバック制御</h3>
                                     <p class="slide-description">（スライド準備中）</p>
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold mb-4 text-slate-700">💪 Forceベース</h3>
+                            <h3 class="text-xl font-bold mb-4 text-slate-700 dark:text-slate-300 transition-colors">💪 Forceベース</h3>
                             <div class="grid md:grid-cols-2 gap-6">
-                                <a href="slides/ros-ft-sensor/index_ros1.html" class="slide-card ros-version-link">
-                                    <h3 class="slide-title">⚖️ フォーストルクセンサ</h3>
+                                <a href="slides/ros-ft-sensor/index_ros1.html" class="slide-card ros-version-link group">
+                                    <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">⚖️ フォーストルクセンサ</h3>
                                     <p class="slide-description">6軸力・トルクの活用、ノイズ除去、座標変換などを学びます。</p>
-                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span>
+                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">応用</span>
                                     </div>
                                 </a>
                                 <a href="slides/ros-arm-force-control/index_ros1.html"
-                                    class="slide-card ros-version-link">
-                                    <h3 class="slide-title">🦾 アーム力制御</h3>
+                                    class="slide-card ros-version-link group">
+                                    <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🦾 アーム力制御</h3>
                                     <p class="slide-description">インピーダンス/アドミッタンス制御など、力を使った高度な制御を学びます。</p>
-                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800">応用</span>
+                                    <div class="slide-meta"><span class="badge bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">応用</span>
                                     </div>
                                 </a>
                             </div>
@@ -208,37 +211,36 @@
                 </section>
             </main>
 
-            <!-- 右側サイドバー -->
             <aside class="lg:col-span-4 space-y-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                    <h3 class="text-lg font-bold mb-4">この教材について</h3>
-                    <p class="text-sm text-slate-600">
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100 transition-colors">この教材について</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 transition-colors">
                         ロボットアームを触ったことがあり、次のステップとしてROSを使って制御したい方に向けたハンズオン教材です。
                         pythonの普及などでロボットを動かすハードルは下がりましたが、より高度な動きをするにはROSが必要です。
                         ROSはロボットのアプリケーション開発を楽にするために作られましたが、求められる知識が高度でハードルが高いです。
                         この教材ではROSでロボットアームを動かすために必要な知識を、基礎から応用まで段階的に学べるように構成しています。
                     </p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                    <h3 class="text-lg font-bold mb-4">📢 お知らせ</h3>
-                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg"
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100 transition-colors">📢 お知らせ</h3>
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-600 p-4 rounded-r-lg"
                         role="alert">
                         <p>本スライドはCC BY-NC-ND 4.0に従ってご利用ください。適切な表示を行い、非営利目的での利用に限り、改変せずにそのままの形での再配布が可能です。</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                    <h3 class="text-lg font-bold mb-4">🔗 関連リンク</h3>
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100 transition-colors">🔗 関連リンク</h3>
                     <ul class="space-y-3">
                         <li>
                             <a href="https://nano-ap.eng.osaka-u.ac.jp/" target="_blank"
-                                class="text-indigo-600 hover:underline">
+                                class="text-indigo-600 hover:underline dark:text-indigo-400 transition-colors">
                                 🌐 小野研究室ホームページ
                             </a>
                         </li>
                         <li>
                             <a href="mailto:yusaku_nakajima@ap.eng.osaka-u.ac.jp"
-                                class="text-indigo-600 hover:underline">
+                                class="text-indigo-600 hover:underline dark:text-indigo-400 transition-colors">
                                 📧 問い合わせ(メール)
                             </a>
                         </li>
@@ -249,29 +251,27 @@
         </div>
     </div>
 
-    <!-- フッター -->
-    <footer class="bg-slate-100 border-t border-slate-200 mt-12">
-        <div class="container mx-auto px-6 py-8 text-center text-slate-500">
+    <footer class="bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-12 transition-colors duration-300">
+        <div class="container mx-auto px-6 py-8 text-center text-slate-500 dark:text-slate-400">
             <p>© 2025 大阪大学 中島優作 | 小野研究室</p>
         </div>
     </footer>
 
-    <!-- CSS (スライドカードのスタイル) -->
     <style>
         .slide-card {
-            @apply bg-white border border-slate-200/80 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col;
+            @apply bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col;
         }
 
         .slide-card-soon {
-            @apply bg-slate-100 border border-slate-200/80 rounded-xl p-6 flex flex-col text-center justify-center;
+            @apply bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-6 flex flex-col text-center justify-center;
         }
 
         .slide-title {
-            @apply text-lg font-bold text-slate-800 mb-2;
+            @apply text-lg font-bold text-slate-800 dark:text-slate-100 mb-2;
         }
 
         .slide-description {
-            @apply text-slate-500 text-sm flex-grow mb-4;
+            @apply text-slate-500 dark:text-slate-400 text-sm flex-grow mb-4;
         }
 
         .slide-meta {
@@ -283,8 +283,48 @@
         }
     </style>
 
-    <!-- JavaScript -->
     <script>
+        // ダークモード切り替えロジック
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // デフォルトをダークモードにするための初期設定
+        // ローカルストレージに設定がない場合はダークモード('dark'クラスはHTMLタグに既についている)
+        // ローカルストレージに 'light' がある場合のみ外す
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        // アイコンの表示切替関数
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                lightIcon.classList.add('hidden');
+                darkIcon.classList.remove('hidden');
+            }
+        }
+        updateIcons(); // 初期実行
+
+        themeToggleBtn.addEventListener('click', function() {
+            // クラスの付け替え
+            document.documentElement.classList.toggle('dark');
+            
+            // ローカルストレージへの保存
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+            
+            updateIcons();
+        });
+
+
         // モバイルメニュー
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -308,11 +348,15 @@
                     const buttons = selector.querySelectorAll('.ros-version-btn');
                     buttons.forEach(button => {
                         if (button.dataset.version === selectedVersion) {
-                            button.classList.add('bg-white', 'shadow');
-                            button.classList.remove('text-slate-700');
+                            // Selected State (Light/Dark対応)
+                            button.classList.add('bg-white', 'dark:bg-slate-600', 'shadow');
+                            button.classList.remove('text-slate-700', 'dark:text-slate-300');
+                            button.classList.add('text-slate-900', 'dark:text-white');
                         } else {
-                            button.classList.remove('bg-white', 'shadow');
-                            button.classList.add('text-slate-700');
+                            // Unselected State
+                            button.classList.remove('bg-white', 'dark:bg-slate-600', 'shadow');
+                            button.classList.remove('text-slate-900', 'dark:text-white');
+                            button.classList.add('text-slate-700', 'dark:text-slate-300');
                         }
                     });
                 });
@@ -325,7 +369,7 @@
 
                 // テキストを更新
                 textElements.forEach(el => {
-                    const text = el.dataset[selectedVersion + 'Text']; // el.dataset.ros1Text or el.dataset.ros2Text
+                    const text = el.dataset[selectedVersion + 'Text']; 
                     if (text) {
                         el.innerText = text;
                     }
