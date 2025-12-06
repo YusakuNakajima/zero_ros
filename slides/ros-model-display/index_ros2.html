@@ -49,16 +49,6 @@
             border: 1px solid #333;
         }
 
-        .slide-layout-code-text {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-        }
-
-        .code-section {
-            flex: 2;
-            min-width: 0;
-        }
     </style>
 </head>
 
@@ -367,17 +357,21 @@ ros2 launch ros_study view_ur.launch.py
                 </section>
 
                 <section>
-                    <h2>エンドエフェクタを追加したい</h2>
+                    <h2>エンドエフェクタを追加</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_eef.xacro" data-trim></code></pre>
-                            <p> pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</p>
+                            <p> pestleとspatulaのエンドエフェクタを含むUR5e設定例</p>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>XACROのinclude機能で既にあるURDFやXACROを呼び出せる</li>
                                 <li>アーム基本構造とエンドエフェクタ追記で別々のファイルを用意するのがおススメ</li>
                                 <li>エンドエフェクタ部分だけ追記すれば変更が用意</li>
+                                <p style="font-size: 0.7em; margin-top: 20px;">使用しているSTLファイル:</p>
+                            <ul style="font-size: 0.7em;">
+                                <li><a href="code/ros2/pestle_ur.stl" download>pestle_ur.stl</a></li>
+                                <li><a href="code/ros2/spatula.stl" download>spatula.stl</a></li>
+                            </ul>
                             </ul>
                         </div>
                     </div>
