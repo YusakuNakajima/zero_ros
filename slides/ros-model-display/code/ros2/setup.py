@@ -12,6 +12,9 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob.glob(os.path.join('launch', '*launch.py'))),
+        (os.path.join('share', package_name, 'urdf'), glob.glob(os.path.join('urdf', '**', '*'), recursive=True)),
+        (os.path.join('share', package_name, 'meshes'), glob.glob(os.path.join('meshes', '**', '*'), recursive=True)),
+        (os.path.join('share', package_name, 'rviz'), glob.glob(os.path.join('rviz', '*.rviz'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -19,7 +22,6 @@ setup(
     maintainer_email='user@todo.todo',
     description='TODO: Package description',
     license='TODO: License declaration',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
         ],

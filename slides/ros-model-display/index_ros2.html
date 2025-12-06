@@ -188,7 +188,7 @@ sudo apt install ros-${ROS_DISTRO}-ur
 
                         <pre><code data-trim class="bash">
 cd ~/ros2_ws
-colcon build --packages-select ros_study
+colcon build
 source install/setup.bash
                         </code></pre>
 
@@ -363,22 +363,26 @@ ros2 launch ros_study view_ur.launch.py
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_eef.xacro" data-trim></code></pre>
                             <p> pestleとspatulaのエンドエフェクタを含むUR5e設定例</p>
                         </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>アーム基本構造とエンドエフェクタ追記で別々のファイルを用意するのがおススメ</li>
-                                <li>エンドエフェクタ部分だけ追記すれば変更が用意</li>
-                                <p style="font-size: 0.7em; margin-top: 20px;">使用しているSTLファイル:</p>
-                            <ul style="font-size: 0.7em;">
-                                <li><a href="code/ros2/pestle_ur.stl" download>pestle_ur.stl</a></li>
-                                <li><a href="code/ros2/spatula.stl" download>spatula.stl</a></li>
-                            </ul>
-                            </ul>
-                        </div>
+                                                <div class="text-section">
+                                                    <ul>
+                                                        <li>アーム基本構造とエンドエフェクタ追記で別々のファイルを用意するのがおススメ</li>
+                                                        <li>エンドエフェクタ部分だけ追記すれば変更が用意</li>
+                                                    </ul>
+                                                    <p style="font-size: 0.7em; margin-top: 20px;">使用しているSTLファイル:</p>
+                                                    <ul style="font-size: 0.7em;">
+                                                        <li><a href="code/ros2/pestle_ur.stl" download>pestle_ur.stl</a></li>
+                                                        <li><a href="code/ros2/spatula.stl" download>spatula.stl</a></li>
+                                                    </ul>
+                                                    <p style="font-size: 0.7em; margin-top: 20px;">
+                                                        これらのSTLファイルは、ROSパッケージ`ros_study`の`meshes`ディレクトリに配置してください。<br>
+                                                        `setup.py`によって、`share/ros_study/meshes`にインストールされます。
+                                                    </p>
+                                                </div>
                     </div>
                 </section>
 
                 <section>
-                    <h2>変更後のxacroの呼び出し</h2>
+                    <h2>変更後のxacroを呼び出すLaunch</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="code/ros2/view_ur_with_eef.launch.py" data-trim></code></pre>
@@ -390,6 +394,25 @@ ros2 launch ros_study view_ur.launch.py
                             </ul>
                         </div>
                     </div>
+                </section>
+
+                <section>
+                    <h2>ビルドと実行</h2>
+                    <ul>
+                        <li>ビルドします</li>
+
+                        <pre><code data-trim class="bash">
+cd ~/ros2_ws
+colcon build
+source install/setup.bash
+                        </code></pre>
+
+                        <li>次のコマンドで実行してください</li>
+                        <pre><code data-trim class="bash">
+ros2 launch ros_study view_ur_with_eef.launch.py
+                        </code></pre>
+                    </ul>
+
                 </section>
 
             </section>
