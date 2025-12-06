@@ -254,6 +254,14 @@
                     </div>
                 </section>
                 <section>
+                    <h2>構築済みROSjectの利用</h2>
+                    <p>勉強のためには自分で試行錯誤して環境を作ることを推奨します。</p>
+                    <p>困った時のために、構築済みのrosjectも用意しておいたので、デバッグなどでご利用ください。</p>
+                    <p style="margin-top: 20px;">
+                        <a href="../../rosject/rosject_humble.zip" download style="color: #3b82f6; text-decoration: underline;">rosject_humble.zip</a>
+                    </p>
+                </section>
+                <section>
                     <h2>ROSjectの作成 1/4</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
@@ -403,24 +411,12 @@
                                                     <li>BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
                                                 </ul>
                                             </section>
-                                            <section>
-                                                <h2>コンテナの起動とROSのビルド</h2>
-                                                <pre><code data-trim class="bash">
-                    user@user:~/powder_grinding_ros2/env$ ./RUN-DOCKER-CONTAINER.sh
-                    root@powder_grinding_ros:~/ros2_ws$ ./INITIAL_SETUP_ROS_ENVIROMENTS.sh
-                    root@powder_grinding_ros:~/ros2_ws$ source install/setup.bash
-                                        </code></pre>
-                                                <ul>
-                                                    <li>Dockerイメージの作成後にDockerコンテナを起動します(RUN-DOCKER-CONTAINER.sh)</li>
-                                                    <li>ターミナルの環境がDockerコンテナ内に移動しますので、ROSの環境のビルドをします(INITIAL_SETUP_ROS_ENVIROMENTS.sh)</li>
-                                                    <li>ROS環境のビルド結果を反映します(source install/setup.bash)</li>
-                                                </ul>
-                                            </section>                </section>
-            </section>
-
-            <section>
-                <h2>困ったときの相談場所</h2>
-                <ul>
+                                                                                            </section>
+                                                                                        </section>
+                                                                                    </section>
+                                                                    
+                                                                                    <section>
+                                                                                        <h2>困ったときの相談場所</h2>                <ul>
                     <li>コミュニティ内で質問（<a href="https://wiki.ros.org/ja/Support" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">https://wiki.ros.org/ja/Support</a>）することができる
                     </li>
