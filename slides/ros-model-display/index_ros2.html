@@ -857,7 +857,7 @@ rviz_node = Node(
             <section>
                 <h2>データの流れを目視確認</h2>
                 <div
-                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin-top: 20px;">
+                    style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-top: 20px;">
 
                     <div style="text-align: left;">
                         <ul style="font-size: 0.9em; line-height: 1.5;">
@@ -1038,34 +1038,39 @@ rqt_graph
             </section>
 
             <section>
-                <h2>うまくいかない時は？<br><span style="font-size: 0.7em;">(トラブルシューティング)</span></h2>
-
-                <div style="display: flex; gap: 40px; justify-content: center; margin-top: 30px;">
-
-                    <div
-                        style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
-                        <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. ロボットが表示されない</h3>
-                        <p style="font-weight: bold; font-size: 0.9em;">A. Fixed Frameを確認</p>
-                        <hr style="border-color: #555;">
-                        <ul style="font-size: 0.8em; margin-top: 10px;">
-                            <li>RViz左側のパネルを確認</li>
-                            <li>「Global Options」→「Fixed Frame」</li>
-                            <li>ここが <code>base_link</code> または <code>world</code> になっているか確認してください。</li>
-                        </ul>
-                    </div>
-
-                    <div
-                        style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left;">
-                        <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. "No transform..." エラー</h3>
-                        <p style="font-weight: bold; font-size: 0.9em;">A. Publisherの確認</p>
-                        <hr style="border-color: #555;">
-                        <ul style="font-size: 0.8em; margin-top: 10px;">
-                            <li><code>robot_state_publisher</code> ノードは起動していますか？</li>
-                            <li>このノードがTF（位置情報）を配信していないとエラーになります。</li>
-                        </ul>
-                    </div>
-
-                </div>
+                <section>
+                    <h2>うまくいかない時は？<br><span style="font-size: 0.7em;">(トラブルシューティング)</span></h2>
+                    <p>↓</p>
+                </section>
+                <section>
+                    <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. ロボットが表示されない</h3>
+                    <p style="font-weight: bold; font-size: 0.9em;">A. Fixed Frameを確認</p>
+                    <hr style="border-color: #555;">
+                    <ul style="font-size: 0.8em; margin-top: 10px;">
+                        <li>RViz左側のパネルを確認</li>
+                        <li>「Global Options」→「Fixed Frame」</li>
+                        <li>ここが <code>base_link</code> または <code>world</code> になっているか確認してください。</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. "No transform..." エラー</h3>
+                    <p style="font-weight: bold; font-size: 0.9em;">A. Publisherの確認</p>
+                    <hr style="border-color: #555;">
+                    <ul style="font-size: 0.8em; margin-top: 10px;">
+                        <li><code>robot_state_publisher</code> ノードは起動していますか？</li>
+                        <li>このノードがTF（位置情報）を配信していないとエラーになります。</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 style="color: #ff6b6b; font-size: 1.0em; margin-bottom: 15px;">Q. ファイルの更新が反映されない</h3>
+                    <p style="font-weight: bold; font-size: 0.9em;">A. ビルドキャッシュをクリア</p>
+                    <hr style="border-color: #555;">
+                    <ul style="font-size: 0.8em; margin-top: 10px;">
+                        <li>`ros2_ws`ディレクトリで以下のコマンドを実行してください:</li>
+                        <li><pre><code class="bash" data-trim>rm -rf build/ install/ log/</code></pre></li>
+                        <li>その後、再度`colcon build`を実行してください。</li>
+                    </ul>
+                </section>
             </section>
 
             <section>
