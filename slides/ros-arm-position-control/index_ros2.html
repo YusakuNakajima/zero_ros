@@ -364,7 +364,7 @@
 
                         <div class="slide-content">
                             <ul>
-                                <li>前章と同様に、まずは<strong style="color: #3b82f6;">Mock
+                                <li>前章と同様に、<strong style="color: #3b82f6;">Mock
                                         Components</strong>を使って、MoveIt!をシミュレーション環境で動かす準備をします。</li>
                                 <li>設定方法はほとんど同じですが、MoveIt!特有のコントローラ設定が追加されます。</li>
                             </ul>
@@ -372,33 +372,29 @@
                     </div>
                 </section>
                 <section>
-                    <h2>MoveIt!で使うコントローラ</h2>
-                    <p style="text-align: left;">MoveIt!のプランナは基本的に関節の目標角度列(軌跡)を生成します。<br>しかし、それだけではロボットは動けません。</p>
+                    <h2>URのMoveIt!で使うコントローラ</h2>
                     <div style="display: flex; gap: 20px; align-items: stretch; margin-top: 20px;">
                         <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
                             <h4 style="margin:0 0 10px 0;">JointTrajectoryController</h4>
                             <ul style="font-size: 0.8em;">
-                                <li>各点での時刻指定が<strong style="color: #f87171;">必須</strong></li>
-                                <li>時刻通りに動こうとする</li>
+                                <li>ROSを使ったロボットアーム制御で一般に使われるコントローラです</li>
                             </ul>
                         </div>
                         <div
                             style="flex: 1; background: rgba(74, 222, 128, 0.1); padding: 15px; border-radius: 8px; border: 2px solid #4ade80;">
                             <h4 style="margin:0 0 10px 0; color: #4ade80;">ScaledJointTrajectoryController</h4>
                             <ul style="font-size: 0.8em;">
-                                <li>ロボットの<strong>速度スライダー(スピードスケーリング)</strong>に対応</li>
-                                <li>実機側で速度を落とした場合、軌道の進行も合わせて<strong>自動で遅く調整</strong>してくれる</li>
-                                <li>通常のコントローラで発生する経路からの逸脱を防ぐことができる</li>
+                                <li>URの<strong>速度スライダー</strong>に対応コントローラ</li>
+
+                                <li>これがないと、速度スライダーが1%でもROSは100%の速度で計算するので制御がおかしくなります</li>
+                                <li>UR限定、URデフォルトです</li>
                             </ul>
                         </div>
                     </div>
-                    <p style="text-align: left; margin-top: 20px;">このため、MoveIt!では<strong
-                            style="color: #4ade80;">ScaledJointTrajectoryController</strong>を使うのが一般的です。</p>
                 </section>
 
                 <section>
-                    <h2>xacroファイルの確認</h2>
-                    <p>前章と同様に、ros2_controlタグでMock Componentsを読み込みます。<br>このファイルは既に設定済みです。</p>
+                    <h2>xacroファイルの更新</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_ee.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
@@ -406,9 +402,8 @@
 
                         <div class="text-section">
                             <ul>
-                                <li><code>slides/ros-arm-position-control/code/ros2/ur5e_with_ee.xacro</code></li>
-                                <li><code>mock_components/GenericSystem</code>プラグインが指定されています。</li>
-                                <li>これにより、シミュレーション用の仮想ハードウェアが有効になります。</li>
+                                <li>MoveItの設定ファイルとの整合性を取るため<code>ur5e_with_ee.xacro</code>を更新します</li>
+                                <li>書き換え箇所が多いので、UR公式のXACROを活用します</li>
                             </ul>
                         </div>
                     </div>
