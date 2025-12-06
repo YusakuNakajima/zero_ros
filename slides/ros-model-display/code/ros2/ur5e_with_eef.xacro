@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5e_with_tools">
 
-    <xacro:include filename="$(find ur_description)/urdf/ur5e.xacro" />
+    <xacro:include filename="$(find ros_study)/urdf/ur5e.xacro" />
 
     <xacro:arg name="pestle_length" default="0.1092" />
     <xacro:arg name="spatula_length" default="0.089" />

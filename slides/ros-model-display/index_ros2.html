@@ -142,7 +142,7 @@ sudo apt install ros-${ROS_DISTRO}-ur
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e.urdf" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -326,7 +326,7 @@ ros2 launch ros_study view_ur.launch.py
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.urdf" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e.urdf" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -354,7 +354,7 @@ ros2 launch ros_study view_ur.launch.py
                     <h2>XACRO（XML Macros for Robots）</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e.xacro" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -370,7 +370,7 @@ ros2 launch ros_study view_ur.launch.py
                     <h2>エンドエフェクタを追加したい</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_robot_with_eef.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_eef.xacro" data-trim></code></pre>
                             <p> pestleとspatulaの2つのエンドエフェクタを含むUR5e設定例</p>
                         </div>
                         <div class="text-section">
@@ -378,6 +378,21 @@ ros2 launch ros_study view_ur.launch.py
                                 <li>XACROのinclude機能で既にあるURDFやXACROを呼び出せる</li>
                                 <li>アーム基本構造とエンドエフェクタ追記で別々のファイルを用意するのがおススメ</li>
                                 <li>エンドエフェクタ部分だけ追記すれば変更が用意</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>変更後のxacroの呼び出し</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ros2/view_ur_with_eef.launch.py" data-trim></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>launchディレクトリ内にview_ur_with_eef.launch.pyという名前で左のコードを保存</li>
+                                <li>前回のlaunchからURDFをXACROに置き換えただけ</li>
                             </ul>
                         </div>
                     </div>
