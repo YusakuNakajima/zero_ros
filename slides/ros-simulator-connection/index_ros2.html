@@ -463,6 +463,14 @@ rviz_node = Node(
                                 <strong style="font-size: 1.4em; color: #3b82f6;">JointTrajectoryController</strong><br>
                                 について簡単に解説します。
                             </p>
+
+                            <p style="margin-top: 40px; font-size: 0.6em;">
+                                詳細は公式ドキュメントを参照してください：<br>
+                                <a
+                                    href="https://control.ros.org/humble/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html">
+                                    https://control.ros.org/humble/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </section>
@@ -483,36 +491,104 @@ rviz_node = Node(
                 </section>
 
                 <section>
-                    <h2>制御できる要素</h2>
-                    <p>各関節（Joint）に対して、以下の値を制御可能</p>
-                    <p>ロジックなどの詳細は次のスライドで説明します</p>
+                    <h2>入出力フロー</h2>
 
+                    <div
+                        style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
+                        <div
+                            style="border: 2px solid #fff; padding: 10px; border-radius: 10px; width: 28%; font-size: 0.8em;">
+                            <div style="font-size: 2em;">📨</div>
+                            <strong>指令 (Input)</strong><br>
+                            <span style="color: #aaa;">JointTrajectory Msg</span><br>
+                            <span style="font-size: 0.8em; color: #3b82f6;">[q1, q2, q3...] + 時間</span>
+                        </div>
 
-                    <div class="diagram-container" style="justify-content: center; gap: 40px; margin-top: 40px;">
-                        <div class="diagram-box"
-                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 120px;">
-                            <span style="font-size: 2.5em;">📍</span><br>
-                            <strong>位置</strong><br>(Position)
+                        <div style="font-size: 1.5em; color: #aaa;">➡</div>
+
+                        <div
+                            style="background: #3b82f6; color: white; padding: 10px; border-radius: 10px; width: 30%; font-size: 0.8em;">
+                            <strong>Joint Trajectory<br>Controller</strong><br>
+                            <span style="font-size: 0.8em;">時間の補間(Spline)<br>各時刻の目標値を計算</span>
                         </div>
-                        <div class="diagram-box"
-                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 120px;">
-                            <span style="font-size: 2.5em;">🚀</span><br>
-                            <strong>速度</strong><br>(Velocity)
-                        </div>
-                        <div class="diagram-box"
-                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 120px;">
-                            <span style="font-size: 2.5em;">💪</span><br>
-                            <strong>トルク</strong><br>(Effort)
+
+                        <div style="font-size: 1.5em; color: #aaa;">➡</div>
+
+                        <div
+                            style="border: 2px dashed #fff; padding: 10px; border-radius: 10px; width: 28%; font-size: 0.8em;">
+                            <div style="font-size: 2em;">🤖</div>
+                            <strong>ロボット (Output)</strong><br>
+                            <span style="color: #aaa;">各関節への指令</span><br>
+                            <span style="font-size: 0.8em; color: #4ade80;">位置 / 速度 / トルク</span>
                         </div>
                     </div>
 
-                    <p style="font-size: 0.7em; color: #aaa; margin-top: 40px; text-align: center;">
-                        ※ すべてのモードが使えるとは限りません。<br>
-                        ロボット側のハードウェア（ドライバ）が対応している制御モードのみ使用可能です。<br>
-                        （今回はMockなので、主に位置制御をシミュレートします）
-                    </p>
+                    <div
+                        style="margin-top: 40px; background: rgba(255,255,255,0.08); padding: 15px; border-radius: 15px; border: 1px solid #fbbf24;">
+                        <h4 style="color: #fbbf24; margin: 0 0 10px 0; font-size: 0.9em;">⚠ 注意：手先座標 (XYZ) ではありません</h4>
+                        <div style="display: flex; justify-content: space-around; align-items: flex-start;">
+                            <div style="width: 48%;">
+                                <strong style="font-size: 0.8em; color: #4ade80;">⭕ 関節空間(Joint Space)</strong>
+                                <p style="font-size: 0.6em; text-align: left; margin: 5px 0;">
+                                    「肩を30度、肘を90度」のように<br>
+                                    <strong>全ての関節の指令</strong>が必要です。
+                                </p>
+                            </div>
+                            <div style="border-left: 1px solid #555;"></div>
+                            <div style="width: 48%; opacity: 0.7;">
+                                <strong style="font-size: 0.8em; color: #f87171;">❌ タスク空間(Task Space)</strong>
+                                <p style="font-size: 0.6em; text-align: left; margin: 5px 0;">
+                                    「手を座標(x,y,z)へ」という指令は<br>
+                                    <strong>直接受け付けられません。</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </section>
+                <section>
+                    <h2>制御できる要素</h2>
 
+                    <p style="font-size: 0.8em; margin-bottom: 20px;">
+                        JTCは以下の要素を扱えますが、<br>
+                        <strong style="color: #fbbf24;">ロボット側がどの制御モードに対応しているか</strong><br>
+                        によって実際に使えるものが決まります。
+                    </p>
+
+                    <div class="diagram-container" style="justify-content: center; gap: 20px; margin-top: 10px;">
+                        <div class="diagram-box"
+                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                            <span style="font-size: 1.8em;">📍</span><br>
+                            <strong style="font-size: 0.9em;">位置</strong><br><span
+                                style="font-size: 0.7em;">(Position)</span>
+                        </div>
+                        <div class="diagram-box"
+                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                            <span style="font-size: 1.8em;">🚀</span><br>
+                            <strong style="font-size: 0.9em;">速度</strong><br><span
+                                style="font-size: 0.7em;">(Velocity)</span>
+                        </div>
+                        <div class="diagram-box"
+                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                            <span style="font-size: 1.8em;">💪</span><br>
+                            <strong style="font-size: 0.9em;">トルク</strong><br><span
+                                style="font-size: 0.7em;">(Effort)</span>
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top: 20px; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 10px; text-align: left; font-size: 0.75em;">
+                        <strong style="color: #fbbf24;">📝 シミュレータ環境で使う制御</strong>
+                        <ul style="margin-top: 5px; line-height: 1.4; padding-left: 20px;">
+                            <li style="margin-bottom: 5px;">
+                                <strong>Mock Hardware :</strong><br>
+                                物理演算がないため、直接<strong style="color: #4ade80;">「位置制御」</strong>で動かすのが基本
+                            </li>
+                            <li>
+                                <strong>Gazebo 等の物理シミュレータ:</strong><br>
+                                重力や慣性があるので、<strong style="color: #f87171;">「トルク制御」</strong>で動かすのが基本
+                            </li>
+                        </ul>
+                    </div>
+                </section>
             </section>
 
             <section>
@@ -525,7 +601,8 @@ rviz_node = Node(
                         <div class="slide-content">
                             <ul>
                                 <li>Gazeboは、ROSで最も広く使われている<strong>3D物理シミュレータ</strong>です。</li>
-                                <li>Mock Componentsとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
+                                <li>Mock
+                                    Componentsとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
                                 </li>
                                 <li>実機を動かす前の「最終確認」として不可欠なツールです。</li>
                             </ul>
@@ -807,7 +884,8 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                             <div
                                 style="flex: 1; padding: 20px; background: rgba(214, 51, 132, 0.2); border: 2px solid #d63384; border-radius: 15px; text-align: center;">
                                 <h4 style="color: #d63384; margin: 0;">Gazebo</h4>
-                                <p style="font-size: 0.7em; margin-top: 10px;">通信方式: <strong>Gz Transport</strong></p>
+                                <p style="font-size: 0.7em; margin-top: 10px;">通信方式: <strong>Gz Transport</strong>
+                                </p>
                                 <div
                                     style="font-size: 0.8em; background: #d63384; color: white; padding: 5px; border-radius: 5px; margin-top: 10px;">
                                     "Hello Gz!"
@@ -881,13 +959,17 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                         </div>
 
                         <ul style="line-height: 1.8;">
-                            <li><span style="color: #4ade80; font-weight: bold;">/topic_name</span> : 通信したいトピック名</li>
+                            <li><span style="color: #4ade80; font-weight: bold;">/topic_name</span> : 通信したいトピック名
+                            </li>
                             <li><span style="color: #facc15; font-weight: bold;">@</span> : <strong>ROS 2の型</strong>
                                 を指定する区切り文字</li>
                             <li><span style="color: #3b82f6; font-weight: bold;">ros_type</span> : ROS側のメッセージ型</li>
-                            <li><span style="color: #facc15; font-weight: bold;">[</span> : <strong>Gazeboの型</strong>
-                                を指定する区切り文字</li>
-                            <li><span style="color: #d63384; font-weight: bold;">gz_type</span> : Gazebo側のメッセージ型</li>
+                            <li><span style="color: #facc15; font-weight: bold;">[</span> :
+                                <strong>Gazeboの型</strong>
+                                を指定する区切り文字
+                            </li>
+                            <li><span style="color: #d63384; font-weight: bold;">gz_type</span> : Gazebo側のメッセージ型
+                            </li>
                         </ul>
 
                         <div
@@ -915,7 +997,8 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                             </p>
                             <hr style="border-color: #facc15; margin: 10px 0;">
                             <p style="font-size: 0.8em; text-align: left;">
-                                ROS 2ノードはこれを受け取り、<strong>「今は現実時間の何時か？」ではなく「シミュレーション世界の何秒目か？」</strong>を基準に動くようになります。<br>
+                                ROS
+                                2ノードはこれを受け取り、<strong>「今は現実時間の何時か？」ではなく「シミュレーション世界の何秒目か？」</strong>を基準に動くようになります。<br>
                                 <span style="font-size: 0.8em; color: #aaa;">(パラメータ <code>use_sim_time:=True</code>
                                     が必要な理由です)</span>
                             </p>
@@ -962,7 +1045,8 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                 <section>
                     <h3>A. GUIでの配置 (Gazebo Fuel)</h3>
                     <div style="text-align: left;">
-                        <p>Gazebo (New) には<strong>「Resource Browser」</strong>があり、<br>オンライン上のモデルライブラリ（Fuel）から物体を呼び出せます。
+                        <p>Gazebo (New) には<strong>「Resource
+                                Browser」</strong>があり、<br>オンライン上のモデルライブラリ（Fuel）から物体を呼び出せます。
                         </p>
 
                         <ol style="font-size: 0.9em; margin-top: 20px;">
