@@ -19,6 +19,25 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
 
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .copy-button:hover {
+            opacity: 1;
+        }
+    </style>
+
     <!-- 共通スタイル読み込み -->
     <link rel="stylesheet" href="../../assets/common-styles.css">
 </head>
@@ -125,7 +144,7 @@
                         </div>
                     </div>
                 </section>
-                 <section>
+                <section>
                     <h2>複数のTCP</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
@@ -141,7 +160,7 @@
                         </div>
                     </div>
                 </section>
-               <section>
+                <section>
                     <h2>エンドエフェクタの重心設定</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
@@ -153,9 +172,9 @@
                                 <li>フリードライブでの重力補償</li>
                                 <li>手先のフォーストルクセンサ値の重力補償</li>
                                 <li>加減速の調整</li>
-                            <ul>
-                                
-                            </ul>
+                                <ul>
+
+                                </ul>
                         </div>
                     </div>
                 </section>
@@ -350,40 +369,11 @@
 
                 <section>
                     <h2>プログラムから動かす(URの例)</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <pre><code class="language-python">
-import rtde_control
-import rtde_receive
-import time
-robot_ip = "URロボットのIPアドレス" 
-rtde_c = rtde_control.RTDEControlInterface(robot_ip)
-rtde_r = rtde_receive.RTDEReceiveInterface(robot_ip)
-try:
-    # PTP動作 (関節空間)
-    # 関節角度をラジアンで指定
-    target_joints = [0.1, -1.2, 2.3, -1.5, 0.5, 0.0] #ラジアン表記
-    rtde_c.moveJ(target_joints, 1.0, 0.5) # 速度1.0rad/s, 加速度0.5rad/s^2
-    time.sleep(5)
-
-    # LIN動作 (ベース座標系)
-    # ベース座標系での目標TCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    target_pose_base = [0.3, 0.4, 0.5, 0.0, 0.0, 0.0]
-    rtde_c.moveL(target_pose_base, 0.5, 0.3) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
-
-    # CIRC動作 (ツール座標系)
-    # ツール座標系での中間点と目標点のTCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    via_pose_tool = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0]
-    to_pose_tool = [0.2, 0.0, 0.0, 0.0, 0.0, 0.0]
-    rtde_c.moveC(via_pose_tool, to_pose_tool, 0.5, 0.3, pose_tool=True) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
-
-finally:
-    rtde_r.disconnect()
-                    </code></pre>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="code/ur_rtde_example.py" data-trim></code></pre>
                         </div>
-                        <div style="flex: 1;">
+                        <div class="text-section">
                             <ul>
                                 <li>PTP = moveJ</li>
                                 <li>LIN = moveL</li>
@@ -391,6 +381,7 @@ finally:
                             </ul>
                         </div>
                     </div>
+
                 </section>
             </section>
 
@@ -890,12 +881,47 @@ finally:
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/zoom/zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-menu@2.1.0/menu.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
 
     <script>
+        // 外部コードファイルを読み込む関数
+        async function loadExternalCode() {
+            try {
+                const codeElements = document.querySelectorAll('.external-code');
+                for (const element of codeElements) {
+                    const source = element.getAttribute('data-src');
+                    if (source) {
+                        const response = await fetch(source);
+                        const text = await response.text();
+                        element.textContent = text;
+                    }
+                }
+                // コードハイライトを再適用
+                hljs.highlightAll();
+            } catch (error) {
+                console.error('コードファイルの読み込みに失敗しました:', error);
+            }
+        }
+
+        function copyCodeToClipboard(button) {
+            const pre = button.closest('pre');
+            const code = pre.querySelector('code');
+            navigator.clipboard.writeText(code.innerText).then(function () {
+                button.innerText = 'Copied!';
+                setTimeout(function () {
+                    button.innerText = 'Copy';
+                }, 2000);
+            }, function (err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
+
         // More info about initialization & config:
         // - https://revealjs.com/initialization/
         // - https://revealjs.com/config/
@@ -935,6 +961,25 @@ finally:
 
                 // その他のChalkboardショートカットはデフォルトで有効
             }
+        });
+
+        // Reveal.js初期化後に外部コードを読み込み
+        Reveal.on('ready', function () {
+            loadExternalCode().then(() => {
+                hljs.highlightAll();
+
+                // Add copy buttons to all pre blocks
+                let preblocks = document.querySelectorAll('pre');
+                preblocks.forEach(function (pre) {
+                    let button = document.createElement('button');
+                    button.className = 'copy-button';
+                    button.innerText = 'Copy';
+                    button.addEventListener('click', function () {
+                        copyCodeToClipboard(this);
+                    });
+                    pre.appendChild(button);
+                });
+            });
         });
     </script>
 </body>
