@@ -1163,19 +1163,19 @@ gazebo = IncludeLaunchDescription(
                 <section>
                     <h3>【重要】ロボットは障害物が見えるか？</h3>
                     <div style="text-align: left;">
-                        <p>Gazeboに障害物を置いただけでは、<br>
-                            <strong>ROS 2（Navigationなど）は障害物に気づきません。</strong>
+                        <p>Gazeboに障害物を置くだけでは、<br>
+                            <strong>UR5eは障害物を認識しません。</strong>
                         </p>
                         <div class="comparison-box"
                             style="margin-top: 20px; background: rgba(220, 53, 69, 0.1); border: 2px solid #dc3545;">
-                            <h4 style="color: #dc3545; font-size: 1.0em; margin-bottom: 10px;">必要なもの：センサー</h4>
+                            <h4 style="color: #dc3545; font-size: 1.0em; margin-bottom: 10px;">必要なもの：センサー or Planning Scene</h4>
                             <p style="font-size: 0.9em; text-align: left;">
-                                ロボットが障害物を避けるためには、以下の流れが必要です。
+                                衝突回避には、以下が必要です。
                             </p>
                             <ol style="font-size: 0.9em;">
-                                <li>Gazebo上で<strong>LiDAR</strong>や<strong>カメラ</strong>をシミュレートする</li>
-                                <li>センサーデータをROSトピック（<code>/scan</code>等）として出す</li>
-                                <li>ROS側のNavigation Stackがそれを受け取ってマップを作る</li>
+                                <li>Gazeboの<strong>深度カメラ</strong>等で障害物を検出</li>
+                                <li><strong>Planning Scene</strong>へ反映（例: <code>/planning_scene</code>）</li>
+                                <li>MoveItが衝突チェックして回避</li>
                             </ol>
                         </div>
                     </div>

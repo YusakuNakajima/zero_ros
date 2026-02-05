@@ -1,78 +1,92 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import rospy
-import actionlib
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionClient
+from rclpy.duration import Duration
+
+from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
-class JTCDemo:
+
+class JTCDemo(Node):
     def __init__(self):
-        rospy.init_node('jtc_demo', anonymous=True)
-        
-        # ActionClient作成
-        self.client = actionlib.SimpleActionClient(
+        super().__init__('jtc_demo')
+
+        self.client = ActionClient(
+            self,
+            FollowJointTrajectory,
             '/scaled_pos_joint_traj_controller/follow_joint_trajectory',
-            FollowJointTrajectoryAction
         )
-        
-        # サーバーが起動するまで待機
-        rospy.loginfo("Waiting for the FollowJointTrajectory action server to come up...")
-        self.client.wait_for_server()
-        rospy.loginfo("Connected to the FollowJointTrajectory action server.")
-        
+
         self.joint_names = [
-            'shoulder_pan_joint', 'shoulder_lift_joint', 
-            'elbow_joint', 'wrist_1_joint', 
+            'shoulder_pan_joint', 'shoulder_lift_joint',
+            'elbow_joint', 'wrist_1_joint',
             'wrist_2_joint', 'wrist_3_joint'
         ]
 
+    def wait_for_server(self):
+        self.get_logger().info('Waiting for the FollowJointTrajectory action server...')
+        self.client.wait_for_server()
+        self.get_logger().info('Connected to the FollowJointTrajectory action server.')
+
     def create_trajectory(self, waypoints, durations):
-        """軌道を作成"""
         trajectory = JointTrajectory()
         trajectory.joint_names = self.joint_names
-        
+
         for waypoint, duration in zip(waypoints, durations):
             point = JointTrajectoryPoint()
             point.positions = waypoint
-            point.time_from_start = rospy.Duration(duration)
+            point.time_from_start = Duration(seconds=duration).to_msg()
             trajectory.points.append(point)
-        
+
         return trajectory
 
     def execute_trajectory(self, trajectory):
-        """軌道を実行"""
-        goal = FollowJointTrajectoryGoal()
+        goal = FollowJointTrajectory.Goal()
         goal.trajectory = trajectory
-        
-        rospy.loginfo("Sending trajectory goal...")
-        self.client.send_goal(goal)
-        
-        rospy.loginfo("Waiting for result...")
-        self.client.wait_for_result()
-        
-        result = self.client.get_result()
+
+        self.get_logger().info('Sending trajectory goal...')
+        goal_future = self.client.send_goal_async(goal)
+        rclpy.spin_until_future_complete(self, goal_future)
+        goal_handle = goal_future.result()
+
+        if not goal_handle.accepted:
+            self.get_logger().error('Trajectory goal was rejected.')
+            return None
+
+        self.get_logger().info('Waiting for result...')
+        result_future = goal_handle.get_result_async()
+        rclpy.spin_until_future_complete(self, result_future)
+        result = result_future.result().result
+
         if result:
-            rospy.loginfo(f"Trajectory execution finished with status: {result.error_code}")
+            self.get_logger().info(f'Trajectory execution finished with status: {result.error_code}')
         else:
-            rospy.logwarn("Trajectory execution failed or no result received.")
+            self.get_logger().warn('Trajectory execution failed or no result received.')
         return result
 
     def demo_sequence(self):
-        """デモシーケンス"""
         waypoints = [
-            [0.0, -1.57, 0.0, -1.57, 0.0, 0.0],      # ホーム (ラジアン)
-            [0.5, -1.0, 1.0, -1.5, -0.5, 0.0] # 目標 (ラジアン)
+            [0.0, -1.57, 0.0, -1.57, 0.0, 0.0],
+            [0.5, -1.0, 1.0, -1.5, -0.5, 0.0]
         ]
-        # 各ウェイポイントに到達するまでの総時間
-        # 最初のウェイポイントは通常0.0秒で設定し、次のウェイポイントまでの時間を累計で指定
-        durations = [0.0, 3.0] 
-        
+        durations = [0.0, 3.0]
+
         trajectory = self.create_trajectory(waypoints, durations)
         self.execute_trajectory(trajectory)
 
-if __name__ == '__main__':
+
+def main():
+    rclpy.init()
+    node = JTCDemo()
     try:
-        demo = JTCDemo()
-        demo.demo_sequence()
-    except rospy.ROSInterruptException:
-        rospy.loginfo("ROS node interrupted.")
+        node.wait_for_server()
+        node.demo_sequence()
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

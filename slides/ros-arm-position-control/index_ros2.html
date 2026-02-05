@@ -644,18 +644,31 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>MoveItCommanderによる実装</h2>
+                    <h2>MoveIt2(C++)による実装</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="code/ros2/moveit_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                            <pre><code class="language-cpp external-code" data-src="code/ros2/ur_moveit_demo.cpp" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>MoveItCommanderを使った基本的な実装例</li>
+                                <li>MoveGroupInterfaceを使ったC++の基本実装例</li>
                                 <li>関節角度指定での移動</li>
                                 <li>姿勢指定での移動</li>
-                                <li>カルテシアン軌道での移動</li>
                                 <li>実際のロボット制御ではこのような流れでプログラムを組む</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>MoveIt2のPython対応（MoveItPy）</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <ul>
+                                <li>公式にMoveItPyが提供されている</li>
+                                <li>Humbleでは未実装で、Jazzy以降（Ubuntu 24.04以降）でのみ利用可能</li>
+                                <li>単純なラッパーではなく、MoveItの各種パラメータを一通り設定する必要がある</li>
+                                <li>導入・運用コストが高いため、現状はおすすめしない</li>
                             </ul>
                         </div>
                     </div>
@@ -876,9 +889,10 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                         </div>
                         <div class="text-section">
                             <ol>
-                                <li>保存してビルド<br>ros_study/scripts/JTC_demo.py</li>
-                                <li>実行権限付与<br><code>chmod +x src/ros_study/scripts/JTC_demo.py</code></li>
-                                <li>実行<br><code>rosrun ros_study JTC_demo.py</code></li>
+                                <li>ROS2パッケージに配置<br>例：<code>src/my_pkg/scripts/jtc_demo.py</code></li>
+                                <li>実行権限付与<br><code>chmod +x src/my_pkg/scripts/jtc_demo.py</code></li>
+                                <li>実行<br><code>ros2 run my_pkg jtc_demo.py</code></li>
+                                <li>必要なら起動<br><code>ros2 launch my_pkg ur5e_bringup_with_moveit.launch.py</code></li>
                             </ol>
                         </div>
                     </div>
@@ -893,8 +907,8 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>MoveItのIKソルバーを組み込んだデモ</li>
-                                <li>関節の限界を超える場合でもIKが得られるが、ロボットの軌道が大回りになるので注意</li>
+                                <li>MoveIt2の<code>/compute_ik</code>サービスを使ったデモ</li>
+                                <li>IKが得られても軌道が大回りになる場合があるので注意</li>
                                 <p style="font-size: 0.6em;">※避けるにはwaypoints間の関節角度に許容量を持たせる等の実装をする</p>
 
                             </ul>
@@ -1187,11 +1201,11 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <div class="slide-layout-image">
                         <div class="image-section dual-images">
                             <div class="image-with-caption">
-                                <img src="media/pestle_tip.png" alt="乳棒座標変換の例">
+                                <img src="media/pestle_tip.png" alt="乳棒座標変換の例" style="max-width: 85%; height: auto;">
                                 <div class="image-caption">baseから見た乳棒手先</div>
                             </div>
                             <div class="image-with-caption">
-                                <img src="media/spatula_tip.png" alt="ヘラ座標変換の例">
+                                <img src="media/spatula_tip.png" alt="ヘラ座標変換の例" style="max-width: 85%; height: auto;">
                                 <div class="image-caption">baseから見たヘラの手先</div>
                             </div>
                         </div>

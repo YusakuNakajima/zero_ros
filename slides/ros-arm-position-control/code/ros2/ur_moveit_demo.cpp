@@ -2,6 +2,9 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <geometry_msgs/msg/pose.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <chrono>
+#include <cmath>
+#include <thread>
 
 // 定数: 制御するグループ名 (SRDFに合わせる: "ur_manipulator" や "manipulator" が一般的)
 static const std::string PLANNING_GROUP = "ur_manipulator";
@@ -13,7 +16,9 @@ int main(int argc, char** argv)
   // Nodeの作成
   // MoveIt2は内部でAction通信を行うため、ノードオプションで自動スピン等の設定が必要な場合がありますが、
   // ここではシンプルにMultiThreadedExecutorで回します。
-  auto node = rclcpp::Node::make_shared("ur_moveit_demo_cpp");
+  rclcpp::NodeOptions node_options;
+  node_options.automatically_declare_parameters_from_overrides(true);
+  auto node = rclcpp::Node::make_shared("ur_moveit_demo_cpp", node_options);
   
   // ログ出力用のヘルパー
   auto logger = node->get_logger();
