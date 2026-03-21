@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ros_study_cpp_examples</name>
+  <version>0.1.0</version>
+  <description>Canonical ROS 2 C++ examples for the zero_ros slides.</description>
+  <maintainer email="yusaku_nakajima@ap.eng.osaka-u.ac.jp">Yusaku Nakajima</maintainer>
+  <license>CC-BY-NC-ND-4.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>rclcpp</depend>
+  <depend>tf2</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

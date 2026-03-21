@@ -290,13 +290,13 @@
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="code/ros2/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_bringup/launch/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
                         </div>
 
                         <div class="text-section">
                             <ul>
                                 <li>詳細は後程やります、まずは表示しましょう</li>
-                                <li>launchディレクトリ内にur5e_bringup_with_mock_components.launch.pyという名前で左のコードを保存</li>
+                                <li><code>ros_study_bringup/launch/ur5e_bringup_with_mock_components.launch.py</code> を参照してください</li>
                             </ul>
                         </div>
                     </div>
@@ -306,12 +306,12 @@
                     <p style="font-size: 0.8em; color: #ffb700; margin-top: 15px;">⚠️ このxacroはシミュレータ (mock_components) 専用であり、実機では使用できません。</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="code/ros2/ur5e_with_ee.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e_with_ee_mock_components.xacro" data-trim></code></pre>
                         </div>
 
                         <div class="text-section">
                             <ul>
-                                <li><code>ur5e_with_ee.xacro</code>に<code>ros2_control</code>タグを追加します。</li>
+                                <li><code>ros_study_description/urdf/ur5e_with_ee_mock_components.xacro</code> が mock components 用の canonical source です</li>
                                 <li>これにより、mock_components(仮想ハードウェア)が読み込まれ、ロボットを制御できるようになります。</li>
                             </ul>
                             <p style="font-size: 0.8em; color: #fbbf24; margin-top: 15px;">
@@ -326,14 +326,14 @@
                         <li>ビルドします</li>
 
                         <pre><code data-trim class="bash">
-cd ~/ros2_ws
+cd ~/zero_ros/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
                         </code></pre>
 
                         <li>次のコマンドで実行してください</li>
                         <pre><code data-trim class="bash">
-ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
+ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py
                         </code></pre>
                         <li>もう一つ別のターミナルで制御用GUIを起動</li>
                         <pre><code data-trim class="bash">

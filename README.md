@@ -48,6 +48,83 @@
    open http://localhost:8000
    ```
 
+## 🐳 ROS2 Docker環境の使い方
+
+ROS2 の実行環境はリポジトリ直下の `docker/` と `ros2_ws/` に同梱しています。
+スライド閲覧だけなら不要ですが、RViz や `ros2 launch` を試す場合はこの環境を使ってください。
+
+### 事前準備
+
+```bash
+sudo apt install docker.io docker-compose-plugin
+xhost +local:docker
+```
+
+### 起動
+
+```bash
+git clone https://github.com/yusakunakajima/zero_ros.git
+cd zero_ros
+docker compose -f docker/compose.yaml up --build --remove-orphans
+```
+
+### よく使うDockerコマンド
+
+```bash
+# コンテナをバックグラウンドで起動
+docker compose -f docker/compose.yaml up -d --build --remove-orphans
+
+# コンテナ内に入る
+docker compose -f docker/compose.yaml exec ros_study bash
+
+# ログを見る
+docker compose -f docker/compose.yaml logs -f
+
+# 停止する
+docker compose -f docker/compose.yaml down --remove-orphans
+
+# イメージを作り直す
+docker compose -f docker/compose.yaml build --no-cache
+```
+
+### コンテナ内での基本操作
+
+```bash
+cd /home/ros/zero_ros/ros2_ws
+colcon build --symlink-install
+source install/setup.bash
+
+ros2 launch ros_study_description view_ur.launch.py
+ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py
+ros2 run ros_study_examples jtc_demo
+```
+
+### 起動後の次の進め方
+
+`ros_study_humble Started` まで出たら、次は次のどちらかで進めます。
+
+1. ターミナルから入る
+
+```bash
+docker compose -f docker/compose.yaml exec ros_study bash
+cd /home/ros/zero_ros/ros2_ws
+colcon build --symlink-install
+source install/setup.bash
+```
+
+2. VSCode から attach する
+
+- Dev Containers 拡張を入れる
+- `Dev Containers: Attach to Running Container...` を開く
+- `ros_study_humble` を選ぶ
+- 開いたターミナルで `cd /home/ros/zero_ros/ros2_ws` して作業する
+
+詳しい Docker 手順は [docker/README.md](/home/user/zero_ros/docker/README.md)、workspace の使い方は [ros2_ws/README.md](/home/user/zero_ros/ros2_ws/README.md) を参照してください。
+
+初回や service 名変更後は orphan コンテナ警告が出ることがありますが、上の `--remove-orphans` 付きコマンドで一緒に整理できます。
+
+ローカル限定の UI から操作したい場合は [environment-setup/index.html](/home/user/zero_ros/environment-setup/index.html) を開き、先に `python3 tools/ros_study_env_server.py` を起動してください。ページ上では Docker ビルド中にスピナーが回り、ターミナルログをそのまま確認できます。
+
 ## 🔧 技術仕様
 
 ### スライド仕様

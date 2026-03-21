@@ -362,7 +362,7 @@
                 <section>
                     <h2>必要な環境とソフトウェア</h2>
                     <ul>
-                        <li>OS: Ubuntu 20.04以降(22.04, 24.04もok)</li>
+                        <li>OS: Ubuntu 22.04 以上を推奨 (ROS2 Humble 前提)</li>
                         <li><a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank"
                                 style="color: #3b82f6; text-decoration: underline;">Docker</a>を事前にインストール</li>
 
@@ -396,16 +396,16 @@
 
                                             <section>
                                                 <h2>②実践用のローカル環境</h2>
-                                                <p>(他にも色々ありますが)僕の公開パッケージpowder_grinding_ros2を使っても良いです</p>
+                                                <p>この教材リポジトリ自体に、ROS2 workspace と Docker 環境を同梱しています</p>
                                                 <pre><code data-trim class="bash">
-                    user@user:~$ git clone -b main https://github.com/quantumbeam/powder_grinding_ros2.git
-                    user@user:~$ cd powder_grinding_ros2/env
-                    user@user:~/powder_grinding_ros2/env$ ./BUILD-DOCKER-IMAGE.sh
+                    user@user:~$ git clone https://github.com/yusakunakajima/zero_ros.git
+                    user@user:~$ cd zero_ros
+                    user@user:~/zero_ros$ docker compose -f docker/compose.yaml up --build
                                         </code></pre>
                                                 <ul>
-                                                    <li>環境構築で使うリポジトリをクローンします</li>
-                                                    <li>環境構築はenvディレクトリ内で行うので、事前に移動しておいてください</li>
-                                                    <li>BUILD-DOCKER-IMAGE.shを実行でDockerイメージの作成が開始されます</li>
+                                                    <li>リポジトリ直下の <code>docker/</code> と <code>ros2_ws/</code> をそのまま使います</li>
+                                                    <li>コンテナ内では <code>/home/ros/zero_ros/ros2_ws</code> が作業ディレクトリです</li>
+                                                    <li><code>colcon build --symlink-install</code> 後に各スライドの launch / run コマンドを実行します</li>
                                                 </ul>
                                             </section>
                                                                                             </section>
