@@ -9,6 +9,7 @@
   <buildtool_depend>ament_python</buildtool_depend>
 
   <depend>joint_state_publisher_gui</depend>
+  <depend>gz_ros2_control</depend>
   <depend>launch</depend>
   <depend>launch_ros</depend>
   <depend>robot_state_publisher</depend>

@@ -20,6 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             "jtc_demo = ros_study_examples.jtc_demo:main",
+            "jtc_velocity_accel_demo = ros_study_examples.jtc_velocity_accel_demo:main",
             "jtc_with_ik_demo = ros_study_examples.jtc_with_ik_demo:main",
             "marker_display_demo = ros_study_examples.marker_display_demo:main",
             "tf_display_demo = ros_study_examples.tf_display_demo:main",

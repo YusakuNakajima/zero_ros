@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import time
+
 import rclpy
-from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.duration import Duration
+from rclpy.node import Node
 
 from control_msgs.action import FollowJointTrajectory
+from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 
@@ -13,10 +16,13 @@ class JTCDemo(Node):
     def __init__(self):
         super().__init__('jtc_demo')
 
+        self.declare_parameter('controller_name', 'scaled_joint_trajectory_controller')
+        controller_name = self.get_parameter('controller_name').get_parameter_value().string_value
+
         self.client = ActionClient(
             self,
             FollowJointTrajectory,
-            '/scaled_pos_joint_traj_controller/follow_joint_trajectory',
+            f'/{controller_name}/follow_joint_trajectory',
         )
 
         self.joint_names = [
@@ -24,11 +30,32 @@ class JTCDemo(Node):
             'elbow_joint', 'wrist_1_joint',
             'wrist_2_joint', 'wrist_3_joint'
         ]
+        self.latest_joint_state = None
+        self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
+
+    def _joint_state_cb(self, msg):
+        self.latest_joint_state = msg
 
     def wait_for_server(self):
         self.get_logger().info('Waiting for the FollowJointTrajectory action server...')
         self.client.wait_for_server()
         self.get_logger().info('Connected to the FollowJointTrajectory action server.')
+
+        self.get_logger().info('Waiting for /joint_states...')
+        start = time.time()
+        while rclpy.ok() and self.latest_joint_state is None:
+            rclpy.spin_once(self, timeout_sec=0.1)
+            if time.time() - start > 5.0:
+                self.get_logger().warn('Still waiting for /joint_states...')
+                start = time.time()
+        self.get_logger().info('Received /joint_states.')
+
+    def current_joint_positions(self):
+        if self.latest_joint_state is None:
+            raise RuntimeError('No joint state has been received yet.')
+
+        joint_map = dict(zip(self.latest_joint_state.name, self.latest_joint_state.position))
+        return [joint_map[name] for name in self.joint_names]
 
     def create_trajectory(self, waypoints, durations):
         trajectory = JointTrajectory()
@@ -67,12 +94,17 @@ class JTCDemo(Node):
         return result
 
     def demo_sequence(self):
+        current = self.current_joint_positions()
         waypoints = [
-            [0.0, -1.57, 0.0, -1.57, 0.0, 0.0],
-            [0.5, -1.0, 1.0, -1.5, -0.5, 0.0]
+            current,
+            [0.0, -1.30, 0.90, -1.40, -0.20, 0.0],
+            [0.45, -1.00, 1.10, -1.55, -0.45, 0.10],
+            current,
         ]
-        durations = [0.0, 3.0]
+        durations = [0.0, 2.5, 5.0, 7.5]
 
+        self.get_logger().info('Sending a simple position-only trajectory.')
+        self.get_logger().info('JointTrajectoryController will interpolate between these waypoints.')
         trajectory = self.create_trajectory(waypoints, durations)
         self.execute_trajectory(trajectory)
 

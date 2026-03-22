@@ -20,7 +20,7 @@ class JTCWithIKSolverDemo(Node):
         super().__init__('jtc_with_ik_solver_demo')
 
         # 設定値（実環境に合わせて変更）
-        self.group_name = 'manipulator'
+        self.group_name = 'ur_manipulator'
         self.base_frame = 'base_link'
         self.tool_frame = 'tool0'
         self.joint_names = [
@@ -32,7 +32,7 @@ class JTCWithIKSolverDemo(Node):
         self.client = ActionClient(
             self,
             FollowJointTrajectory,
-            '/scaled_pos_joint_traj_controller/follow_joint_trajectory',
+            '/scaled_joint_trajectory_controller/follow_joint_trajectory',
         )
 
         self.ik_client = self.create_client(GetPositionIK, '/compute_ik')

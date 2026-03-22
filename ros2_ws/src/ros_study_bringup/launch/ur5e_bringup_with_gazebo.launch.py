@@ -1,6 +1,5 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
-from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
@@ -14,12 +13,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "description_package",
             default_value="ros_study_description",
-            description="Package containing the mock-components Xacro file.",
+            description="Package containing the Gazebo Xacro file.",
         ),
         DeclareLaunchArgument(
             "description_file",
-            default_value="ur5e_with_ee_mock_components.xacro",
-            description="Mock-components Xacro file to load.",
+            default_value="ur5e_with_ee_gazebo.xacro",
+            description="Gazebo Xacro file to load.",
         ),
         DeclareLaunchArgument(
             "controllers_file",
@@ -36,14 +35,21 @@ def generate_launch_description():
             description="RViz configuration file.",
         ),
         DeclareLaunchArgument(
-            "initial_joint_controller",
-            default_value="scaled_joint_trajectory_controller",
-            description="Trajectory controller started after the joint state broadcaster.",
+            "world_sdf",
+            default_value=PathJoinSubstitution(
+                [FindPackageShare("ros_study_bringup"), "worlds", "obstacle_world.sdf"]
+            ),
+            description="Gazebo world SDF file to load.",
         ),
         DeclareLaunchArgument(
-            "launch_moveit",
-            default_value="false",
-            description="Also start MoveIt on top of the mock-components bringup.",
+            "entity_name",
+            default_value="ur5e",
+            description="Name of the spawned Gazebo entity.",
+        ),
+        DeclareLaunchArgument(
+            "spawn_z",
+            default_value="0.1",
+            description="Initial Z position used when spawning the robot.",
         ),
     ]
 
@@ -51,32 +57,36 @@ def generate_launch_description():
     description_file = LaunchConfiguration("description_file")
     controllers_file = LaunchConfiguration("controllers_file")
     rviz_config_file = LaunchConfiguration("rviz_config_file")
-    initial_joint_controller = LaunchConfiguration("initial_joint_controller")
-    launch_moveit = LaunchConfiguration("launch_moveit")
+    world_sdf = LaunchConfiguration("world_sdf")
+    entity_name = LaunchConfiguration("entity_name")
+    spawn_z = LaunchConfiguration("spawn_z")
 
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
+            " ",
+            "controllers_file:=",
+            controllers_file,
         ]
     )
     robot_description = {
         "robot_description": ParameterValue(robot_description_content, value_type=str),
     }
 
-    control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        output="screen",
-        parameters=[robot_description, controllers_file],
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([FindPackageShare("ros_gz_sim"), "launch", "gz_sim.launch.py"])
+        ),
+        launch_arguments={"gz_args": ["-r ", world_sdf]}.items(),
     )
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="screen",
-        parameters=[robot_description],
+        parameters=[robot_description, {"use_sim_time": True}],
     )
 
     rviz_node = Node(
@@ -85,34 +95,61 @@ def generate_launch_description():
         name="rviz2",
         output="screen",
         arguments=["-d", rviz_config_file],
+        parameters=[{"use_sim_time": True}],
+    )
+
+    bridge = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
+        output="screen",
+    )
+
+    spawn_entity = Node(
+        package="ros_gz_sim",
+        executable="create",
+        arguments=[
+            "-topic",
+            "robot_description",
+            "-name",
+            entity_name,
+            "-z",
+            spawn_z,
+        ],
+        output="screen",
     )
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+            "--controller-manager-timeout",
+            "120",
+        ],
         output="screen",
     )
 
     trajectory_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=[initial_joint_controller, "--controller-manager", "/controller_manager"],
+        arguments=[
+            "scaled_joint_trajectory_controller",
+            "--controller-manager",
+            "/controller_manager",
+            "--controller-manager-timeout",
+            "120",
+        ],
         output="screen",
     )
 
-    moveit_overlay = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [FindPackageShare("ros_study_bringup"), "launch", "ur5e_moveit_overlay.launch.py"]
-            )
-        ),
-        launch_arguments={
-            "description_package": description_package,
-            "description_file": description_file,
-            "launch_rviz": "false",
-        }.items(),
-        condition=IfCondition(launch_moveit),
+    delayed_joint_state_broadcaster_spawner = RegisterEventHandler(
+        OnProcessExit(
+            target_action=spawn_entity,
+            on_exit=[joint_state_broadcaster_spawner],
+        )
     )
 
     delayed_trajectory_spawner = RegisterEventHandler(
@@ -125,11 +162,12 @@ def generate_launch_description():
     return LaunchDescription(
         declared_arguments
         + [
-            control_node,
+            gazebo,
             robot_state_publisher_node,
             rviz_node,
-            joint_state_broadcaster_spawner,
+            bridge,
+            spawn_entity,
+            delayed_joint_state_broadcaster_spawner,
             delayed_trajectory_spawner,
-            moveit_overlay,
         ]
     )
