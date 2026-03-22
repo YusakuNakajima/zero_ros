@@ -729,18 +729,20 @@ gz sim shapes.sdf
                             故障ではないのでそのまま待ってください。
                         </p>
                     </div>
-                    <div
-                        style="background: rgba(59, 130, 246, 0.12); border-left: 5px solid #3b82f6; padding: 15px; text-align: left; border-radius: 0 5px 5px 0; margin-top: 15px;">
-                        <p style="font-size: 0.78em; margin: 0;">
-                            <strong>mesh が見つからない場合:</strong><br>
-                            <code>package://...</code> や <code>model://...</code> の解決に必要な
-                            <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code>
-                            が不足していることがあります。
-                        </p>
-                        <pre style="margin-top: 10px;"><code class="bash" data-trim>
+                </section>
+
+                <section>
+                    <h2>メッシュが見つからない場合</h2>
+                    <div style="text-align: left;">
+                        <p><code>package://...</code> や <code>model://...</code> の解決に必要な<br>
+                            <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code> が不足していることがあります。</p>
+                        <pre><code class="bash" data-trim>
 export GZ_SIM_RESOURCE_PATH=/opt/ros/${ROS_DISTRO}/share:~/zero_ros/ros2_ws/install/ros_study_description/share:~/zero_ros/ros2_ws/install/ros_study_bringup/share
 export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
                         </code></pre>
+                        <p style="font-size: 0.78em; color: #aaa;">
+                            mesh 解決エラーが出ると、ロボットが一部だけ表示されたり、まったく見えないことがあります。
+                        </p>
                     </div>
                 </section>
 
@@ -803,34 +805,21 @@ export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
                 <section>
                     <h3>Gazeboプラグインの追加</h3>
                     <div style="text-align: left;">
-                        <p>さらに、<code>robot.urdf.xacro</code>の末尾（<code>&lt;/robot&gt;</code>の直前）に、<br>
-                            Gazebo側からROS 2制御を呼び出すためのタグを追加します。</p>
+                        <p><code>robot.urdf.xacro</code> の末尾に、Gazebo から ROS 2 制御を呼ぶタグを追加します。</p>
                         <pre><code class="xml" data-trim>
 &lt;gazebo&gt;
     &lt;plugin filename="gz_ros2_control-system" 
             name="gz_ros2_control::GazeboSimROS2ControlPlugin"&gt;
         &lt;parameters&gt;
-            $(find my_robot_description)/config/controllers.yaml
+            $(find ros_study_bringup)/config/ur_joint_trajectory_controller.yaml
         &lt;/parameters&gt;
     &lt;/plugin&gt;
 &lt;/gazebo&gt;
                         </code></pre>
-                        <div
-                            style="background: rgba(255, 193, 7, 0.15); border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px;">
-                            <p style="font-size: 0.7em; margin: 0;">
+                        <div style="background: rgba(255, 193, 7, 0.15); border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px;">
+                            <p style="font-size: 0.72em; margin: 0;">
                                 <strong>⚠️ ハマるポイント</strong><br>
-                                このタグがないと、ロボットは表示されますが<strong>「力が抜けたようにダラっとして動かない」</strong>状態になります。<br>
-                                コントローラマネージャが起動しないためです。
-                            </p>
-                        </div>
-                        <div
-                            style="background: rgba(59, 130, 246, 0.12); border-left: 5px solid #3b82f6; padding: 15px; margin-top: 15px;">
-                            <p style="font-size: 0.7em; margin: 0;">
-                                <strong>補足:</strong><br>
-                                このプラグインを使うには、環境に
-                                <code>ros-${ROS_DISTRO}-gz-ros2-control</code> が入っている必要があります。<br>
-                                入っていないと <code>/controller_manager</code> が現れず、
-                                <code>spawner</code> が待ち続けます。
+                                このタグがないと表示だけされて、<strong>controller_manager が起動せず動きません。</strong>
                             </p>
                         </div>
                     </div>
@@ -883,17 +872,44 @@ bridge = Node(
                 </section>
 
                 <section>
+                    <h2>実ファイル: Gazebo用 xacro</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e_with_ee_gazebo.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>canonical source は <code>ros_study_description/urdf/ur5e_with_ee_gazebo.xacro</code></li>
+                                <li>Mock Components版と違い、<code>gz_ros2_control/GazeboSimSystem</code> を使います</li>
+                                <li>末尾の <code>&lt;gazebo&gt;</code> タグで controller 設定ファイルを Gazebo 側へ渡します</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>実ファイル: Gazebo起動Launch</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_bringup/launch/ur5e_bringup_with_gazebo.launch.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li><code>ur5e_bringup_with_gazebo.launch.py</code> に起動処理を集約しています</li>
+                                <li>Gazebo起動、spawn、<code>/clock</code> bridge、controller 起動までを担当します</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
                     <h2>実行と確認</h2>
                     <div style="text-align: left;">
-                        <p>作成したLaunchファイルを実行します。</p>
                         <pre><code class="bash" data-trim>
-ros2 launch my_robot_description gazebo_sim.launch.py
+cd ~/zero_ros/ros2_ws
+source install/setup.bash
+ros2 launch ros_study_bringup ur5e_bringup_with_gazebo.launch.py
                         </code></pre>
-                        <ul>
-                            <li>Gazeboの画面が立ち上がり、ロボットが表示される</li>
-                            <li>ターミナルに <span style="color: #28a745;">"Configured and activated"</span> と表示</li>
-                            <li><code>rqt</code> のスライダーで関節を動かすと、<br><strong>Gazebo上のロボットも連動して動く</strong></li>
-                        </ul>
                         <div style="margin-top: 20px; padding: 15px; border: 1px solid #aaa; border-radius: 8px;">
                             <p style="font-size: 0.8em; margin: 0;">
                                 <strong>動かない場合：</strong><br>
@@ -905,12 +921,30 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                             <p style="font-size: 0.78em; margin: 0;">
                                 <strong>controller が出ない場合：</strong><br>
                                 <code>ros2 control list_controllers</code> がつながらないときは、
-                                <code>gz_ros2_control</code> 未導入か resource path 不足のことが多いです。<br>
+                                <code>gz_ros2_control</code> 未導入かresource path不足が多いです。<br>
                                 とくに mesh 解決エラーが出る場合は
                                 <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code>
                                 を確認してください。
                             </p>
                         </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Gazebo版でハマりやすい点</h2>
+                    <div style="text-align: left;">
+                        <ul>
+                            <li><strong><code>gz_ros2_control</code> 未導入:</strong> <code>/controller_manager</code> が立たず、spawner が待ち続ける</li>
+                            <li><strong>resource path 不足:</strong> mesh や package 参照に失敗してロボットが崩れたり見えなかったりする</li>
+                            <li><strong>再生ボタン未押下:</strong> Gazebo が一時停止で、見た目は出ていても時間が進まない</li>
+                        </ul>
+                        <pre><code class="bash" data-trim>
+ros2 topic echo /clock --once
+ros2 action list | grep scaled_joint_trajectory_controller
+                        </code></pre>
+                        <p style="font-size: 0.78em; color: #aaa;">
+                            <code>/clock</code> と controller の両方が見えていれば、Gazebo 側の最小構成は概ね正常です。
+                        </p>
                     </div>
                 </section>
             </section>
@@ -1183,8 +1217,8 @@ gazebo = IncludeLaunchDescription(
     launch_arguments={
         # "empty.sdf" を自作ファイルに変更
         "gz_args": "-r " + os.path.join(
-            get_package_share_directory('my_pkg'), 
-            'worlds', 'my_world.sdf')
+            get_package_share_directory('ros_study_bringup'),
+            'worlds', 'obstacle_world.sdf')
     }.items(),
 )
                         </code></pre>
@@ -1213,6 +1247,45 @@ gazebo = IncludeLaunchDescription(
                         </div>
                     </div>
                 </section>
+
+                <section>
+                    <h2>Planning Sceneへの反映方法</h2>
+                    <div style="text-align: left;">
+                        <ul>
+                            <li><strong>1.</strong> Gazebo の障害物をセンサや既知モデルから取得する</li>
+                            <li><strong>2.</strong> MoveIt の <code>Planning Scene</code> に box / mesh / octomap として追加する</li>
+                            <li><strong>3.</strong> motion planning 時に衝突チェックへ反映する</li>
+                        </ul>
+                        <div style="margin-top: 20px; padding: 15px; border-left: 5px solid #3b82f6; background: rgba(59, 130, 246, 0.12);">
+                            <p style="font-size: 0.78em; margin: 0;">
+                                <strong>ポイント:</strong><br>
+                                Gazebo に存在するだけでは MoveIt は見えません。<br>
+                                <code>/planning_scene</code> や <code>PlanningSceneInterface</code> で明示的に反映してはじめて、経路計画の衝突判定に使われます。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Planning Scene 反映サンプル (C++)</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp_examples/src/planning_scene_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>Gazebo に障害物があるだけでは MoveIt の衝突判定には使われません</li>
+                                <li>C++ では <code>/planning_scene</code> を直接 publish する代わりに <code>PlanningSceneInterface</code> を使うと簡潔です</li>
+                                <li>この例は Gazebo world の <code>box_obstacle</code> を <code>world</code> フレームの box として MoveIt 側へ写します</li>
+                            </ul>
+                            <pre><code class="bash" data-trim>
+ros2 launch ros_study_bringup ur5e_bringup_with_gazebo.launch.py
+ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py description_file:=ur5e_with_ee_gazebo.xacro
+ros2 run ros_study_cpp_examples planning_scene_example_node
+                            </code></pre>
+                        </div>
+                    </div>
+                </section>
             </section>
 
             <section>
@@ -1229,6 +1302,8 @@ gazebo = IncludeLaunchDescription(
     <script src="../../assets/vendor/reveal.js-menu/menu.js"></script>
     <script src="../../assets/vendor/reveal.js-plugins/chalkboard/plugin.js"></script>
     <script src="../../assets/vendor/highlight.js/highlight.min.js"></script>
+    <script src="../../assets/vendor/highlight.js/languages/cpp.min.js"></script>
+    <script src="../../assets/vendor/highlight.js/languages/xml.min.js"></script>
     <script src="../../assets/vendor/highlight.js/languages/python.min.js"></script>
     <script>
         Reveal.initialize({

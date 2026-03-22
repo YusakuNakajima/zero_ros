@@ -7,8 +7,10 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(shape_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 
 add_executable(ur_moveit_demo_cpp src/ur_moveit_demo.cpp)
@@ -17,9 +19,20 @@ ament_target_dependencies(ur_moveit_demo_cpp rclcpp moveit_ros_planning_interfac
 add_executable(moveit_example_node src/moveit_example_node.cpp)
 ament_target_dependencies(moveit_example_node rclcpp moveit_ros_planning_interface geometry_msgs)
 
+add_executable(planning_scene_example_node src/planning_scene_example_node.cpp)
+ament_target_dependencies(
+  planning_scene_example_node
+  rclcpp
+  moveit_ros_planning_interface
+  moveit_msgs
+  shape_msgs
+  geometry_msgs
+)
+
 install(TARGETS
   ur_moveit_demo_cpp
   moveit_example_node
+  planning_scene_example_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
