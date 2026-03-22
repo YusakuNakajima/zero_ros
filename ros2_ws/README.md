@@ -44,6 +44,12 @@ ros2 run ros_study_examples jtc_demo
 ros2 run ros_study_cpp_examples ur_moveit_demo_cpp
 ```
 
+## 実装確認
+
+追加した Mock Components / JointTrajectoryController / MoveIt2 / Gazebo の確認手順は
+[`docs/implementation_check.md`](docs/implementation_check.md)
+を参照してください。
+
 ## スライドとの対応
 
 - `ros-model-display`: `ros_study_description`

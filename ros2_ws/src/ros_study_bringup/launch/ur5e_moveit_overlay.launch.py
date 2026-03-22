@@ -43,6 +43,8 @@ def generate_launch_description():
             "launch_rviz": LaunchConfiguration("launch_rviz"),
             "description_package": LaunchConfiguration("description_package"),
             "description_file": LaunchConfiguration("description_file"),
+            "moveit_config_package": "ros_study_bringup",
+            "moveit_config_file": "ur_with_ee.srdf.xacro",
             "prefix": LaunchConfiguration("tf_prefix"),
         }.items(),
     )

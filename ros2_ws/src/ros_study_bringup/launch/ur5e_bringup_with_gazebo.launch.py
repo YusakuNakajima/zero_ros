@@ -1,5 +1,8 @@
+import os
+
+from ament_index_python.packages import get_package_prefix
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler, SetEnvironmentVariable
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
@@ -9,6 +12,20 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
+    resource_paths = [
+        os.path.join(get_package_prefix("ur_description"), "share"),
+        os.path.join(get_package_prefix("ros_study_description"), "share"),
+        os.path.join(get_package_prefix("ros_study_bringup"), "share"),
+    ]
+    existing_gz_resource_path = os.environ.get("GZ_SIM_RESOURCE_PATH", "")
+    existing_ign_resource_path = os.environ.get("IGN_GAZEBO_RESOURCE_PATH", "")
+    gz_resource_path = os.pathsep.join(
+        [path for path in [existing_gz_resource_path, *resource_paths] if path]
+    )
+    ign_resource_path = os.pathsep.join(
+        [path for path in [existing_ign_resource_path, *resource_paths] if path]
+    )
+
     declared_arguments = [
         DeclareLaunchArgument(
             "description_package",
@@ -162,6 +179,8 @@ def generate_launch_description():
     return LaunchDescription(
         declared_arguments
         + [
+            SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", gz_resource_path),
+            SetEnvironmentVariable("IGN_GAZEBO_RESOURCE_PATH", ign_resource_path),
             gazebo,
             robot_state_publisher_node,
             rviz_node,

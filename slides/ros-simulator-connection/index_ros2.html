@@ -677,8 +677,11 @@ rviz_node = Node(
                             <span style="font-size: 0.8em; color: #aaa;">本スライドではこっちを使います</span>
                         </p>
                         <pre><code data-trim class="bash">
-# ros_gz (ブリッジやシミュレータ本体を含むメタパッケージ)
+# ros_gz: ブリッジやシミュレータ本体
 sudo apt-get install ros-${ROS_DISTRO}-ros-gz
+
+# ros2_control 連携: Gazebo上のロボットを controller_manager で動かす
+sudo apt-get install ros-${ROS_DISTRO}-gz-ros2-control
                         </code></pre>
                     </div>
                     <div style="margin-top: 20px; text-align: left;">
@@ -725,6 +728,19 @@ gz sim shapes.sdf
                             <strong>画面が出るまでに数分間、真っ暗な状態が続くことがあります。</strong>
                             故障ではないのでそのまま待ってください。
                         </p>
+                    </div>
+                    <div
+                        style="background: rgba(59, 130, 246, 0.12); border-left: 5px solid #3b82f6; padding: 15px; text-align: left; border-radius: 0 5px 5px 0; margin-top: 15px;">
+                        <p style="font-size: 0.78em; margin: 0;">
+                            <strong>mesh が見つからない場合:</strong><br>
+                            <code>package://...</code> や <code>model://...</code> の解決に必要な
+                            <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code>
+                            が不足していることがあります。
+                        </p>
+                        <pre style="margin-top: 10px;"><code class="bash" data-trim>
+export GZ_SIM_RESOURCE_PATH=/opt/ros/${ROS_DISTRO}/share:~/zero_ros/ros2_ws/install/ros_study_description/share:~/zero_ros/ros2_ws/install/ros_study_bringup/share
+export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
+                        </code></pre>
                     </div>
                 </section>
 
@@ -807,6 +823,16 @@ gz sim shapes.sdf
                                 コントローラマネージャが起動しないためです。
                             </p>
                         </div>
+                        <div
+                            style="background: rgba(59, 130, 246, 0.12); border-left: 5px solid #3b82f6; padding: 15px; margin-top: 15px;">
+                            <p style="font-size: 0.7em; margin: 0;">
+                                <strong>補足:</strong><br>
+                                このプラグインを使うには、環境に
+                                <code>ros-${ROS_DISTRO}-gz-ros2-control</code> が入っている必要があります。<br>
+                                入っていないと <code>/controller_manager</code> が現れず、
+                                <code>spawner</code> が待ち続けます。
+                            </p>
+                        </div>
                     </div>
                 </section>
             </section>
@@ -873,6 +899,16 @@ ros2 launch my_robot_description gazebo_sim.launch.py
                                 <strong>動かない場合：</strong><br>
                                 「再生ボタン(▶)」が押されているか確認してください。<br>
                                 Gazeboは起動直後、一時停止状態の場合があります。
+                            </p>
+                        </div>
+                        <div style="margin-top: 15px; padding: 15px; border: 1px solid #3b82f6; border-radius: 8px;">
+                            <p style="font-size: 0.78em; margin: 0;">
+                                <strong>controller が出ない場合：</strong><br>
+                                <code>ros2 control list_controllers</code> がつながらないときは、
+                                <code>gz_ros2_control</code> 未導入か resource path 不足のことが多いです。<br>
+                                とくに mesh 解決エラーが出る場合は
+                                <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code>
+                                を確認してください。
                             </p>
                         </div>
                     </div>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
+
+  <xacro:arg name="name" default="ur"/>
+  <xacro:arg name="prefix" default=""/>
+
+  <xacro:include filename="$(find ur_moveit_config)/srdf/ur_macro.srdf.xacro"/>
+
+  <xacro:ur_srdf name="$(arg name)" prefix="$(arg prefix)"/>
+
+  <!-- Our simplified URDF connects shoulder_link directly to base_link,
+       so the upstream disable_collisions entry for base_link_inertia does
+       not cover this adjacent pair. -->
+  <disable_collisions link1="$(arg prefix)base_link" link2="$(arg prefix)shoulder_link" reason="Adjacent" />
+
+</robot>

@@ -1,6 +1,6 @@
 # zero_ros Docker Environment
 
-このディレクトリは Ubuntu/Linux + X11 前提の ROS2 Humble 開発環境です。`RViz` や `rqt` をコンテナ内でそのまま起動できます。
+このディレクトリは Ubuntu/Linux + X11 前提の ROS2 Humble 開発環境です。`RViz` や `rqt` をコンテナ内でそのまま起動できます。あわせて `nvm` と `@openai/codex` もイメージ内に入るようにしています。
 
 ## 事前準備
 
@@ -26,6 +26,9 @@ docker compose -f docker/compose.yaml up -d --build --remove-orphans
 ```bash
 # コンテナ一覧を確認
 docker compose -f docker/compose.yaml ps
+
+# Codex CLI の確認
+codex --help
 
 # シェルに入る
 docker compose -f docker/compose.yaml exec ros_study bash
@@ -86,3 +89,5 @@ ros2 run ros_study_cpp_examples ur_moveit_demo_cpp
 - GUI は X11 前提です。Wayland 専用の調整は含めていません。
 - `host network` と `/dev` マウントを使うため、教材用でも Linux ホスト前提です。
 - 初回起動では `zero_ros` リポジトリ全体が `/home/ros/zero_ros` にマウントされます。
+- Gazebo デモ用に `ros-${ROS_DISTRO}-ros-gz` と `ros-${ROS_DISTRO}-gz-ros2-control` もイメージへ入るようにしています。
+- entrypoint で `GZ_SIM_RESOURCE_PATH` と `IGN_GAZEBO_RESOURCE_PATH` に ROS と workspace の share ディレクトリを追加し、`package://...` / `model://...` の mesh 解決を補助しています。
