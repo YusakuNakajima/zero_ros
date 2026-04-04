@@ -6,15 +6,13 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.duration import Duration
-from rclpy.time import Time
 
 from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import JointState
 from moveit_msgs.msg import RobotState
-from moveit_msgs.srv import GetPositionIK
-from tf2_ros import Buffer, TransformException, TransformListener
+from moveit_msgs.srv import GetPositionFK, GetPositionIK
 
 
 class JTCWithIKSolverDemo(Node):
@@ -37,9 +35,8 @@ class JTCWithIKSolverDemo(Node):
             '/scaled_joint_trajectory_controller/follow_joint_trajectory',
         )
 
+        self.fk_client = self.create_client(GetPositionFK, '/compute_fk')
         self.ik_client = self.create_client(GetPositionIK, '/compute_ik')
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self, spin_thread=False)
         self.joint_state = None
         self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
 
@@ -57,6 +54,10 @@ class JTCWithIKSolverDemo(Node):
         self.get_logger().info('Waiting for IK service: /compute_ik')
         self.ik_client.wait_for_service()
         self.get_logger().info('Connected to IK service.')
+
+        self.get_logger().info('Waiting for FK service: /compute_fk')
+        self.fk_client.wait_for_service()
+        self.get_logger().info('Connected to FK service.')
 
         self.get_logger().info('Waiting for /joint_states...')
         start = time.time()
@@ -118,35 +119,28 @@ class JTCWithIKSolverDemo(Node):
             return None
 
     def get_current_tool_pose(self):
-        deadline = time.time() + 2.0
-        last_error = None
-        transform = None
-
-        while rclpy.ok() and time.time() < deadline:
-            rclpy.spin_once(self, timeout_sec=0.1)
-            try:
-                transform = self.tf_buffer.lookup_transform(
-                    self.base_frame,
-                    self.tool_frame,
-                    Time(),
-                    timeout=Duration(seconds=0.0),
-                )
-                break
-            except TransformException as exc:
-                last_error = exc
-
-        if transform is None:
-            self.get_logger().error(
-                f'Failed to lookup TF from {self.base_frame} to {self.tool_frame}: {last_error}'
-            )
+        if self.joint_state is None:
+            self.get_logger().error('No joint state received; cannot compute FK.')
             return None
 
-        pose = Pose()
-        pose.position.x = transform.transform.translation.x
-        pose.position.y = transform.transform.translation.y
-        pose.position.z = transform.transform.translation.z
-        pose.orientation = transform.transform.rotation
-        return pose
+        request = GetPositionFK.Request()
+        request.header.frame_id = self.base_frame
+        request.fk_link_names = [self.tool_frame]
+        request.robot_state = RobotState(joint_state=self.joint_state)
+
+        future = self.fk_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response = future.result()
+
+        if response is None:
+            self.get_logger().error('FK service call failed.')
+            return None
+
+        if response.error_code.val != response.error_code.SUCCESS or not response.pose_stamped:
+            self.get_logger().error('FK failed to compute the current tool pose.')
+            return None
+
+        return response.pose_stamped[0].pose
 
     def create_trajectory(self, waypoints, durations):
         trajectory = JointTrajectory()
