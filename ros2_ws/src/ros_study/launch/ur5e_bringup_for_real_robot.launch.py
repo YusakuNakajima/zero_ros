@@ -1,57 +1,113 @@
+# ur5e_with_pestle_bringup.launch.py
+
+import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch_ros.actions import Node
+from launch.launch_description_sources import PythonLaunchDescriptionSource, AnyLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.substitutions import FindPackageShare
+from launch.conditions import IfCondition # Potentially needed if 'use_moveit' controls inclusion
+from ament_index_python.packages import get_package_share_directory
 
+def launch_setup(context, *args, **kwargs):
+    # --- Get Launch Configuration values ---
+    ur_type = LaunchConfiguration('ur_type')
+    robot_ip = LaunchConfiguration('robot_ip')
+    use_mock_hardware = LaunchConfiguration('use_mock_hardware')
+    mock_sensor_commands = LaunchConfiguration('mock_sensor_commands')
+    use_moveit = LaunchConfiguration('use_moveit') # Evaluate the condition
+    launch_moveit_rviz = LaunchConfiguration('launch_moveit_rviz') # Unified RViz argument
+    initial_joint_controller = LaunchConfiguration('initial_joint_controller')
 
-def generate_launch_description():
-    declared_arguments = [
-        DeclareLaunchArgument(
-            "description_package",
-            default_value="ros_study",
-            description="Package containing the JTC-focused Xacro file.",
-        ),
-        DeclareLaunchArgument(
-            "controllers_file",
-            default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study"), "config", "ur_joint_trajectory_controller.yaml"]
-            ),
-            description="Controller configuration file.",
-        ),
-        DeclareLaunchArgument(
-            "rviz_config_file",
-            default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study"), "rviz", "ur5e.rviz"]
-            ),
-            description="RViz configuration file.",
-        ),
-        DeclareLaunchArgument(
-            "initial_joint_controller",
-            default_value="scaled_joint_trajectory_controller",
-            description="Trajectory controller started after the joint state broadcaster.",
-        ),
-        DeclareLaunchArgument(
-            "launch_moveit",
-            default_value="false",
-            description="Also start MoveIt on top of the mock-components bringup.",
-        ),
-    ]
-
-    bringup = IncludeLaunchDescription(
+    # --- Get Package Share Directories ---
+    ur_robot_driver_share = get_package_share_directory('ur_robot_driver')
+    ur_moveit_config_share = get_package_share_directory('ur_moveit_config')
+    ros_study_share = get_package_share_directory('ros_study')
+    
+    # --- Include ur_control launch file ---
+    # This provides the basic robot driver and controllers.
+    ur_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [FindPackageShare("ros_study"), "launch", "ur5e_bringup_with_mock_components.launch.py"]
-            )
+            PathJoinSubstitution([ros_study_share, 'launch',  'ur_control.launch.py'])
         ),
         launch_arguments={
-            "description_package": LaunchConfiguration("description_package"),
-            "description_file": "ur5e_with_ee_for_real_robot.xacro",
-            "controllers_file": LaunchConfiguration("controllers_file"),
-            "rviz_config_file": LaunchConfiguration("rviz_config_file"),
-            "initial_joint_controller": LaunchConfiguration("initial_joint_controller"),
-            "launch_moveit": LaunchConfiguration("launch_moveit"),
-        }.items(),
+            'ur_type': ur_type,
+            'robot_ip': robot_ip,
+            'use_fake_hardware': use_mock_hardware,
+            'fake_sensor_commands': mock_sensor_commands,
+            # Always set launch_rviz to 'false' for ur_control,
+            # as we want to use the MoveIt RViz configuration if RViz is launched at all.
+            'launch_rviz': 'false',
+            'initial_joint_controller': initial_joint_controller,
+        }.items()
     )
 
-    return LaunchDescription(declared_arguments + [bringup])
+    # --- Include ur_moveit launch file ---
+    # This sets up the MoveIt planning capabilities.
+    # We include it based on the 'use_moveit' argument.
+    ur_moveit_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([ur_moveit_config_share, 'launch', 'ur_moveit.launch.py'])
+        ),
+        launch_arguments={
+            'ur_type': ur_type,
+            # Pass the unified 'launch_rviz' argument.
+            # ur_moveit.launch.py will handle launching RViz with its config if this is 'true'.
+            'launch_rviz': launch_moveit_rviz,
+        }.items(),
+        # Only include this if 'use_moveit' is true
+        condition=IfCondition(use_moveit)
+    )
+
+    # --- List of actions to execute ---
+    actions_to_start = [
+        ur_control_launch,
+        ur_moveit_launch,
+    ]
+
+    return actions_to_start
+
+def generate_launch_description():
+    declared_arguments = []
+
+    # --- Declare Launch Arguments ---
+    declared_arguments.append(DeclareLaunchArgument(
+        'ur_type',
+        default_value='ur5e',
+        description='Type of UR robot (e.g., ur3, ur3e, ur5, ur5e, ur10, ur10e, ur16e, ur20).'
+    ))
+    declared_arguments.append(DeclareLaunchArgument(
+        'robot_ip',
+        default_value='192.168.58.42',
+        description='IP address of the robot controller.'
+    ))
+    declared_arguments.append(DeclareLaunchArgument(
+        'use_mock_hardware',
+        default_value='true',
+        description='Use mock hardware interface for testing without a physical robot.'
+    ))
+    declared_arguments.append(DeclareLaunchArgument(
+        'mock_sensor_commands',
+        default_value='true',
+        description='Enable mock sensor commands for testing.'
+    ))
+    declared_arguments.append(DeclareLaunchArgument(
+        'use_moveit',
+        default_value='true',
+        description='Whether to launch MoveIt related nodes and load the planning scene.'
+    ))
+    declared_arguments.append(DeclareLaunchArgument(
+        'initial_joint_controller',
+        default_value='scaled_joint_trajectory_controller',
+        description='Initial robot controller.'
+    ))
+    # --- Unified RViz Argument ---
+    declared_arguments.append(DeclareLaunchArgument(
+        'launch_moveit_rviz',
+        default_value='true', # Default to launching RViz (with MoveIt config if use_moveit is true)
+        description='Whether to launch RViz. If use_moveit is true, uses MoveIt configuration.'
+    ))
+  
+    # --- Create Launch Description ---
+    # Combine declared arguments with the OpaqueFunction that executes the launch setup logic
+    return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])
