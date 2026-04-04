@@ -442,7 +442,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "runtime_config_package",
-            default_value="ros_study",
+            default_value="ur_robot_driver",
             description='Package with the controller\'s configuration in "config" folder. '
             "Usually the argument is not set, it enables use of a custom setup.",
         )
@@ -450,7 +450,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "controllers_file",
-            default_value="ur_joint_trajectory_controller.yaml",
+            default_value="ur_controllers.yaml",
             description="YAML file with the controllers configuration.",
         )
     )
