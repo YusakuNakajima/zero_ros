@@ -6,6 +6,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.duration import Duration
+from rclpy.time import Time
 
 from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -13,6 +14,7 @@ from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import JointState
 from moveit_msgs.msg import RobotState
 from moveit_msgs.srv import GetPositionIK
+from tf2_ros import Buffer, TransformException, TransformListener
 
 
 class JTCWithIKSolverDemo(Node):
@@ -36,11 +38,12 @@ class JTCWithIKSolverDemo(Node):
         )
 
         self.ik_client = self.create_client(GetPositionIK, '/compute_ik')
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self, spin_thread=False)
         self.joint_state = None
         self.create_subscription(JointState, '/joint_states', self._joint_state_cb, 10)
 
         self.attempts = 1
-        self.move_step = 0.05
         self.duration = 2.0
 
     def _joint_state_cb(self, msg):
@@ -71,11 +74,13 @@ class JTCWithIKSolverDemo(Node):
 
         request = GetPositionIK.Request()
         request.ik_request.group_name = self.group_name
+        request.ik_request.ik_link_name = self.tool_frame
         request.ik_request.robot_state = RobotState(joint_state=self.joint_state)
         request.ik_request.avoid_collisions = True
 
         pose_stamped = PoseStamped()
         pose_stamped.header.frame_id = self.base_frame
+        pose_stamped.header.stamp = self.get_clock().now().to_msg()
         pose_stamped.pose = target_pose
         request.ik_request.pose_stamped = pose_stamped
         request.ik_request.timeout = Duration(seconds=0.5).to_msg()
@@ -93,14 +98,55 @@ class JTCWithIKSolverDemo(Node):
             if response.error_code.val == response.error_code.SUCCESS:
                 joint_positions = response.solution.joint_state.position
                 joint_names = response.solution.joint_state.name
-                active_positions = [
-                    pos for name, pos in zip(joint_names, joint_positions)
-                    if name in self.joint_names
-                ]
+                solution_map = dict(zip(joint_names, joint_positions))
+                active_positions = [solution_map[name] for name in self.joint_names]
                 return active_positions
 
         self.get_logger().error('IK failed to find a solution.')
         return None
+
+    def get_current_joint_positions(self):
+        if self.joint_state is None:
+            self.get_logger().error('No joint state received.')
+            return None
+
+        joint_map = dict(zip(self.joint_state.name, self.joint_state.position))
+        try:
+            return [joint_map[name] for name in self.joint_names]
+        except KeyError as exc:
+            self.get_logger().error(f'Missing joint in /joint_states: {exc}')
+            return None
+
+    def get_current_tool_pose(self):
+        deadline = time.time() + 2.0
+        last_error = None
+        transform = None
+
+        while rclpy.ok() and time.time() < deadline:
+            rclpy.spin_once(self, timeout_sec=0.1)
+            try:
+                transform = self.tf_buffer.lookup_transform(
+                    self.base_frame,
+                    self.tool_frame,
+                    Time(),
+                    timeout=Duration(seconds=0.0),
+                )
+                break
+            except TransformException as exc:
+                last_error = exc
+
+        if transform is None:
+            self.get_logger().error(
+                f'Failed to lookup TF from {self.base_frame} to {self.tool_frame}: {last_error}'
+            )
+            return None
+
+        pose = Pose()
+        pose.position.x = transform.transform.translation.x
+        pose.position.y = transform.transform.translation.y
+        pose.position.z = transform.transform.translation.z
+        pose.orientation = transform.transform.rotation
+        return pose
 
     def create_trajectory(self, waypoints, durations):
         trajectory = JointTrajectory()
@@ -140,28 +186,37 @@ class JTCWithIKSolverDemo(Node):
             )
         return result
 
-    def move_relative(self, dx=0, dy=0, dz=0):
+    def move_relative_and_back(self, dx=0.0, dy=0.0, dz=0.0):
+        current_joints = self.get_current_joint_positions()
+        if current_joints is None:
+            self.get_logger().error('Failed to read current joints.')
+            return False
+
+        current_pose = self.get_current_tool_pose()
+        if current_pose is None:
+            self.get_logger().error('Failed to read current tool pose from TF.')
+            return False
+
         target_pose = Pose()
-        target_pose.position.x = dx
-        target_pose.position.y = dy
-        target_pose.position.z = dz
-        target_pose.orientation.w = 1.0
+        target_pose.position.x = current_pose.position.x + dx
+        target_pose.position.y = current_pose.position.y + dy
+        target_pose.position.z = current_pose.position.z + dz
+        target_pose.orientation = current_pose.orientation
 
         joint_goal = self.solve_ik(target_pose)
         if not joint_goal:
             self.get_logger().error('Failed to execute move because IK solution was not found.')
             return False
 
-        current_joints = [0.0] * len(self.joint_names)
-        waypoints = [current_joints, joint_goal]
-        durations = [0.0, self.duration]
+        waypoints = [current_joints, joint_goal, current_joints]
+        durations = [0.0, self.duration, self.duration * 2.0]
         trajectory = self.create_trajectory(waypoints, durations)
         self.execute_trajectory(trajectory)
         return True
 
     def demo_sequence(self):
-        self.get_logger().info('Starting IK + JTC demo...')
-        self.move_relative(dx=0.1, dy=0.0, dz=0.0)
+        self.get_logger().info('Starting IK + JTC demo: move current tool pose by z=+0.1 and return.')
+        self.move_relative_and_back(dz=0.1)
 
 
 def main():
