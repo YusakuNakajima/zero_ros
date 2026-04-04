@@ -97,14 +97,14 @@ class JTCDemo(Node):
         current = self.current_joint_positions()
         waypoints = [
             current,
-            [0.0, -1.30, 0.90, -1.40, -0.20, 0.0],
-            [0.45, -1.00, 1.10, -1.55, -0.45, 0.10],
+            [0.55, -1.35, 1.20, -1.70, -0.10, 0.25],
+            [-0.40, -0.95, 0.85, -1.30, -0.65, -0.20],
             current,
         ]
         durations = [0.0, 2.5, 5.0, 7.5]
 
-        self.get_logger().info('Sending a simple position-only trajectory.')
-        self.get_logger().info('JointTrajectoryController will interpolate between these waypoints.')
+        self.get_logger().info('Sending a comparison-friendly position-only trajectory.')
+        self.get_logger().info('JointTrajectoryController will interpolate between sharp waypoint direction changes.')
         trajectory = self.create_trajectory(waypoints, durations)
         self.execute_trajectory(trajectory)
 

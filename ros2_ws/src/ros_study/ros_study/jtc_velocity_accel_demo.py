@@ -17,7 +17,7 @@ class JTCVelocityAccelDemo(Node):
         super().__init__('jtc_velocity_accel_demo')
 
         self.declare_parameter('controller_name', 'scaled_joint_trajectory_controller')
-        self.declare_parameter('segment_duration', 3.0)
+        self.declare_parameter('segment_duration', 2.5)
         self.declare_parameter('samples_per_segment', 30)
 
         controller_name = self.get_parameter('controller_name').get_parameter_value().string_value
@@ -106,8 +106,8 @@ class JTCVelocityAccelDemo(Node):
 
     def create_demo_trajectory(self):
         current = self.current_joint_positions()
-        middle = [0.35, -1.20, 1.00, -1.45, -0.35, 0.10]
-        goal = [0.60, -0.95, 1.15, -1.60, -0.55, 0.20]
+        middle = [0.55, -1.35, 1.20, -1.70, -0.10, 0.25]
+        goal = [-0.40, -0.95, 0.85, -1.30, -0.65, -0.20]
 
         trajectory = JointTrajectory()
         trajectory.joint_names = self.joint_names
@@ -174,7 +174,7 @@ class JTCVelocityAccelDemo(Node):
             f'Generated {len(trajectory.points)} points over about {total_time} seconds.'
         )
         self.get_logger().info(
-            'This example uses a quintic profile, so waypoint boundaries start and end with zero velocity and acceleration.'
+            'This example uses the same targets as jtc_demo, but with a quintic profile and explicit velocity/acceleration.'
         )
         self.execute_trajectory(trajectory)
 

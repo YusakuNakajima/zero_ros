@@ -595,7 +595,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
 
-                   <section>
+                <section>
                     <h2>entry_points を追加</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
@@ -637,14 +637,14 @@ ros2 run ros_study jtc_demo
                             <ul>
                                 <li>IKが得られても軌道が大回りになる場合があるので注意</li>
                                 <p style="font-size: 0.6em;">※実用には関節角度に許容量を持たせて大回りを避ける等の実装をする</p>
-                                <li>IKの計算は簡単なのでMoveItを使っています</li>
+                                <li>FK/IKの計算は簡単なのでMoveItを使っています</li>
 
                             </ul>
                         </div>
                     </div>
                 </section>
 
-                                <section>
+                <section>
                     <h2>buildと実行</h2>
                     <div style="text-align: left;">
                         <pre><code class="bash" data-trim>
@@ -657,18 +657,7 @@ ros2 run ros_study jtc_with_ik_demo
                             </code></pre>
                     </div>
                 </section>
-
-                <section>
-                    <h2>JointTrajectoryControllerの設定例</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study/config/ur_joint_trajectory_controller.yaml" data-trim style="max-height: 450px; font-size: 0.7em;"></code></pre>
-                        </div>
-                    </div>
-                </section>
             </section>
-
-            
             <section>
                 <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
                     <h2>JointTrajectoryControllerによるアームの速度・加速度制御</h2>
@@ -1318,7 +1307,7 @@ ros2 launch ros_study ur5e_moveit_overlay.launch.py
                     </div>
                 </section>
 
-             
+
 
             </section>
 
