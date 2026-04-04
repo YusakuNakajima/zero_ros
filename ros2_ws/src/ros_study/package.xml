@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ros_study</name>
+  <version>0.1.0</version>
+  <description>Unified ROS 2 study package for the zero_ros slides.</description>
+  <maintainer email="yusaku_nakajima@ap.eng.osaka-u.ac.jp">Yusaku Nakajima</maintainer>
+  <license>CC-BY-NC-ND-4.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <depend>ament_index_python</depend>
+  <depend>builtin_interfaces</depend>
+  <depend>control_msgs</depend>
+  <depend>controller_manager</depend>
+  <depend>geometry_msgs</depend>
+  <depend>gz_ros2_control</depend>
+  <depend>joint_state_broadcaster</depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>joint_trajectory_controller</depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>moveit_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>ros2_control</depend>
+  <depend>ros2_controllers</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>ros_gz_sim</depend>
+  <depend>rviz2</depend>
+  <depend>sensor_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf_transformations</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>ur_client_library</depend>
+  <depend>ur_description</depend>
+  <depend>ur_moveit_config</depend>
+  <depend>ur_robot_driver</depend>
+  <depend>visualization_msgs</depend>
+  <depend>xacro</depend>
+
+  <exec_depend>python3-numpy</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

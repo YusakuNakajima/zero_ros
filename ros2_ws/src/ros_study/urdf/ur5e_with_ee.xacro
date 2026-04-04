@@ -39,7 +39,7 @@
        <visual>
            <origin xyz="0 0 0.0001" rpy="0 0 0" />
            <geometry>
-               <mesh filename="package://ros_study_description/meshes/pestle_ur.stl" />
+               <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
            </geometry>
            <material name="LightGrey">
                <color rgba="0.7 0.7 0.7 1.0"/>
@@ -48,7 +48,7 @@
        <collision>
            <origin xyz="0 0 0.0001" rpy="0 0 0" />
            <geometry>
-               <mesh filename="package://ros_study_description/meshes/pestle_ur.stl" />
+               <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
            </geometry>
        </collision>
    </link>
@@ -70,14 +70,14 @@
        <visual>
            <origin xyz="0 0 0.0001" rpy="0 0 0" />
            <geometry>
-               <mesh filename="package://ros_study_description/meshes/spatula.stl" />
+               <mesh filename="package://ros_study/meshes/spatula.stl" />
            </geometry>
            <material name="LightGrey"/>
        </visual>
        <collision>
            <origin xyz="0 0 0.0001" rpy="0 0 0" />
            <geometry>
-               <mesh filename="package://ros_study_description/meshes/spatula.stl" />
+               <mesh filename="package://ros_study/meshes/spatula.stl" />
            </geometry>
        </collision>
    </link>

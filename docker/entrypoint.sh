@@ -2,6 +2,10 @@
 set -e
 
 export NVM_DIR=${NVM_DIR:-/home/ros/.nvm}
+export ROS2_WS=${ROS2_WS:-/home/ros/ros2_ws}
+
+ln -sfn /home/ros/zero_ros/ros2_ws "$ROS2_WS"
+
 if [ -s "$NVM_DIR/nvm.sh" ]; then
   source "$NVM_DIR/nvm.sh"
   nvm use default >/dev/null 2>&1 || true
@@ -11,8 +15,8 @@ if [ -s "$NVM_DIR/bash_completion" ]; then
 fi
 
 source /opt/ros/${ROS_DISTRO:-humble}/setup.bash
-if [ -f /home/ros/zero_ros/ros2_ws/install/setup.bash ]; then
-  source /home/ros/zero_ros/ros2_ws/install/setup.bash
+if [ -f "$ROS2_WS/install/setup.bash" ]; then
+  source "$ROS2_WS/install/setup.bash"
 fi
 
 add_resource_path() {
@@ -34,10 +38,8 @@ add_resource_path() {
 }
 
 add_resource_path GZ_SIM_RESOURCE_PATH /opt/ros/${ROS_DISTRO:-humble}/share
-add_resource_path GZ_SIM_RESOURCE_PATH /home/ros/zero_ros/ros2_ws/install/ros_study_description/share
-add_resource_path GZ_SIM_RESOURCE_PATH /home/ros/zero_ros/ros2_ws/install/ros_study_bringup/share
+add_resource_path GZ_SIM_RESOURCE_PATH "$ROS2_WS/install/ros_study/share"
 add_resource_path IGN_GAZEBO_RESOURCE_PATH /opt/ros/${ROS_DISTRO:-humble}/share
-add_resource_path IGN_GAZEBO_RESOURCE_PATH /home/ros/zero_ros/ros2_ws/install/ros_study_description/share
-add_resource_path IGN_GAZEBO_RESOURCE_PATH /home/ros/zero_ros/ros2_ws/install/ros_study_bringup/share
+add_resource_path IGN_GAZEBO_RESOURCE_PATH "$ROS2_WS/install/ros_study/share"
 
 exec "$@"

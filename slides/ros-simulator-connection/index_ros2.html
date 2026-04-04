@@ -9,8 +9,7 @@
     <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reset.css">
     <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reveal.css">
     <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/theme/black.css">
-    <link rel="stylesheet"
-        href="../../assets/vendor/highlight.js/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/styles/atom-one-dark.min.css">
 
 
     <link rel="stylesheet" href="../../assets/vendor/reveal.js-plugins/chalkboard/style.css">
@@ -38,6 +37,7 @@
         pre {
             position: relative;
         }
+
         /* --- 基本設定 --- */
         .reveal {
             font-family: 'Noto Sans JP', sans-serif;
@@ -131,7 +131,6 @@
             border-radius: 10px;
             text-align: center;
         }
-
     </style>
 </head>
 
@@ -231,6 +230,9 @@
                         </tbody>
                     </table>
                 </div>
+                <p style="font-size: 0.65em; color: #aaaaaa; margin-top: 12px; text-align: left;">
+                    ※多くの場合は簡易シミュレーションで十分です。物理シミュレータはシミュレーション上での学習等で使います。
+                </p>
             </section>
 
             <section>
@@ -290,32 +292,35 @@
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_bringup/launch/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/ur5e_bringup_with_mock_components.launch.py" data-trim></code></pre>
                         </div>
 
                         <div class="text-section">
                             <ul>
                                 <li>詳細は後程やります、まずは表示しましょう</li>
-                                <li><code>ros_study_bringup/launch/ur5e_bringup_with_mock_components.launch.py</code> を参照してください</li>
+                                <li><code>ros_study/launch/ur5e_bringup_with_mock_components.launch.py</code>
+                                    を参照してください</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section>
                     <h2>xacroを更新</h2>
-                    <p style="font-size: 0.8em; color: #ffb700; margin-top: 15px;">⚠️ このxacroはシミュレータ (mock_components) 専用であり、実機では使用できません。</p>
+                    <p style="font-size: 0.8em; color: #ffb700; margin-top: 15px;">⚠️ このxacroはシミュレータ (mock_components)
+                        専用であり、実機では使用できません。</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e_with_ee_mock_components.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e_with_ee_mock_components.xacro" data-trim></code></pre>
                         </div>
 
                         <div class="text-section">
                             <ul>
-                                <li><code>ros_study_description/urdf/ur5e_with_ee_mock_components.xacro</code> が mock components 用の canonical source です</li>
+                                <li><code>ros_study/urdf/ur5e_with_ee_mock_components.xacro</code> が mock
+                                    components 用の canonical source です</li>
                                 <li>これにより、mock_components(仮想ハードウェア)が読み込まれ、ロボットを制御できるようになります。</li>
                             </ul>
                             <p style="font-size: 0.8em; color: #fbbf24; margin-top: 15px;">
-                                
+
                             </p>
                         </div>
                     </div>
@@ -333,7 +338,7 @@ source install/setup.bash
 
                         <li>次のコマンドで実行してください</li>
                         <pre><code data-trim class="bash">
-ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py
+ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
                         </code></pre>
                         <li>もう一つ別のターミナルで制御用GUIを起動</li>
                         <pre><code data-trim class="bash">
@@ -482,19 +487,21 @@ rviz_node = Node(
 
             <section>
                 <section>
-                    <h2>今回使用するコントローラ</h2>
+                    <h2>Mock Componentsの裏で動いているコントローラ</h2>
                     <div class="slide-layout-image">
                         <div class="slide-content" style="text-align: center;">
-                            <p>ロボットを動かす「脳」にあたる部分、<br>
-                                <strong style="font-size: 1.4em; color: #3b82f6;">JointTrajectoryController</strong><br>
-                                について簡単に解説します。
+                            <p style="margin: 0 0 18px 0;">
+                                Mock Components では、実機と同様に<br>
+                                <strong style="font-size: 1.4em; color: #3b82f6;">JointTrajectoryController</strong>
+                                を使って関節を制御します。
                             </p>
-
-                            <p style="margin-top: 40px; font-size: 0.6em;">
-                                詳細は公式ドキュメントを参照してください：<br>
-                                <a
-                                    href="https://control.ros.org/humble/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html">
-                                    https://control.ros.org/humble/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html
+                            <p style="font-size: 0.75em; color: #aaa; margin: 0 0 18px 0;">
+                                詳細は以下のスライドで、この章では概要のみを説明します。
+                            </p>
+                            <p style="margin: 0;">
+                                <a href="../ros-arm-position-control/index_ros2.html"
+                                    style="color: #3b82f6; text-decoration: underline; font-size: 0.8em;">
+                                    → ROS2 アーム位置制御とモーションプランニングへ
                                 </a>
                             </p>
                         </div>
@@ -568,51 +575,6 @@ rviz_node = Node(
                                 </p>
                             </div>
                         </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>制御できる要素</h2>
-
-                    <p style="font-size: 0.8em; margin-bottom: 20px;">
-                        JTCは以下の要素を扱えますが、<br>
-                        <strong style="color: #fbbf24;">ロボット側がどの制御モードに対応しているか</strong><br>
-                        によって実際に使えるものが決まります。
-                    </p>
-
-                    <div class="diagram-container" style="justify-content: center; gap: 20px; margin-top: 10px;">
-                        <div class="diagram-box"
-                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
-                            <span style="font-size: 1.8em;">📍</span><br>
-                            <strong style="font-size: 0.9em;">位置</strong><br><span
-                                style="font-size: 0.7em;">(Position)</span>
-                        </div>
-                        <div class="diagram-box"
-                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
-                            <span style="font-size: 1.8em;">🚀</span><br>
-                            <strong style="font-size: 0.9em;">速度</strong><br><span
-                                style="font-size: 0.7em;">(Velocity)</span>
-                        </div>
-                        <div class="diagram-box"
-                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
-                            <span style="font-size: 1.8em;">💪</span><br>
-                            <strong style="font-size: 0.9em;">トルク</strong><br><span
-                                style="font-size: 0.7em;">(Effort)</span>
-                        </div>
-                    </div>
-
-                    <div
-                        style="margin-top: 20px; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 10px; text-align: left; font-size: 0.75em;">
-                        <strong style="color: #fbbf24;">📝 シミュレータ環境で使う制御</strong>
-                        <ul style="margin-top: 5px; line-height: 1.4; padding-left: 20px;">
-                            <li style="margin-bottom: 5px;">
-                                <strong>Mock Hardware :</strong><br>
-                                物理演算がないため、直接<strong style="color: #4ade80;">「位置制御」</strong>で動かすのが基本
-                            </li>
-                            <li>
-                                <strong>Gazebo 等の物理シミュレータ:</strong><br>
-                                重力や慣性があるので、<strong style="color: #f87171;">「トルク制御」</strong>で動かすのが基本
-                            </li>
-                        </ul>
                     </div>
                 </section>
             </section>
@@ -735,9 +697,10 @@ gz sim shapes.sdf
                     <h2>メッシュが見つからない場合</h2>
                     <div style="text-align: left;">
                         <p><code>package://...</code> や <code>model://...</code> の解決に必要な<br>
-                            <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code> が不足していることがあります。</p>
+                            <code>GZ_SIM_RESOURCE_PATH</code> / <code>IGN_GAZEBO_RESOURCE_PATH</code> が不足していることがあります。
+                        </p>
                         <pre><code class="bash" data-trim>
-export GZ_SIM_RESOURCE_PATH=/opt/ros/${ROS_DISTRO}/share:~/zero_ros/ros2_ws/install/ros_study_description/share:~/zero_ros/ros2_ws/install/ros_study_bringup/share
+export GZ_SIM_RESOURCE_PATH=/opt/ros/${ROS_DISTRO}/share:~/zero_ros/ros2_ws/install/ros_study/share
 export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
                         </code></pre>
                         <p style="font-size: 0.78em; color: #aaa;">
@@ -811,12 +774,13 @@ export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
     &lt;plugin filename="gz_ros2_control-system" 
             name="gz_ros2_control::GazeboSimROS2ControlPlugin"&gt;
         &lt;parameters&gt;
-            $(find ros_study_bringup)/config/ur_joint_trajectory_controller.yaml
+            $(find ros_study)/config/ur_joint_trajectory_controller.yaml
         &lt;/parameters&gt;
     &lt;/plugin&gt;
 &lt;/gazebo&gt;
                         </code></pre>
-                        <div style="background: rgba(255, 193, 7, 0.15); border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px;">
+                        <div
+                            style="background: rgba(255, 193, 7, 0.15); border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px;">
                             <p style="font-size: 0.72em; margin: 0;">
                                 <strong>⚠️ ハマるポイント</strong><br>
                                 このタグがないと表示だけされて、<strong>controller_manager が起動せず動きません。</strong>
@@ -875,11 +839,12 @@ bridge = Node(
                     <h2>実ファイル: Gazebo用 xacro</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e_with_ee_gazebo.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e_with_ee_gazebo.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>canonical source は <code>ros_study_description/urdf/ur5e_with_ee_gazebo.xacro</code></li>
+                                <li>canonical source は <code>ros_study/urdf/ur5e_with_ee_gazebo.xacro</code>
+                                </li>
                                 <li>Mock Components版と違い、<code>gz_ros2_control/GazeboSimSystem</code> を使います</li>
                                 <li>末尾の <code>&lt;gazebo&gt;</code> タグで controller 設定ファイルを Gazebo 側へ渡します</li>
                             </ul>
@@ -891,7 +856,7 @@ bridge = Node(
                     <h2>実ファイル: Gazebo起動Launch</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_bringup/launch/ur5e_bringup_with_gazebo.launch.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/ur5e_bringup_with_gazebo.launch.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -908,7 +873,7 @@ bridge = Node(
                         <pre><code class="bash" data-trim>
 cd ~/zero_ros/ros2_ws
 source install/setup.bash
-ros2 launch ros_study_bringup ur5e_bringup_with_gazebo.launch.py
+ros2 launch ros_study ur5e_bringup_with_gazebo.launch.py
                         </code></pre>
                         <div style="margin-top: 20px; padding: 15px; border: 1px solid #aaa; border-radius: 8px;">
                             <p style="font-size: 0.8em; margin: 0;">
@@ -934,7 +899,8 @@ ros2 launch ros_study_bringup ur5e_bringup_with_gazebo.launch.py
                     <h2>Gazebo版でハマりやすい点</h2>
                     <div style="text-align: left;">
                         <ul>
-                            <li><strong><code>gz_ros2_control</code> 未導入:</strong> <code>/controller_manager</code> が立たず、spawner が待ち続ける</li>
+                            <li><strong><code>gz_ros2_control</code> 未導入:</strong> <code>/controller_manager</code>
+                                が立たず、spawner が待ち続ける</li>
                             <li><strong>resource path 不足:</strong> mesh や package 参照に失敗してロボットが崩れたり見えなかったりする</li>
                             <li><strong>再生ボタン未押下:</strong> Gazebo が一時停止で、見た目は出ていても時間が進まない</li>
                         </ul>
@@ -1217,12 +1183,12 @@ gazebo = IncludeLaunchDescription(
     launch_arguments={
         # "empty.sdf" を自作ファイルに変更
         "gz_args": "-r " + os.path.join(
-            get_package_share_directory('ros_study_bringup'),
+            get_package_share_directory('ros_study'),
             'worlds', 'obstacle_world.sdf')
     }.items(),
 )
                         </code></pre>
-                        <p style="font-size: 0.7em; color: #aaa;">※ <code>worlds</code> フォルダを <code>setup.py</code>
+                        <p style="font-size: 0.7em; color: #aaa;">※ <code>worlds</code> フォルダを <code>CMakeLists.txt</code>
                             でインストールする設定を忘れずに！</p>
                     </div>
                 </section>
@@ -1235,7 +1201,8 @@ gazebo = IncludeLaunchDescription(
                         </p>
                         <div class="comparison-box"
                             style="margin-top: 20px; background: rgba(220, 53, 69, 0.1); border: 2px solid #dc3545;">
-                            <h4 style="color: #dc3545; font-size: 1.0em; margin-bottom: 10px;">必要なもの：センサー or Planning Scene</h4>
+                            <h4 style="color: #dc3545; font-size: 1.0em; margin-bottom: 10px;">必要なもの：センサー or Planning
+                                Scene</h4>
                             <p style="font-size: 0.9em; text-align: left;">
                                 衝突回避には、以下が必要です。
                             </p>
@@ -1248,7 +1215,7 @@ gazebo = IncludeLaunchDescription(
                     </div>
                 </section>
 
-             
+
             </section>
 
             <section>
@@ -1257,14 +1224,17 @@ gazebo = IncludeLaunchDescription(
                     <div style="text-align: left;">
                         <ul>
                             <li><strong>1.</strong> Gazebo の障害物をセンサや既知モデルから取得する</li>
-                            <li><strong>2.</strong> MoveIt の <code>Planning Scene</code> に box / mesh / octomap として追加する</li>
+                            <li><strong>2.</strong> MoveIt の <code>Planning Scene</code> に box / mesh / octomap として追加する
+                            </li>
                             <li><strong>3.</strong> motion planning 時に衝突チェックへ反映する</li>
                         </ul>
-                        <div style="margin-top: 20px; padding: 15px; border-left: 5px solid #3b82f6; background: rgba(59, 130, 246, 0.12);">
+                        <div
+                            style="margin-top: 20px; padding: 15px; border-left: 5px solid #3b82f6; background: rgba(59, 130, 246, 0.12);">
                             <p style="font-size: 0.78em; margin: 0;">
                                 <strong>ポイント:</strong><br>
                                 Gazebo に存在するだけでは MoveIt は見えません。<br>
-                                <code>/planning_scene</code> や <code>PlanningSceneInterface</code> で明示的に反映してはじめて、経路計画の衝突判定に使われます。
+                                <code>/planning_scene</code> や <code>PlanningSceneInterface</code>
+                                で明示的に反映してはじめて、経路計画の衝突判定に使われます。
                             </p>
                         </div>
                     </div>
@@ -1274,22 +1244,68 @@ gazebo = IncludeLaunchDescription(
                     <h2>Planning Scene 反映サンプル (C++)</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp_examples/src/planning_scene_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
+                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study/src/planning_scene_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
                                 <li>Gazebo に障害物があるだけでは MoveIt の衝突判定には使われません</li>
-                                <li>C++ では <code>/planning_scene</code> を直接 publish する代わりに <code>PlanningSceneInterface</code> を使うと簡潔です</li>
-                                <li>この例は Gazebo world の <code>box_obstacle</code> を <code>world</code> フレームの box として MoveIt 側へ写します</li>
+                                <li>C++ では <code>/planning_scene</code> を直接 publish する代わりに
+                                    <code>PlanningSceneInterface</code> を使うと簡潔です</li>
+                                <li>この例は Gazebo world の <code>box_obstacle</code> を <code>world</code> フレームの box として
+                                    MoveIt 側へ写します</li>
                             </ul>
                             <pre><code class="bash" data-trim>
-ros2 launch ros_study_bringup ur5e_bringup_with_gazebo.launch.py
-ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py description_file:=ur5e_with_ee_gazebo.xacro
-ros2 run ros_study_cpp_examples planning_scene_example_node
+ros2 launch ros_study ur5e_bringup_with_gazebo.launch.py
+ros2 launch ros_study ur5e_moveit_overlay.launch.py description_file:=ur5e_with_ee_gazebo.xacro
+ros2 run ros_study planning_scene_example_node
                             </code></pre>
                         </div>
                     </div>
                 </section>
+            </section>
+
+            <section>
+                <h2>ロボットアームの制御方式</h2>
+
+                <p style="font-size: 0.8em; margin-bottom: 20px;">
+                    ロボットアームの関節は主に以下のいずれかで制御されます
+                </p>
+
+                <div class="diagram-container" style="justify-content: center; gap: 20px; margin-top: 10px;">
+                    <div class="diagram-box"
+                        style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                        <span style="font-size: 1.8em;">📍</span><br>
+                        <strong style="font-size: 0.9em;">位置</strong><br><span
+                            style="font-size: 0.7em;">(Position)</span>
+                    </div>
+                    <div class="diagram-box"
+                        style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                        <span style="font-size: 1.8em;">🚀</span><br>
+                        <strong style="font-size: 0.9em;">速度</strong><br><span
+                            style="font-size: 0.7em;">(Velocity)</span>
+                    </div>
+                    <div class="diagram-box"
+                        style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                        <span style="font-size: 1.8em;">💪</span><br>
+                        <strong style="font-size: 0.9em;">トルク</strong><br><span
+                            style="font-size: 0.7em;">(Effort)</span>
+                    </div>
+                </div>
+
+                <div
+                    style="margin-top: 20px; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 10px; text-align: left; font-size: 0.75em;">
+                    <strong style="color: #fbbf24;">📝 シミュレータごとの環境で使う制御</strong>
+                    <ul style="margin-top: 5px; line-height: 1.4; padding-left: 20px;">
+                        <li style="margin-bottom: 5px;">
+                            <strong>Mock Hardware :</strong><br>
+                            物理演算がないため、直接<strong style="color: #4ade80;">「位置制御」</strong>で動かすのが基本
+                        </li>
+                        <li>
+                            <strong>Gazebo 等の物理シミュレータ:</strong><br>
+                            重力や慣性があるので、<strong style="color: #f87171;">「トルク制御」</strong>で動かすのが基本
+                        </li>
+                    </ul>
+                </div>
             </section>
 
             <section>
@@ -1380,7 +1396,7 @@ ros2 run ros_study_cpp_examples planning_scene_example_node
             };
 
             Promise.all(Array.from(codeBlocks).map(fetchCode)).then(() => {
-                 // Add copy buttons to all pre blocks
+                // Add copy buttons to all pre blocks
                 let preblocks = document.querySelectorAll('pre');
                 preblocks.forEach(function (pre) {
                     if (pre.querySelector('code')) {

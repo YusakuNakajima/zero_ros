@@ -18,5 +18,6 @@ services:
       - ..:/home/ros/zero_ros
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /dev:/dev
+    working_dir: /home/ros/ros2_ws
     tty: true
     stdin_open: true

@@ -118,7 +118,7 @@
 # helper を使わず手動で起動する場合
 docker compose -f docker/compose.yaml up --build -d --remove-orphans
 docker compose -f docker/compose.yaml exec ros_study bash
-cd /home/ros/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash</div>
                 </section>
@@ -141,7 +141,7 @@ source install/setup.bash</div>
                         <div>
                             <p class="font-semibold text-emerald-200">方法1: ターミナルから入る</p>
                             <div class="mt-2 terminal rounded-2xl p-4 text-sm leading-6 whitespace-pre-wrap">docker compose -f docker/compose.yaml exec ros_study bash
-cd /home/ros/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash</div>
                         </div>
@@ -151,7 +151,7 @@ source install/setup.bash</div>
                                 <li>VSCode に Dev Containers 拡張を入れる</li>
                                 <li>コマンドパレットで `Dev Containers: Attach to Running Container...` を開く</li>
                                 <li>`ros_study_humble` を選ぶ</li>
-                                <li>開いたターミナルで `cd /home/ros/zero_ros/ros2_ws` して作業を続ける</li>
+                                <li>開いたターミナルで `cd ~/ros2_ws` して作業を続ける</li>
                             </ol>
                         </div>
                     </div>

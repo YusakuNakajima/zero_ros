@@ -76,8 +76,8 @@ def generate_launch_description():
         [robot_driver_package, "config", "ur5e_update_rate.yaml"]
     )
 
-    # URDF生成用ファイル (ros_study_description パッケージを使用)
-    description_package_name = "ros_study_description"
+    # URDF生成用ファイル (ros_study パッケージを使用)
+    description_package_name = "ros_study"
     description_file_name = "ur5e_with_ee.xacro"
     
     description_package = FindPackageShare(description_package_name)

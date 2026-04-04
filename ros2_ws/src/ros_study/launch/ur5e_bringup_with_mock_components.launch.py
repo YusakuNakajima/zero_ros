@@ -13,7 +13,7 @@ def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument(
             "description_package",
-            default_value="ros_study_description",
+            default_value="ros_study",
             description="Package containing the mock-components Xacro file.",
         ),
         DeclareLaunchArgument(
@@ -24,14 +24,14 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "controllers_file",
             default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study_bringup"), "config", "ur_joint_trajectory_controller.yaml"]
+                [FindPackageShare("ros_study"), "config", "ur_joint_trajectory_controller.yaml"]
             ),
             description="Controller configuration file.",
         ),
         DeclareLaunchArgument(
             "rviz_config_file",
             default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study_description"), "rviz", "ur5e.rviz"]
+                [FindPackageShare("ros_study"), "rviz", "ur5e.rviz"]
             ),
             description="RViz configuration file.",
         ),
@@ -104,7 +104,7 @@ def generate_launch_description():
     moveit_overlay = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare("ros_study_bringup"), "launch", "ur5e_moveit_overlay.launch.py"]
+                [FindPackageShare("ros_study"), "launch", "ur5e_moveit_overlay.launch.py"]
             )
         ),
         launch_arguments={

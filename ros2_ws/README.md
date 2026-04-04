@@ -21,27 +21,24 @@ docker compose -f docker/compose.yaml up --build
 ```bash
 docker compose -f docker/compose.yaml up -d --build
 docker compose -f docker/compose.yaml exec ros_study bash
-cd /home/ros/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 ```
 
 ## パッケージ構成
 
-- `ros_study_description`: URDF/Xacro、mesh、RViz、モデル表示 launch
-- `ros_study_bringup`: MoveIt / UR driver / mock components 用 launch と controller 設定
-- `ros_study_examples`: Python サンプルノード
-- `ros_study_cpp_examples`: C++ サンプルノード
+- `ros_study`: URDF/Xacro、mesh、RViz、モデル表示 launch、MoveIt / UR driver / mock components 用 launch と controller 設定、Python / C++ サンプルノードをまとめた単一パッケージ
 
 ## 代表コマンド
 
 ```bash
-ros2 launch ros_study_description view_ur.launch.py
-ros2 launch ros_study_description view_ur_with_ee.launch.py
-ros2 launch ros_study_bringup ur5e_bringup_with_moveit.launch.py
-ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py
-ros2 run ros_study_examples jtc_demo
-ros2 run ros_study_cpp_examples ur_moveit_demo_cpp
+ros2 launch ros_study view_ur.launch.py
+ros2 launch ros_study view_ur_with_ee.launch.py
+ros2 launch ros_study ur5e_bringup_with_moveit.launch.py
+ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
+ros2 run ros_study jtc_demo
+ros2 run ros_study ur_moveit_demo_cpp
 ```
 
 ## 実装確認
@@ -52,7 +49,7 @@ ros2 run ros_study_cpp_examples ur_moveit_demo_cpp
 
 ## スライドとの対応
 
-- `ros-model-display`: `ros_study_description`
-- `ros-arm-position-control`: `ros_study_bringup`, `ros_study_examples`, `ros_study_cpp_examples`
-- `ros-simulator-connection`: `ros_study_bringup`, `ros_study_description`, `ros_study_cpp_examples`
-- `ros-arm-force-control`: `ros_study_examples`, `ros_study_bringup`
+- `ros-model-display`: `ros_study`
+- `ros-arm-position-control`: `ros_study`
+- `ros-simulator-connection`: `ros_study`
+- `ros-arm-force-control`: `ros_study`

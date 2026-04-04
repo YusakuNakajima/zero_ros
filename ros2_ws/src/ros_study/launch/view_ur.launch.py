@@ -12,7 +12,7 @@ def generate_launch_description():
     # 1. ロボットモデルが入っているパッケージ名 (自作パッケージ)
     description_package_arg = DeclareLaunchArgument(
         "description_package",
-        default_value="ros_study_description",
+        default_value="ros_study",
         description="Description package with robot URDF/XACRO files.",
     )
     declared_arguments.append(description_package_arg)

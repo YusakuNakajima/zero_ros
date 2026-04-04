@@ -14,8 +14,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     resource_paths = [
         os.path.join(get_package_prefix("ur_description"), "share"),
-        os.path.join(get_package_prefix("ros_study_description"), "share"),
-        os.path.join(get_package_prefix("ros_study_bringup"), "share"),
+        os.path.join(get_package_prefix("ros_study"), "share"),
     ]
     existing_gz_resource_path = os.environ.get("GZ_SIM_RESOURCE_PATH", "")
     existing_ign_resource_path = os.environ.get("IGN_GAZEBO_RESOURCE_PATH", "")
@@ -29,7 +28,7 @@ def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument(
             "description_package",
-            default_value="ros_study_description",
+            default_value="ros_study",
             description="Package containing the Gazebo Xacro file.",
         ),
         DeclareLaunchArgument(
@@ -40,21 +39,21 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "controllers_file",
             default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study_bringup"), "config", "ur_joint_trajectory_controller.yaml"]
+                [FindPackageShare("ros_study"), "config", "ur_joint_trajectory_controller.yaml"]
             ),
             description="Controller configuration file.",
         ),
         DeclareLaunchArgument(
             "rviz_config_file",
             default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study_description"), "rviz", "ur5e.rviz"]
+                [FindPackageShare("ros_study"), "rviz", "ur5e.rviz"]
             ),
             description="RViz configuration file.",
         ),
         DeclareLaunchArgument(
             "world_sdf",
             default_value=PathJoinSubstitution(
-                [FindPackageShare("ros_study_bringup"), "worlds", "obstacle_world.sdf"]
+                [FindPackageShare("ros_study"), "worlds", "obstacle_world.sdf"]
             ),
             description="Gazebo world SDF file to load.",
         ),

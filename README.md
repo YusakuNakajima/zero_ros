@@ -90,13 +90,13 @@ docker compose -f docker/compose.yaml build --no-cache
 ### コンテナ内での基本操作
 
 ```bash
-cd /home/ros/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 
-ros2 launch ros_study_description view_ur.launch.py
-ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py
-ros2 run ros_study_examples jtc_demo
+ros2 launch ros_study view_ur.launch.py
+ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py
+ros2 run ros_study jtc_demo
 ```
 
 ### 起動後の次の進め方
@@ -107,7 +107,7 @@ ros2 run ros_study_examples jtc_demo
 
 ```bash
 docker compose -f docker/compose.yaml exec ros_study bash
-cd /home/ros/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 ```
@@ -117,7 +117,7 @@ source install/setup.bash
 - Dev Containers 拡張を入れる
 - `Dev Containers: Attach to Running Container...` を開く
 - `ros_study_humble` を選ぶ
-- 開いたターミナルで `cd /home/ros/zero_ros/ros2_ws` して作業する
+- 開いたターミナルで `cd ~/ros2_ws` して作業する
 
 詳しい Docker 手順は [docker/README.md](/home/user/zero_ros/docker/README.md)、workspace の使い方は [ros2_ws/README.md](/home/user/zero_ros/ros2_ws/README.md) を参照してください。
 

@@ -99,7 +99,7 @@ source install/setup.bash
                         </code></pre>
                 <ul>
                     <li>このリポジトリには <code>ros2_ws</code> が同梱されており、ROS2 サンプルはすでに package 化されています</li>
-                    <li>以降のコード例は <code>ros2_ws/src/ros_study_description</code> を canonical source として参照してください</li>
+                    <li>以降のコード例は <code>ros2_ws/src/ros_study</code> を canonical source として参照してください</li>
                 </ul>
             </section>
 
@@ -130,12 +130,12 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e.urdf" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e.urdf" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
                                 <li>詳細は後程やります、まずは表示しましょう</li>
-                                <li><code>ros_study_description/urdf/ur5e.urdf</code> を参照してください</li>
+                                <li><code>ros_study/urdf/ur5e.urdf</code> を参照してください</li>
                                 <li>スライド上のコードと workspace 内の実ファイルが一致するようにしてあります</li>
                             </ul>
                         </div>
@@ -145,11 +145,11 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                     <h2>launchを作成</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_description/launch/view_ur.launch.py" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/view_ur.launch.py" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>ros_study_description/launch/view_ur.launch.py</code> を参照してください</li>
+                                <li><code>ros_study/launch/view_ur.launch.py</code> を参照してください</li>
                                 <li>ロボット表示 launch も workspace へ集約しています</li>
                             </ul>
                         </div>
@@ -157,15 +157,15 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                 </section>
 
                 <section>
-                    <h2>setup.pyを修正</h2>
+                    <h2>CMakeLists.txtを修正</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_description/setup.py" data-trim></code></pre>
+                            <pre><code class="language-cmake external-code" data-src="../../ros2_ws/src/ros_study/CMakeLists.txt" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>ros_study_description/setup.py</code> が launch / urdf / mesh / rviz の canonical 定義です</li>
-                                <li>スライドではその実ファイルを直接参照するように切り替えています</li>
+                                <li><code>ros_study/CMakeLists.txt</code> が launch / urdf / mesh / rviz の install 定義です</li>
+                                <li>依存関係は <code>ros_study/package.xml</code> に、インストール定義は <code>CMakeLists.txt</code> に集約しています</li>
                                 <li>ビルドと実行↓</li>
                             </ul>
                         </div>
@@ -173,10 +173,10 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                 </section>
                 <section>
                     <h2>ファイルの配置の確認</h2>
-                    <img src="media/ros_study_file_structure.png" alt="ros_study_description ファイル配置例"
+                    <img src="media/ros_study_file_structure.png" alt="ros_study ファイル配置例"
                         style="display: block; max-width: 90%;">
 
-                    <p><code>ros2_ws/src/ros_study_description</code> に同等の配置になっていればOKです</p>
+                    <p><code>ros2_ws/src/ros_study</code> に同等の配置になっていればOKです</p>
                 </section>
 
                 <section>
@@ -192,7 +192,7 @@ source install/setup.bash
 
                         <li>次のコマンドで実行してください</li>
                         <pre><code data-trim class="bash">
-ros2 launch ros_study_description view_ur.launch.py
+ros2 launch ros_study view_ur.launch.py
                         </code></pre>
                     </ul>
 
@@ -244,11 +244,11 @@ ros2 launch ros_study_description view_ur.launch.py
                     <h2>rviz設定ファイルの保存</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study_description/rviz/ur5e.rviz" data-trim></code></pre>
+                            <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study/rviz/ur5e.rviz" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>ros_study_description/rviz/ur5e.rviz</code> をそのまま使えます</li>
+                                <li><code>ros_study/rviz/ur5e.rviz</code> をそのまま使えます</li>
                                 <li>launchディレクトリ内にur5e.rvizという名前で左のコードを保存、もしはRvizのGUIから保存</li>
                                 <li>launchファイルのRvizノードにur5e.rvizの引数を追加して読み込むようになっています</li>
                             </ul>
@@ -314,7 +314,7 @@ ros2 launch ros_study_description view_ur.launch.py
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e.urdf" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e.urdf" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -342,7 +342,7 @@ ros2 launch ros_study_description view_ur.launch.py
                     <h2>XACRO（XML Macros for Robots）</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e.xacro" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -358,7 +358,7 @@ ros2 launch ros_study_description view_ur.launch.py
                     <h2>エンドエフェクタを追加</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e_with_ee.xacro" data-trim></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e_with_ee.xacro" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -367,8 +367,8 @@ ros2 launch ros_study_description view_ur.launch.py
                             </ul>
                             <p style="font-size: 0.7em; margin-top: 20px;">STLファイルのダウンロード(`meshes`ディレクトリに配置):</p>
                             <ul style="font-size: 0.7em;">
-                                <li><a href="../../ros2_ws/src/ros_study_description/meshes/pestle_ur.stl" download>pestle_ur.stl</a></li>
-                                <li><a href="../../ros2_ws/src/ros_study_description/meshes/spatula.stl" download>spatula.stl</a></li>
+                                <li><a href="../../ros2_ws/src/ros_study/meshes/pestle_ur.stl" download>pestle_ur.stl</a></li>
+                                <li><a href="../../ros2_ws/src/ros_study/meshes/spatula.stl" download>spatula.stl</a></li>
                             </ul>
                         </div>
                     </div>
@@ -378,7 +378,7 @@ ros2 launch ros_study_description view_ur.launch.py
                     <h2>変更後のxacroを呼び出すLaunch</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_description/launch/view_ur_with_ee.launch.py" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/view_ur_with_ee.launch.py" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -402,7 +402,7 @@ source install/setup.bash
 
                         <li>次のコマンドで実行してください</li>
                         <pre><code data-trim class="bash">
-ros2 launch ros_study_description view_ur_with_ee.launch.py
+ros2 launch ros_study view_ur_with_ee.launch.py
                         </code></pre>
                     </ul>
 

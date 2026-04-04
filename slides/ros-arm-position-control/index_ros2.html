@@ -312,13 +312,13 @@
                     <h2>xacroファイルの更新</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study_description/urdf/ur5e_with_ee.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                            <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e_with_ee.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
 
                         <div class="text-section">
                             <ul>
                                 <li>MoveIt 用の canonical source は
-                                    <code>ros_study_description/urdf/ur5e_with_ee.xacro</code> です</li>
+                                    <code>ros_study/urdf/ur5e_with_ee.xacro</code> です</li>
                                 <li>書き換え箇所が多いので、UR公式のXACROを活用します</li>
                             </ul>
                         </div>
@@ -329,13 +329,13 @@
                     <h2>起動用Launchの作成</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_bringup/launch/ur5e_bringup_with_moveit.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/ur5e_bringup_with_moveit.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
 
                         <div class="text-section">
                             <ul>
                                 <li>起動用 launch は
-                                    <code>ros_study_bringup/launch/ur5e_bringup_with_moveit.launch.py</code> に集約しています
+                                    <code>ros_study/launch/ur5e_bringup_with_moveit.launch.py</code> に集約しています
                                 </li>
                                 <li><code>initial_joint_controller</code>が<code>scaled_joint_trajectory_controller</code>に更新され、必要な設定も追加されています。
                                 </li>
@@ -350,15 +350,13 @@
 
                         <pre style="font-size: 0.75em;"><code data-trim class="bash">
 cd ~/zero_ros/ros2_ws
-colcon build --symlink-install --packages-select \
-  ros_study_description ros_study_bringup \
-  ros_study_examples ros_study_cpp_examples
+colcon build --symlink-install --packages-select ros_study
 source install/setup.bash
                         </code></pre>
 
                         <li>次のコマンドで実行してください</li>
                         <pre style="font-size: 0.75em;"><code data-trim class="bash">
-ros2 launch ros_study_bringup ur5e_bringup_with_moveit.launch.py
+ros2 launch ros_study ur5e_bringup_with_moveit.launch.py
                         </code></pre>
                         <li>もう一つ別のターミナルで制御用GUIを起動</li>
                         <pre style="font-size: 0.75em;"><code data-trim class="bash">  
@@ -712,7 +710,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                         <h2>MoveItをどこで起動するか</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_bringup/launch/ur5e_moveit_overlay.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/ur5e_moveit_overlay.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
@@ -723,9 +721,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                                     <li>MoveIt の講義ではこの「既存シミュレータに機能を追加する」構成を知っておくと便利です</li>
                                 </ul>
                                 <pre><code class="bash" data-trim>
-ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py launch_moveit:=true
+ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py launch_moveit:=true
 # または
-ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
+ros2 launch ros_study ur5e_moveit_overlay.launch.py
                             </code></pre>
                             </div>
                         </div>
@@ -735,7 +733,7 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>MoveIt2(C++)の最小実装</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp_examples/src/moveit_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                                <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study/src/moveit_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
@@ -765,7 +763,7 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>このリポジトリの Python ファイルの位置づけ</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_examples/ros_study_examples/moveit_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/moveit_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
@@ -995,14 +993,14 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <p>関節を指定して補間するだけのシンプルなデモ</p>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_examples/ros_study_examples/jtc_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/jtc_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ol>
                                     <li>現在の関節角度を読んでから、位置+<code>time_from_start</code> だけで軌道を送る基本版です</li>
-                                    <li>実行<br><code>ros2 run ros_study_examples jtc_demo</code></li>
+                                    <li>実行<br><code>ros2 run ros_study jtc_demo</code></li>
                                     <li>起動側は
-                                        <code>ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py</code>
+                                        <code>ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py</code>
                                     </li>
                                     <li>JTC 自体の最小使用例として一番分かりやすい構成です</li>
                                 </ol>
@@ -1015,7 +1013,7 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>JTC + IKの実装</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_examples/ros_study_examples/jtc_with_ik_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/jtc_with_ik_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
@@ -1033,7 +1031,7 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>JointTrajectoryControllerの設定例</h2>
                         <div style="display: flex; align-items: center; gap: 2em;">
                             <div style="flex: 1;">
-                                <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study_bringup/config/ur_joint_trajectory_controller.yaml" data-trim style="max-height: 450px; font-size: 0.7em;"></code></pre>
+                                <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study/config/ur_joint_trajectory_controller.yaml" data-trim style="max-height: 450px; font-size: 0.7em;"></code></pre>
                             </div>
                         </div>
                     </section>
@@ -1198,16 +1196,16 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>速度・加速度つき JTC 実装</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_examples/ros_study_examples/jtc_velocity_accel_demo.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/jtc_velocity_accel_demo.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
                                     <li><code>jtc_demo.py</code> が位置だけの基本版、こちらは
                                         <code>positions / velocities / accelerations</code> を明示する版です</li>
                                     <li>5次多項式ベースで軌道点を細かく作り、各区間の始端と終端で速度・加速度を 0 にそろえます</li>
-                                    <li>実行<br><code>ros2 run ros_study_examples jtc_velocity_accel_demo</code></li>
+                                    <li>実行<br><code>ros2 run ros_study jtc_velocity_accel_demo</code></li>
                                     <li>起動側は
-                                        <code>ros2 launch ros_study_bringup ur5e_bringup_with_mock_components.launch.py</code>
+                                        <code>ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py</code>
                                     </li>
                                 </ul>
                             </div>
@@ -1282,7 +1280,7 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>waypoints表示: Marker の再利用部品</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_examples/ros_study_examples/marker_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/marker_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
@@ -1298,7 +1296,7 @@ ros2 launch ros_study_bringup ur5e_moveit_overlay.launch.py
                         <h2>waypoints表示: TF の再利用部品</h2>
                         <div class="slide-layout-code-text">
                             <div class="code-section">
-                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_examples/ros_study_examples/tf_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                                <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/tf_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                             </div>
                             <div class="text-section">
                                 <ul>
