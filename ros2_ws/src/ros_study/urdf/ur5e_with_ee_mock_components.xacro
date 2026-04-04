@@ -1,16 +1,18 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur">
 
-    <xacro:include filename="$(find ros_study)/urdf/ur5e.xacro" />
-
+    <xacro:arg name="name" default="ur"/>
+    <xacro:arg name="tf_prefix" default="" />
     <xacro:arg name="pestle_length" default="0.1092" />
     <xacro:arg name="spatula_length" default="0.089" />
 
+    <xacro:include filename="$(find ros_study)/urdf/ur5e.xacro" />
+
     <link name="world" />
     <joint name="world_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <parent link="world" />
         <child link="base_link" />
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
     </joint>
 
     <ros2_control name="UR5eMockSystem" type="system">
@@ -20,32 +22,44 @@
 
         <joint name="shoulder_pan_joint">
             <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
             <state_interface name="velocity" />
         </joint>
         <joint name="shoulder_lift_joint">
             <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">-1.57</param></state_interface>
+            <state_interface name="position">
+                <param name="initial_value">-1.57</param>
+            </state_interface>
             <state_interface name="velocity" />
         </joint>
         <joint name="elbow_joint">
             <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
             <state_interface name="velocity" />
         </joint>
         <joint name="wrist_1_joint">
             <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">-1.57</param></state_interface>
+            <state_interface name="position">
+                <param name="initial_value">-1.57</param>
+            </state_interface>
             <state_interface name="velocity" />
         </joint>
         <joint name="wrist_2_joint">
             <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
             <state_interface name="velocity" />
         </joint>
         <joint name="wrist_3_joint">
             <command_interface name="position" />
-            <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
             <state_interface name="velocity" />
         </joint>
     </ros2_control>
@@ -57,7 +71,7 @@
                 <mesh filename="package://ros_study/meshes/pestle_ur.stl" />
             </geometry>
             <material name="LightGrey">
-                <color rgba="0.7 0.7 0.7 1.0" />
+                <color rgba="0.7 0.7 0.7 1.0"/>
             </material>
         </visual>
         <collision>
@@ -87,7 +101,7 @@
             <geometry>
                 <mesh filename="package://ros_study/meshes/spatula.stl" />
             </geometry>
-            <material name="LightGrey" />
+            <material name="LightGrey"/>
         </visual>
         <collision>
             <origin xyz="0 0 0.0001" rpy="0 0 0" />

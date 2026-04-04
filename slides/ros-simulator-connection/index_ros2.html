@@ -286,6 +286,26 @@
 
                     </div>
                 </section>
+                <section>
+                    <h2>まずは ROS 2 control を更新</h2>
+                    <div style="text-align: left;">
+                        <p style="font-size: 0.85em;">
+                            Mock Components が起動しない場合、<code>controller_manager</code> と
+                            <code>realtime_tools</code> の不整合で落ちることがあります。まず関連パッケージを更新します。
+                        </p>
+                        <pre><code class="bash" data-trim>
+sudo apt update
+sudo apt install --reinstall \
+  ros-humble-realtime-tools \
+  ros-humble-controller-manager \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-joint-state-broadcaster \
+  ros-humble-joint-trajectory-controller \
+  ros-humble-ros2controlcli
+                        </code></pre>
+                    </div>
+                </section>
 
                 <section>
                     <h2>まずはLaunchを作成</h2>
@@ -300,6 +320,20 @@
                                 <li>詳細は後程やります、まずは表示しましょう</li>
                                 <li><code>ros_study/launch/ur5e_bringup_with_mock_components.launch.py</code>
                                     を参照してください</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>controller設定ファイルを作成</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study/config/ur_joint_trajectory_controller.yaml" data-trim></code></pre>
+                        </div>
+
+                        <div class="text-section">
+                            <ul>
+                                <li><code>ros_study/config/ur_joint_trajectory_controller.yaml</code> を用意します</li>
                             </ul>
                         </div>
                     </div>
@@ -1304,6 +1338,38 @@ ros2 run ros_study planning_scene_example_node
                             <strong>Gazebo 等の物理シミュレータ:</strong><br>
                             重力や慣性があるので、<strong style="color: #f87171;">「トルク制御」</strong>で動かすのが基本
                         </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>デバッグ用コマンド</h2>
+                <div style="text-align: left;">
+                    <p style="font-size: 0.85em;">
+                        Mock Components や Gazebo で「表示は出るが動かない」「TF がつながらない」ときは、まず次を確認します。
+                    </p>
+                    <pre><code class="bash" data-trim>
+# TF tree
+ros2 run tf2_tools view_frames
+ros2 run tf2_ros tf2_echo world base_link
+ros2 run tf2_ros tf2_echo base_link tool0
+
+# Joint state
+ros2 topic echo /joint_states --once
+
+# ros2_control
+ros2 control list_controllers
+ros2 control list_hardware_interfaces
+
+# 必要なら GUI
+sudo apt update
+sudo apt install ros-${ROS_DISTRO}-ros2controlcli ros-${ROS_DISTRO}-rqt-controller-manager
+rqt_controller_manager
+                    </code></pre>
+                    <ul style="font-size: 0.8em;">
+                        <li><code>world -&gt; base_link</code> が見えていても、<code>base_link -&gt; tool0</code> が切れているなら <code>/joint_states</code> を疑います</li>
+                        <li><code>/joint_states</code> が出ないときは、<code>joint_state_broadcaster</code> が active かを確認します</li>
+                        <li><code>ros2 control</code> コマンドがないときは <code>ros2controlcli</code> を追加します</li>
                     </ul>
                 </div>
             </section>

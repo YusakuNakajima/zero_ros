@@ -157,15 +157,15 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                 </section>
 
                 <section>
-                    <h2>CMakeLists.txtを修正</h2>
+                    <h2>setup.pyを修正</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-cmake external-code" data-src="../../ros2_ws/src/ros_study/CMakeLists.txt" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>ros_study/CMakeLists.txt</code> が launch / urdf / mesh / rviz の install 定義です</li>
-                                <li>依存関係は <code>ros_study/package.xml</code> に、インストール定義は <code>CMakeLists.txt</code> に集約しています</li>
+                                <li><code>setup.py</code> で launch / urdf / mesh / config / rviz の install 先を定義します</li>
+                                <li>Mock Components で使う <code>config/ur_joint_trajectory_controller.yaml</code> もここで入るようにします</li>
                                 <li>ビルドと実行↓</li>
                             </ul>
                         </div>

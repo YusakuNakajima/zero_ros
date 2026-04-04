@@ -78,7 +78,7 @@ def generate_launch_description():
 
     # URDF生成用ファイル (ros_study パッケージを使用)
     description_package_name = "ros_study"
-    description_file_name = "ur5e_with_ee.xacro"
+    description_file_name = "ur5e_with_ee_mock_components.xacro"
     
     description_package = FindPackageShare(description_package_name)
     description_file = PathJoinSubstitution([description_package, "urdf", description_file_name])
