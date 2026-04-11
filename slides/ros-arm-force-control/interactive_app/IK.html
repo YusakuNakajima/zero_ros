@@ -73,6 +73,10 @@
                         <span id="endEffectorCoords" class="info-value">N/A</span>
                     </div>
                     <div class="flex">
+                        <span class="info-label text-slate-400">収束状態:</span>
+                        <span id="solutionStatus" class="font-semibold text-emerald-400">未収束</span>
+                    </div>
+                    <div class="flex">
                         <span class="info-label text-slate-400">角度 θ1:</span>
                         <span id="theta1" class="info-value">N/A</span>
                     </div>
@@ -112,6 +116,7 @@
         ];
         const targetCoordsSpan = document.getElementById('targetCoords');
         const endEffectorCoordsSpan = document.getElementById('endEffectorCoords');
+        const solutionStatusSpan = document.getElementById('solutionStatus');
 
         let width, height, centerX, centerY;
         let scale = 1.0;
@@ -128,6 +133,12 @@
         const CCD_ITERATIONS = 1; // 1回の描画あたりの計算回数
         const ANGLE_STEP_RATE = 0.02; // 角度の更新速度をさらに小さくして、より遅くする
         const DISTANCE_THRESHOLD = 1;
+
+        function isConverged() {
+            if (target.x === null) return false;
+            const endEffector = jointPositions[numLinks];
+            return Math.hypot(endEffector.x - target.x, endEffector.y - target.y) < DISTANCE_THRESHOLD;
+        }
 
         function resizeCanvas() {
             const container = canvas.parentElement;
@@ -212,13 +223,14 @@
 
             // Draw target
             if (target.x !== null) {
+                const converged = isConverged();
                 ctx.beginPath();
                 ctx.arc(target.x, target.y, 10, 0, 2 * Math.PI);
-                ctx.fillStyle = 'rgba(52, 211, 153, 0.5)';
+                ctx.fillStyle = converged ? 'rgba(248, 113, 113, 0.5)' : 'rgba(52, 211, 153, 0.5)';
                 ctx.fill();
                 ctx.beginPath();
                 ctx.arc(target.x, target.y, 2, 0, 2 * Math.PI);
-                ctx.fillStyle = '#10b981';
+                ctx.fillStyle = converged ? '#ef4444' : '#10b981';
                 ctx.fill();
             }
 
@@ -256,6 +268,14 @@
             
             const endEffector = jointPositions[numLinks];
             endEffectorCoordsSpan.textContent = `${(endEffector.x - centerX).toFixed(1)}, ${-(endEffector.y - centerY).toFixed(1)}`;
+
+            if (isConverged()) {
+                solutionStatusSpan.textContent = '解を得た';
+                solutionStatusSpan.className = 'font-semibold text-red-400';
+            } else {
+                solutionStatusSpan.textContent = '未収束';
+                solutionStatusSpan.className = 'font-semibold text-emerald-400';
+            }
             
             for (let i = 0; i < numLinks; i++) {
                 // Normalize angle to be within -PI to PI for display

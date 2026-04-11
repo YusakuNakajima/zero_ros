@@ -91,7 +91,7 @@ docker compose -f docker/compose.yaml build --no-cache
 
 ```bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash
 
 ros2 launch ros_study view_ur.launch.py
@@ -108,7 +108,7 @@ ros2 run ros_study jtc_demo
 ```bash
 docker compose -f docker/compose.yaml exec ros_study bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash
 ```
 

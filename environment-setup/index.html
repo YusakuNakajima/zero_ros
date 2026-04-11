@@ -103,7 +103,7 @@
 
             <div class="space-y-6">
                 <section class="panel rounded-3xl p-6 md:p-8">
-                    <h2 class="text-2xl font-bold">ローカル限定の注意</h2>
+                    <h2 class="text-2xl font-bold">注意点</h2>
                     <ul class="mt-4 space-y-3 text-slate-300 leading-relaxed">
                         <li>このページは <strong class="text-amber-200">オンラインでは動きません</strong>。Docker 実行はブラウザ単体ではできないためです。</li>
                         <li>ローカルで <code class="text-emerald-200">python3 tools/ros_study_env_server.py</code> を起動してから使ってください。</li>
@@ -112,26 +112,16 @@
                 </section>
 
                 <section class="panel rounded-3xl p-6 md:p-8">
-                    <h2 class="text-2xl font-bold">手動コマンド</h2>
-                    <div class="mt-4 terminal rounded-2xl p-4 text-sm leading-6 whitespace-pre-wrap">python3 tools/ros_study_env_server.py
-
-# helper を使わず手動で起動する場合
+                    <h2 class="text-2xl font-bold">手動コマンド(Helperなし)</h2>
+                    <div class="mt-4 terminal rounded-2xl p-4 text-sm leading-6 whitespace-pre-wrap">
 docker compose -f docker/compose.yaml up --build -d --remove-orphans
 docker compose -f docker/compose.yaml exec ros_study bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash</div>
                 </section>
 
-                <section class="panel rounded-3xl p-6 md:p-8">
-                    <h2 class="text-2xl font-bold">使い方</h2>
-                    <ol class="mt-4 space-y-3 text-slate-300 leading-relaxed list-decimal list-inside">
-                        <li>リポジトリ直下で helper サーバーを起動する</li>
-                        <li>このページをローカルで開いて、接続表示が緑になるのを待つ</li>
-                        <li>「Dockerビルドして起動」を押して、ターミナルログを確認する</li>
-                        <li>必要なら「コンテナログ取得」で実行後ログを再表示する</li>
-                    </ol>
-                </section>
+             
 
 
                 <section class="panel rounded-3xl p-6 md:p-8">
@@ -142,7 +132,7 @@ source install/setup.bash</div>
                             <p class="font-semibold text-emerald-200">方法1: ターミナルから入る</p>
                             <div class="mt-2 terminal rounded-2xl p-4 text-sm leading-6 whitespace-pre-wrap">docker compose -f docker/compose.yaml exec ros_study bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash</div>
                         </div>
                         <div>

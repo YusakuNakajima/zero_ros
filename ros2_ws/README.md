@@ -5,8 +5,8 @@
 ## 使い方
 
 ```bash
-cd ~/zero_ros/ros2_ws
-colcon build --symlink-install
+cd ~/ros2_ws
+colcon build
 source install/setup.bash
 ```
 
@@ -22,7 +22,7 @@ docker compose -f docker/compose.yaml up --build
 docker compose -f docker/compose.yaml up -d --build
 docker compose -f docker/compose.yaml exec ros_study bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash
 ```
 

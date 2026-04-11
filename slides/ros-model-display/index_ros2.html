@@ -91,16 +91,14 @@
             </section>
 
             <section>
-                <h2>同梱workspaceの利用</h2>
+                <h2>ROS packageの作成</h2>
                 <pre><code data-trim class="bash">
-cd ~/zero_ros/ros2_ws
-colcon build --symlink-install
-source install/setup.bash
+cd ~/ros2_ws/src
+ros2 pkg create --build-type ament_python ros_study
                         </code></pre>
-                <ul>
-                    <li>このリポジトリには <code>ros2_ws</code> が同梱されており、ROS2 サンプルはすでに package 化されています</li>
-                    <li>以降のコード例は <code>ros2_ws/src/ros_study</code> を canonical source として参照してください</li>
-                </ul>
+                    <p style="margin-top: 30px;"><code>src/</code> 配下で package を作成します</p>
+                <p style="margin-top: 30px;">同梱workspaceを使う場合はすでに含まれているので不要です</p>
+         
             </section>
 
             <section>
@@ -116,7 +114,7 @@ source install/setup.bash
                 <pre><code data-trim class="bash">
 # キーが期限切れの場合があるので念のため更新します
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-sudo apt update
+sudo apt update && 
 # ユニバーサルロボットのROSパッケージをインストールします
 sudo apt install ros-${ROS_DISTRO}-ur    
 # ユニバーサルロボットのROSパッケージの動作確認
@@ -160,7 +158,7 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                     <h2>setup.pyを修正</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="code/ros2/setup.py" data-trim></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/setup.py" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -185,8 +183,8 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                         <li>ビルドします</li>
 
                         <pre><code data-trim class="bash">
-cd ~/zero_ros/ros2_ws
-colcon build --symlink-install
+cd ~/ros2_ws
+colcon build
 source install/setup.bash
                         </code></pre>
 
@@ -346,9 +344,9 @@ ros2 launch ros_study view_ur.launch.py
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>URDFにマクロ(関数等)を追加したのがXACRO</li>
-                                <li>リンク→ジョイントの繰り返し構造をマクロで書けるので便利</li>
+                                <li>URDFにマクロ(関数等)を追加しリンク→ジョイントの繰り返し構造を書けるので便利</li>
                                 <li>URDFよりXACROを使うことの方が多い</li>
+                                <li>urdf/ur5e.xacroで保存</li>
                             </ul>
                         </div>
                     </div>
@@ -363,7 +361,7 @@ ros2 launch ros_study view_ur.launch.py
                         <div class="text-section">
                             <ul>
                                 <li>アーム基本構造とエンドエフェクタ追記で別々のファイルを用意するのがおススメ</li>
-                                <li>エンドエフェクタ部分だけ追記すれば変更が用意</li>
+                                <li>urdf/ur5e_with_ee.xacroで保存</li>
                             </ul>
                             <p style="font-size: 0.7em; margin-top: 20px;">STLファイルのダウンロード(`meshes`ディレクトリに配置):</p>
                             <ul style="font-size: 0.7em;">
@@ -395,8 +393,8 @@ ros2 launch ros_study view_ur.launch.py
                         <li>ビルドします</li>
 
                         <pre><code data-trim class="bash">
-cd ~/zero_ros/ros2_ws
-colcon build --symlink-install
+cd ~/ros2_ws
+colcon build
 source install/setup.bash
                         </code></pre>
 

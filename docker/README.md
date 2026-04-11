@@ -47,7 +47,7 @@ docker compose -f docker/compose.yaml build --no-cache
 
 ```bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash
 ```
 
@@ -60,7 +60,7 @@ source install/setup.bash
 ```bash
 docker compose -f docker/compose.yaml exec ros_study bash
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash
 ```
 

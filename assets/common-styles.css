@@ -44,6 +44,22 @@
     width: auto;
 }
 
+/* 複数画像レイアウト */
+.image-section.dual-images {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.image-section.dual-images img {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+}
+
 /* --- レイアウト: コードとテキストの横並び --- */
 .slide-layout-code-text {
     display: flex;
@@ -212,6 +228,7 @@ mark.code-highlight-green {
     font-size: 0.6em;
     color: #aaa;
     margin-top: 10px;
+    text-align: center;
 }
 
 /* --- CSS修正: 長いコードを強制的に折り返す設定 --- */

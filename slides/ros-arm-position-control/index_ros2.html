@@ -265,7 +265,7 @@
 
             <section>
                 <section>
-                    <h2>実機用ロボットドライバを使うための準備</h2>
+                    <h2>ロボットドライバの準備</h2>
                     <div class="slide-layout-image">
                         <div class="slide-image">
                             <img src="../ros-simulator-connection/media/mock_components.png" alt="Robot_on_simulator"
@@ -274,9 +274,8 @@
 
                         <div class="slide-content">
                             <ul>
-                                <li>実機用のロボットドライバには、<strong style="color: #3b82f6;">Mock Components</strong>
+                                <li>メーカーのロボットドライバには、<strong style="color: #3b82f6;">Mock Components</strong>
                                     用の設定と実機接続用の設定の両方が含まれています。</li>
-                                <li>そのため、シミュレーション段階でも実機用ドライバの構成を活用できます。</li>
                                 <li>必要であれば end effector を追記して、そのまま利用可能です。</li>
                             </ul>
                         </div>
@@ -310,7 +309,7 @@
                     </p>
                 </section>
                 <section>
-                    <h2>xacroファイルの更新</h2>
+                    <h2>xacroファイルの作成更新</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-xml external-code" data-src="../../ros2_ws/src/ros_study/urdf/ur5e_with_ee_for_real_robot.xacro" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
@@ -339,7 +338,22 @@
                                 <li>起動用 launch は
                                     <code>ros_study/launch/ur5e_bringup_for_real_robot.launch.py</code>です
                                 </li>
-                                <li><code>initial_joint_controller</code>が<code>scaled_joint_trajectory_controller</code>に更新されています
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>起動用Launchの作成2</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/ur_control.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                        </div>
+
+                        <div class="text-section">
+                            <ul>
+                                <li><code>ros_study/launch/ur_control.launch.py</code>を作成します
+                                </li>
+                                <li>2つのlaunchを使うのはUR公式パッケージに合わせた仕様です
                                 </li>
                             </ul>
                         </div>
@@ -351,7 +365,7 @@
                         <li>ビルドします</li>
 
                         <pre style="font-size: 0.75em;"><code data-trim class="bash">
-cd ~/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build
 source install/setup.bash
                         </code></pre>
@@ -399,11 +413,154 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                             <ul>
                                 <li>位置とクオータニオンの7次元を並べてwaypointsを作成</li>
                                 <li>クオータニオンのSlerpを活用すると動作が滑らかになる</li>
-                                <li>詳しくはMoveItのスライドを確認</li>
                             </ul>
                         </div>
                     </div>
                 </section>
+                <section>
+                    <h2>手先姿勢の表現</h2>
+                    <p>位置(position)+向き(orientation)=姿勢(pose)</p>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>位置：</strong>XYZで表す</li>
+                                <li><strong>向き：</strong>オイラー角 or クオータニオン</li>
+                                <li>ROSでは内部計算でクオータニオンを使う</li>
+
+
+                            </ul>
+                        </div>
+                    </div>
+                    <p>実用上は最初と最後の姿勢をオイラー角で指定、クオータニオンに変換後に補完してROSに渡す</p>
+                </section>
+
+                <section>
+                    <h2>オイラー角による表現と課題</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/gimbal_lock.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/gimbal_lock.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>利点</strong>
+                                    <ul>
+                                        <li>直観的</li>
+                                        <li>3つの角度（Roll, Pitch, Yaw）で表現</li>
+                                    </ul>
+                                </li>
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>ジンバルロックを避ける必要</li>
+                                        <li>軌道補間で不自然な動きになることがある</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>クォータニオンによる表現</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/euler_vs_quat.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/euler_vs_quat.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>利点</strong>
+                                    <ul>
+                                        <li>ジンバルロックが発生しない</li>
+                                        <li>回転軸と回転角で表現</li>
+                                        <li>数値的に安定</li>
+                                    </ul>
+                                </li>
+                                <li><strong>課題</strong>
+                                    <ul>
+                                        <li>直観的理解が困難</li>
+                                        <li>4つの要素（w, x, y, z）で表現</li>
+                                        <li>正規化が必要</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>クォータニオン補間の利点</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/euler_vs_quat_interpolation.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/euler_vs_quat_interpolation.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>SLERP (Spherical Linear Interpolation)</strong>
+                                    <ul>
+                                        <li>球面上の最短経路で補間</li>
+                                        <li>角速度が一定</li>
+                                        <li>滑らかな軌道生成</li>
+                                    </ul>
+                                </li>
+                                <li><strong>オイラー角補間との比較</strong>
+                                    <ul>
+                                        <li>より自然な回転軌道</li>
+                                        <li>ジンバルロック回避</li>
+                                        <li>計算効率が良い</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>クォータニオンを扱う方法</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.9em;">
+                                <li><strong>TF</strong>
+                                    <ul>
+                                        <li>ROS標準</li>
+                                        <li>ROS専用の型を使えるのが便利</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Scipy Rotation</strong>
+                                    <ul>
+                                        <li>ROS不要でクオータニオンの計算が可能</li>
+                                        <li>SLERPもあるので僕はよく使う</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>姿勢の表現 - オススメの実装</h2>
+                    <ul>
+                        <li>最初と最後の姿勢は<strong>直観的にわかりやすいオイラー角</strong>で指定</li>
+                        <li>最初→最後の間のwaypointsの計算では<strong>オイラー角→クォータニオンに変換</strong>してSlerpで補完</li>
+                        <li>ROSはクオータニオンしか扱えない点に注意</li>
+                    </ul>
+
+                </section>
+
                 <section>
                     <h2>step2:逆運動学(IK)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -449,9 +606,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>MoveItのIKソルバー</h2>
-                    <p>MoveItのIKソルバー(ROS Service)だけ使用可能</p>
-                    <p>通信時間がかかるので数点のIKなら実用的</p>
+                    <h2>MoveItのIKソルバーの利用</h2>
+                    <p>MoveItのIKソルバーをROS Serviceを介して使うのが簡単</p>
+                    <p>通信時間がかかるので大量のIKには使いにくい、数点のIKなら実用的</p>
                     <ul style="font-size: 0.8em;">
                         <li><strong><a
                                     href="https://moveit.github.io/moveit_tutorials/doc/kinematics_configuration/kinematics_configuration_tutorial.html"
@@ -476,8 +633,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>Pythonで使えるIKソルバー</h2>
-                    <p>大量のIKはIk用ライブラリを直接使うのが良い</p>
-                    <p>実際に使われている手法を紹介</p>
+                    <p>大量のIKを解く際は以下のようなIk用ライブラリを直接使うのが良い</p>
 
                     <ul style="font-size: 0.8em;">
                         <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank"
@@ -495,7 +651,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <ul style="font-size: 0.9em;">
                         <li><strong>軌跡：</strong>逆運動学で得た解, 時間情報なし</li>
                         <li><strong>軌道：</strong>時間情報を加えたもの</li>
-                        <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は「実践 ロボット制御」での定義を使っています</p>
+                        <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は書籍「実践 ロボット制御」での定義を使っています</p>
                         <li>JointTrajectoryControllerでは、少なくともPositionとTimeFromStartを渡すと軌道計算と実行が可能</li>
                         <li>振動を抑える場合は厳密な速度, 加速度が必要だが、実用上はpositionだけでも問題ないことも多い</li>
                     </ul>
@@ -505,13 +661,12 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 <section>
                     <h2>JointTrajectoryの送信方法</h2>
                     <ul style="font-size: 0.9em;">
-                        <li>Topic or Actionで軌跡(JointTrajectory)を送信し実行</li>
-                        <li><strong>Topic</strong></li>
+                        <li><strong>Topic(こっちは簡易的、もしくは連続でGoalを 送る場合)</strong></li>
                         <ul>
                             <li>/joint_trajectory_controller_name/commandに送信</li>
                             <li>送ったら直ちに動作を実行、途中で止められない</li>
                         </ul>
-                        <li><strong>Action</strong>
+                        <li><strong>Action(基本はこっちを使う)</strong>
                             <ul>
                                 <li>/joint_trajectory_controller_name/FollowJointTrajectoryに送信</li>
                                 <li>目標到達までの状態確認や途中変更も可能</li>
@@ -597,9 +752,10 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>entry_points を追加</h2>
+                    <p>※スライドでは設定済みのファイルです</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../ros-model-display/code/ros2/setup.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/setup.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
@@ -614,7 +770,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <h2>buildと実行</h2>
                     <div style="text-align: left;">
                         <pre><code class="bash" data-trim>
-cd ~/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build
 source install/setup.bash
                             </code></pre>
@@ -648,7 +804,7 @@ ros2 run ros_study jtc_demo
                     <h2>buildと実行</h2>
                     <div style="text-align: left;">
                         <pre><code class="bash" data-trim>
-cd ~/zero_ros/ros2_ws
+cd ~/ros2_ws
 colcon build
 source install/setup.bash
                             </code></pre>
@@ -821,14 +977,8 @@ ros2 run ros_study jtc_with_ik_demo
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>jtc_demo.py</code> が位置だけの基本版、こちらは
-                                    <code>positions / velocities / accelerations</code> を明示する版です
-                                </li>
                                 <li>5次多項式ベースで軌道点を細かく作り、各区間の始端と終端で速度・加速度を 0 にそろえます</li>
-                                <li>実行<br><code>ros2 run ros_study jtc_velocity_accel_demo</code></li>
-                                <li>起動側は
-                                    <code>ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py</code>
-                                </li>
+                                <li>ros_study/jtc_velocity_accel_demo.pyで保存</code></li>
                             </ul>
                         </div>
                     </div>
@@ -850,11 +1000,10 @@ ros2 run ros_study jtc_with_ik_demo
                         <div style="flex: 1;">
                             <h3>ヤコビアンとは</h3>
                             <ul style="font-size: 0.9em;">
-                                <li>関節角度変化と手先位置変化の関係を表す行列</li>
+                                <li>関節速度 → 手先速度</li>
                                 <li>微分の連鎖律から導出</li>
-                                <li>速度の関係式：<strong>v = J * q̇</strong></li>
+                                <li>関係式：<strong>v = J * q̇</strong></li>
                             </ul>
-                            <h3>物理的意味</h3>
                             <ul style="font-size: 0.9em;">
                                 <li>v: 手先速度ベクトル（6次元）</li>
                                 <li>J: ヤコビアン行列（6×n）</li>
@@ -876,14 +1025,13 @@ ros2 run ros_study jtc_with_ik_demo
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
-                            <h3>逆ヤコビアンの計算</h3>
+                            <h3>逆ヤコビアン</h3>
                             <ul style="font-size: 0.9em;">
-                                <li><strong>目標</strong>：手先速度 → 関節速度</li>
+                                <li>手先速度 → 関節速度</li>
                                 <li><strong>式</strong>：q̇ = J⁻¹ * v</li>
-                                <li><strong>問題</strong>：Jが正方行列でない場合</li>
                             </ul>
-                            <h3>解決方法</h3>
-                            <ul style="font-size: 0.9em;">
+                            <p>Jが正方行列でない場合は？</p>
+                            <ul style="font-size: 0.6em;">
                                 <li><strong>疑似逆行列</strong>：J⁺ = Jᵀ(JJᵀ)⁻¹</li>
                                 <li><strong>特異点対策</strong>：Damped Least Squares</li>
                                 <li><strong>冗長性解決</strong>：Null Space制御</li>
@@ -941,7 +1089,7 @@ ros2 run ros_study jtc_with_ik_demo
                     <p>姿勢をGUIで指定</p>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
+                            <img src="media/moveit_ur.png" alt="姿勢表現" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -1059,252 +1207,79 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2>手先姿勢の表現</h2>
-                    <p>位置(position)+向き(orientation)=姿勢(pose)</p>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>位置：</strong>XYZで表す</li>
-                                <li><strong>向き：</strong>オイラー角 or クオータニオン</li>
-                                <li>ROSでは内部計算でクオータニオンを使う</li>
-
-
-                            </ul>
-                        </div>
-                    </div>
-                    <p>実用上は最初と最後の姿勢をオイラー角で指定、クオータニオンに変換後に補完してROSに渡す</p>
-                </section>
-
-                <section>
-                    <h2>オイラー角による表現と課題</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/gimbal_lock.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/gimbal_lock.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>利点</strong>
-                                    <ul>
-                                        <li>直観的</li>
-                                        <li>3つの角度（Roll, Pitch, Yaw）で表現</li>
-                                    </ul>
-                                </li>
-                                <li><strong>課題</strong>
-                                    <ul>
-                                        <li>ジンバルロックを避ける必要</li>
-                                        <li>軌道補間で不自然な動きになることがある</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
-                    <h2>クォータニオンによる表現</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/euler_vs_quat.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/euler_vs_quat.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>利点</strong>
-                                    <ul>
-                                        <li>ジンバルロックが発生しない</li>
-                                        <li>回転軸と回転角で表現</li>
-                                        <li>数値的に安定</li>
-                                    </ul>
-                                </li>
-                                <li><strong>課題</strong>
-                                    <ul>
-                                        <li>直観的理解が困難</li>
-                                        <li>4つの要素（w, x, y, z）で表現</li>
-                                        <li>正規化が必要</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
-                    <h2>クォータニオン補間の利点</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/euler_vs_quat_interpolation.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/euler_vs_quat_interpolation.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>SLERP (Spherical Linear Interpolation)</strong>
-                                    <ul>
-                                        <li>球面上の最短経路で補間</li>
-                                        <li>角速度が一定</li>
-                                        <li>滑らかな軌道生成</li>
-                                    </ul>
-                                </li>
-                                <li><strong>オイラー角補間との比較</strong>
-                                    <ul>
-                                        <li>より自然な回転軌道</li>
-                                        <li>ジンバルロック回避</li>
-                                        <li>計算効率が良い</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>クォータニオンを扱う方法</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>TF</strong>
-                                    <ul>
-                                        <li>ROS標準</li>
-                                        <li>ROS専用の型を使えるのが便利</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Scipy Rotation</strong>
-                                    <ul>
-                                        <li>ROS不要でクオータニオンの計算が可能</li>
-                                        <li>SLERPもあるので僕はよく使う</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>姿勢の表現 - オススメの実装</h2>
-                    <ul>
-                        <li>最初と最後の姿勢は<strong>直観的にわかりやすいオイラー角</strong>で指定</li>
-                        <li>最初→最後の間のwaypointsの計算では<strong>オイラー角→クォータニオンに変換</strong>してSlerpで補完</li>
-                        <li>ROSはクオータニオンしか扱えない点に注意</li>
-                    </ul>
-
-                </section>
-
-
-
-                <section>
-                    <h2>Step2:モーションプランニング</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/moveit_algorithm.png" alt="パスプランニング手法" style="width: 100%;">
-                            <p style="font-size: 0.6em;">
-                                MoveItで使える手法一覧<br>https://opensource-robotics.tokyo.jp/?p=4313
-                            </p>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>産業用モーション(PTP,LIN,CIRC)</strong>
-                                    <ul>
-                                        <li>Pilz Industrial Motion Planner</li>
-                                    </ul>
-                                </li>
-                                <li><strong>サンプリングベース(最もよく使う)</strong>
-                                    <ul>
-                                        <li>OMPLの中の手法</li>
-                                    </ul>
-                                </li>
-                                <li><strong>最適化ベース</strong>
-                                    <ul>
-                                        <li>CHOMP</li>
-                                        <li>STOMP</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
                     <h2>MoveIt2のPython対応（MoveItPy）</h2>
+                    <p>※Pythonは現状おすすめしない、使うならC++</p>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <ul>
                                 <li>公式にMoveItPyが提供されている</li>
                                 <li>Humbleでは未実装で、Jazzy以降（Ubuntu 24.04以降）でのみ利用可能</li>
-                                <li>単純なラッパーではなく、MoveItの各種パラメータを一通り設定する必要がある</li>
-                                <li>導入・運用コストが高いため、現状はおすすめしない</li>
+                                <li>単純なラッパーではなく、MoveItの各種パラメータを一通り設定する必要があるので使いにくい</li>
                             </ul>
                         </div>
                     </div>
                 </section>
-
 
                 <section>
-                    <h2>MoveItをどこで起動するか</h2>
-                    <div class="slide-layout-code-text">
-                        <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/ur5e_moveit_overlay.launch.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li><code>ur5e_bringup_with_moveit.launch.py</code>
-                                    は一体型、<code>ur5e_moveit_overlay.launch.py</code> は後載せ用です</li>
-                                <li><code>ros-simulator-connection#/7</code> の mock_components 起動済み環境に MoveIt
-                                    だけ重ねたいときに使います</li>
-                                <li>MoveIt の講義ではこの「既存シミュレータに機能を追加する」構成を知っておくと便利です</li>
-                            </ul>
-                            <pre><code class="bash" data-trim>
-ros2 launch ros_study ur5e_bringup_with_mock_components.launch.py launch_moveit:=true
-# または
-ros2 launch ros_study ur5e_moveit_overlay.launch.py
-                            </code></pre>
-                        </div>
-                    </div>
+                    <h2>C++用のROS packageの作成</h2>
+                    <pre><code data-trim class="bash">
+cd ~/ros2_ws/src
+ros2 pkg create --build-type ament_cmake ros_study_cpp
+                        </code></pre>
+                    <p style="margin-top: 30px;"><code>src/</code> 配下で package を作成します</p>
+                    <p style="margin-top: 30px;">同梱workspaceを使う場合はすでに含まれているので不要です</p>
+
                 </section>
+
+
+
 
                 <section>
                     <h2>MoveIt2(C++)の最小実装</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study/src/moveit_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/src/ur_moveit_demo.cpp" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li>まずは <code>MoveGroupInterface</code> で pose target を 1 つ計画・実行する最小例です</li>
-                                <li>「MoveIt をどう呼び出すか」だけを確認したいときはこちらが読みやすいです</li>
-                                <li>講義ではまずこの最小実装を土台にして、launch 側と合わせた制御の流れを確認します</li>
+                                <li><code>MoveGroupInterface</code> で pose target を 計画・実行する最小例です</li>
+                                <li>ros_study_cpp/src/ur_moveit_demo.cppで保存</code>
                             </ul>
                         </div>
                     </div>
                 </section>
 
-
                 <section>
-                    <h2>このリポジトリの Python ファイルの位置づけ</h2>
+                    <h2>CMakeLists.txtを修正</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/moveit_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study_cpp/CMakeLists.txt" data-trim></code></pre>
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>moveit_demo.py</code> は MoveItPy の本実装ではなく、C++ デモへの案内用エントリです</li>
-                                <li>Humble では MoveItPy を講義の主軸にしにくいため、この資料では C++ の最小実装を中心に扱います</li>
-                                <li>Python を見に来た人が迷わないよう、「何を実行すべきか」をログで案内します</li>
+                                <li><code>CMakeLists.txt</code> で実行ファイルのビルド条件を定義します</li>
+                                <li>ビルドと実行↓</li>
                             </ul>
                         </div>
                     </div>
+                </section>
+                <section>
+                    <h2>ビルドと実行</h2>
+                    <ul>
+                        <li>ビルドします</li>
+
+                        <pre><code data-trim class="bash">
+cd ~/ros2_ws
+colcon build
+source install/setup.bash
+                        </code></pre>
+
+                        <li>次のコマンドで実行してください</li>
+                        <pre><code data-trim class="bash">
+ros2 run ros_study_cpp ur_moveit_demo_cpp
+                        </code></pre>
+                    </ul>
+
                 </section>
 
 
@@ -1314,7 +1289,7 @@ ros2 launch ros_study ur5e_moveit_overlay.launch.py
 
             <section>
                 <section>
-                    <h2>waypoints表示: Marker の再利用部品</h2>
+                    <h2>デバッグのヒント：waypoints表示</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/marker_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
@@ -1330,7 +1305,7 @@ ros2 launch ros_study ur5e_moveit_overlay.launch.py
                 </section>
 
                 <section>
-                    <h2>waypoints表示: TF の再利用部品</h2>
+                    <h2>デバッグのヒント：目標姿勢の表示</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/tf_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>

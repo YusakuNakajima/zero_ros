@@ -23,7 +23,7 @@ WORKDIR /home/ros/ros2_ws
 
 RUN bash -lc 'curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash     && source "$NVM_DIR/nvm.sh"     && nvm install ${NODE_VERSION}     && nvm alias default ${NODE_VERSION}     && nvm use default     && npm install -g @openai/codex'
 
-RUN echo 'export NVM_DIR="/home/ros/.nvm"' >> /home/ros/.bashrc     && echo '[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"' >> /home/ros/.bashrc     && echo '[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"' >> /home/ros/.bashrc     && echo 'export ROS2_WS="/home/ros/ros2_ws"' >> /home/ros/.bashrc     && echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> /home/ros/.bashrc     && echo 'if [ -f "$ROS2_WS/install/setup.bash" ]; then source "$ROS2_WS/install/setup.bash"; fi' >> /home/ros/.bashrc     && echo 'alias b="cd $ROS2_WS && colcon build --symlink-install && source install/setup.bash"' >> /home/ros/.bashrc
+RUN echo 'export NVM_DIR="/home/ros/.nvm"' >> /home/ros/.bashrc     && echo '[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"' >> /home/ros/.bashrc     && echo '[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"' >> /home/ros/.bashrc     && echo 'export ROS2_WS="/home/ros/ros2_ws"' >> /home/ros/.bashrc     && echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> /home/ros/.bashrc     && echo 'if [ -f "$ROS2_WS/install/setup.bash" ]; then source "$ROS2_WS/install/setup.bash"; fi' >> /home/ros/.bashrc     && echo 'alias b="cd $ROS2_WS && colcon build && source install/setup.bash"' >> /home/ros/.bashrc
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["bash"]

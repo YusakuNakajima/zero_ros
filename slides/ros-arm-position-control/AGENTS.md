@@ -3,7 +3,8 @@
 ## Project Structure & Module Organization
 - `index_ros1.html` and `index_ros2.html` are the main slide decks for ROS1/ROS2.
 - `interactive_app/` contains standalone HTML demos used inside slides.
-- `code/ros1/` and `code/ros2/` hold example scripts (Python/C++) and ROS config (`.yaml`, `.xacro`).
+- `code/ros1/` holds ROS1 example scripts and configs used by this deck.
+- ROS2 examples are maintained in `../../ros2_ws/src/ros_study/` as the canonical source.
 - `media/` stores images and GIFs embedded in slides.
 - `CLAUDE.md` is a detailed content outline and reference for the deck.
 
@@ -15,7 +16,7 @@ There is no build system in this repo. Common local workflows:
   python3 -m http.server
   ```
   Then browse to the slide HTML file.
-- ROS demos: scripts under `code/ros1/` and `code/ros2/` are educational examples. Run them inside a configured ROS1/ROS2 workspace as appropriate.
+- ROS demos: ROS1 examples under `code/ros1/` and ROS2 examples under `../../ros2_ws/src/ros_study/` are educational examples. Run them inside a configured ROS workspace as appropriate.
 
 ## Coding Style & Naming Conventions
 - Python uses 4-space indentation and UTF-8 source headers. Keep the existing style and inline Japanese comments where present.

@@ -111,7 +111,7 @@
                                 style="border: 3px solid #5bc0de; border-radius: 15px; padding: 20px; background-color: #eef7fa; position: relative;">
                                 <p
                                     style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #5bc0de; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
-                                    GPTに聞く</p>
+                                    AIに聞く</p>
                                 <h4 style="color: #5bc0de;">Linux</h4>
                                 <p style="font-size: 0.7em; color: black;">(コマンド,仕組み)</p>
                             </div>
@@ -136,7 +136,7 @@
                                 style="border: 3px solid #337ab7; border-radius: 15px; padding: 20px; background-color: #e8f0f7; position: relative;">
                                 <p
                                     style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #337ab7; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold; width: 80%; text-align: center;">
-                                    スキップ(まずは使わないものを作る)</p>
+                                    スキップ(まずは不要)</p>
                                 <h4 style="color: #337ab7;">リアルタイム処理</h4>
                                 <p style="font-size: 0.7em; color: black;">(優先度設定など)</p>
                             </div>
@@ -384,19 +384,13 @@
 
                     </section>
 
-                    <section>
-                        <h2>①勉強用のローカル環境</h2>
-                        <ul>
-                            <li>勉強用ならまずは<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/"
-                                    target="_blank" style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です
-                            </li>
-                            <li>トラブルはほぼないですが、VNC越しのため実機ロボットには使えないです(あくまで勉強用)</li>
-                        </ul>
-                    </section>
+                  
 
                                             <section>
-                                                <h2>②実践用のローカル環境</h2>
+                                                <h2>実践用のローカル環境</h2>
                                                 <p>この教材リポジトリ自体に、ROS2 workspace と Docker 環境を同梱しています</p>
+                                                <p><a href="../../environment-setup/index.html" target="_blank"
+                                                        style="color: #3b82f6; text-decoration: underline;">ローカル環境構築の手順はこちら</a></p>
                                                 <pre><code data-trim class="bash">
                     user@user:~$ git clone https://github.com/yusakunakajima/zero_ros.git
                     user@user:~$ cd zero_ros
@@ -405,11 +399,18 @@
                                                 <ul>
                                                     <li>リポジトリ直下の <code>docker/</code> と <code>ros2_ws/</code> をそのまま使います</li>
                                                     <li>コンテナ内では <code>~/ros2_ws</code> が作業ディレクトリです</li>
-                                                    <li><code>colcon build --symlink-install</code> 後に各スライドの launch / run コマンドを実行します</li>
                                                 </ul>
                                             </section>
                                                                                             </section>
-                                                                                        </section>
+                                                         <section>
+                        <h2>[その他]勉強用のローカル環境</h2>
+                        <ul>
+                            <li>勉強用の手軽な環境なら<a href="https://qiita.com/karaage0703/items/957bdc7b4dabfc6639da/"
+                                    target="_blank" style="color: #3b82f6; text-decoration: underline;">これがオススメ</a>です
+                            </li>
+                            <li>VNC越しでdockerコンテナに繋ぐため実機ロボットには使えないです(あくまで勉強用)</li>
+                        </ul>
+                    </section>                                 </section>
                                                                                     </section>
                                                                     
                                                                                     <section>
@@ -435,8 +436,11 @@
                     <li><a href="../ros-model-display/index_ros2.html"
                             style="color: #3b82f6; text-decoration: underline;">→
                             ステップ1：ロボットアームを表示</a></li>
+                              <li><a href="../ros-simulator-connection/index_ros2.html"
+                            style="color: #3b82f6; text-decoration: underline;">→
+                            ステップ2：シミュレーションの設定</a></li>
                     <li><a href="../ros-arm-position-control/index_ros2.html"
-                            style="color: #3b82f6; text-decoration: underline;">→ ステップ2：ロボットアームを動かす</a></li>
+                            style="color: #3b82f6; text-decoration: underline;">→ ステップ3：ロボットアームを動かす</a></li>
                 </ul>
                 <p>本スライドの残りは前準備として<br>ROSのプログラムの基本的な仕組みを紹介 →</p>
             </section>
