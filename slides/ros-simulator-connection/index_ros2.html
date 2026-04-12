@@ -1222,7 +1222,8 @@ gazebo = IncludeLaunchDescription(
     }.items(),
 )
                         </code></pre>
-                        <p style="font-size: 0.7em; color: #aaa;">※ <code>worlds</code> フォルダを <code>CMakeLists.txt</code>
+                        <p style="font-size: 0.7em; color: #aaa;">※ <code>worlds</code> フォルダを
+                            <code>CMakeLists.txt</code>
                             でインストールする設定を忘れずに！</p>
                     </div>
                 </section>
@@ -1248,11 +1249,6 @@ gazebo = IncludeLaunchDescription(
                         </div>
                     </div>
                 </section>
-
-
-            </section>
-
-            <section>
                 <section>
                     <h2>Planning Sceneへの反映方法</h2>
                     <div style="text-align: left;">
@@ -1270,29 +1266,6 @@ gazebo = IncludeLaunchDescription(
                                 <code>/planning_scene</code> や <code>PlanningSceneInterface</code>
                                 で明示的に反映してはじめて、経路計画の衝突判定に使われます。
                             </p>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
-                    <h2>Planning Scene 反映サンプル (C++)</h2>
-                    <div class="slide-layout-code-text">
-                        <div class="code-section">
-                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study/src/planning_scene_example_node.cpp" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>Gazebo に障害物があるだけでは MoveIt の衝突判定には使われません</li>
-                                <li>C++ では <code>/planning_scene</code> を直接 publish する代わりに
-                                    <code>PlanningSceneInterface</code> を使うと簡潔です</li>
-                                <li>この例は Gazebo world の <code>box_obstacle</code> を <code>world</code> フレームの box として
-                                    MoveIt 側へ写します</li>
-                            </ul>
-                            <pre><code class="bash" data-trim>
-ros2 launch ros_study ur5e_bringup_with_gazebo.launch.py
-ros2 launch ros_study ur5e_moveit_overlay.launch.py description_file:=ur5e_with_ee_gazebo.xacro
-ros2 run ros_study planning_scene_example_node
-                            </code></pre>
                         </div>
                     </div>
                 </section>

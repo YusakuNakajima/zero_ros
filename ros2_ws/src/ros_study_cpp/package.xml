@@ -12,6 +12,7 @@
   <depend>controller_manager</depend>
   <depend>geometry_msgs</depend>
   <depend>gz_ros2_control</depend>
+  <depend>geometric_shapes</depend>
   <depend>joint_state_broadcaster</depend>
   <depend>joint_state_publisher_gui</depend>
   <depend>joint_trajectory_controller</depend>

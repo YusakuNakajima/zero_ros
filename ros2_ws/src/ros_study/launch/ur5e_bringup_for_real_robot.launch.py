@@ -23,6 +23,7 @@ def launch_setup(context, *args, **kwargs):
     ur_robot_driver_share = get_package_share_directory('ur_robot_driver')
     ur_moveit_config_share = get_package_share_directory('ur_moveit_config')
     ros_study_share = get_package_share_directory('ros_study')
+    ros_study_cpp_share = get_package_share_directory('ros_study_cpp')
     
     # --- Include ur_control launch file ---
     # This provides the basic robot driver and controllers.
@@ -59,10 +60,26 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(use_moveit)
     )
 
+    planning_scene_loader = Node(
+        package='ros_study_cpp',
+        executable='load_planning_scene',
+        name='load_planning_scene',
+        output='screen',
+        parameters=[
+            os.path.join(
+                ros_study_cpp_share,
+                'config',
+                'planning_scene_config.yaml',
+            )
+        ],
+        condition=IfCondition(use_moveit),
+    )
+
     # --- List of actions to execute ---
     actions_to_start = [
         ur_control_launch,
         ur_moveit_launch,
+        planning_scene_loader,
     ]
 
     return actions_to_start
