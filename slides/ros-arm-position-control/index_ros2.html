@@ -1281,10 +1281,122 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                     </ul>
 
                 </section>
+            </section>
 
 
+            <section>
+
+                <section data-background-image="media/moveit.png" data-background-opacity="0.5">
+                    <h2>MoveIt Planning Sceneによる障害物設置</h2>
+                </section>
+
+                <section>
+                    <h2>MoveIt Planning Scene の設置方法</h2>
+                    <div style="display: flex; align-items: flex-start; gap: 2em;">
+                        <div style="flex: 1;">
+                            <h3>GUIで追加する場合</h3>
+                            <ul>
+                                <li>RViz の MoveIt 画面で Planning Scene を確認しながら障害物を追加・調整します</li>
+                                <li>形状や位置を見ながら試行錯誤できるので、寸法合わせや初期確認に向いています</li>
+
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3>スクリプトで追加する場合</h3>
+                            <ul>
+                                <li><code>/planning_scene</code> に CollisionObject を publish して障害物を追加します</li>
+                                <li>launch に組み込めるので、毎回同じ環境を再現できます</li>
+                                <li>実機運用では「テーブルや乳鉢を自動で読み込む」構成にしておくと扱いやすいです</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1em;">
+                        <ul>
+                            <li>この講義では、再利用しやすいように <code>load_planning_scene</code> ノードとして実装します</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>追加する CPP コード1: load_planning_scene.cpp</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/src/load_planning_scene.cpp" data-trim style="max-height: 450px; font-size: 0.52em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li><code>table</code> と <code>mortar</code> を Planning Scene に追加する本体です</li>
+                                <li>起動時に既存オブジェクトを削除してから、テーブルと乳鉢を登録します</li>
+                                <li>今回は mesh の代わりに box で乳鉢の内側領域を近似しています</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>追加する CPP コード2: load_planning_scene_main.cpp</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/src/load_planning_scene_main.cpp" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li><code>PlanningSceneLoader</code> を standalone ノードとして起動するための <code>main()</code> です</li>
+                                <li>launch から呼べる実行ファイルにするために追加します</li>
+                                <li>パラメータ override を受け取れるように <code>NodeOptions</code> を設定しています</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>追加する HPP コード: load_planning_scene.hpp</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/include/ros_study_cpp/load_planning_scene.hpp" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li><code>PlanningSceneLoader</code> クラスの宣言です</li>
+                                <li>publisher, timer, 障害物追加用メソッドをまとめています</li>
+                                <li>C++ の実装を <code>.cpp</code> と分離して見通しを良くします</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>ビルドと実行コマンド</h2>
+                    <ul>
+                        <li>乳鉢 mesh は <code>ros2_ws/src/ros_study/meshes/asone_agate_mortar_80x100x36.stl</code> として保存しておきます</li>
+                    </ul>
+                    <pre><code data-trim class="bash">
+cd ~/zero_ros/ros2_ws/src/ros_study/meshes
+cp ~/Downloads/asone_agate_mortar_80x100x36.stl .
+                    </code></pre>
+
+                    <ul>
+                        <li>ワークスペースをビルドします</li>
+                    </ul>
+                    <pre><code data-trim class="bash">
+cd ~/zero_ros/ros2_ws
+colcon build --packages-select ros_study_cpp ros_study
+source install/setup.bash
+                    </code></pre>
+
+                    <ul>
+                        <li>実機用 launch を起動すると Planning Scene も自動で読み込まれます</li>
+                    </ul>
+                    <pre><code data-trim class="bash">
+ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
+  robot_ip:=192.168.58.42 \
+  use_mock_hardware:=false \
+  use_moveit:=true
+                    </code></pre>
+                </section>
 
             </section>
+
 
 
             <section>
