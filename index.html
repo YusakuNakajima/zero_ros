@@ -127,16 +127,31 @@
                                 class="ros-version-btn w-20 rounded-md py-1 text-sm font-semibold text-slate-700 dark:text-slate-400 transition-all">ROS2</button>
                         </div>
                     </div>
-                    <p class="text-slate-500 dark:text-slate-300 mb-6 transition-colors">対象：ROSでアーム制御が必要な人。ROS(Robot Operating
+                    <p class="text-slate-500 dark:text-slate-300 mb-4 transition-colors">対象：ROSでアーム制御が必要な人。ROS(Robot Operating
                         System)を使って、より高度な制御を行うための基礎を学びます。</p>
+                    <div class="mb-6 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-slate-700 dark:border-sky-900/60 dark:bg-slate-900 dark:text-slate-200 transition-colors">
+                        <p class="text-sm font-semibold tracking-wide text-sky-700 dark:text-sky-300">この順番で進めるのがおすすめ</p>
+                        <p class="mt-2 text-sm leading-7">
+                            <span class="font-semibold">1. ROSの全体像</span>
+                            <span class="text-slate-400 dark:text-slate-500">→</span>
+                            <span class="font-semibold">2. ロボットモデルの表示</span>
+                            <span class="text-slate-400 dark:text-slate-500">→</span>
+                            <span class="font-semibold">3. シミュレータとの接続</span>
+                            <span class="text-slate-400 dark:text-slate-500">→</span>
+                            <span class="font-semibold">4. アーム位置制御とモーションプランニング</span>
+                        </p>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">上から順に進めると、モデルを表示してから動かし、最後に制御までつなげられます。</p>
+                    </div>
                     <div class="grid md:grid-cols-2 gap-6">
                         <a href="slides/ros-introduction/index_ros1.html" class="slide-card ros-version-link group">
+                            <div class="mb-3 inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800 dark:bg-sky-900/40 dark:text-sky-200">STEP 1</div>
                             <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🌐 ROSの全体像</h3>
                             <p class="slide-description">ROSの学習戦略と、効果的な学習リソースの選択方法を紹介します。</p>
                             <div class="slide-meta"><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200 ros-text-switch"
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
                         <a href="slides/ros-model-display/index_ros1.html" class="slide-card ros-version-link group">
+                            <div class="mb-3 inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800 dark:bg-sky-900/40 dark:text-sky-200">STEP 2</div>
                             <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">📐 ロボットモデルの表示</h3>
                             <p class="slide-description ros-text-switch"
                                 data-ros1-text="URDF/XACROでのロボットモデリング、TFツリー、RVizでの可視化を学びます."
@@ -146,6 +161,7 @@
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
                         <a href="slides/ros-simulator-connection/index_ros1.html" class="slide-card ros-version-link group">
+                            <div class="mb-3 inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800 dark:bg-sky-900/40 dark:text-sky-200">STEP 3</div>
                             <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🎮 シミュレータとの接続</h3>
                             <p class="slide-description ros-text-switch"
                                 data-ros1-text="fake_jointやGazeboシミュレータを使い、PC上でロボットを動かす方法を学びます."
@@ -155,6 +171,7 @@
                                     data-ros1-text="ROS" data-ros2-text="ROS2">ROS</span></div>
                         </a>
                         <a href="slides/ros-arm-position-control/index_ros1.html" class="slide-card ros-version-link group">
+                            <div class="mb-3 inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800 dark:bg-sky-900/40 dark:text-sky-200">STEP 4</div>
                             <h3 class="slide-title group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">🎯 アーム位置制御とモーションプランニング</h3>
                             <p class="slide-description ros-text-switch"
                                 data-ros1-text="MoveIt!フレームワーク、IKソルバー、JointTrajectoryControllerについて詳解します."
