@@ -1,12 +1,10 @@
 # ur5e_with_pestle_bringup.launch.py
 
-import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
-from launch_ros.actions import Node
-from launch.launch_description_sources import PythonLaunchDescriptionSource, AnyLaunchDescriptionSource
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.conditions import IfCondition # Potentially needed if 'use_moveit' controls inclusion
+from launch.conditions import IfCondition
 from ament_index_python.packages import get_package_share_directory
 
 def launch_setup(context, *args, **kwargs):
@@ -20,10 +18,8 @@ def launch_setup(context, *args, **kwargs):
     initial_joint_controller = LaunchConfiguration('initial_joint_controller')
 
     # --- Get Package Share Directories ---
-    ur_robot_driver_share = get_package_share_directory('ur_robot_driver')
     ur_moveit_config_share = get_package_share_directory('ur_moveit_config')
     ros_study_share = get_package_share_directory('ros_study')
-    ros_study_cpp_share = get_package_share_directory('ros_study_cpp')
     
     # --- Include ur_control launch file ---
     # This provides the basic robot driver and controllers.
@@ -60,26 +56,10 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(use_moveit)
     )
 
-    planning_scene_loader = Node(
-        package='ros_study_cpp',
-        executable='load_planning_scene',
-        name='load_planning_scene',
-        output='screen',
-        parameters=[
-            os.path.join(
-                ros_study_cpp_share,
-                'config',
-                'planning_scene_config.yaml',
-            )
-        ],
-        condition=IfCondition(use_moveit),
-    )
-
     # --- List of actions to execute ---
     actions_to_start = [
         ur_control_launch,
         ur_moveit_launch,
-        planning_scene_loader,
     ]
 
     return actions_to_start
@@ -111,7 +91,7 @@ def generate_launch_description():
     declared_arguments.append(DeclareLaunchArgument(
         'use_moveit',
         default_value='true',
-        description='Whether to launch MoveIt related nodes and load the planning scene.'
+        description='Whether to launch MoveIt related nodes.'
     ))
     declared_arguments.append(DeclareLaunchArgument(
         'initial_joint_controller',

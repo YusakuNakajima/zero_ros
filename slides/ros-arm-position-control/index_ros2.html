@@ -260,7 +260,6 @@
                         </div>
                     </div>
                 </section>
-
             </section>
 
             <section>
@@ -308,6 +307,47 @@
                         今回は UR を使用するため、UR 用コントローラとして <code>ScaledJointTrajectoryController</code> を利用します。
                     </p>
                 </section>
+ <section>
+                <h2>[復習]URのパッケージを取得</h2>
+                <ul>
+                    <li>ここではユニバーサルロボット(UR)を扱います</li>
+                    <li>URのパッケージ詳細→ <a
+                            href="https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/tree/humble"
+                            target="_blank"
+                            style="color: #007bff; text-decoration: underline;">Universal_Robots_ROS2_Driver</a></li>
+                    <li><span style="color: rgb(255, 104, 104); font-weight: bold;">※The Constructを使っている人は環境立ち上げの度にインストールが必要なので注意</span></li>
+                </ul>
+                <pre><code data-trim class="bash">
+# キーが期限切れの場合があるので念のため更新します
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt update && 
+# ユニバーサルロボットのROSパッケージをインストールします
+sudo apt install ros-${ROS_DISTRO}-ur    
+# ユニバーサルロボットのROSパッケージの動作確認
+ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
+</code></pre>
+            </section>
+ <section>
+                    <h2>[復習]ROS 2 control を更新</h2>
+                    <div style="text-align: left;">
+                        <p style="font-size: 0.85em;">
+                            Mock Components が起動しない場合、<code>controller_manager</code> と
+                            <code>realtime_tools</code> の不整合で落ちることがあります。まず関連パッケージを更新します。
+                        </p>
+                        <pre><code class="bash" data-trim>
+sudo apt update && 
+sudo apt install --reinstall \
+  ros-humble-realtime-tools \
+  ros-humble-controller-manager \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-joint-state-broadcaster \
+  ros-humble-joint-trajectory-controller \
+  ros-humble-ros2controlcli
+                        </code></pre>
+                    </div>
+                </section>
+
                 <section>
                     <h2>xacroファイルの作成更新</h2>
                     <div class="slide-layout-code-text">
@@ -1341,7 +1381,8 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>PlanningSceneLoader</code> を standalone ノードとして起動するための <code>main()</code> です</li>
+                                <li><code>PlanningSceneLoader</code> を standalone ノードとして起動するための <code>main()</code> です
+                                </li>
                                 <li>launch から呼べる実行ファイルにするために追加します</li>
                                 <li>パラメータ override を受け取れるように <code>NodeOptions</code> を設定しています</li>
                             </ul>
@@ -1364,12 +1405,29 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                         </div>
                     </div>
                 </section>
-
+                <section>
+                    <h2>Launchファイル</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/load_planning_scene.launch.py" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li><code>load_planning_scene</code> ノードを起動する Launch ファイルです</li>
+                                <li><code>planning_scene_config.yaml</code> をパラメータとしてノードに渡します</li>
+                                <li>planning scene の読み込みを単体で実行できる構成にしています</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
                 <section>
                     <h2>ビルドと実行コマンド</h2>
                     <ul>
-                        <li>乳鉢 mesh は <code>ros2_ws/src/ros_study/meshes/asone_agate_mortar_80x100x36.stl</code> として保存しておきます</li>
-                        <li>ダウンロード: <a href="https://raw.githubusercontent.com/quantumbeam/powder_grinding_ros2/main/grinding_scene_description/meshes/asone_agate_mortar_80x100x36.stl" target="_blank">asone_agate_mortar_80x100x36.stl</a></li>
+                        <li>乳鉢 mesh は <code>ros2_ws/src/ros_study/meshes/asone_agate_mortar_80x100x36.stl</code>
+                            として保存しておきます</li>
+                        <li>ダウンロード: <a
+                                href="https://raw.githubusercontent.com/quantumbeam/powder_grinding_ros2/main/grinding_scene_description/meshes/asone_agate_mortar_80x100x36.stl"
+                                target="_blank">asone_agate_mortar_80x100x36.stl</a></li>
                     </ul>
                     <pre><code data-trim class="bash">
 cd ~/zero_ros/ros2_ws/src/ros_study/meshes
