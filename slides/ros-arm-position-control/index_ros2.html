@@ -1406,6 +1406,20 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                     </div>
                 </section>
                 <section>
+                    <h2>設定ファイル: planning_scene_config.yaml</h2>
+                    <div class="slide-layout-code-text">
+                        <div class="code-section">
+                            <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study_cpp/config/planning_scene_config.yaml" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
+                        </div>
+                        <div class="text-section">
+                            <ul>
+                                <li>テーブル位置や乳鉢位置など、planning scene の寸法と配置を YAML で管理します</li>
+                                <li>config/planning_scene_config.yaml で保存</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
                     <h2>Launchファイル</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
@@ -1413,7 +1427,7 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                         </div>
                         <div class="text-section">
                             <ul>
-                                <li><code>load_planning_scene</code> ノードを起動する Launch ファイルです</li>
+                                <li><code>load_planning_scene.launch.py</code>で保存</li>
                                 <li><code>planning_scene_config.yaml</code> をパラメータとしてノードに渡します</li>
                                 <li>planning scene の読み込みを単体で実行できる構成にしています</li>
                             </ul>

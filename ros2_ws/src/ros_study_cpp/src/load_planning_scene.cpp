@@ -1,8 +1,10 @@
 // load_planning_scene.cpp
 #include <chrono>
+#include <memory>
 
+#include <boost/variant/get.hpp>
 #include "ros_study_cpp/load_planning_scene.hpp"
-#include <geometric_shapes/mesh_operations.h> 
+#include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
 namespace grinding_scene_description
@@ -13,13 +15,25 @@ const rclcpp::Logger PlanningSceneLoader::LOGGER = rclcpp::get_logger("grinding_
 PlanningSceneLoader::PlanningSceneLoader(const rclcpp::NodeOptions & options)
 : rclcpp::Node("load_planning_scene", options)
 {
-    // Declare parameters
-  this->declare_parameter<std::string>("move_group_name", "default_group");
-  this->declare_parameter<std::vector<double>>("table_position", {0.0, 0.0, 0.0});
-  this->declare_parameter<std::vector<double>>("table_scale", {1.0, 1.0, 1.0});
-  this->declare_parameter<std::vector<double>>("mortar_top_position", {0.0, 0.0, 0.0});
-  this->declare_parameter<std::vector<double>>("mortar_inner_scale", {1.0, 1.0, 1.0});
-  this->declare_parameter<std::string>("mortar_mesh_file_name", "asone_agate_mortar_80x100x36.stl");
+  // Declare parameters only when they have not already been declared via overrides.
+  if (!this->has_parameter("move_group_name")) {
+    this->declare_parameter<std::string>("move_group_name", "default_group");
+  }
+  if (!this->has_parameter("table_position")) {
+    this->declare_parameter<std::vector<double>>("table_position", {0.0, 0.0, 0.0});
+  }
+  if (!this->has_parameter("table_scale")) {
+    this->declare_parameter<std::vector<double>>("table_scale", {1.0, 1.0, 1.0});
+  }
+  if (!this->has_parameter("mortar_top_position")) {
+    this->declare_parameter<std::vector<double>>("mortar_top_position", {0.0, 0.0, 0.0});
+  }
+  if (!this->has_parameter("mortar_inner_scale")) {
+    this->declare_parameter<std::vector<double>>("mortar_inner_scale", {1.0, 1.0, 1.0});
+  }
+  if (!this->has_parameter("mortar_mesh_file_name")) {
+    this->declare_parameter<std::string>("mortar_mesh_file_name", "asone_agate_mortar_80x100x36.stl");
+  }
 
   // Get parameters
   std::string move_group_name;
@@ -139,9 +153,14 @@ void PlanningSceneLoader::_add_mortar(const std::string& file_path, const std::v
   mortar.id = "mortar";
 
   shape_msgs::msg::Mesh mortar_mesh;
-  shapes::Mesh* m = shapes::createMeshFromResource(file_path);
+  std::unique_ptr<shapes::Mesh> mesh(shapes::createMeshFromResource(file_path));
+  if (!mesh) {
+    RCLCPP_ERROR(LOGGER, "Failed to load mortar mesh from resource: %s", file_path.c_str());
+    return;
+  }
+
   shapes::ShapeMsg mesh_msg;
-  shapes::constructMsgFromShape(m, mesh_msg);
+  shapes::constructMsgFromShape(mesh.get(), mesh_msg);
   mortar_mesh = boost::get<shape_msgs::msg::Mesh>(mesh_msg);
 
   geometry_msgs::msg::Pose mortar_pose;

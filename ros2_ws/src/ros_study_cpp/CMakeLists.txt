@@ -41,13 +41,13 @@ install(
 
 install(
   DIRECTORY
-    config
+    ${CMAKE_CURRENT_SOURCE_DIR}/config
   DESTINATION share/${PROJECT_NAME}
 )
 
 install(
   DIRECTORY
-    include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
   DESTINATION include
 )
 

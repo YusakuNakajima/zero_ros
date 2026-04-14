@@ -5,12 +5,12 @@
 #include <string>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+#include <moveit_msgs/msg/collision_object.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
+#include <shape_msgs/msg/mesh.hpp>
 #include <moveit_msgs/msg/planning_scene.hpp>
-#include <moveit_msgs/msg/attached_collision_object.hpp>
-#include <moveit_msgs/srv/apply_planning_scene.hpp>
 
 
 namespace grinding_scene_description
@@ -23,7 +23,6 @@ public:
   void load_scene();
 
 private:
-  rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_diff_publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr shutdown_timer_;
