@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" font-family="Noto Sans JP, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#eee"/>
+    </marker>
+  </defs>
+  <g font-size="20" text-anchor="middle">
+    <text x="60" y="76" fill="#eee">目標</text>
+    <text x="60" y="100" fill="#aaa" font-size="16">力・柔らかさ</text>
+    <line x1="100" y1="86" x2="150" y2="86" stroke="#eee" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="152" y="56" width="140" height="60" rx="8" fill="#5d4037" stroke="#ffb74d" stroke-width="3"/>
+    <text x="222" y="93" fill="#ffb74d">力制御器</text>
+    <line x1="292" y1="86" x2="338" y2="86" stroke="#eee" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="340" y="56" width="120" height="60" rx="8" fill="#37474f" stroke="#90a4ae" stroke-width="3"/>
+    <text x="400" y="82" fill="#eee">サーボ</text>
+    <text x="400" y="104" fill="#aaa" font-size="15">位置 or トルク</text>
+    <line x1="400" y1="116" x2="400" y2="178" stroke="#eee" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="340" y="180" width="120" height="60" rx="8" fill="#424242" stroke="#bdbdbd" stroke-width="3"/>
+    <text x="400" y="217" fill="#eee">ロボット</text>
+    <line x1="400" y1="240" x2="400" y2="298" stroke="#eee" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="340" y="300" width="120" height="50" rx="8" fill="#4e342e" stroke="#bcaaa4" stroke-width="3"/>
+    <text x="400" y="332" fill="#eee">環境</text>
+    <!-- feedback -->
+    <polyline points="340,325 222,325 222,118" fill="none" stroke="#ff6b6b" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="152" y="250" width="140" height="46" rx="8" fill="#212121" stroke="#ff6b6b" stroke-width="3"/>
+    <text x="222" y="280" fill="#ff6b6b">力覚センサ</text>
+    <text x="240" y="392" fill="#ffb74d" font-size="20">一定周期で 計測 → 計算 → 指令 を繰り返す</text>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" font-family="Noto Sans JP, sans-serif">
+  <!-- axes -->
+  <line x1="60" y1="340" x2="450" y2="340" stroke="#aaa" stroke-width="2"/>
+  <line x1="60" y1="340" x2="60" y2="50" stroke="#aaa" stroke-width="2"/>
+  <text x="440" y="368" fill="#aaa" font-size="18" text-anchor="end">時間</text>
+  <text x="44" y="70" fill="#aaa" font-size="18" text-anchor="end" transform="rotate(-90 44 70)">接触力</text>
+  <!-- target -->
+  <line x1="60" y1="200" x2="450" y2="200" stroke="#777" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="446" y="192" fill="#aaa" font-size="16" text-anchor="end">目標の力</text>
+  <!-- contact moment -->
+  <line x1="120" y1="340" x2="120" y2="60" stroke="#666" stroke-width="1.5" stroke-dasharray="3 5"/>
+  <text x="124" y="80" fill="#aaa" font-size="16">接触</text>
+  <!-- passive: smooth -->
+  <path d="M60,340 L120,340 C150,250 170,205 210,201 L450,200" fill="none" stroke="#4dd0e1" stroke-width="4"/>
+  <!-- active: stairs with overshoot -->
+  <polyline points="60,340 120,340 120,340 150,340 150,110 180,110 180,250 210,250 210,170 240,170 240,220 270,220 270,190 300,190 300,205 330,205 330,198 450,198"
+            fill="none" stroke="#ffb74d" stroke-width="4" stroke-linejoin="miter"/>
+  <!-- period annotation -->
+  <line x1="150" y1="96" x2="180" y2="96" stroke="#ffb74d" stroke-width="2"/>
+  <text x="186" y="102" fill="#ffb74d" font-size="16">制御周期ぶん遅れて応答</text>
+  <!-- legend -->
+  <line x1="80" y1="385" x2="120" y2="385" stroke="#4dd0e1" stroke-width="4"/>
+  <text x="128" y="391" fill="#4dd0e1" font-size="18">受動 (ばね・ゲル)</text>
+  <line x1="290" y1="385" x2="330" y2="385" stroke="#ffb74d" stroke-width="4"/>
+  <text x="338" y="391" fill="#ffb74d" font-size="18">能動 (力制御)</text>
+</svg>

@@ -45,7 +45,7 @@
                         <img src="media/実践ロボット制御.jpg" style="width: 20%; margin-right: 20px;">
                         <p>力制御、インピーダンス制御の理論と実装の詳細解説<br>実際の接触タスクに必要な制御理論が充実</p>
                     </div>
-
+                    <p style="font-size: 0.7em;">山野辺 夏樹: <a href="http://jstage.jst.go.jp/article/sicejl/56/10/56_741/_pdf/-char/en" target="_blank">マニピュレーションにおける力制御の研究動向</a>, 計測と制御, 56(10), pp.741-746, 2017</p>
                 </ol>
             </section>
 
@@ -70,6 +70,120 @@
                         </ul>
                     </div>
                 </div>
+            </section>
+
+            <!-- 受動/能動コンプライアンス -->
+            <section>
+                <section>
+                    <h2>受動 vs 能動コンプライアンス</h2>
+                    <table class="custom-table" style="font-size: 0.6em; white-space: nowrap;">
+                        <tr>
+                            <th></th>
+                            <th>受動コンプライアンス</th>
+                            <th>能動コンプライアンス (力制御)</th>
+                        </tr>
+                        <tr>
+                            <th>柔らかさの源</th>
+                            <td class="col-control">ばね・ゲル等の機械要素</td>
+                            <td class="col-action">力覚センサ + サーボ制御</td>
+                        </tr>
+                        <tr>
+                            <th>応答性</th>
+                            <td class="col-control">◎ 接触の瞬間から応答</td>
+                            <td class="col-action">△ 制御周期・帯域に依存</td>
+                        </tr>
+                        <tr>
+                            <th>柔らかさの変更</th>
+                            <td class="col-control">△ 固定（部品交換が必要）</td>
+                            <td class="col-action">◎ パラメータで自由に変更</td>
+                        </tr>
+                        <tr>
+                            <th>安定性・導入</th>
+                            <td class="col-control">◎ 安定・安価・シンプル</td>
+                            <td class="col-action">△ 発振の恐れ・センサが必要</td>
+                        </tr>
+                        <tr>
+                            <th>代表例</th>
+                            <td class="col-control">RCC (Peg-in-Hole)</td>
+                            <td class="col-action">ハイブリッド / インピーダンス制御</td>
+                        </tr>
+                    </table>
+                    <p class="caption" style="text-align: center;">山野辺 (2017) の分類をもとに作成 ↓ で各方式を説明</p>
+                </section>
+
+                <section>
+                    <h2>受動コンプライアンス制御</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/passive_compliance.svg" alt="位置制御アームの手先にばねを付けた受動コンプライアンス">
+                        </div>
+                        <div class="text-section" style="font-size: 0.7em;">
+                            <ul>
+                                <li>アームは<strong>位置制御のまま</strong></li>
+                                <li>手先にばね・ゲル等を挟んで柔らかくする</li>
+                                <li>機械要素なので<strong>力に即座に応答</strong></li>
+                                <li>柔らかさは設計時に決まり、作業ごとに固定</li>
+                                <li>例: RCC による穴への軸の挿入</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>能動コンプライアンス制御</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/active_compliance.svg" alt="力覚センサの値をフィードバックする能動コンプライアンスのブロック図">
+                        </div>
+                        <div class="text-section" style="font-size: 0.7em;">
+                            <ul>
+                                <li>センサで力を測り<strong>サーボで柔らかく動く</strong></li>
+                                <li>一般に「力制御」と呼ばれるのはこちら</li>
+                                <li><strong>直接的</strong>: 力そのものを目標値に制御（ハイブリッド制御）</li>
+                                <li><strong>間接的</strong>: 力と動きの関係を制御（インピーダンス制御）</li>
+                                <li>柔軟に変更できる反面、周期・安定性の制約あり</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- 本当に力制御が必要か？ -->
+            <section>
+                <section>
+                    <h2>本当に力“制御”が必要か？</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/compliance_response.svg" alt="接触時の力の応答: 受動は即時、能動は制御周期ぶん遅れる">
+                        </div>
+                        <div class="text-section" style="font-size: 0.7em;">
+                            <ul>
+                                <li>受動コンプライアンスで<strong>事足りる作業</strong>も多い</li>
+                                <li>能動制御は「計測→計算→指令」の周期ぶん遅れる</li>
+                                <li>ばね・ゲルは接触の瞬間から力を受け流す</li>
+                                <li class="fragment">「常に一定の力で押す」なら<strong>受動の方が有利</strong>な場合も</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>事例: 受動で力を制御</h2>
+                    <div class="slide-layout-image">
+                        <div class="image-section">
+                            <img src="media/mechanochemistry_passive.svg" alt="ロボットが受動コンプライアンスを介して乳鉢で粉砕する様子">
+                        </div>
+                        <div class="text-section" style="font-size: 0.7em;">
+                            <ul>
+                                <li>ロボットによる乳鉢での<strong>メカノケミカル合成</strong></li>
+                                <li>受動コンプライアンスで粉砕力を制御</li>
+                                <li>粉砕の力と速度を調整して<strong>再現性が向上</strong></li>
+                                <li>反応経路の制御も可能に</li>
+                            </ul>
+                            <p style="font-size: 0.55em;">Y. Nakajima et al., <a href="https://pubs.rsc.org/dd/article/3/10/2130/846113/Force-controlled-robotic-mechanochemical-synthesis" target="_blank">"Force-controlled robotic mechanochemical synthesis"</a>, Digital Discovery, 3, 2130-2136 (2024)</p>
+                        </div>
+                    </div>
+                </section>
             </section>
 
             <!-- アーム制御の前提知識 -->
