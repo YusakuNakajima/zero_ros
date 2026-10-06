@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インピーダンス vs アドミッタンス</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --line: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --imp: #4dd0e1;
+            --adm: #ffb74d;
+            --ref: #9ca3af;
+            --force: #ff6b6b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+        }
+        h1 { font-size: 18px; margin: 0 0 8px; }
+        .layout { display: grid; grid-template-columns: 1fr 290px; gap: 12px; }
+        @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+        .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+        canvas { width: 100%; display: block; }
+        label { display: block; margin: 10px 0 2px; color: var(--muted); }
+        label b { color: var(--text); float: right; font-weight: 700; }
+        input[type="range"], select { width: 100%; }
+        select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px; }
+        .buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        button {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #374151;
+            color: var(--text);
+            font: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        button:hover { background: #4b5563; }
+        button.primary { background: #2563eb; border-color: #2563eb; }
+        .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-top: 6px; }
+        .legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 5px; vertical-align: middle; background: currentColor; }
+        .imp { color: var(--imp); }
+        .adm { color: var(--adm); }
+        .refc { color: var(--ref); }
+        .notes { margin-top: 10px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+        .notes strong.imp, .notes strong.adm { font-weight: 700; }
+        .stats { display: grid; grid-template-columns: auto auto auto; gap: 2px 10px; margin-top: 10px; font-size: 12px; white-space: nowrap; }
+        .stats div:nth-child(-n+3) { color: var(--muted); }
+    </style>
+</head>
+<body>
+    <h1>インピーダンス制御 vs アドミッタンス制御（1自由度・壁への押し付け）</h1>
+    <div class="layout">
+        <div class="panel">
+            <canvas id="scene" height="170"></canvas>
+            <canvas id="plotX" height="150"></canvas>
+            <canvas id="plotF" height="150"></canvas>
+            <div class="legend">
+                <span class="imp">インピーダンス制御</span>
+                <span class="adm">アドミッタンス制御</span>
+                <span class="refc">目標位置</span>
+            </div>
+        </div>
+        <div class="panel">
+            <label>環境の硬さ k<sub>e</sub> <b id="keVal"></b></label>
+            <input type="range" id="ke" min="2" max="5.5" step="0.1" value="4.5">
+            <label>制御周期 <b id="TVal"></b></label>
+            <select id="T">
+                <option value="0.001">1 ms (1 kHz)</option>
+                <option value="0.002">2 ms (500 Hz)</option>
+                <option value="0.004" selected>4 ms (250 Hz)</option>
+                <option value="0.008">8 ms (125 Hz)</option>
+            </select>
+            <label>関節摩擦 <b id="fcVal"></b></label>
+            <input type="range" id="fc" min="0" max="10" step="0.5" value="5">
+            <div class="buttons">
+                <button id="presetSoft">スポンジ</button>
+                <button id="presetHard">金属</button>
+                <button id="restart" class="primary">再スタート</button>
+            </div>
+            <div class="stats">
+                <div></div><div class="imp">インピ.</div><div class="adm">アドミ.</div>
+                <div>自由空間の追従誤差</div><div id="errImp">-</div><div id="errAdm">-</div>
+                <div>最大接触力</div><div id="fmaxImp">-</div><div id="fmaxAdm">-</div>
+            </div>
+            <div class="notes">
+                <strong class="imp">インピーダンス</strong>: 位置の誤差 → トルクを出力。センサ不要で硬い壁にも安定だが、摩擦で位置がずれる。<br>
+                <strong class="adm">アドミッタンス</strong>: 力センサの値 → 位置指令。位置制御が強いので正確だが、硬い壁 × 長い制御周期で振動しやすい。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---- モデル定数 (1自由度) ----
+        const ROBOT_MASS = 2.0;          // [kg]
+        const VISCOUS = 2.0;             // 関節粘性 [N s/m]
+        const WALL_X = 0.10;             // 壁の位置 [m]
+        const X_GOAL = 0.12;             // 目標位置 (壁の 2cm 奥) [m]
+        const RAMP_TIME = 1.0;           // 目標位置が動く時間 [s]
+        const SIM_END = 2.5;             // [s]
+        const DT = 1e-5;                 // 物理シミュレーションの刻み [s]
+        const SENSOR_DELAY = 1;          // 力センサの遅れ [制御周期]
+
+        // 目標インピーダンス
+        const KD = 500, MD = 2.0, DD = 2 * 0.7 * Math.sqrt(KD * MD);
+        // アドミッタンス制御の内側の位置制御 (帯域 20Hz)
+        const WP = 2 * Math.PI * 20;
+        const KP_POS = ROBOT_MASS * WP * WP, KV_POS = 2 * ROBOT_MASS * WP * 0.9;
+
+        const $ = id => document.getElementById(id);
+        const ui = { ke: $('ke'), T: $('T'), fc: $('fc') };
+
+        let params, robots, history, t, stepCount, running = false;
+
+        function reference(time) {
+            const s = Math.min(time / RAMP_TIME, 1);
+            return { x: s * X_GOAL, v: time < RAMP_TIME ? X_GOAL / RAMP_TIME : 0 };
+        }
+
+        function newRobot(mode) {
+            return { mode, x: 0, v: 0, u: 0, xc: 0, vc: 0, sensor: new Array(SENSOR_DELAY + 1).fill(0), force: 0, fmax: 0, errMax: 0, touched: false };
+        }
+
+        function readParams() {
+            params = {
+                ke: Math.pow(10, parseFloat(ui.ke.value)),
+                T: parseFloat(ui.T.value),
+                fc: parseFloat(ui.fc.value),
+            };
+            params.be = 2 * 0.05 * Math.sqrt(params.ke * ROBOT_MASS); // 環境のわずかな減衰
+            params.ctrlEvery = Math.round(params.T / DT);
+            $('keVal').textContent = formatStiffness(params.ke);
+            $('fcVal').textContent = params.fc.toFixed(1) + ' N';
+            $('TVal').textContent = (params.T * 1000) + ' ms';
+        }
+
+        function formatStiffness(k) {
+            return k >= 1000 ? (k / 1000).toFixed(k >= 10000 ? 0 : 1) + ' kN/m' : k.toFixed(0) + ' N/m';
+        }
+
+        function restart() {
+            readParams();
+            robots = [newRobot('imp'), newRobot('adm')];
+            history = [];
+            t = 0;
+            stepCount = 0;
+            running = true;
+        }
+
+        function contactForce(r) {
+            const pen = r.x - WALL_X;
+            if (pen <= 0) return 0;
+            return Math.max(0, params.ke * pen + params.be * r.v); // 壁がロボットを押し返す力 (正)
+        }
+
+        function step() {
+            const ref = reference(t);
+            const doControl = stepCount % params.ctrlEvery === 0;
+            for (const r of robots) {
+                const fEnv = contactForce(r);
+                if (doControl) {
+                    r.sensor.shift();
+                    r.sensor.push(fEnv);
+                    if (r.mode === 'imp') {
+                        // インピーダンス制御: 位置・速度の誤差からトルク(力)を直接出力
+                        r.u = KD * (ref.x - r.x) + DD * (ref.v - r.v);
+                    } else {
+                        // アドミッタンス制御: 計測した力から位置指令を計算し、位置制御で追従
+                        const fMeas = r.sensor[0];
+                        const acc = (-fMeas - DD * (r.vc - ref.v) - KD * (r.xc - ref.x)) / MD;
+                        r.vc += acc * params.T;
+                        r.xc += r.vc * params.T;
+                        r.u = KP_POS * (r.xc - r.x) + KV_POS * (r.vc - r.v);
+                    }
+                }
+                const drive = r.u - fEnv;
+                let friction;
+                if (Math.abs(r.v) > 1e-4) friction = -params.fc * Math.sign(r.v);
+                else friction = -Math.max(-params.fc, Math.min(params.fc, drive)); // 静止摩擦
+                const a = (drive + friction - VISCOUS * r.v) / ROBOT_MASS;
+                r.v += a * DT;
+                r.x += r.v * DT;
+                r.force = fEnv;
+                r.fmax = Math.max(r.fmax, fEnv);
+                if (fEnv > 0) r.touched = true;
+                // 追従誤差は最初に壁に触れるまで（自由空間）だけで測る
+                if (!r.touched && t > 0.2) r.errMax = Math.max(r.errMax, Math.abs(ref.x - r.x));
+            }
+            if (stepCount % 200 === 0) {
+                history.push({ t, ref: ref.x, x: robots.map(r => r.x), f: robots.map(r => r.force) });
+            }
+            t += DT;
+            stepCount++;
+        }
+
+        // ---- 描画 ----
+        const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const COLORS = () => ({ imp: css('--imp'), adm: css('--adm'), ref: css('--ref'), text: css('--text'), muted: css('--muted'), line: css('--line'), force: css('--force') });
+
+        function fitCanvas(c) {
+            const ratio = window.devicePixelRatio || 1;
+            const w = c.clientWidth, h = parseInt(c.getAttribute('height'), 10);
+            if (c.width !== Math.round(w * ratio)) {
+                c.width = Math.round(w * ratio);
+                c.height = Math.round(h * ratio);
+                c.style.height = h + 'px';
+            }
+            const ctx = c.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            return { ctx, w, h };
+        }
+
+        function drawScene() {
+            const { ctx, w, h } = fitCanvas($('scene'));
+            const col = COLORS();
+            ctx.clearRect(0, 0, w, h);
+            const left = 70, right = w - 30;
+            const toPx = x => left + (x / 0.13) * (right - left);
+            const wallPx = toPx(WALL_X);
+            const hardness = (parseFloat(ui.ke.value) - 2) / 3.5;
+            const ref = reference(t);
+
+            const lanes = [{ r: robots[0], y: 45, color: col.imp, name: 'インピーダンス' },
+                           { r: robots[1], y: 120, color: col.adm, name: 'アドミッタンス' }];
+            for (const lane of lanes) {
+                ctx.fillStyle = col.muted;
+                ctx.font = '12px "Noto Sans JP", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(lane.name, 4, lane.y - 28);
+                // 壁 (硬いほど明るい灰色、柔らかいほど黄色っぽく)
+                ctx.fillStyle = `hsl(${45 - hardness * 45}, ${70 - hardness * 60}%, ${45 + hardness * 10}%)`;
+                ctx.fillRect(wallPx, lane.y - 30, 26, 60);
+                // 目標位置
+                ctx.strokeStyle = col.ref;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(toPx(ref.x), lane.y - 30);
+                ctx.lineTo(toPx(ref.x), lane.y + 30);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                // ロボット (ばねで目標と結ばれているイメージ)
+                const rx = toPx(Math.min(lane.r.x, WALL_X + 0.02));
+                ctx.fillStyle = lane.color;
+                ctx.fillRect(rx - 34, lane.y - 16, 34, 32);
+                ctx.fillStyle = col.muted;
+                ctx.fillRect(left - 10, lane.y - 2, rx - 34 - left + 10, 4);
+                // 接触力の矢印
+                const f = lane.r.force;
+                if (f > 0.05) {
+                    const len = Math.min(80, 6 + f * 1.2);
+                    ctx.strokeStyle = col.force;
+                    ctx.fillStyle = col.force;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(rx - 4, lane.y - 22);
+                    ctx.lineTo(rx - 4 - len, lane.y - 22);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(rx - 10 - len, lane.y - 22);
+                    ctx.lineTo(rx - 2 - len, lane.y - 27);
+                    ctx.lineTo(rx - 2 - len, lane.y - 17);
+                    ctx.fill();
+                    ctx.lineWidth = 1;
+                    ctx.font = '12px sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(f.toFixed(1) + ' N', rx - 12 - len, lane.y - 18);
+                }
+            }
+            ctx.fillStyle = col.muted;
+            ctx.textAlign = 'center';
+            ctx.font = '12px "Noto Sans JP", sans-serif';
+            ctx.fillText('壁 (' + formatStiffness(params.ke) + ')', wallPx + 13, h - 6);
+        }
+
+        function drawPlot(canvasId, title, getSeries, yMin, yMax, unit) {
+            const { ctx, w, h } = fitCanvas($(canvasId));
+            const col = COLORS();
+            ctx.clearRect(0, 0, w, h);
+            const pad = { l: 44, r: 10, t: 18, b: 22 };
+            const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+            const X = time => pad.l + (time / SIM_END) * pw;
+            const Y = v => pad.t + ph - ((Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin)) * ph;
+
+            ctx.strokeStyle = col.line;
+            ctx.strokeRect(pad.l, pad.t, pw, ph);
+            ctx.fillStyle = col.muted;
+            ctx.font = '12px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(title, pad.l, 12);
+            ctx.textAlign = 'right';
+            ctx.fillText(yMax + unit, pad.l - 4, pad.t + 10);
+            ctx.fillText(yMin + unit, pad.l - 4, pad.t + ph);
+            ctx.textAlign = 'center';
+            ctx.fillText('時間 [s]', pad.l + pw / 2, h - 4);
+
+            for (const s of getSeries(col)) {
+                if (s.hline !== undefined) {
+                    ctx.strokeStyle = s.color;
+                    ctx.setLineDash([3, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(pad.l, Y(s.hline));
+                    ctx.lineTo(pad.l + pw, Y(s.hline));
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    continue;
+                }
+                ctx.strokeStyle = s.color;
+                ctx.lineWidth = s.width || 2;
+                if (s.dash) ctx.setLineDash(s.dash);
+                ctx.beginPath();
+                history.forEach((p, i) => {
+                    const px = X(p.t), py = Y(s.value(p));
+                    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+                });
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.lineWidth = 1;
+            }
+        }
+
+        function drawStats() {
+            const fmt = (v, d, u) => v.toFixed(d) + ' ' + u;
+            $('errImp').textContent = fmt(robots[0].errMax * 1000, 1, 'mm');
+            $('errAdm').textContent = fmt(robots[1].errMax * 1000, 1, 'mm');
+            $('fmaxImp').textContent = fmt(robots[0].fmax, 1, 'N');
+            $('fmaxAdm').textContent = fmt(robots[1].fmax, 1, 'N');
+        }
+
+        function draw() {
+            drawScene();
+            drawPlot('plotX', '位置 [mm]', col => [
+                { hline: WALL_X * 1000, color: col.muted },
+                { value: p => p.ref * 1000, color: col.ref, dash: [5, 4] },
+                { value: p => p.x[0] * 1000, color: col.imp },
+                { value: p => p.x[1] * 1000, color: col.adm },
+            ], 0, 130, '');
+            drawPlot('plotF', '接触力 [N]', col => [
+                { value: p => p.f[0], color: col.imp },
+                { value: p => p.f[1], color: col.adm },
+            ], 0, 60, '');
+            drawStats();
+        }
+
+        // 実時間の 1/2 の速さで再生
+        const PLAYBACK = 0.5;
+        let lastFrame = null;
+        function loop(now) {
+            if (lastFrame === null) lastFrame = now;
+            const elapsed = Math.min((now - lastFrame) / 1000, 0.05);
+            lastFrame = now;
+            if (running) {
+                const steps = Math.round(elapsed * PLAYBACK / DT);
+                for (let i = 0; i < steps && t < SIM_END; i++) step();
+                if (t >= SIM_END) running = false;
+            }
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        ui.ke.addEventListener('input', restart);
+        ui.T.addEventListener('change', restart);
+        ui.fc.addEventListener('input', restart);
+        $('restart').addEventListener('click', restart);
+        $('presetSoft').addEventListener('click', () => { ui.ke.value = 2.5; ui.T.value = '0.004'; restart(); });
+        $('presetHard').addEventListener('click', () => { ui.ke.value = 5.5; ui.T.value = '0.004'; restart(); });
+
+        restart();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
