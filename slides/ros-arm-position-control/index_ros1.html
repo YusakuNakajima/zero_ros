@@ -1132,6 +1132,7 @@
     </div>
 
     <script src="../../assets/vendor/reveal.js/dist/reveal.js"></script>
+    <script src="../../assets/chapter-numbers.js"></script>
     <script src="../../assets/vendor/reveal.js/plugin/zoom/zoom.js"></script>
     <script src="../../assets/vendor/reveal.js-menu/menu.js"></script>
     <script src="../../assets/vendor/reveal.js-plugins/chalkboard/plugin.js"></script>
@@ -1143,7 +1144,7 @@
             progress: true,  // 進捗バーを表示
             center: true,    // スライドを中央揃え
             hash: true,      // URLにスライド番号を反映
-            slideNumber: true, // スライド番号を表示
+            slideNumber: chapterSlideNumber, // 見出しと同じ章番号 (assets/chapter-numbers.js)
 
             // プラグインの有効化
             plugins: [

@@ -462,6 +462,7 @@
 
     <!-- Reveal.js Core and Plugins -->
     <script src="../../assets/vendor/reveal.js/dist/reveal.js"></script>
+    <script src="../../assets/chapter-numbers.js"></script>
     <script src="../../assets/vendor/reveal.js/plugin/notes/notes.js"></script>
     <script src="../../assets/vendor/reveal.js/plugin/markdown/markdown.js"></script>
     <script src="../../assets/vendor/reveal.js/plugin/highlight/highlight.js"></script>
@@ -476,7 +477,7 @@
             progress: true,
             center: true,
             hash: true,
-            slideNumber: true,
+            slideNumber: chapterSlideNumber, // 見出しと同じ章番号 (assets/chapter-numbers.js)
 
             // Plugin activation
             plugins: [
