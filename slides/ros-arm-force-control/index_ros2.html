@@ -75,7 +75,7 @@
             <!-- 受動/能動コンプライアンス -->
             <section>
                 <section>
-                    <h2>受動 vs 能動コンプライアンス</h2>
+                    <h2 style="font-size: 1.3em;">受動 vs 能動コンプライアンス</h2>
                     <table class="custom-table" style="font-size: 0.6em; white-space: nowrap;">
                         <tr>
                             <th></th>
@@ -108,7 +108,8 @@
                             <td class="col-action">ハイブリッド / インピーダンス制御</td>
                         </tr>
                     </table>
-                    <p class="caption" style="text-align: center;">山野辺 (2017) の分類をもとに作成 ↓ で各方式を説明</p>
+                    <p style="font-size: 0.5em; text-align: center; margin-bottom: 0;">出典: 山野辺 夏樹, <a href="http://jstage.jst.go.jp/article/sicejl/56/10/56_741/_pdf/-char/en" target="_blank">「マニピュレーションにおける力制御の研究動向」</a>,<br>計測と制御, 56(10), pp.741-746 (2017) の分類をもとに作成</p>
+                    <p class="caption" style="text-align: center;">↓ で各方式を説明</p>
                 </section>
 
                 <section>
@@ -194,8 +195,8 @@
                 <section>
                     <p>本スライドでは力制御の実装を扱います</p>
 
-                    <div style="margin-top: 2em;">
-                        <ul>
+                    <div style="margin-top: 1em;">
+                        <ul style="font-size: 0.8em;">
                             <li><strong>実装方法1: インピーダンス制御</strong><br>
                                 仮想スプリングダンパーシステムで柔軟性を実現<br>
                                 組み立てや研削作業に適している</li>
@@ -203,7 +204,7 @@
                                 力入力から位置出力を生成<br>
                                 人間との協調作業や手動誘導に便利</li>
                         </ul>
-                        <p>ROS2ではこれらのコントローラが標準で提供されている</p>
+                        <p style="font-size: 0.8em;">標準の力制御コントローラは<strong>ごく一部</strong> → <strong>OSSパッケージ</strong>を活用</p>
                     </div>
                 </section>
 
@@ -256,7 +257,7 @@
                         }
                     </style>
 
-                    <table class="custom-table">
+                    <table class="custom-table" style="font-size: 0.7em;">
                         <thead>
                             <tr>
                                 <th>制御方式</th>
@@ -285,11 +286,11 @@
 
                     <div class="caption">
 
-                        <h4>ROS2力制御コントローラ命名則</h4>
-                        <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
-                            <span style="color: #87ceeb;">admittance_controller</span>/<span
+                        <h4>コントローラ名の読み方 (パッケージ名/クラス名)</h4>
+                        <p style="font-size: 0.8em; text-align: center; font-family: monospace;">
+                            <span style="color: #87ceeb;">cartesian_compliance_controller</span>/<span
                                 style="color: #ffb3b3;">Cartesian</span><span
-                                style="color: #90ee90;">ImpedanceController</span>
+                                style="color: #90ee90;">ComplianceController</span>
                         </p>
 
                     </div>
@@ -297,7 +298,7 @@
 
                 <!-- よく使うROS2の力制御コントローラ -->
                 <section>
-                    <h2>ROS2の力制御コントローラ</h2>
+                    <h2>ROS2標準のコントローラ</h2>
                     <div style="margin-bottom: 2em;">
                         <p style="font-size: 0.8em; margin-bottom: 0.5em;">
                             参考: <a
@@ -305,28 +306,29 @@
                                 target="_blank" style="color: #4CAF50; text-decoration: underline;">
                                 Admittance Controller Documentation</a>
                         </p>
-                        <ul style="font-size: 0.9em;">
+                        <ul style="font-size: 0.6em;">
                             <li><strong>admittance_controller/AdmittanceController</strong></li>
                             <li><strong>force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster</strong></li>
                             <li><strong>joint_trajectory_controller/JointTrajectoryController</strong> (組み合わせ用)</li>
                         </ul>
+                        <p style="font-size: 0.8em; color: #ffb3b3;">インピーダンス制御・ハイブリッド制御は標準には無い</p>
                     </div>
                 </section> <!-- よく使うROSのアームコントローラ -->
                 <section>
-                    <h2>直交空間用力制御コントローラ</h2>
+                    <h2>便利なOSSパッケージ</h2>
                     <div>
                         <p style="font-size: 0.8em; margin-bottom: 0.5em;">
                             参考: <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers"
                                 target="_blank" style="color: #4CAF50; text-decoration: underline;">
-                                cartesian_controllers (ROS2用)</a>
+                                fzi-forschungszentrum-informatik/cartesian_controllers</a>
                         </p>
                         <p style="font-size: 0.8em; color: #ccc; margin-bottom: 0.5em;">
-                            力センサーのフィードバックを使った直交空間制御
+                            ros2_controllersに無い力制御を補える定番パッケージ<br>FZI製・ROS1/ROS2対応・BSD-3ライセンス
                         </p>
-                        <ul style="font-size: 0.9em;">
-                            <li><strong>cartesian_force_controller/CartesianForceController</strong></li>
-                            <li><strong>cartesian_compliance_controller/CartesianComplianceController</strong></li>
-                            <li><strong>cartesian_motion_controller/CartesianMotionController</strong> (ハイブリッド)</li>
+                        <ul style="font-size: 0.8em;">
+                            <li><strong>cartesian_motion_controller</strong>: 目標姿勢に追従 (位置)</li>
+                            <li><strong>cartesian_force_controller</strong>: 目標の力に追従 (力)</li>
+                            <li><strong>cartesian_compliance_controller</strong>: 両者を重ね合わせ (位置+力)</li>
                         </ul>
                     </div>
                 </section>
