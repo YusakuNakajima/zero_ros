@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブレンドと速度・加速度</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --border: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #4fc3f7;
+            --path: #fb923c;
+            --ref: #6b7280;
+            --speed: #4fc3f7;
+            --an: #f472b6;
+            --at: #a3e635;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+        }
+
+        h1 {
+            font-size: 17px;
+            margin: 0 0 8px;
+            text-align: center;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 6px 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        .controls label {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .controls label span.value {
+            color: var(--text);
+            font-weight: bold;
+        }
+
+        .controls input[type="range"] { width: 100%; }
+
+        .mode {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .mode button {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .mode button.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .main {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 560px) {
+            .main { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 0 0 4px 4px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+        }
+
+        #path-canvas { height: 200px; }
+        .plot { height: 115px; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 4px 12px;
+            margin-top: 6px;
+            font-size: 12px;
+        }
+
+        .stats div span { font-weight: bold; color: var(--text); }
+        .stats div { color: var(--muted); }
+
+        .formula {
+            margin-top: 6px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            background: var(--bg);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .legend {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--muted);
+            margin: 0 0 2px 4px;
+        }
+
+        .legend i {
+            display: inline-block;
+            width: 14px;
+            height: 3px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #fda4af;
+            min-height: 1.4em;
+            margin-top: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>なぜ角を丸めるのか：ブレンドと速度・加速度</h1>
+
+    <div class="controls">
+        <div class="mode" id="mode">
+            <button data-mode="stop">停止点 (r=0)</button>
+            <button data-mode="arc" class="active">円弧ブレンド (C¹)</button>
+            <button data-mode="smooth">曲率連続ブレンド (C²)</button>
+        </div>
+        <label><div>ブレンド半径 r <span class="value" id="r-val"></span></div>
+            <input type="range" id="r" min="5" max="100" step="1" value="50">
+        </label>
+        <label><div>許容加速度 a<sub>max</sub> <span class="value" id="a-val"></span></div>
+            <input type="range" id="a" min="0.5" max="5" step="0.1" value="2">
+        </label>
+        <label><div>指令速度 v <span class="value" id="v-val"></span></div>
+            <input type="range" id="v" min="0.1" max="1.0" step="0.05" value="0.5">
+        </label>
+        <label><div>コーナーの内角 <span class="value" id="ang-val"></span></div>
+            <input type="range" id="ang" min="30" max="160" step="5" value="90">
+        </label>
+    </div>
+
+    <div class="main">
+        <div class="card">
+            <p class="card-title">TCPの経路（上から見た図）</p>
+            <canvas id="path-canvas"></canvas>
+            <div class="formula" id="formula"></div>
+            <div class="stats">
+                <div>コーナー通過速度: <span id="s-vc"></span></div>
+                <div>最小曲率半径 ρ: <span id="s-rho"></span></div>
+                <div>コーナー点からのずれ: <span id="s-dev"></span></div>
+                <div>所要時間: <span id="s-time"></span></div>
+            </div>
+        </div>
+        <div class="card">
+            <p class="card-title">TCP速度 |v| [m/s]</p>
+            <div class="legend"><span><i style="background: var(--speed)"></i>速度</span><span><i style="background: var(--ref)"></i>停止点 (r=0) の場合</span></div>
+            <canvas id="speed-canvas" class="plot"></canvas>
+            <p class="card-title" style="margin-top: 6px;">TCP加速度 [m/s²]</p>
+            <div class="legend"><span><i style="background: var(--an)"></i>法線方向 a<sub>n</sub> = v²/ρ</span><span><i style="background: var(--at)"></i>接線方向 a<sub>t</sub></span></div>
+            <canvas id="acc-canvas" class="plot"></canvas>
+            <div class="note" id="note"></div>
+        </div>
+    </div>
+
+    <script>
+        // 経路モデル: 長さ L の直線 → コーナー → 長さ L の直線。
+        // ブレンドはコーナー点から距離 r の位置で始まり r の位置で終わる (偏差はコーナー点から r 以内)。
+        // ブレンド区間の曲率 κ(s) を与えて方位角を積分し、形状を作る。
+        //   円弧    : κ 一定          → 直線との境目で曲率がステップ (C¹)
+        //   曲率連続: κ を三角形状に増減 → 曲率が連続 (C², クロソイド2本相当)
+        const L = 0.3;          // 直線区間の長さ [m]
+        const DS = 0.0005;      // 経路の離散化幅 [m]
+
+        const state = { mode: 'arc', r: 0.05, a: 2, v: 0.5, angleDeg: 90 };
+        let sim = null;         // 計算結果
+        let refSim = null;      // 停止点の計算結果 (比較用)
+        let animStart = performance.now();
+
+        const $ = (id) => document.getElementById(id);
+
+        // 曲率プロファイルの形 (u ∈ [0,1] で正規化, 平均が1になるように)
+        function curvatureShape(mode, u) {
+            if (mode === 'smooth') return 2 * (1 - Math.abs(2 * u - 1)); // 三角形
+            return 1;                                                       // 一定
+        }
+
+        // 長さ1・旋回角 turn のブレンドを積分したとき、始点からコーナー点(接線の交点)までの距離
+        function unitBlendTangentLength(mode, turn) {
+            const n = 400;
+            let x = 0, y = 0, th = 0;
+            for (let i = 0; i < n; i++) {
+                const dth = turn * curvatureShape(mode, (i + 0.5) / n) / n;
+                x += Math.cos(th + dth / 2) / n;
+                y += Math.sin(th + dth / 2) / n;
+                th += dth;
+            }
+            // 始点の接線 (x軸) と終点の接線の交点の x 座標
+            return x - y / Math.tan(turn);
+        }
+
+        // 経路を離散点列として作る。各点に位置・曲率を持たせる。
+        function buildPath(mode, r, turn) {
+            const pts = [];
+            const blend = mode !== 'stop';
+            const straight = blend ? L - r : L;
+            let blendLen = 0;
+            if (blend) {
+                const d1 = Math.abs(turn) < 1e-6 ? 0.5 : unitBlendTangentLength(mode, turn);
+                blendLen = r / d1;
+            }
+            // 直線1: (-L, 0) から x 軸正方向へ
+            let x = -L, y = 0, th = 0;
+            const push = (k, isCorner = false) => pts.push({ x, y, k, isCorner });
+            const n1 = Math.round(straight / DS);
+            for (let i = 0; i < n1; i++) { push(0); x += DS; }
+            if (blend) {
+                const nb = Math.max(2, Math.round(blendLen / DS));
+                const ds = blendLen / nb;
+                for (let i = 0; i < nb; i++) {
+                    const u = (i + 0.5) / nb;
+                    const k = turn / blendLen * curvatureShape(mode, u);
+                    push(k);
+                    x += Math.cos(th + k * ds / 2) * ds;
+                    y += Math.sin(th + k * ds / 2) * ds;
+                    th += k * ds;
+                }
+            } else {
+                push(0, true); // コーナー点 (ここで方向が不連続)
+                th = turn;
+            }
+            const n2 = Math.round(straight / DS);
+            for (let i = 0; i <= n2; i++) {
+                push(0);
+                x += Math.cos(th) * DS; y += Math.sin(th) * DS;
+            }
+            return pts;
+        }
+
+        // 速度プロファイル: 停止→停止。速度上限 v_cmd, 曲率による上限 √(a/κ), 接線加速度 ≤ a。
+        function simulate(mode, r, a, vCmd, turn) {
+            const pts = buildPath(mode, r, turn);
+            const n = pts.length;
+            const seg = new Array(n).fill(0);
+            for (let i = 1; i < n; i++) seg[i] = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+            const vLim = pts.map(p => {
+                if (p.isCorner) return 0;                      // 角は速度0でしか通れない
+                return p.k > 1e-9 ? Math.min(vCmd, Math.sqrt(a / p.k)) : vCmd;
+            });
+            vLim[0] = 0; vLim[n - 1] = 0;
+            const v = vLim.slice();
+            for (let i = 1; i < n; i++) v[i] = Math.min(v[i], Math.sqrt(v[i - 1] ** 2 + 2 * a * seg[i]));
+            for (let i = n - 2; i >= 0; i--) v[i] = Math.min(v[i], Math.sqrt(v[i + 1] ** 2 + 2 * a * seg[i + 1]));
+
+            const t = new Array(n).fill(0);
+            const at = new Array(n).fill(0);
+            for (let i = 1; i < n; i++) {
+                const vm = (v[i] + v[i - 1]) / 2;
+                t[i] = t[i - 1] + (vm > 1e-9 ? seg[i] / vm : 0);
+                at[i] = seg[i] > 0 ? (v[i] ** 2 - v[i - 1] ** 2) / (2 * seg[i]) : 0;
+            }
+            const an = pts.map((p, i) => v[i] ** 2 * p.k);
+
+            // 指標
+            let kMax = 0, vCorner = Infinity;
+            pts.forEach((p, i) => {
+                if (p.k > 1e-9 || p.isCorner) vCorner = Math.min(vCorner, v[i]);
+                kMax = Math.max(kMax, p.k);
+            });
+            // コーナー点 (原点) と経路の最短距離
+            const dev = Math.min(...pts.map(p => Math.hypot(p.x, p.y)));
+            return { pts, v, t, at, an, T: t[n - 1], kMax, vCorner: vCorner === Infinity ? vCmd : vCorner, dev };
+        }
+
+        // --- 描画 ---
+        function setupCanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.round(rect.width * dpr);
+            canvas.height = Math.round(rect.height * dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+        function drawPath(now) {
+            const { ctx, w, h } = setupCanvas($('path-canvas'));
+            ctx.clearRect(0, 0, w, h);
+            const turn = Math.PI - state.angleDeg * Math.PI / 180;
+            // 表示範囲: 経路の外接矩形
+            const all = sim.pts.concat(refSim.pts);
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            all.forEach(p => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); });
+            const pad = 16;
+            const scale = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY));
+            const ox = (w - (maxX - minX) * scale) / 2 - minX * scale;
+            const oy = (h + (maxY - minY) * scale) / 2 + minY * scale;
+            const X = (x) => ox + x * scale, Y = (y) => oy - y * scale;
+
+            // 教示した折れ線
+            ctx.strokeStyle = css('--ref');
+            ctx.setLineDash([5, 4]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            refSim.pts.forEach((p, i) => i ? ctx.lineTo(X(p.x), Y(p.y)) : ctx.moveTo(X(p.x), Y(p.y)));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // ブレンド開始範囲 (コーナー点から半径 r の円)
+            if (state.mode !== 'stop') {
+                ctx.strokeStyle = 'rgba(79, 195, 247, 0.5)';
+                ctx.beginPath();
+                ctx.arc(X(0), Y(0), state.r * scale, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // 実際の経路 (曲率で色の濃さを変える)
+            ctx.lineWidth = 3.5;
+            ctx.lineCap = 'round';
+            for (let i = 1; i < sim.pts.length; i++) {
+                const p = sim.pts[i - 1], q = sim.pts[i];
+                ctx.strokeStyle = p.k > 1e-9 ? css('--an') : css('--path');
+                ctx.beginPath();
+                ctx.moveTo(X(p.x), Y(p.y));
+                ctx.lineTo(X(q.x), Y(q.y));
+                ctx.stroke();
+            }
+
+            // コーナー点
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(X(0), Y(0), 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = css('--muted');
+            ctx.font = '11px "Noto Sans JP", sans-serif';
+            ctx.fillText('教示点', X(0) + 6, Y(0) + 14);
+
+            // TCPの現在位置
+            const i = indexAt(now);
+            const p = sim.pts[i];
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = css('--accent');
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(X(p.x), Y(p.y), 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawPlot(canvasId, series, tMax, yMax, cursorT, unit) {
+            const { ctx, w, h } = setupCanvas($(canvasId));
+            ctx.clearRect(0, 0, w, h);
+            const left = 38, right = 8, top = 6, bottom = 18;
+            const pw = w - left - right, ph = h - top - bottom;
+            const X = (t) => left + t / tMax * pw;
+            const Y = (y) => top + ph - y / yMax * ph;
+
+            // 軸と目盛り
+            ctx.strokeStyle = css('--border');
+            ctx.fillStyle = css('--muted');
+            ctx.font = '10px "Noto Sans JP", sans-serif';
+            ctx.lineWidth = 1;
+            for (let k = 0; k <= 4; k++) {
+                const y = yMax * k / 4;
+                ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(w - right, Y(y)); ctx.stroke();
+                ctx.fillText(y.toFixed(yMax < 2 ? 2 : 1), 2, Y(y) + 3);
+            }
+            const tStep = tMax > 3 ? 1 : 0.5;
+            for (let t = 0; t <= tMax + 1e-9; t += tStep) ctx.fillText(t.toFixed(1), X(t) - 6, h - 4);
+            ctx.fillText('[s]', w - right - 14, h - 4);
+
+            series.forEach(({ t, y, color, dash }) => {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = dash ? 1.5 : 2;
+                ctx.setLineDash(dash ? [5, 4] : []);
+                ctx.beginPath();
+                for (let i = 0; i < t.length; i += 2) {
+                    const yy = Math.max(-yMax * 0.05, Math.min(y[i], yMax * 1.05));
+                    i ? ctx.lineTo(X(t[i]), Y(yy)) : ctx.moveTo(X(t[i]), Y(yy));
+                }
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+
+            // 再生位置
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.moveTo(X(cursorT), top); ctx.lineTo(X(cursorT), top + ph); ctx.stroke();
+        }
+
+        // 再生中の時刻 → 点のインデックス (末尾で少し止まってからループ)
+        function currentTime(now) {
+            const T = Math.max(sim.T, refSim.T);
+            const cycle = T + 0.8;
+            const tt = ((now - animStart) / 1000) % cycle;
+            return Math.min(tt, sim.T);
+        }
+
+        function indexAt(now) {
+            const tt = currentTime(now);
+            let lo = 0, hi = sim.t.length - 1;
+            while (lo < hi) { const mid = (lo + hi) >> 1; if (sim.t[mid] < tt) lo = mid + 1; else hi = mid; }
+            return lo;
+        }
+
+        function draw(now) {
+            drawPath(now);
+            const tMax = Math.max(sim.T, refSim.T);
+            const cursorT = currentTime(now);
+            drawPlot('speed-canvas', [
+                { t: refSim.t, y: refSim.v, color: css('--ref'), dash: true },
+                { t: sim.t, y: sim.v, color: css('--speed') }
+            ], tMax, state.v * 1.1, cursorT);
+            // 接線加速度は絶対値で表示 (加速・減速とも上限 a_max)
+            drawPlot('acc-canvas', [
+                { t: sim.t, y: sim.at.map(Math.abs), color: css('--at') },
+                { t: sim.t, y: sim.an, color: css('--an') }
+            ], tMax, state.a * 1.25, cursorT);
+        }
+
+        function recompute() {
+            state.r = parseFloat($('r').value) / 1000;
+            state.a = parseFloat($('a').value);
+            state.v = parseFloat($('v').value);
+            state.angleDeg = parseFloat($('ang').value);
+            const turn = Math.PI - state.angleDeg * Math.PI / 180;
+
+            $('r-val').textContent = state.mode === 'stop' ? '0 mm (停止点)' : `${Math.round(state.r * 1000)} mm`;
+            $('a-val').textContent = `${state.a.toFixed(1)} m/s²`;
+            $('v-val').textContent = `${state.v.toFixed(2)} m/s`;
+            $('ang-val').textContent = `${state.angleDeg}°`;
+            $('r').disabled = state.mode === 'stop';
+
+            sim = simulate(state.mode, state.r, state.a, state.v, turn);
+            refSim = simulate('stop', 0, state.a, state.v, turn);
+
+            const rho = sim.kMax > 0 ? 1 / sim.kMax : 0;
+            $('s-vc').textContent = `${sim.vCorner.toFixed(2)} m/s`;
+            $('s-rho').textContent = state.mode === 'stop' ? '0 mm（角）' : `${(rho * 1000).toFixed(0)} mm`;
+            $('s-dev').textContent = `${(sim.dev * 1000).toFixed(1)} mm`;
+            const diff = (sim.T / refSim.T - 1) * 100;
+            $('s-time').textContent = state.mode === 'stop'
+                ? `${sim.T.toFixed(2)} s`
+                : `${sim.T.toFixed(2)} s（停止点比 ${diff.toFixed(0)}%）`;
+
+            if (state.mode === 'stop') {
+                $('formula').innerHTML = '角は ρ = 0 → a<sub>n</sub> = v²/ρ が発散 → <strong>v = 0 で通過するしかない</strong>';
+            } else {
+                const vmax = Math.sqrt(state.a * rho);
+                $('formula').innerHTML = `v<sub>max</sub> = √(a<sub>max</sub> · ρ) = √(${state.a.toFixed(1)} × ${rho.toFixed(3)}) = <strong>${vmax.toFixed(2)} m/s</strong>`
+                    + (vmax >= state.v ? '（指令速度のまま通過）' : '（ここまで自動減速）');
+            }
+            $('note').textContent = state.mode === 'arc'
+                ? '円弧の入口・出口で a_n がステップ状に跳ぶ → ジャーク無限大 → 振動の原因'
+                : state.mode === 'smooth'
+                    ? '曲率が連続なので a_n もなめらかに変化（ただし同じ r でも ρ が小さくなる）'
+                    : '角で一度止まる → 減速・加速を毎回繰り返す';
+        }
+
+        document.querySelectorAll('#mode button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('active', b === btn));
+                state.mode = btn.dataset.mode;
+                recompute();
+                animStart = performance.now();
+            });
+        });
+        ['r', 'a', 'v', 'ang'].forEach(id => $(id).addEventListener('input', recompute));
+
+        function loop(now) {
+            draw(now);
+            requestAnimationFrame(loop);
+        }
+        recompute();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

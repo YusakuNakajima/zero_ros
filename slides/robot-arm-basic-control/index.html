@@ -234,18 +234,32 @@
             </section>
             <section>
                 <section>
-                    <h2>ステップ③ロボットモーションは3種類</h2>
-                    <div style="display: flex;">
+                    <h2>ステップ③動作指令は2分類</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 1;">
                             <video width="100%" autoplay muted loop>
                                 <source src="media/motion_demo.mp4" type="video/mp4">
                                 動画を再生できません。
                             </video>
                         </div>
-                        <div style="flex: 1;">
-                            <li>PTP:最短, 高速</li>
-                            <li>LIN:直線, 動作制限</li>
-                            <li>CIRC:円弧, 障害物回避</li>
+                        <div style="flex: 1.2; font-size: 0.6em; text-align: left;">
+                            <div style="border: 2px solid #f472b6; border-radius: 10px; padding: 10px 15px; margin-bottom: 15px;">
+                                <strong style="color: #f472b6;">PTP</strong>（Point To Point）<br>
+                                経路を規定しない・<strong>関節空間</strong>で補間<br>
+                                → UR: <code>movej()</code>
+                            </div>
+                            <div style="border: 2px solid #4fc3f7; border-radius: 10px; padding: 10px 15px;">
+                                <strong style="color: #4fc3f7;">CP</strong>（Continuous Path）<br>
+                                TCPの経路形状を規定・<strong>直交空間</strong>で補間
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <div style="flex: 1; border: 2px solid #fb923c; border-radius: 8px; padding: 6px 10px;">
+                                        <strong style="color: #fb923c;">LIN</strong> 直線<br>→ <code>movel()</code>
+                                    </div>
+                                    <div style="flex: 1; border: 2px solid #2dd4bf; border-radius: 8px; padding: 6px 10px;">
+                                        <strong style="color: #2dd4bf;">CIRC</strong> 円弧<br>→ <code>movec()</code>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <p>詳細は以下↓</p>
@@ -267,7 +281,7 @@
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li><strong>関節空間での最短経路</strong></li>
+                                <li><strong>関節空間での補間</strong>（UR: <code>movej</code>）</li>
                                 <li>各関節が最も速く目標に到達するように動く(グラフ)</li>
                                 <li>手先の軌道は予測できない</li>
                                 <li>障害物がない環境で使用する動作モード</li>
@@ -283,7 +297,7 @@
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li><strong>直線動作</strong></li>
+                                <li><strong>CPの直線</strong>（UR: <code>movel</code>）</li>
                                 <li>手先が直線的に移動</li>
                                 <li>関節の可動範囲や特異点により動きに制限</li>
                                 <li>部品挿入や溶接で使用</li>
@@ -300,7 +314,7 @@
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li><strong>円弧動作</strong></li>
+                                <li><strong>CPの円弧</strong>（UR: <code>movec</code>）</li>
                                 <li>中間点を指定して円弧を描く</li>
                                 <li>障害物回避や滑らかな動作で使用</li>
                                 <li>角を持つ物体の加工などに有効</li>
@@ -308,6 +322,32 @@
                             </ul>
                         </div>
                     </div>
+                </section>
+                <section>
+                    <h2>URScriptでの対応</h2>
+                    <table style="font-size: 0.55em; margin: 0 auto;">
+                        <thead>
+                            <tr><th>分類</th><th>関数</th><th>位置の与え方</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>PTP</td><td><code>movej(q, a, v, t, r)</code></td><td><strong>関節角</strong> <code>[j0..j5]</code></td></tr>
+                            <tr><td>LIN</td><td><code>movel(pose, a, v, t, r)</code></td><td><strong>TCP姿勢</strong> <code>p[x,y,z,rx,ry,rz]</code></td></tr>
+                            <tr><td>CIRC</td><td><code>movec(pose_via, pose_to, a, v, r)</code></td><td>経由点＋終点の<strong>TCP姿勢</strong></td></tr>
+                        </tbody>
+                    </table>
+                    <pre><code class="language-python" data-trim>
+movej([0, -1.57, 1.57, 0, 1.57, 0], a=1.4, v=1.05)
+movel(p[0.3, -0.2, 0.25, 0, 3.14, 0], a=1.2, v=0.25)
+movec(p[0.35, -0.1, 0.25, 0, 3.14, 0],  # 経由点
+      p[0.3, 0.0, 0.25, 0, 3.14, 0],    # 終点
+      a=1.2, v=0.25)
+                    </code></pre>
+                    <ul style="font-size: 0.7em;">
+                        <li>引数の型に「関節空間 / 直交空間」の違いがそのまま現れる</li>
+                    </ul>
+                    <p style="font-size: 0.45em; color: #aaa;">
+                        ※ <code>movej</code> に pose を渡すと内部で逆運動学を解き、関節空間で補間します
+                    </p>
                 </section>
             </section>
             <section>
@@ -332,16 +372,58 @@
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
-                            <ul>
-                                <li>waypointsをショートカットし滑らかな動作を実現</li>
-                                <li>メーカーごとにこの機能の呼び方は異なりますが、ここではURに合わせてブレンド半径と呼びます</li>
+                            <p><strong>ブレンド<br>（コーナー丸め）</strong></p>
+                            <ul style="font-size: 0.8em;">
+                                <li>教示点で止まらず手前で丸めて通過</li>
+                                <li>stop point ⇔ fly-by point</li>
                             </ul>
                         </div>
                     </div>
-                    <p>ブレンド半径の良し悪し↓</p>
+                    <p>メーカーごとの指定方法↓</p>
                 </section>
                 <section>
-                    <h2>ブレンド半径の良し悪し</h2>
+                    <h2>ブレンドの指定はメーカーで違う</h2>
+                    <table style="font-size: 0.6em; margin: 0 auto;">
+                        <thead>
+                            <tr><th>メーカー</th><th>呼び方</th><th>指定する量</th><th>例</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>UR</td><td>blend radius</td><td>丸めの半径 [mm]</td><td>r=10mm</td></tr>
+                            <tr><td>ABB</td><td>zone data（fly-by point）</td><td>教示点からのゾーン半径 [mm]</td><td><code>z10</code></td></tr>
+                            <tr><td>KUKA</td><td>approximate positioning</td><td>距離 / 速度 / 時間から選択</td><td>mm, %, s</td></tr>
+                            <tr><td>FANUC</td><td>termination type <code>CNT</code></td><td>経路に対する割合（無次元）</td><td><code>CNT100</code></td></tr>
+                            <tr><td>安川</td><td>PL（position level）</td><td>離散レベル 0〜8</td><td><code>PL=5</code></td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="font-size: 0.75em;">
+                        <li>概念は同じでも<strong>「半径」で指定するのはURなど一部だけ</strong></li>
+                        <li>このスライドでは概念を「ブレンド」、URでの指定量を「ブレンド半径」と呼びます</li>
+                    </ul>
+                    <p style="font-size: 0.5em; color: #aaa;">
+                        ※ 軌道計画の LSPB（Linear Segments with Parabolic Blends）の "blend" は速度プロファイルを滑らかにする話で、コーナー丸めとは別物です
+                    </p>
+                </section>
+                <section>
+                    <h2>補間方法とブレンドは独立した軸</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.7em;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 10px;">
+                            <strong>軸A：補間方法</strong><br>PTP / LIN / CIRC<br>→ どう動くか
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 10px;">
+                            <strong>軸B：経由点の扱い</strong><br>停止 / 丸めて通過<br>→ 経由点で止まるか
+                        </div>
+                    </div>
+                    <pre><code class="language-python" data-trim>
+movel(p1, a=1.2, v=0.25, r=0)     # p1 で停止してから次へ（stop point）
+movel(p1, a=1.2, v=0.25, r=0.05)  # p1 の 50mm 手前から丸めて通過（fly-by）
+                    </code></pre>
+                    <ul style="font-size: 0.7em;">
+                        <li>URでは軸Bが全move関数の引数 <code>r</code> 1つに集約 → 2軸が独立だと見えやすい</li>
+                        <li>「<code>movel</code>なのに角が丸まって干渉した」は軸Bの問題</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>ブレンド半径の良し悪し（URの例）</h2>
                     <div style="display: flex;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
@@ -356,6 +438,145 @@
                                 <li>二等分線を中心とした円が新しい経路です</li>
                                 <li>点を正確に通過しないので細かい動きはできません</li>
                                 <li>動作精度と動きの滑らかさのトレードオフで調整が必要です</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>URでブレンドを使うときの注意</h2>
+                    <ul>
+                        <li><strong>隣り合うブレンド円を重ねない</strong>
+                            <ul style="font-size: 0.8em;">
+                                <li>重なると実行時エラー</li>
+                                <li>目安：<code>r</code> &lt; 教示点間距離の半分</li>
+                            </ul>
+                        </li>
+                        <li><strong>最初と最後の点はブレンドできない</strong>
+                            <ul style="font-size: 0.8em;">
+                                <li>停止状態から / への遷移になるため</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>補足：丸めずに連続で動けない？</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 300 220" width="100%" aria-label="角と丸めたコーナーの速度ベクトル">
+                                <defs>
+                                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M0,0 L10,5 L0,10 z" fill="#4fc3f7"></path>
+                                    </marker>
+                                </defs>
+                                <!-- 角 -->
+                                <polyline points="20,200 120,200 120,100" fill="none" stroke="#fb923c" stroke-width="4"></polyline>
+                                <line x1="85" y1="190" x2="115" y2="190" stroke="#4fc3f7" stroke-width="3" marker-end="url(#arrow-blue)"></line>
+                                <line x1="130" y1="195" x2="130" y2="165" stroke="#4fc3f7" stroke-width="3" marker-end="url(#arrow-blue)"></line>
+                                <text x="70" y="90" fill="#f472b6" font-size="15" text-anchor="middle">ρ = 0</text>
+                                <text x="70" y="40" fill="#e5e7eb" font-size="13" text-anchor="middle">向きが瞬時に変わる</text>
+                                <text x="70" y="60" fill="#e5e7eb" font-size="13" text-anchor="middle">→ 加速度 ∞</text>
+                                <!-- 丸め -->
+                                <path d="M170,200 L230,200 A40,40 0 0 0 270,160 L270,100" fill="none" stroke="#fb923c" stroke-width="4"></path>
+                                <line x1="252" y1="194" x2="268" y2="178" stroke="#4fc3f7" stroke-width="3" marker-end="url(#arrow-blue)"></line>
+                                <text x="225" y="90" fill="#f472b6" font-size="15" text-anchor="middle">ρ &gt; 0</text>
+                                <text x="225" y="40" fill="#e5e7eb" font-size="13" text-anchor="middle">向きが連続に変わる</text>
+                                <text x="225" y="60" fill="#e5e7eb" font-size="13" text-anchor="middle">→ 加速度は有限</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1.2;">
+                            <ul style="font-size: 0.75em;">
+                                <li>直線の角は位置は連続でも<strong>速度の向きが不連続</strong>（C⁰ だが C¹ でない）</li>
+                                <li>法線加速度 a<sub>n</sub> = v² / ρ は角（ρ = 0）で発散</li>
+                                <li>角で選べるのは2つだけ
+                                    <ul>
+                                        <li><strong>v = 0</strong>：止まる（r = 0）→ 時間を失う</li>
+                                        <li><strong>ρ &gt; 0</strong>：丸める（r &gt; 0）→ 形を失う</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.7em;">丸めるのは妥協ではなく、<strong>角を止まらずに通る唯一の方法</strong></p>
+                </section>
+                <section>
+                    <h2>補足：ブレンド半径は精度と速度の交換レート</h2>
+                    <p style="font-size: 1.1em;">v<sub>max</sub> = √( a<sub>max</sub> · r )</p>
+                    <table style="font-size: 0.6em; margin: 0 auto;">
+                        <thead>
+                            <tr><th>許容加速度 a<sub>max</sub></th><th>ブレンド半径 r</th><th>コーナー通過速度の上限</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>2 m/s²</td><td>50 mm</td><td>0.32 m/s</td></tr>
+                            <tr><td>2 m/s²</td><td>10 mm</td><td>0.14 m/s</td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="font-size: 0.7em;">
+                        <li>r を小さくすると経路は正確になるが、コーナーで自動的に減速する</li>
+                        <li>「ブレンド半径を小さくしたら遅くなった」の答えはこの式</li>
+                    </ul>
+                    <p style="font-size: 0.45em; color: #aaa;">※ 90°コーナーを半径 r の円弧で丸めた場合。一般には r ではなく曲率半径 ρ で v<sub>max</sub> = √(a<sub>max</sub> · ρ)</p>
+                </section>
+                <section>
+                    <h2>補足：止まる vs 丸める</h2>
+                    <p style="text-align: center; margin: 0 0 6px; font-size: 0.6em;">
+                        <strong>→ <a href="interactive_app/blend_physics.html" target="_blank"
+                                style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
+                        　r を変えて通過速度と所要時間、a<sub>n</sub> の跳び方を比べる
+                    </p>
+                    <iframe data-src="interactive_app/blend_physics.html" width="100%" height="500px"
+                        frameborder="0"></iframe>
+                </section>
+                <section>
+                    <h2>補足：丸めない連続パスはある？</h2>
+                    <ul style="font-size: 0.75em;">
+                        <li>教示点を通るスプライン（KUKA の SPL、CNC の NURBS 補間など）でも、<strong>折れ線の角は通らない</strong></li>
+                        <li>違うのは<strong>誤差の置き場所</strong>だけ</li>
+                    </ul>
+                    <table style="font-size: 0.6em; margin: 0 auto;">
+                        <thead>
+                            <tr><th>方式</th><th>教示点そのもの</th><th>教示点を結ぶ折れ線</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>停止点</td><td>通る</td><td>一致する（ただし止まる）</td></tr>
+                            <tr><td>ブレンド</td><td><strong>通らない</strong>（手前で丸める）</td><td>コーナー付近でずれる</td></tr>
+                            <tr><td>スプライン</td><td>通る</td><td><strong>点と点の間でずれる</strong></td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.7em;">「誤差ゼロで滑らか」は存在せず、どちらのずれを許すかの設計判断</p>
+                </section>
+                <section>
+                    <h2>補足：振動はどこから来る？</h2>
+                    <ul style="font-size: 0.75em;">
+                        <li>円弧ブレンドは向きは連続（C¹）だが<strong>曲率が不連続</strong>（C² でない）</li>
+                        <li>円弧に入る瞬間 a<sub>n</sub> が 0 → v²/r に跳ぶ → ジャーク ∞ → 構造を揺らして残留振動</li>
+                        <li>上位の制御器はクロソイド・5次多項式・Bスプラインで<strong>曲率も連続</strong>にする</li>
+                    </ul>
+                    <ol style="font-size: 0.6em;">
+                        <li>角を速度 &gt; 0 で通れない（幾何）</li>
+                        <li>関節トルク・加速度に上限がある（アクチュエータ）</li>
+                        <li>停止を挟むとサイクルタイムが伸びる（生産性）</li>
+                        <li><strong>加速度の急変が振動を励起する（構造）</strong></li>
+                        <li>振動と停止が加工品質を落とす（プロセス）</li>
+                    </ol>
+                    <p style="font-size: 0.6em; color: #aaa;">「振動するから丸める」は因果が逆。丸め方が粗いと振動する</p>
+                </section>
+                <section>
+                    <h2>補足：現場でブレンドが必須な理由</h2>
+                    <div style="display: flex; gap: 30px; font-size: 0.7em;">
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 1.1em;">なぜ必要か</h3>
+                            <ul>
+                                <li><strong>サイクルタイム</strong>：毎点で減速・加速・整定。ブレンドだけで2〜3割縮むことも</li>
+                                <li><strong>プロセス</strong>：塗布・溶接・塗装は速度一定が必要。<strong>止まれないから丸める</strong></li>
+                                <li><strong>機械寿命</strong>：減速機・ブレーキへの繰り返し荷重</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 1.1em;">なぜ「円弧」で「半径」指定か</h3>
+                            <ul>
+                                <li>計算が軽い</li>
+                                <li><strong>ずれの上限が保証できる</strong>：TCPは教示点から r 以内</li>
+                                <li>「ワークから30mm離したいので r は20mmまで」と干渉を設計できる</li>
                             </ul>
                         </div>
                     </div>
