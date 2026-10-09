@@ -40,6 +40,19 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+        /* スライド埋め込みなど高さが小さい時は2列のコンパクト表示 */
+        @media (max-height: 600px) {
+            header, .desc, .mode-box, input[type=number] { display: none !important; }
+            .container { padding: 6px !important; max-width: none !important; }
+            #cards { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+            .card { padding: 8px !important; }
+            .card h2 { font-size: 1rem !important; }
+            .card .mb-4 { margin-bottom: 4px !important; }
+            #canvas-container1, #canvas-container2 { height: 190px !important; }
+            #controls1, #controls2 { margin-top: 6px !important; }
+            #controls1 > * + *, #controls2 > * + * { margin-top: 4px !important; }
+            #reset-rv, #reset-rpy { padding: 2px 8px !important; }
+        }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -55,21 +68,21 @@
             <p class="mt-2 text-lg text-gray-600"><b>Universal Robot</b>で採用されている回転ベクトルとRPYの違いを視覚的に理解する</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div id="cards" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Rotation Vector Card -->
-            <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="card bg-white p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-semibold text-blue-600">1. 回転ベクトル</h2>
                     <button id="reset-rv" class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">リセット</button>
                 </div>
-                <div class="mb-4">
+                <div class="mode-box mb-4">
                     <label for="rv-mode" class="block text-sm font-medium text-gray-700 mb-1">表現タイプ:</label>
                     <select id="rv-mode" class="w-full p-2 border border-gray-300 rounded-md bg-white">
                         <option value="rad">回転ベクトル [rad]</option>
                         <option value="deg">回転ベクトル [°]</option>
                     </select>
                 </div>
-                <p id="rv-desc" class="text-sm text-gray-600 mb-2">
+                <p id="rv-desc" class="desc text-sm text-gray-600 mb-2">
                     <b>Universal Robot</b>の標準的な回転表現です。ベクトルの方向が回転軸、長さが<strong class="font-medium">ラジアン単位</strong>の回転角度になります。
                 </p>
                 <p class="text-sm text-gray-700 font-medium mb-4">ベクトルの長さ (ノルム): <span id="rv-norm" class="font-bold text-blue-600">0.0000</span></p>
@@ -79,43 +92,43 @@
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="vec-x" class="text-sm font-medium text-gray-700">ベクトル X: <span id="vec-x-value" class="font-bold text-blue-600">0.00</span></label>
-                            <input type="number" id="vec-x-input" min="-4" max="4" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="vec-x-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="vec-x" type="range" min="-4" max="4" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="vec-x" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                     <!-- Vector Y -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="vec-y" class="text-sm font-medium text-gray-700">ベクトル Y: <span id="vec-y-value" class="font-bold text-blue-600">0.00</span></label>
-                            <input type="number" id="vec-y-input" min="-4" max="4" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="vec-y-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="vec-y" type="range" min="-4" max="4" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="vec-y" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                     <!-- Vector Z -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="vec-z" class="text-sm font-medium text-gray-700">ベクトル Z: <span id="vec-z-value" class="font-bold text-blue-600">0.00</span></label>
-                            <input type="number" id="vec-z-input" min="-4" max="4" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="vec-z-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="vec-z" type="range" min="-4" max="4" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="vec-z" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                 </div>
             </div>
 
             <!-- RPY (Roll, Pitch, Yaw) Card -->
-            <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="card bg-white p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-semibold text-green-600">2. ロール・ピッチ・ヨー</h2>
                     <button id="reset-rpy" class="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">リセット</button>
                 </div>
-                 <div class="mb-4">
+                <div class="mode-box mb-4">
                     <label for="rpy-mode" class="block text-sm font-medium text-gray-700 mb-1">表現タイプ:</label>
                     <select id="rpy-mode" class="w-full p-2 border border-gray-300 rounded-md bg-white">
                         <option value="rad">RPY [rad]</option>
                         <option value="deg">RPY [°]</option>
                     </select>
                 </div>
-                <p id="rpy-desc" class="text-sm text-gray-600 mb-4">
+                <p id="rpy-desc" class="desc text-sm text-gray-600 mb-4">
                     <b>Universal Robot</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">ラジアン単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±π/2に近づくとジンバルロックが発生します。</strong>
                 </p>
                 <div id="canvas-container2" class="w-full h-64 md:h-80 bg-gray-900 rounded-lg relative overflow-hidden"></div>
@@ -124,25 +137,25 @@
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="roll" class="text-sm font-medium text-gray-700">Roll (X軸): <span id="roll-value" class="font-bold text-green-600">0.00</span><span id="roll-unit"> rad</span></label>
-                            <input type="number" id="roll-input" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="roll-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="roll" type="range" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="roll" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                     <!-- Pitch -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="pitch" class="text-sm font-medium text-gray-700">Pitch (Y軸): <span id="pitch-value" class="font-bold text-green-600">0.00</span><span id="pitch-unit"> rad</span></label>
-                            <input type="number" id="pitch-input" min="-1.5708" max="1.5708" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="pitch-input" min="-1.57" max="1.57" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="pitch" type="range" min="-1.5708" max="1.5708" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="pitch" type="range" min="-1.57" max="1.57" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                     <!-- Yaw -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label for="yaw" class="text-sm font-medium text-gray-700">Yaw (Z軸): <span id="yaw-value" class="font-bold text-green-600">0.00</span><span id="yaw-unit"> rad</span></label>
-                            <input type="number" id="yaw-input" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
+                            <input type="number" id="yaw-input" min="-3.14" max="3.14" step="0.01" value="0" class="w-24 p-1 border border-gray-300 rounded-md text-right">
                         </div>
-                        <input id="yaw" type="range" min="-3.1416" max="3.1416" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <input id="yaw" type="range" min="-3.14" max="3.14" step="0.01" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
                     </div>
                 </div>
             </div>
@@ -151,13 +164,28 @@
 
     <script>
         // --- Initialization ---
+        function makeLabel(text, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.font = 'bold 48px sans-serif';
+            ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 32, 34);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+            sprite.scale.set(0.4, 0.4, 0.4);
+            return sprite;
+        }
+
         function initScene(containerId, addAxisLine = false) {
             const container = document.getElementById(containerId);
             if (!container) return null;
 
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(2.5, 2.5, 4);
+            const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.up.set(0, 0, 1); // URのベース座標系に合わせてZ軸を上にする
+            camera.position.set(4, 3, 2.6);
             camera.lookAt(0, 0, 0);
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -171,13 +199,29 @@
             directionalLight.position.set(5, 10, 7.5);
             scene.add(directionalLight);
 
-            const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-            const material = new THREE.MeshNormalMaterial();
-            const cube = new THREE.Mesh(geometry, material);
+            // 面ごとに色を固定して回転が見えるようにする (MeshNormalMaterialは向きで色が決まるため回転が分からない)
+            const geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+            const faceColors = [0xef4444, 0x7f1d1d, 0x22c55e, 0x14532d, 0x3b82f6, 0x1e3a8a]; // +X,-X,+Y,-Y,+Z,-Z
+            const materials = faceColors.map(c => new THREE.MeshLambertMaterial({ color: c, transparent: true, opacity: 0.85 }));
+            const cube = new THREE.Mesh(geometry, materials);
             scene.add(cube);
 
-            const axesHelper = new THREE.AxesHelper(2.5);
+            // 箱に固定したツール座標系 (箱と一緒に回る)
+            const toolAxes = new THREE.AxesHelper(1.3);
+            toolAxes.material.depthTest = false;
+            toolAxes.renderOrder = 1;
+            cube.add(toolAxes);
+
+            // ベース座標系 (固定、薄く表示)
+            const axesHelper = new THREE.AxesHelper(2.2);
+            axesHelper.material.transparent = true;
+            axesHelper.material.opacity = 0.4;
             scene.add(axesHelper);
+            [['X', 0xf87171, [2.45, 0, 0]], ['Y', 0x4ade80, [0, 2.45, 0]], ['Z', 0x60a5fa, [0, 0, 2.45]]].forEach(([text, color, pos]) => {
+                const label = makeLabel(text, color);
+                label.position.set(...pos);
+                scene.add(label);
+            });
 
             let axisLine = null;
             if (addAxisLine) {
@@ -297,15 +341,19 @@
         }
 
         // --- Control Update Functions ---
+        // -0.00 と表示されないように丸める
+        const formatValue = (val, digits) => (parseFloat(val) + 0).toFixed(digits).replace(/^-(0\.?0*)$/, '$1');
+
         function updateRvValues() {
-            vecXValue.textContent = parseFloat(vecXSlider.value).toFixed(2);
-            vecYValue.textContent = parseFloat(vecYSlider.value).toFixed(2);
-            vecZValue.textContent = parseFloat(vecZSlider.value).toFixed(2);
+            const digits = rvModeSelect.value === 'deg' ? 0 : 2;
+            vecXValue.textContent = formatValue(vecXSlider.value, digits);
+            vecYValue.textContent = formatValue(vecYSlider.value, digits);
+            vecZValue.textContent = formatValue(vecZSlider.value, digits);
         }
 
         function updateRpyValues() {
             const mode = rpyModeSelect.value;
-            const format = (val) => (mode === 'deg' ? val : parseFloat(val).toFixed(2));
+            const format = (val) => formatValue(val, mode === 'deg' ? 0 : 2);
             rollValue.textContent = format(rollSlider.value);
             pitchValue.textContent = format(pitchSlider.value);
             yawValue.textContent = format(yawSlider.value);
@@ -316,7 +364,7 @@
             let unitLabel, min, max, step, descHtml;
             switch (mode) {
                 case 'rad':
-                    unitLabel = ' rad'; min = -Math.PI; max = Math.PI; step = 0.01;
+                    unitLabel = ' rad'; min = -3.14; max = 3.14; step = 0.01; // 0.01刻みで0に乗るよう±πではなく±3.14
                     descHtml = `<b>Universal Robot</b>でも利用可能なRPY形式です。機体のX(Roll), Y(Pitch), Z(Yaw)軸周りの回転を<strong class="font-medium">ラジアン単位</strong>で適用します。<strong class="font-medium text-red-600">Pitchが±π/2に近づくとジンバルロックが発生します。</strong>`;
                     break;
                 default: // deg
@@ -368,9 +416,22 @@
 
             // Rotation Vector listeners
             rvModeSelect.addEventListener('change', () => {
-                rvDesc.innerHTML = rvModeSelect.value === 'rad'
+                const isRad = rvModeSelect.value === 'rad';
+                rvDesc.innerHTML = isRad
                     ? `<b>Universal Robot</b>の標準的な回転表現です。ベクトルの方向が回転軸、長さが<strong class="font-medium">ラジアン単位</strong>の回転角度になります。`
                     : `<b>Universal Robot</b>の標準的な回転表現です。ベクトルの方向が回転軸、長さが<strong class="font-medium">度数単位</strong>の回転角度になります。`;
+                // 単位に合わせてスライダー範囲を切り替え、同じ回転を保つよう値も換算する
+                const [min, max, step] = isRad ? [-3.14, 3.14, 0.01] : [-180, 180, 1];
+                const factor = isRad ? Math.PI / 180 : 180 / Math.PI;
+                [[vecXSlider, vecXInput], [vecYSlider, vecYInput], [vecZSlider, vecZInput]].forEach(([slider, input]) => {
+                    const converted = parseFloat(slider.value) * factor;
+                    slider.min = input.min = min;
+                    slider.max = input.max = max;
+                    slider.step = input.step = step;
+                    slider.value = converted;
+                    input.value = parseFloat(slider.value).toFixed(isRad ? 2 : 0);
+                });
+                updateRvValues();
             });
             linkSliderAndInput(vecXSlider, vecXInput, updateRvValues);
             linkSliderAndInput(vecYSlider, vecYInput, updateRvValues);

@@ -127,16 +127,17 @@
             <section>
                 <section>
                     <h2>ステップ①TCPと重心</h2>
-                    <div style="display: flex;">
+                    <div style="display: flex; align-items: center;">
                         <div style="flex: 1;">
-                            <img src="media/robotic_powder_grinding.png" style="width: 60%;">
+                            <img src="media/tcp_cog_schematic.svg" alt="ロボットの模式図: フランジに付けたエンドエフェクタのTCP(先端)と重心" style="width: 100%;">
                         </div>
-                        <div style="flex: 1;">
+                        <div style="flex: 1; font-size: 0.65em;">
                             <ul>
-                                <li>ロボットの手先に着けるツールをエンドエフェクタという</li>
-                                <li>エンドエフェクタの中で実際に動かす座標系のことをTCPという</li>
-                                <p>例)エンドエフェクタは乳棒とヘラ</p>
-                                <p>TCPは乳棒とヘラのそれぞれの先端</p>
+                                <li><strong>エンドエフェクタ</strong>: 手先のツール</li>
+                                <li><strong style="color: #ff6b6b;">TCP</strong>: 実際に動かしたい点と向き<br>例) 乳棒の先端</li>
+                                <li><strong style="color: #ffd54f;">重心</strong>: ツールの質量がかかる点</li>
+                                <li>どちらも<strong>フランジからの位置</strong>で登録</li>
+                                <li>重心は質量とセットで設定する</li>
                             </ul>
                         </div>
                     </div>
@@ -830,16 +831,16 @@
                 </section>
                 <section>
                     <h2>URの回転表現について</h2>
-                    <div style="display: flex;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="flex: 2;">
+                            <p style="text-align: center; margin: 0 0 6px; font-size: 0.6em;">
                                 <strong>→ <a href="interactive_app/rot_vector.html" target="_blank"
                                         style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                             </p>
-                            <iframe data-src="interactive_app/rot_vector.html" width="100%" height="400px"
+                            <iframe data-src="interactive_app/rot_vector.html" width="100%" height="460px"
                                 frameborder="0"></iframe>
                         </div>
-                        <div style="flex: 1;">
+                        <div style="flex: 1; font-size: 0.6em;">
                             <ul>
                                 <li>デフォルトの回転表現は回転ベクトル</li>
                                 <li>RPY（ロール、ピッチ、ヨー）で使うには変換が必要</li>
