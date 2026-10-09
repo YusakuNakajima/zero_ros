@@ -66,6 +66,12 @@
             max-width: 90vw;
         }
 
+        .jog-btn {
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
         .control-panel button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -142,11 +148,11 @@
                 <h2 class="text-lg font-bold text-center mb-2 text-white">エンドエフェクタ選択</h2>
                 <div id="end-effector-selector" class="flex justify-center space-x-4 bg-gray-800 p-2 rounded-lg">
                      <div>
-                        <input type="radio" name="end-effector-type" value="A" id="ee-type-a" class="hidden" checked>
+                        <input type="radio" name="end-effector-type" value="A" id="ee-type-a" class="hidden">
                         <label for="ee-type-a" class="radio-label text-sm">タイプA (コーン)</label>
                     </div>
                     <div>
-                        <input type="radio" name="end-effector-type" value="B" id="ee-type-b" class="hidden">
+                        <input type="radio" name="end-effector-type" value="B" id="ee-type-b" class="hidden" checked>
                         <label for="ee-type-b" class="radio-label text-sm">タイプB (グリッパー)</label>
                     </div>
                 </div>
@@ -327,7 +333,7 @@
         // --- エンドエフェクタ関連 ---
         let endEffector;
         let endEffectorGroupA, endEffectorGroupB;
-        let currentEndEffectorType = 'A';
+        let currentEndEffectorType = 'B';
         const endEffectorDefs = {
             'A': { tcpOffset: 6 },
             'B': { tcpOffset: 12 }
@@ -537,7 +543,7 @@
                     document.getElementById('cartesian-jog-panel').style.display = (currentJogMode !== 'joint') ? 'block' : 'none';
                 });
             });
-            document.getElementById('jog-controls').addEventListener('click', handleJog);
+            setupJogHold();
         }
 
         function updatePositions() {
@@ -727,7 +733,7 @@
 
                     // LIN duration
                     const lineCurve = new THREE.Line3(startPos, endPos);
-                    const distanceLin = lineCurve.getLength();
+                    const distanceLin = lineCurve.distance();
                     const baseDurationLin = (distanceLin / safeTcpSpeed) * 1000;
                     const estMaxSpeedLin = estimateMaxJointVelocity(lineCurve, baseDurationLin);
                     let durationLin = baseDurationLin;
@@ -839,9 +845,32 @@
             return { j1: theta1, j2: alpha + beta, j3: theta3 };
         }
 
-        function handleJog(event) {
-            const btn = event.target.closest('.jog-btn');
-            if (isAnimating || !btn) return;
+        // ジョグボタン: 押した瞬間に1ステップ、長押しで連続移動
+        function setupJogHold() {
+            const jogControls = document.getElementById('jog-controls');
+            let holdDelay = null, holdRepeat = null;
+            const stopHold = () => {
+                clearTimeout(holdDelay); clearInterval(holdRepeat);
+                holdDelay = holdRepeat = null;
+            };
+            jogControls.addEventListener('pointerdown', (event) => {
+                const btn = event.target.closest('.jog-btn');
+                if (!btn || event.button !== 0) return;
+                event.preventDefault();
+                stopHold();
+                if (!handleJog(btn)) return;
+                holdDelay = setTimeout(() => {
+                    holdRepeat = setInterval(() => { if (!handleJog(btn)) stopHold(); }, 40);
+                }, 300);
+            });
+            jogControls.addEventListener('pointerout', (event) => { if (event.target.closest('.jog-btn')) stopHold(); });
+            ['pointerup', 'pointercancel', 'blur'].forEach(type => window.addEventListener(type, stopHold));
+            jogControls.addEventListener('contextmenu', (event) => { if (event.target.closest('.jog-btn')) event.preventDefault(); });
+        }
+
+        // 1ステップ分ジョグする。動けなかった場合は false を返す
+        function handleJog(btn) {
+            if (isAnimating) return false;
             const type = btn.dataset.type, dir = parseInt(btn.dataset.dir);
             if (type === 'joint') {
                 const jointIndex = parseInt(btn.dataset.joint);
@@ -867,8 +896,10 @@
                     const errorMessage = document.getElementById('error-message');
                     errorMessage.textContent = '可動範囲外です。';
                     setTimeout(() => { if(errorMessage.textContent === '可動範囲外です。') errorMessage.textContent = ''; }, 1500);
+                    return false;
                 }
             }
+            return true;
         }
 
         function updateJogUI() {
