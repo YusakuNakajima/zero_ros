@@ -1,28 +1,17 @@
 import rtde_control
-import rtde_receive
-import time
-robot_ip = "URロボットのIPアドレス" 
-rtde_c = rtde_control.RTDEControlInterface(robot_ip)
-rtde_r = rtde_receive.RTDEReceiveInterface(robot_ip)
-try:
-    # PTP動作 (関節空間)
-    # 関節角度をラジアンで指定
-    target_joints = [0.1, -1.2, 2.3, -1.5, 0.5, 0.0] #ラジアン表記
-    rtde_c.moveJ(target_joints, 1.0, 0.5) # 速度1.0rad/s, 加速度0.5rad/s^2
-    time.sleep(5)
+rtde_c = rtde_control.RTDEControlInterface("URロボットのIPアドレス")
 
-    # LIN動作 (ベース座標系)
-    # ベース座標系での目標TCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    target_pose_base = [0.3, 0.4, 0.5, 0.0, 0.0, 0.0]
-    rtde_c.moveL(target_pose_base, 0.5, 0.3) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
+# PTP ⇔ movej(q, a=1.4, v=1.05)  ※ ur_rtde は (位置, speed, acceleration) の順
+rtde_c.moveJ([0, -1.57, 1.57, 0, 1.57, 0], 1.05, 1.4)
 
-    # CIRC動作 (ツール座標系)
-    # ツール座標系での中間点と目標点のTCP位置を指定,  [x, y, z, rx, ry, rz] (単位: [m, rad])
-    via_pose_tool = [0.1, 0.1, 0.0, 0.0, 0.0, 0.0]
-    to_pose_tool = [0.2, 0.0, 0.0, 0.0, 0.0, 0.0]
-    rtde_c.moveC(via_pose_tool, to_pose_tool, 0.5, 0.3, pose_tool=True) # 速度0.5m/s, 加速度0.3m/s^2
-    time.sleep(5)
+# LIN ⇔ movel(p[...], a=1.2, v=0.25)
+rtde_c.moveL([0.3, -0.2, 0.25, 0, 3.14, 0], 0.25, 1.2)
 
-finally:
-    rtde_r.disconnect()
+# ブレンド ⇔ r=0.05：経路で渡す（各点 = pose + [speed, acceleration, blend]）
+rtde_c.moveL([[0.35, -0.1, 0.25, 0, 3.14, 0, 0.25, 1.2, 0.05],
+              [0.3, 0.0, 0.25, 0, 3.14, 0, 0.25, 1.2, 0.0]])  # 最後は blend=0
+
+# CIRC ⇔ movec：ur_rtde に moveC は無い → URScript を直接送る
+rtde_c.sendCustomScriptFunction("circ",
+    "movec(p[0.35,-0.1,0.25,0,3.14,0], p[0.3,0.0,0.25,0,3.14,0], a=1.2, v=0.25)")
+rtde_c.stopScript()

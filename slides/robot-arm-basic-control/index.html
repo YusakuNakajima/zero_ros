@@ -676,19 +676,11 @@ movel(p1, a=1.2, v=0.25, r=0.05)  # p1 の 50mm 手前から丸めて通過（fl
 
                 <section>
                     <h2>プログラムから動かす(URの例)</h2>
-                    <div class="slide-layout-code-text">
-                        <div class="code-section">
-                            <pre><code class="language-python external-code" data-src="code/ur_rtde_example.py" data-trim></code></pre>
-                        </div>
-                        <div class="text-section">
-                            <ul>
-                                <li>PTP = moveJ</li>
-                                <li>LIN = moveL</li>
-                                <li>CIRC = moveC</li>
-                            </ul>
-                        </div>
-                    </div>
-
+                    <p style="font-size: 0.6em; margin: 0 0 6px;">Python ライブラリ ur_rtde で、前の URScript と同じ動作を書く</p>
+                    <pre style="font-size: 0.42em; width: 100%;"><code class="language-python external-code" data-src="code/ur_rtde_example.py" data-trim></code></pre>
+                    <ul style="font-size: 0.6em;">
+                        <li>関数の対応は同じ（moveJ / moveL）。違いは <strong>①引数順が (speed, acceleration)</strong>、<strong>②ブレンドは経路で渡す</strong>、<strong>③moveC が無い</strong></li>
+                    </ul>
                 </section>
             </section>
 
