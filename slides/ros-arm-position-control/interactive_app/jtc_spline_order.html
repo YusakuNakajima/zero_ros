@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTCの補間次数</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --border: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #4fc3f7;
+            --target: #6b7280;
+            --line: #4fc3f7;
+            --node: #fb923c;
+            --spike: #f472b6;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+        }
+
+        h1 { font-size: 17px; margin: 0 0 8px; text-align: center; }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            align-items: center;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        .mode { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .mode button {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .mode button small { display: block; color: var(--muted); font-size: 10px; }
+
+        .mode button.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
+
+        .controls label { font-size: 12px; color: var(--muted); min-width: 200px; flex: 1; }
+        .controls label span { color: var(--text); font-weight: bold; }
+        .controls input[type="range"] { width: 100%; }
+
+        .plots {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        @media (max-width: 700px) { .plots { grid-template-columns: minmax(0, 1fr); } }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 0;
+        }
+
+        .card-title { font-size: 12px; color: var(--muted); margin: 0 0 4px 4px; }
+        canvas { display: block; width: 100%; height: 190px; }
+
+        .summary {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .summary div {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+        }
+
+        .summary b { color: var(--accent); }
+        .warn { color: #fda4af; }
+    </style>
+</head>
+<body>
+    <h1>JointTrajectoryPoint に何を入れるかで補間の次数が変わる</h1>
+
+    <div class="controls">
+        <div class="mode" id="mode">
+            <button data-mode="linear">positions のみ<small>→ 線形補間</small></button>
+            <button data-mode="cubic">+ velocities<small>→ 3次 (Hermite)</small></button>
+            <button data-mode="quintic" class="active">+ accelerations<small>→ 5次</small></button>
+            <button data-mode="zero">速度・加速度を 0<small>→ 5次・全点で停止</small></button>
+        </div>
+        <label>waypoint の間隔 Δt <span id="dt-val"></span>
+            <input type="range" id="dt" min="0.1" max="1.0" step="0.05" value="0.5">
+        </label>
+    </div>
+
+    <div class="plots">
+        <div class="card">
+            <p class="card-title">関節角 q [rad]（灰色：目標の滑らかな軌道）</p>
+            <canvas id="pos"></canvas>
+        </div>
+        <div class="card">
+            <p class="card-title">関節速度 q′ [rad/s]</p>
+            <canvas id="vel"></canvas>
+        </div>
+        <div class="card">
+            <p class="card-title">関節加速度 q″ [rad/s²]</p>
+            <canvas id="acc"></canvas>
+        </div>
+    </div>
+
+    <div class="summary">
+        <div>連続性：<b id="s-cont"></b></div>
+        <div>不連続になる量：<b id="s-disc"></b></div>
+        <div id="s-note"></div>
+    </div>
+
+    <script>
+        const T_END = 4;
+        // 目標の滑らかな関節軌道 (この上から waypoint をサンプリングする)
+        const target = (t) => 0.6 * Math.sin(1.3 * t) + 0.25 * Math.sin(3.1 * t + 0.4);
+
+        const state = { mode: 'quintic', dt: 0.5 };
+        const $ = (id) => document.getElementById(id);
+        const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+        // waypoint を作る。速度・加速度は waypoint の位置から差分で求める (実装でよくあるやり方)
+        function makeWaypoints(dt) {
+            const n = Math.round(T_END / dt);
+            const t = [], q = [];
+            for (let i = 0; i <= n; i++) { t.push(i * dt); q.push(target(i * dt)); }
+            const v = q.map((_, i) => {
+                if (i === 0) return (q[1] - q[0]) / dt;
+                if (i === n) return (q[n] - q[n - 1]) / dt;
+                return (q[i + 1] - q[i - 1]) / (2 * dt);
+            });
+            const a = v.map((_, i) => {
+                if (i === 0) return (v[1] - v[0]) / dt;
+                if (i === n) return (v[n] - v[n - 1]) / dt;
+                return (v[i + 1] - v[i - 1]) / (2 * dt);
+            });
+            return { t, q, v, a };
+        }
+
+        // 区間 [0, h] で両端の位置・速度・加速度を満たす5次多項式の係数
+        function quinticCoeffs(q0, v0, a0, q1, v1, a1, h) {
+            const h2 = h * h, h3 = h2 * h, h4 = h3 * h, h5 = h4 * h;
+            const c0 = q0, c1 = v0, c2 = a0 / 2;
+            const c3 = (20 * (q1 - q0) - (8 * v1 + 12 * v0) * h - (3 * a0 - a1) * h2) / (2 * h3);
+            const c4 = (30 * (q0 - q1) + (14 * v1 + 16 * v0) * h + (3 * a0 - 2 * a1) * h2) / (2 * h4);
+            const c5 = (12 * (q1 - q0) - 6 * (v1 + v0) * h - (a0 - a1) * h2) / (2 * h5);
+            return [c0, c1, c2, c3, c4, c5];
+        }
+
+        // 区間 [0, h] で両端の位置・速度を満たす3次多項式の係数
+        function cubicCoeffs(q0, v0, q1, v1, h) {
+            const c2 = (3 * (q1 - q0) / h - 2 * v0 - v1) / h;
+            const c3 = (2 * (q0 - q1) / h + v0 + v1) / (h * h);
+            return [q0, v0, c2, c3, 0, 0];
+        }
+
+        // 多項式 (6係数) の値・1階・2階微分
+        function evalPoly(c, s) {
+            const q = c[0] + c[1] * s + c[2] * s ** 2 + c[3] * s ** 3 + c[4] * s ** 4 + c[5] * s ** 5;
+            const v = c[1] + 2 * c[2] * s + 3 * c[3] * s ** 2 + 4 * c[4] * s ** 3 + 5 * c[5] * s ** 4;
+            const a = 2 * c[2] + 6 * c[3] * s + 12 * c[4] * s ** 2 + 20 * c[5] * s ** 3;
+            return { q, v, a };
+        }
+
+        // 補間した軌道を区間ごとにサンプリング。区間の境目は NaN で区切って線をつなげない
+        function interpolate(wp, mode) {
+            const out = { t: [], q: [], v: [], a: [] };
+            const segs = wp.t.length - 1;
+            for (let i = 0; i < segs; i++) {
+                const h = wp.t[i + 1] - wp.t[i];
+                let c;
+                if (mode === 'linear') {
+                    c = [wp.q[i], (wp.q[i + 1] - wp.q[i]) / h, 0, 0, 0, 0];
+                } else if (mode === 'cubic') {
+                    c = cubicCoeffs(wp.q[i], wp.v[i], wp.q[i + 1], wp.v[i + 1], h);
+                } else if (mode === 'quintic') {
+                    c = quinticCoeffs(wp.q[i], wp.v[i], wp.a[i], wp.q[i + 1], wp.v[i + 1], wp.a[i + 1], h);
+                } else {
+                    c = quinticCoeffs(wp.q[i], 0, 0, wp.q[i + 1], 0, 0, h);
+                }
+                const n = 40;
+                for (let k = 0; k <= n; k++) {
+                    const s = h * k / n;
+                    const r = evalPoly(c, s);
+                    out.t.push(wp.t[i] + s); out.q.push(r.q); out.v.push(r.v); out.a.push(r.a);
+                }
+                out.t.push(NaN); out.q.push(NaN); out.v.push(NaN); out.a.push(NaN);
+            }
+            return out;
+        }
+
+        function setupCanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.round(rect.width * dpr);
+            canvas.height = Math.round(rect.height * dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        // series: {t, y, color, width, dash, connectGaps}; nodes: 区切り線を描く時刻; spikes: ∞ を描く時刻
+        function drawPlot(id, series, yRange, opts = {}) {
+            const { ctx, w, h } = setupCanvas($(id));
+            const left = 34, right = 6, top = 6, bottom = 18;
+            const pw = w - left - right, ph = h - top - bottom;
+            const [yMin, yMax] = yRange;
+            const X = (t) => left + t / T_END * pw;
+            const Y = (y) => top + ph - (Math.max(yMin, Math.min(yMax, y)) - yMin) / (yMax - yMin) * ph;
+            ctx.clearRect(0, 0, w, h);
+            ctx.font = '10px "Noto Sans JP", sans-serif';
+            ctx.fillStyle = css('--muted');
+            ctx.strokeStyle = css('--border');
+            ctx.lineWidth = 1;
+            for (let k = 0; k <= 4; k++) {
+                const y = yMin + (yMax - yMin) * k / 4;
+                ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(w - right, Y(y)); ctx.stroke();
+                ctx.fillText(y.toFixed(1), 2, Y(y) + 3);
+            }
+            for (let t = 0; t <= T_END; t++) ctx.fillText(t.toFixed(0), X(t) - 3, h - 4);
+            ctx.fillText('[s]', w - right - 14, h - 4);
+            // y=0 の線
+            if (yMin < 0 && yMax > 0) {
+                ctx.strokeStyle = '#4b5563';
+                ctx.beginPath(); ctx.moveTo(left, Y(0)); ctx.lineTo(w - right, Y(0)); ctx.stroke();
+            }
+
+            series.forEach(sr => {
+                ctx.strokeStyle = sr.color;
+                ctx.lineWidth = sr.width || 2;
+                ctx.setLineDash(sr.dash || []);
+                ctx.beginPath();
+                let pen = false;
+                for (let i = 0; i < sr.t.length; i++) {
+                    if (Number.isNaN(sr.y[i])) { if (!sr.connectGaps) pen = false; continue; }
+                    const x = X(sr.t[i]), y = Y(sr.y[i]);
+                    if (pen) ctx.lineTo(x, y); else { ctx.moveTo(x, y); pen = true; }
+                }
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+
+            (opts.points || []).forEach(p => {
+                ctx.fillStyle = css('--node');
+                ctx.beginPath(); ctx.arc(X(p.t), Y(p.y), 3.5, 0, Math.PI * 2); ctx.fill();
+            });
+            (opts.spikes || []).forEach(t => {
+                ctx.strokeStyle = css('--spike');
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(X(t), top); ctx.lineTo(X(t), top + ph); ctx.stroke();
+            });
+            if (opts.spikes && opts.spikes.length) {
+                ctx.fillStyle = css('--spike');
+                ctx.font = 'bold 11px "Noto Sans JP", sans-serif';
+                ctx.fillText('節点で ∞（速度の段差）', left + 6, top + 12);
+            }
+        }
+
+        // 区間の境目で値が跳ぶか (左端の値と右端の値の差) を NaN 区切りから求める
+        function jumpsAt(arr) {
+            const jumps = [];
+            for (let i = 1; i < arr.length - 1; i++) {
+                if (Number.isNaN(arr[i])) jumps.push(Math.abs(arr[i + 1] - arr[i - 1]));
+            }
+            return jumps;
+        }
+
+        function render() {
+            state.dt = parseFloat($('dt').value);
+            $('dt-val').textContent = `${state.dt.toFixed(2)} s（${Math.round(T_END / state.dt) + 1} 点）`;
+            const wp = makeWaypoints(state.dt);
+            const tr = interpolate(wp, state.mode);
+
+            const fine = [];
+            for (let i = 0; i <= 400; i++) fine.push(i * T_END / 400);
+            const tq = fine.map(target);
+            const h = 1e-4;
+            const tv = fine.map(t => (target(t + h) - target(t - h)) / (2 * h));
+            const ta = fine.map(t => (target(t + h) - 2 * target(t) + target(t - h)) / (h * h));
+            const ref = { color: css('--target'), width: 1.5, dash: [5, 4] };
+            const main = { color: css('--line'), connectGaps: true };
+
+            drawPlot('pos', [{ ...ref, t: fine, y: tq }, { ...main, t: tr.t, y: tr.q }], [-1, 1],
+                { points: wp.t.map((t, i) => ({ t, y: wp.q[i] })) });
+            drawPlot('vel', [{ ...ref, t: fine, y: tv }, { ...main, t: tr.t, y: tr.v, connectGaps: state.mode !== 'linear' }], [-1.5, 1.5]);
+            drawPlot('acc', [{ ...ref, t: fine, y: ta }, { ...main, t: tr.t, y: tr.a, connectGaps: state.mode === 'quintic' || state.mode === 'zero' }], [-4, 4],
+                { spikes: state.mode === 'linear' ? wp.t.slice(1, -1) : [] });
+
+            const accJump = Math.max(...jumpsAt(tr.a));
+            const info = {
+                linear: ['C⁰', '速度（加速度は ∞）', '<span class="warn">点を密にしても速度の段差が細かくなるだけ</span>'],
+                cubic: ['C¹', `加速度（最大 ${accJump.toFixed(2)} rad/s² の段差）`, '<span class="warn">accelerations が空だと静かにこの次数になる</span>'],
+                quintic: ['C²', 'ジャーク（節点で折れる）', '加速度まで連続。実用上の合格線'],
+                zero: ['C²（ただし全点で v = 0）', 'なし（毎点で止まる）', '<span class="warn">形は合うが速度が毎点 0 に落ちる ＝ 全点が停止点 (r = 0)</span>']
+            }[state.mode];
+            $('s-cont').textContent = info[0];
+            $('s-disc').textContent = info[1];
+            $('s-note').innerHTML = info[2];
+        }
+
+        document.querySelectorAll('#mode button').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('active', b === btn));
+            state.mode = btn.dataset.mode;
+            render();
+        }));
+        $('dt').addEventListener('input', render);
+        window.addEventListener('resize', render);
+        render();
+    </script>
+</body>
+</html>

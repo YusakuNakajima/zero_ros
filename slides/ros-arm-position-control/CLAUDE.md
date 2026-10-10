@@ -72,6 +72,12 @@
 - **縦スライド8-9**: JointTrajectoryControllerにvelocityとaccelerationを追加
 - **縦スライド8-10**: JointTrajectoryControllerでの設定例（ur_joint_trajectory_controller.yamlから読み込み）
 
+### 5.5 軌道の滑らかさ：ブレンド半径からROS実装まで（index_ros2.html のみ・水平スライド + 縦スライド18枚）
+ロボットアーム入門（robot-arm-basic-control）第9章のブレンド半径の話を、ROSの軌道生成につなげる章。
+- 復習（blend_physics.html を相互参照で埋め込み）→ G（幾何）と C（時間）の区別 → 連続性の階層表 → なぜ G¹ では C² にできないか
+- 加速度 = 時間則 + 幾何（accel_geometry_timing.html）、ジャークと残留振動（jerk_vibration.html）
+- ROS の3段構造（幾何パス → 時間パラメータ化 → JTC補間）とチェック①〜⑤（密度と幾何精度、JTCの補間次数＝jtc_spline_order.html、TOTG vs Ruckig、密にしすぎ、角は消えない）、特異点、実務上の判断、まとめ
+
 ### 6. waypointsの表示編（水平スライド9 + 縦スライド）
 **スライド9: waypointsの表示**（メインスライド）
 - **縦スライド9-1**: デバッグ用にwaypointsを表示したいことはよくある、方法を紹介

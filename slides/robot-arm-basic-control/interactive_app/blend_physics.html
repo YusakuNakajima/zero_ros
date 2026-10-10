@@ -344,6 +344,7 @@
             all.forEach(p => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); });
             const pad = 16;
             const scale = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY));
+            if (scale <= 0) return; // 非表示の iframe 内ではキャンバスの大きさが 0
             const ox = (w - (maxX - minX) * scale) / 2 - minX * scale;
             const oy = (h + (maxY - minY) * scale) / 2 + minY * scale;
             const X = (x) => ox + x * scale, Y = (y) => oy - y * scale;

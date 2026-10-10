@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加速度は時間則と幾何の和</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --border: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #4fc3f7;
+            --path: #fb923c;
+            --at: #a3e635;
+            --an: #f472b6;
+            --jerk: #fbbf24;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+        }
+
+        h1 { font-size: 17px; margin: 0 0 4px; text-align: center; }
+
+        .eq {
+            text-align: center;
+            font-size: 15px;
+            margin: 0 0 8px;
+        }
+
+        .eq .t { color: var(--at); font-weight: bold; }
+        .eq .n { color: var(--an); font-weight: bold; }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        .group-title { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+        .group-title b.t { color: var(--at); }
+        .group-title b.n { color: var(--an); }
+
+        .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .seg button {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .seg button.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
+
+        .main {
+            display: grid;
+            grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .main, .controls { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 0;
+        }
+
+        .card-title { font-size: 12px; color: var(--muted); margin: 0 0 4px 4px; }
+        canvas { display: block; width: 100%; }
+        #path { height: 210px; }
+        .plot { height: 120px; }
+
+        .verdict {
+            margin-top: 6px;
+            font-size: 13px;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            background: var(--bg);
+        }
+
+        .ok { color: #86efac; }
+        .ng { color: #fda4af; }
+    </style>
+</head>
+<body>
+    <h1>加速度は「時間則」と「経路の幾何」の和</h1>
+    <p class="eq">p″ = <span class="t">s″ · t</span>（時間則・接線方向） + <span class="n">(s′)² κ · n</span>（幾何・法線方向）</p>
+
+    <div class="controls">
+        <div>
+            <div class="group-title">時間則 s(t)：<b class="t">接線方向</b>の加速度を決める</div>
+            <div class="seg" id="timing">
+                <button data-v="trap" class="active">台形速度（加速度が段差）</button>
+                <button data-v="scurve">Sカーブ（ジャーク制限）</button>
+            </div>
+        </div>
+        <div>
+            <div class="group-title">経路の幾何：<b class="n">法線方向</b>の加速度を決める</div>
+            <div class="seg" id="geom">
+                <button data-v="arc" class="active">円弧ブレンド（G¹）</button>
+                <button data-v="smooth">曲率連続ブレンド（G²）</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="card">
+            <p class="card-title">TCPの経路（r = 50 mm、通過速度 0.3 m/s）</p>
+            <canvas id="path"></canvas>
+            <div class="verdict" id="verdict"></div>
+        </div>
+        <div class="card">
+            <p class="card-title">加速度 [m/s²]</p>
+            <canvas id="acc" class="plot"></canvas>
+            <p class="card-title" style="margin-top: 6px;">ジャーク（加速度の時間微分）の大きさ [m/s³]</p>
+            <canvas id="jerk" class="plot"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 経路: 直線 L → ブレンド (コーナー点から r で開始) → 直線 L、内角 90°
+        // 時間則: 停止 → 一定速度 V で巡航 (コーナーも同じ速度) → 停止
+        const L = 0.25, R = 0.05, V = 0.3, A_MAX = 2.0, T_J = 0.08, DT = 0.001, DS = 0.0002;
+        const TURN = Math.PI / 2;
+        const state = { timing: 'trap', geom: 'arc' };
+        const $ = (id) => document.getElementById(id);
+        const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+        const shape = (geom, u) => geom === 'smooth' ? 2 * (1 - Math.abs(2 * u - 1)) : 1;
+
+        // 長さ1のブレンドを積分したときの、始点から接線交点までの距離
+        function unitTangentLength(geom) {
+            const n = 400;
+            let x = 0, y = 0, th = 0;
+            for (let i = 0; i < n; i++) {
+                const d = TURN * shape(geom, (i + 0.5) / n) / n;
+                x += Math.cos(th + d / 2) / n; y += Math.sin(th + d / 2) / n; th += d;
+            }
+            return x - y / Math.tan(TURN);
+        }
+
+        // 経路を弧長 s の配列で表す (位置・接線角・曲率)
+        function buildPath(geom) {
+            const blendLen = R / unitTangentLength(geom);
+            const pts = [];
+            let x = -L, y = 0, th = 0, s = 0;
+            const straight = L - R;
+            const step = (k, ds) => {
+                pts.push({ s, x, y, th, k });
+                x += Math.cos(th + k * ds / 2) * ds; y += Math.sin(th + k * ds / 2) * ds; th += k * ds; s += ds;
+            };
+            const n1 = Math.round(straight / DS);
+            for (let i = 0; i < n1; i++) step(0, DS);
+            const nb = Math.round(blendLen / DS), db = blendLen / nb;
+            for (let i = 0; i < nb; i++) step(TURN / blendLen * shape(geom, (i + 0.5) / nb), db);
+            for (let i = 0; i <= n1; i++) step(0, DS);
+            return pts;
+        }
+
+        // 速度の時間関数 v(t): 台形 (加速度 ±A_MAX)、Sカーブは台形を幅 T_J の移動平均でならす
+        // (移動平均は移動距離を変えずに加速度を台形状にする = ジャーク ≤ A_MAX / T_J)
+        function velocityProfile(timing, S) {
+            const tAcc = V / A_MAX;
+            const tCruise = (S - V * tAcc) / V;
+            const T = 2 * tAcc + tCruise;
+            const n = Math.ceil(T / DT) + 1;
+            let v = [];
+            for (let i = 0; i < n; i++) {
+                const t = i * DT;
+                v.push(t < tAcc ? A_MAX * t : t < tAcc + tCruise ? V : Math.max(0, V - A_MAX * (t - tAcc - tCruise)));
+            }
+            if (timing === 'scurve') {
+                const m = Math.round(T_J / DT);
+                const padded = v.concat(new Array(m).fill(0));
+                const out = [];
+                let acc = 0;
+                for (let i = 0; i < padded.length; i++) {
+                    acc += padded[i] - (i >= m ? padded[i - m] : 0);
+                    out.push(acc / m);
+                }
+                v = out;
+            }
+            return v;
+        }
+
+        function simulate() {
+            const pts = buildPath(state.geom);
+            const S = pts[pts.length - 1].s;
+            const v = velocityProfile(state.timing, S);
+            const t = [], at = [], an = [], xs = [], ys = [], ax = [], ay = [];
+            let s = 0, j = 0;
+            for (let i = 0; i < v.length; i++) {
+                while (j < pts.length - 1 && pts[j + 1].s <= s) j++;
+                const p = pts[j];
+                const aT = i > 0 ? (v[i] - v[i - 1]) / DT : 0;
+                const aN = v[i] * v[i] * p.k;
+                t.push(i * DT); at.push(aT); an.push(aN); xs.push(p.x); ys.push(p.y);
+                // 加速度ベクトル (接線 + 法線)
+                ax.push(aT * Math.cos(p.th) - aN * Math.sin(p.th));
+                ay.push(aT * Math.sin(p.th) + aN * Math.cos(p.th));
+                s += v[i] * DT;
+            }
+            const jerk = ax.map((_, i) => i === 0 ? 0 : Math.hypot(ax[i] - ax[i - 1], ay[i] - ay[i - 1]) / DT);
+            return { pts, t, at, an, jerk, xs, ys };
+        }
+
+        function setupCanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.round(rect.width * dpr);
+            canvas.height = Math.round(rect.height * dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        function drawPath(sim) {
+            const { ctx, w, h } = setupCanvas($('path'));
+            ctx.clearRect(0, 0, w, h);
+            const pad = 14;
+            const minX = -L, maxX = 0.02, minY = -0.02, maxY = L;
+            const sc = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY));
+            const ox = (w - (maxX - minX) * sc) / 2 - minX * sc, oy = (h + (maxY - minY) * sc) / 2 + minY * sc;
+            const X = (x) => ox + x * sc, Y = (y) => oy - y * sc;
+            ctx.strokeStyle = '#6b7280'; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(X(-L), Y(0)); ctx.lineTo(X(0), Y(0)); ctx.lineTo(X(0), Y(L)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+            for (let i = 1; i < sim.pts.length; i++) {
+                const p = sim.pts[i - 1], q = sim.pts[i];
+                ctx.strokeStyle = p.k > 1e-9 ? css('--an') : css('--path');
+                ctx.beginPath(); ctx.moveTo(X(p.x), Y(p.y)); ctx.lineTo(X(q.x), Y(q.y)); ctx.stroke();
+            }
+        }
+
+        function drawPlot(id, series, tMax, yMax, opts = {}) {
+            const { ctx, w, h } = setupCanvas($(id));
+            const left = 34, right = 6, top = 6, bottom = 16;
+            const pw = w - left - right, ph = h - top - bottom;
+            const yMin = opts.yMin ?? 0;
+            const X = (t) => left + t / tMax * pw;
+            const Y = (y) => top + ph - (Math.max(yMin, Math.min(yMax, y)) - yMin) / (yMax - yMin) * ph;
+            ctx.clearRect(0, 0, w, h);
+            ctx.font = '10px "Noto Sans JP", sans-serif';
+            ctx.fillStyle = css('--muted'); ctx.strokeStyle = css('--border'); ctx.lineWidth = 1;
+            for (let k = 0; k <= 4; k++) {
+                const y = yMin + (yMax - yMin) * k / 4;
+                ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(w - right, Y(y)); ctx.stroke();
+                ctx.fillText(y.toFixed(yMax - yMin < 10 ? 1 : 0), 2, Y(y) + 3);
+            }
+            for (let t = 0; t <= tMax; t += 0.5) ctx.fillText(t.toFixed(1), X(t) - 6, h - 3);
+            series.forEach(sr => {
+                ctx.strokeStyle = sr.color; ctx.lineWidth = 2;
+                ctx.beginPath();
+                sr.y.forEach((y, i) => i ? ctx.lineTo(X(sr.t[i]), Y(y)) : ctx.moveTo(X(sr.t[i]), Y(y)));
+                ctx.stroke();
+            });
+            (opts.labels || []).forEach(l => {
+                ctx.fillStyle = l.color; ctx.font = 'bold 11px "Noto Sans JP", sans-serif';
+                ctx.fillText(l.text, X(l.t) + 4, top + 12);
+            });
+            (opts.legend || []).forEach((l, i) => {
+                ctx.fillStyle = l.color; ctx.font = '11px "Noto Sans JP", sans-serif';
+                ctx.fillText(l.text, w - right - 150, top + 12 + i * 14);
+            });
+        }
+
+        function render() {
+            const sim = simulate();
+            const tMax = sim.t[sim.t.length - 1];
+            drawPath(sim);
+            drawPlot('acc', [
+                { t: sim.t, y: sim.at, color: css('--at') },
+                { t: sim.t, y: sim.an, color: css('--an') }
+            ], tMax, 4, { yMin: -2, legend: [
+                { text: '接線 a_t = s″（時間則）', color: css('--at') },
+                { text: '法線 a_n = (s′)²κ（幾何）', color: css('--an') }
+            ] });
+            // ジャークは段差で ∞ になるので軸の上端で切る
+            const JMAX = 120;
+            const spikes = [];
+            sim.jerk.forEach((j, i) => { if (j > JMAX * 3 && (!spikes.length || sim.t[i] - spikes[spikes.length - 1] > 0.05)) spikes.push(sim.t[i]); });
+            drawPlot('jerk', [{ t: sim.t, y: sim.jerk, color: css('--jerk') }], tMax, JMAX,
+                { labels: spikes.map(t => ({ t, text: '∞', color: '#fda4af' })) });
+
+            const timingOk = state.timing === 'scurve', geomOk = state.geom === 'smooth';
+            const part = (ok, okText, ngText) => `<span class="${ok ? 'ok' : 'ng'}">${ok ? okText : ngText}</span>`;
+            $('verdict').innerHTML = [
+                part(timingOk, '時間則：ジャーク有界', '時間則：発進・停止で加速度が段差'),
+                part(geomOk, '幾何：ジャーク有界', '幾何：ブレンド入口・出口で加速度が段差')
+            ].join('<br>') + (timingOk && geomOk ? '<br><b class="ok">両方そろって初めて C²</b>' : '');
+        }
+
+        ['timing', 'geom'].forEach(group => {
+            document.querySelectorAll(`#${group} button`).forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll(`#${group} button`).forEach(b => b.classList.toggle('active', b === btn));
+                state[group] = btn.dataset.v;
+                render();
+            }));
+        });
+        window.addEventListener('resize', render);
+        render();
+    </script>
+</body>
+</html>

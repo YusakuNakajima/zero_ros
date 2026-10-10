@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ジャークと残留振動</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --border: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #4fc3f7;
+            --cmd: #a3e635;
+            --dev: #f472b6;
+            --ref: #6b7280;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+        }
+
+        h1 { font-size: 17px; margin: 0 0 8px; text-align: center; }
+
+        .controls {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px 16px;
+            align-items: center;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 640px) { .controls, .main { grid-template-columns: minmax(0, 1fr) !important; } }
+
+        .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .seg button, .small-btn {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .seg button.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
+        .small-btn { margin-top: 2px; font-size: 11px; padding: 2px 6px; }
+
+        label { font-size: 12px; color: var(--muted); }
+        label span { color: var(--text); font-weight: bold; }
+        input[type="range"] { width: 100%; }
+        input:disabled { opacity: 0.4; }
+
+        .main {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
+            gap: 8px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 0;
+        }
+
+        .card-title { font-size: 12px; color: var(--muted); margin: 0 0 4px 4px; }
+        canvas { display: block; width: 100%; }
+        #anim { height: 150px; }
+        .plot { height: 120px; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 4px 10px;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .stats span { color: var(--text); font-weight: bold; }
+        .note { margin-top: 6px; font-size: 12px; color: #fda4af; text-align: center; min-height: 1.4em; }
+    </style>
+</head>
+<body>
+    <h1>加速度の段差が固有振動を叩く：台形速度 vs Sカーブ</h1>
+
+    <div class="controls">
+        <div class="seg" id="profile">
+            <button data-v="trap" class="active">台形速度<br><small>加速度が段差（TOTG 的）</small></button>
+            <button data-v="scurve">Sカーブ<br><small>ジャーク制限（Ruckig 的）</small></button>
+        </div>
+        <label>アームの固有振動数 f<sub>n</sub> <span id="fn-val"></span>
+            <input type="range" id="fn" min="2" max="15" step="0.5" value="6">
+        </label>
+        <label>加速度を立ち上げる時間 T<sub>j</sub> <span id="tj-val"></span>
+            <input type="range" id="tj" min="10" max="400" step="5" value="80">
+            <button class="small-btn" id="match">T<sub>j</sub> を固有周期 1/f<sub>n</sub> に合わせる</button>
+        </label>
+    </div>
+
+    <div class="main">
+        <div class="card">
+            <p class="card-title">先端のたわみ（見やすいよう拡大表示）</p>
+            <canvas id="anim"></canvas>
+            <div class="stats">
+                <div>動作時間: <span id="s-move"></span></div>
+                <div>最大ジャーク: <span id="s-jerk"></span></div>
+                <div>停止後の残留振動: <span id="s-res"></span></div>
+                <div>整定まで (±0.1 mm): <span id="s-settle"></span></div>
+            </div>
+            <div class="note" id="note"></div>
+        </div>
+        <div class="card">
+            <p class="card-title">指令加速度 [m/s²]</p>
+            <canvas id="acc" class="plot"></canvas>
+            <p class="card-title" style="margin-top: 6px;">先端のずれ（指令位置との差）[mm]　灰色の点線：台形速度の場合</p>
+            <canvas id="dev" class="plot"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // モデル: モータ側は指令どおり x_m(t) で動く。先端は ばね-質量-ダンパ (固有振動数 f_n, 減衰比 ζ) でつながる。
+        //   先端のずれ e = x_tip - x_m は  ë = -ω² e - 2ζω ė - ẍ_m
+        const D = 0.3, V = 0.5, A = 3.0, ZETA = 0.03, DT = 0.0005, T_AFTER = 1.5;
+        const state = { profile: 'trap', fn: 6, tj: 0.08 };
+        const $ = (id) => document.getElementById(id);
+        const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        let sim = null, refSim = null, animStart = performance.now();
+
+        // 台形速度。Sカーブは速度を幅 T_j の移動平均でならしたもの (移動距離は同じ、ジャーク = A / T_j)
+        function velocity(profile, tj) {
+            const tAcc = V / A, tCruise = (D - V * tAcc) / V;
+            const T = 2 * tAcc + tCruise;
+            const n = Math.ceil(T / DT) + 1;
+            let v = [];
+            for (let i = 0; i < n; i++) {
+                const t = i * DT;
+                v.push(t < tAcc ? A * t : t < tAcc + tCruise ? V : Math.max(0, V - A * (t - tAcc - tCruise)));
+            }
+            if (profile === 'scurve') {
+                const m = Math.max(1, Math.round(tj / DT));
+                const padded = v.concat(new Array(m).fill(0));
+                const out = [];
+                let sum = 0;
+                for (let i = 0; i < padded.length; i++) {
+                    sum += padded[i] - (i >= m ? padded[i - m] : 0);
+                    out.push(sum / m);
+                }
+                v = out;
+            }
+            return v;
+        }
+
+        function simulate(profile, fn, tj) {
+            const v = velocity(profile, tj);
+            const nMove = v.length;
+            const nTotal = nMove + Math.round(T_AFTER / DT);
+            const w = 2 * Math.PI * fn;
+            const t = [], a = [], e = [], xm = [];
+            let x = 0, ed = 0, ev = 0;
+            for (let i = 0; i < nTotal; i++) {
+                const vi = i < nMove ? v[i] : 0;
+                const ai = i === 0 ? 0 : i < nMove ? (v[i] - v[i - 1]) / DT : (i === nMove ? -v[nMove - 1] / DT : 0);
+                t.push(i * DT); a.push(ai); e.push(ed); xm.push(x);
+                // 半陰的オイラー法
+                ev += (-w * w * ed - 2 * ZETA * w * ev - ai) * DT;
+                ed += ev * DT;
+                x += vi * DT;
+            }
+            const tMove = (nMove - 1) * DT;
+            let residual = 0, settle = 0;
+            for (let i = nMove; i < nTotal; i++) {
+                residual = Math.max(residual, Math.abs(e[i]));
+                if (Math.abs(e[i]) > 1e-4) settle = t[i] - tMove;
+            }
+            return { t, a, e, xm, tMove, residual, settle, T: t[nTotal - 1] };
+        }
+
+        function setupCanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.round(rect.width * dpr);
+            canvas.height = Math.round(rect.height * dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        function drawPlot(id, series, tMax, yMin, yMax, cursor, tMove) {
+            const { ctx, w, h } = setupCanvas($(id));
+            const left = 36, right = 6, top = 6, bottom = 16;
+            const pw = w - left - right, ph = h - top - bottom;
+            const X = (t) => left + t / tMax * pw;
+            const Y = (y) => top + ph - (Math.max(yMin, Math.min(yMax, y)) - yMin) / (yMax - yMin) * ph;
+            ctx.clearRect(0, 0, w, h);
+            ctx.font = '10px "Noto Sans JP", sans-serif';
+            ctx.fillStyle = css('--muted'); ctx.strokeStyle = css('--border'); ctx.lineWidth = 1;
+            for (let k = 0; k <= 4; k++) {
+                const y = yMin + (yMax - yMin) * k / 4;
+                ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(w - right, Y(y)); ctx.stroke();
+                ctx.fillText(Math.abs(yMax) < 10 ? y.toFixed(1) : y.toFixed(0), 2, Y(y) + 3);
+            }
+            for (let tt = 0; tt <= tMax; tt += 0.5) ctx.fillText(tt.toFixed(1), X(tt) - 6, h - 3);
+            // 動作終了 (ここから先は残留振動)
+            ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            ctx.fillRect(X(tMove), top, X(tMax) - X(tMove), ph);
+            ctx.fillStyle = css('--muted');
+            ctx.fillText('停止後', X(tMove) + 4, top + 10);
+            series.forEach(sr => {
+                ctx.strokeStyle = sr.color; ctx.lineWidth = sr.width || 2; ctx.setLineDash(sr.dash || []);
+                ctx.beginPath();
+                for (let i = 0; i < sr.t.length; i += 2) {
+                    i ? ctx.lineTo(X(sr.t[i]), Y(sr.y[i])) : ctx.moveTo(X(sr.t[i]), Y(sr.y[i]));
+                }
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.moveTo(X(cursor), top); ctx.lineTo(X(cursor), top + ph); ctx.stroke();
+        }
+
+        function drawAnim(i) {
+            const { ctx, w, h } = setupCanvas($('anim'));
+            ctx.clearRect(0, 0, w, h);
+            const pad = 30;
+            const X = (x) => pad + x / D * (w - 2 * pad);
+            const base = h - 24;
+            // レール
+            ctx.strokeStyle = css('--border'); ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(pad - 20, base + 14); ctx.lineTo(w - pad + 20, base + 14); ctx.stroke();
+            // 目標位置
+            ctx.strokeStyle = css('--ref'); ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(X(D), 10); ctx.lineTo(X(D), base + 14); ctx.stroke();
+            ctx.setLineDash([]);
+            const xm = sim.xm[i], e = sim.e[i];
+            const gain = 40 / Math.max(1e-4, maxAbs(refSim.e));   // 最大たわみが約 40px になる拡大率
+            const bx = X(xm), tipX = bx + e * gain, tipY = 24;
+            // 台座
+            ctx.fillStyle = '#4b5563';
+            ctx.fillRect(bx - 16, base - 4, 32, 18);
+            // しなるリンク (2次ベジェ)
+            ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(bx, base - 4);
+            ctx.quadraticCurveTo(bx, (base + tipY) / 2, tipX, tipY);
+            ctx.stroke();
+            // 先端 (持っている物)
+            ctx.fillStyle = css('--dev');
+            ctx.beginPath(); ctx.arc(tipX, tipY, 9, 0, Math.PI * 2); ctx.fill();
+        }
+
+        const maxAbs = (arr) => arr.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+
+        function frame(now) {
+            const cycle = sim.T + 0.3;
+            const tt = Math.min(((now - animStart) / 1000) % cycle, sim.T);
+            const i = Math.min(sim.t.length - 1, Math.round(tt / DT));
+            drawAnim(i);
+            const tMax = Math.max(sim.T, refSim.T);
+            drawPlot('acc', [{ t: sim.t, y: sim.a, color: css('--cmd') }], tMax, -A * 1.2, A * 1.2, tt, sim.tMove);
+            const eMax = maxAbs(refSim.e) * 1000 * 1.1;
+            drawPlot('dev', [
+                { t: refSim.t, y: refSim.e.map(x => x * 1000), color: css('--ref'), width: 1.5, dash: [5, 4] },
+                { t: sim.t, y: sim.e.map(x => x * 1000), color: css('--dev') }
+            ], tMax, -eMax, eMax, tt, sim.tMove);
+            requestAnimationFrame(frame);
+        }
+
+        function recompute() {
+            state.fn = parseFloat($('fn').value);
+            state.tj = parseFloat($('tj').value) / 1000;
+            $('fn-val').textContent = `${state.fn.toFixed(1)} Hz（周期 ${(1000 / state.fn).toFixed(0)} ms）`;
+            $('tj-val').textContent = `${(state.tj * 1000).toFixed(0)} ms`;
+            $('tj').disabled = state.profile === 'trap';
+            $('match').disabled = state.profile === 'trap';
+            sim = simulate(state.profile, state.fn, state.tj);
+            refSim = simulate('trap', state.fn, state.tj);
+            $('s-move').textContent = `${sim.tMove.toFixed(2)} s`;
+            $('s-jerk').textContent = state.profile === 'trap' ? '∞（段差）' : `${(A / state.tj).toFixed(0)} m/s³`;
+            $('s-res').textContent = `±${(sim.residual * 1000).toFixed(2)} mm`;
+            $('s-settle').textContent = sim.settle > 0 ? `+${sim.settle.toFixed(2)} s` : '即座に整定';
+            const ratio = state.tj * state.fn;
+            $('note').textContent = state.profile === 'trap'
+                ? 'ステップ状の加速度は広い周波数成分を持ち、固有モードを必ず叩く'
+                : Math.abs(ratio - Math.round(ratio)) < 0.08 && ratio > 0.5
+                    ? 'T_j が固有周期の整数倍 → 残留振動がほぼ消える'
+                    : '加速度をなめらかに立ち上げると残留振動が減る（動作時間は T_j だけ伸びる）';
+            animStart = performance.now();
+        }
+
+        document.querySelectorAll('#profile button').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelectorAll('#profile button').forEach(b => b.classList.toggle('active', b === btn));
+            state.profile = btn.dataset.v;
+            recompute();
+        }));
+        ['fn', 'tj'].forEach(id => $(id).addEventListener('input', recompute));
+        $('match').addEventListener('click', () => {
+            $('tj').value = Math.round(1000 / parseFloat($('fn').value) / 5) * 5;
+            recompute();
+        });
+        recompute();
+        requestAnimationFrame(frame);
+    </script>
+</body>
+</html>
