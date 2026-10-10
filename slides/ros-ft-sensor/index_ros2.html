@@ -43,6 +43,122 @@
                 </ul>
             </section>
 
+            <!-- FTセンサの基本 -->
+            <section>
+                <section>
+                    <h2>6軸 = 力3つ + トルク3つ</h2>
+                    <svg viewBox="0 0 640 330" style="width: 70%; max-height: 50vh;">
+                        <defs>
+                            <marker id="ah-x" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                            <marker id="ah-y" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
+                            <marker id="ah-z" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker>
+                        </defs>
+                        <!-- センサ本体 -->
+                        <path d="M210,180 L210,250 A110,34 0 0 0 430,250 L430,180 Z" fill="#b45309"/>
+                        <ellipse cx="320" cy="180" rx="110" ry="34" fill="#f59e0b"/>
+                        <ellipse cx="320" cy="180" rx="22" ry="7" fill="#78350f"/>
+                        <!-- 力：軸方向の矢印 -->
+                        <line x1="320" y1="180" x2="320" y2="45" stroke="#60a5fa" stroke-width="7" marker-end="url(#ah-z)"/>
+                        <line x1="320" y1="180" x2="560" y2="180" stroke="#4ade80" stroke-width="7" marker-end="url(#ah-y)"/>
+                        <line x1="320" y1="180" x2="175" y2="285" stroke="#f87171" stroke-width="7" marker-end="url(#ah-x)"/>
+                        <!-- トルク：軸まわりの矢印（右手の法則） -->
+                        <path d="M275,85 A45,14 0 1 0 365,85" fill="none" stroke="#60a5fa" stroke-width="4" marker-end="url(#ah-z)"/>
+                        <path d="M510,140 A14,40 0 1 0 510,220" fill="none" stroke="#4ade80" stroke-width="4" marker-end="url(#ah-y)"/>
+                        <path d="M230,258 A28,28 0 1 0 202,286" fill="none" stroke="#f87171" stroke-width="4" marker-end="url(#ah-x)"/>
+                        <g font-size="24" font-weight="bold">
+                            <text x="332" y="50" fill="#60a5fa">Fz</text>
+                            <text x="372" y="80" fill="#60a5fa">Tz</text>
+                            <text x="572" y="188" fill="#4ade80">Fy</text>
+                            <text x="530" y="250" fill="#4ade80">Ty</text>
+                            <text x="140" y="316" fill="#f87171">Fx</text>
+                            <text x="128" y="262" fill="#f87171">Tx</text>
+                        </g>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li><strong>力 F</strong>：軸の向きに押す・引く ／ <strong>トルク T</strong>：軸まわりにねじる（右手の法則：親指＝軸、指＝正の向き）</li>
+                        <li>ROS では <code>geometry_msgs/WrenchStamped</code> の <code>force</code> / <code>torque</code></li>
+                        <li>向きの基準は <code>header.frame_id</code> のセンサ座標系 → 軸の向きは本体の刻印やデータシートで確認</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>取り付け位置は2通り</h2>
+                    <svg viewBox="0 0 760 300" style="width: 82%; max-height: 42vh;">
+                        <!-- 左：手首 -->
+                        <text x="190" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">① 手首（フランジとツールの間）</text>
+                        <line x1="20" y1="285" x2="360" y2="285" stroke="#6b7280" stroke-width="3"/>
+                        <rect x="60" y="245" width="70" height="40" fill="#9ca3af"/>
+                        <polyline points="95,245 95,140 225,90 290,140" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                        <rect x="270" y="140" width="40" height="12" fill="#6b7280"/>
+                        <rect x="266" y="152" width="48" height="20" fill="#f59e0b"/>
+                        <rect x="276" y="172" width="28" height="22" fill="#4b5563"/>
+                        <line x1="281" y1="194" x2="281" y2="225" stroke="#4b5563" stroke-width="7"/>
+                        <line x1="299" y1="194" x2="299" y2="225" stroke="#4b5563" stroke-width="7"/>
+                        <circle cx="290" cy="162" r="40" fill="none" stroke="#f87171" stroke-width="3" stroke-dasharray="7 5"/>
+                        <text x="338" y="170" fill="#f59e0b" font-size="20">FT</text>
+                        <!-- 右：作業台・治具の下 -->
+                        <text x="575" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">② 作業台・治具の下</text>
+                        <rect x="430" y="240" width="300" height="12" fill="#6b7280"/>
+                        <rect x="445" y="252" width="12" height="33" fill="#6b7280"/>
+                        <rect x="703" y="252" width="12" height="33" fill="#6b7280"/>
+                        <rect x="535" y="218" width="80" height="22" fill="#f59e0b"/>
+                        <rect x="515" y="206" width="120" height="12" fill="#9ca3af"/>
+                        <path d="M535,206 Q575,150 615,206 Z" fill="#d1d5db"/>
+                        <line x1="690" y1="60" x2="590" y2="178" stroke="#9ca3af" stroke-width="14" stroke-linecap="round"/>
+                        <circle cx="575" cy="229" r="52" fill="none" stroke="#f87171" stroke-width="3" stroke-dasharray="7 5"/>
+                        <text x="632" y="270" fill="#f59e0b" font-size="20">FT</text>
+                    </svg>
+                    <div style="display: flex; gap: 24px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1;">
+                            <p style="margin: 0;">○ ツールにかかる力を直接測れる。どの作業でも使える</p>
+                            <p style="margin: 0;">△ ツールの重さも測ってしまう（次↓）</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <p style="margin: 0;">○ ワークにかかる力を測る。アームの姿勢に影響されない</p>
+                            <p style="margin: 0;">△ その治具の上の作業でしか使えない</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>ツールの重さも測ってしまう</h2>
+                    <svg viewBox="0 0 720 290" style="width: 78%; max-height: 42vh;">
+                        <defs>
+                            <marker id="ah-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                        </defs>
+                        <!-- 左：下向き -->
+                        <text x="170" y="30" fill="#e5e7eb" font-size="22" text-anchor="middle" font-weight="bold">ツール下向き</text>
+                        <rect x="120" y="50" width="100" height="14" fill="#6b7280"/>
+                        <rect x="120" y="64" width="100" height="22" fill="#f59e0b"/>
+                        <rect x="152" y="86" width="36" height="130" fill="#4b5563"/>
+                        <circle cx="170" cy="150" r="10" fill="#e5e7eb"/>
+                        <path d="M170,150 L170,140 A10,10 0 0 1 180,150 Z M170,150 L170,160 A10,10 0 0 1 160,150 Z" fill="#111827"/>
+                        <line x1="170" y1="160" x2="170" y2="255" stroke="#f87171" stroke-width="5" marker-end="url(#ah-g)"/>
+                        <text x="182" y="250" fill="#f87171" font-size="22">mg</text>
+                        <text x="170" y="284" fill="#e5e7eb" font-size="20" text-anchor="middle">→ Fz にだけ出る</text>
+                        <!-- 右：横向き -->
+                        <text x="530" y="30" fill="#e5e7eb" font-size="22" text-anchor="middle" font-weight="bold">ツール横向き</text>
+                        <rect x="390" y="80" width="14" height="100" fill="#6b7280"/>
+                        <rect x="404" y="80" width="22" height="100" fill="#f59e0b"/>
+                        <rect x="426" y="112" width="200" height="36" fill="#4b5563"/>
+                        <circle cx="520" cy="130" r="10" fill="#e5e7eb"/>
+                        <path d="M520,130 L520,120 A10,10 0 0 1 530,130 Z M520,130 L520,140 A10,10 0 0 1 510,130 Z" fill="#111827"/>
+                        <line x1="520" y1="140" x2="520" y2="235" stroke="#f87171" stroke-width="5" marker-end="url(#ah-g)"/>
+                        <text x="532" y="230" fill="#f87171" font-size="22">mg</text>
+                        <line x1="415" y1="200" x2="520" y2="200" stroke="#e5e7eb" stroke-width="2"/>
+                        <line x1="415" y1="192" x2="415" y2="208" stroke="#e5e7eb" stroke-width="2"/>
+                        <line x1="520" y1="192" x2="520" y2="208" stroke="#e5e7eb" stroke-width="2"/>
+                        <text x="467" y="194" fill="#e5e7eb" font-size="20" text-anchor="middle">d</text>
+                        <text x="530" y="284" fill="#e5e7eb" font-size="20" text-anchor="middle">→ 横向きの力 ＋ トルク d·mg</text>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li>何も触れていなくても、<strong>姿勢が変わると読み値が変わる</strong></li>
+                        <li>対策①：作業直前の姿勢でゼロ点リセット（姿勢があまり変わらない作業向け）</li>
+                        <li>対策②：ツールの質量・重心を登録して重力分を差し引く（<strong>重力補償</strong>）</li>
+                    </ul>
+                </section>
+            </section>
+
             <!-- スライド3: フォーストルクセンサの用途 -->
             <section>
                 <section>
@@ -163,15 +279,81 @@
 
             <!-- スライド6: 座標変換 -->
             <section>
+                <section>
                 <h2>座標変換</h2>
                 <ul>
-                    <li>TFを使って同姿変換行列を取得</li>
+                    <li>TFを使って同次変換行列を取得</li>
                     <li>フォースはそのまま回転行列で座標変換をする</li>
                     <li>トルクは回転行列で座標変換したもの+(旧位置-新位置)*新力で変換する</li>
                     <li>センサ座標系からロボット座標系へ</li>
                     <li>tf2_geometryライブラリの活用</li>
                     <li>リアルタイム座標変換</li>
                 </ul>
+                <p style="font-size: 0.7em;">図で見ると↓</p>
+                </section>
+                <section>
+                    <h2>測る点でトルクが変わる</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <svg viewBox="0 0 420 340" style="flex: 1; max-height: 50vh;">
+                            <defs>
+                                <marker id="ah-f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                                <marker id="ah-t" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+                            </defs>
+                            <rect x="100" y="20" width="100" height="16" fill="#6b7280"/>
+                            <text x="12" y="34" fill="#9ca3af" font-size="18">フランジ</text>
+                            <rect x="100" y="36" width="100" height="30" fill="#f59e0b"/>
+                            <rect x="138" y="66" width="24" height="200" fill="#4b5563"/>
+                            <!-- センサ座標系 S -->
+                            <circle cx="150" cy="51" r="6" fill="#111827"/>
+                            <text x="66" y="58" fill="#f59e0b" font-size="22" font-weight="bold">S</text>
+                            <!-- TCP座標系 T -->
+                            <circle cx="150" cy="280" r="8" fill="#34d399"/>
+                            <text x="112" y="300" fill="#34d399" font-size="22" font-weight="bold">T</text>
+                            <text x="40" y="330" fill="#34d399" font-size="18">TCP（測りたい点）</text>
+                            <!-- TCPに加わる力 -->
+                            <line x1="158" y1="280" x2="270" y2="280" stroke="#f87171" stroke-width="5" marker-end="url(#ah-f)"/>
+                            <text x="278" y="288" fill="#f87171" font-size="24" font-weight="bold">F</text>
+                            <!-- センサで見える力とトルク -->
+                            <line x1="210" y1="51" x2="300" y2="51" stroke="#f87171" stroke-width="5" marker-end="url(#ah-f)"/>
+                            <text x="308" y="59" fill="#f87171" font-size="24" font-weight="bold">F</text>
+                            <path d="M195,95 A48,48 0 0 0 195,7" fill="none" stroke="#fbbf24" stroke-width="4" marker-end="url(#ah-t)" transform="translate(-10 0)"/>
+                            <text x="200" y="118" fill="#fbbf24" font-size="22" font-weight="bold">τ = d × F</text>
+                            <!-- 腕の長さ d -->
+                            <line x1="70" y1="51" x2="70" y2="280" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="6 4"/>
+                            <line x1="60" y1="280" x2="80" y2="280" stroke="#e5e7eb" stroke-width="2"/>
+                            <text x="45" y="175" fill="#e5e7eb" font-size="24">d</text>
+                        </svg>
+                        <div style="flex: 1; font-size: 0.6em; text-align: left;">
+                            <p style="margin-top: 0;">TCP を横に押しただけでも、センサには<strong>てこのトルク</strong>が出る</p>
+                            <p style="background: #1f2937; padding: 12px; border-radius: 8px; font-family: monospace;">
+                                f<sub>T</sub> = R f<sub>S</sub><br>
+                                τ<sub>T</sub> = R τ<sub>S</sub> + p × f<sub>T</sub>
+                            </p>
+                            <p style="font-size: 0.85em;">R：S → T の回転<br>p：T から見た S の位置</p>
+                            <p style="font-size: 0.85em;">力は回すだけ。トルクは<strong>回す＋ p × f</strong></p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>ROS2 では tf2 で変換</h2>
+                    <pre style="font-size: 0.5em;"><code class="language-cpp" data-trim>
+#include &lt;tf2_geometry_msgs/tf2_geometry_msgs.hpp&gt;
+
+// センサ座標系（msg.header.frame_id）→ TCP座標系
+auto tf = tf_buffer_-&gt;lookupTransform(
+    "tcp_link", msg.header.frame_id, tf2::TimePointZero);
+
+geometry_msgs::msg::WrenchStamped out;
+tf2::doTransform(msg, out, tf);  // 回転 ＋ p × f まで計算してくれる
+                    </code></pre>
+                    <ul style="font-size: 0.6em;">
+                        <li>センサと TCP の位置関係は URDF に書いておけば TF で取れる</li>
+                        <li>自分で書くときは<strong>力だけ回して終わりにしない</strong>（トルクの p × f が抜ける）</li>
+                    </ul>
+                    <p style="font-size: 0.45em; color: #aaa;">※ ROS 2 Humble の tf2_geometry_msgs（C++）で p × f の項が入っていることを確認</p>
+                </section>
+
             </section>
 
             <!-- 最終スライド: まとめ -->
