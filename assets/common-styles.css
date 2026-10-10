@@ -240,13 +240,6 @@ mark.code-highlight-green {
     line-height: 1.25 !important;
 }
 
-/* --- 章番号 (assets/chapter-numbers.js が見出しの先頭に付与) --- */
-.reveal .chapter-number {
-    margin-right: 0.4em;
-    font-size: 0.75em;
-    color: #4fc3f7;
-    font-weight: bold;
-}
 
 /* 番号の無いスライド (タイトルなど) では右下の番号枠を隠す */
 .reveal .slide-number:has(.slide-number-a:empty) {
