@@ -11,7 +11,4 @@ rtde_c.moveL([0.3, -0.2, 0.25, 0, 3.14, 0], 0.25, 1.2)
 rtde_c.moveL([[0.35, -0.1, 0.25, 0, 3.14, 0, 0.25, 1.2, 0.05],
               [0.3, 0.0, 0.25, 0, 3.14, 0, 0.25, 1.2, 0.0]])  # 最後は blend=0
 
-# CIRC ⇔ movec：ur_rtde に moveC は無い → URScript を直接送る
-rtde_c.sendCustomScriptFunction("circ",
-    "movec(p[0.35,-0.1,0.25,0,3.14,0], p[0.3,0.0,0.25,0,3.14,0], a=1.2, v=0.25)")
 rtde_c.stopScript()
