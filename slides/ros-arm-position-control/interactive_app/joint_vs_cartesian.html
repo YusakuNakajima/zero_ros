@@ -86,9 +86,9 @@
             <h2>関節空間で指令（Joint）</h2>
             <div class="sub">各関節の角度を指定 → 手先の位置は「結果」として決まる</div>
             <canvas id="cvJ"></canvas>
-            <div class="row"><label>θ1</label><input type="range" id="j0" min="-180" max="180" value="60"><span class="val" id="j0v"></span></div>
-            <div class="row"><label>θ2</label><input type="range" id="j1" min="-170" max="170" value="-70"><span class="val" id="j1v"></span></div>
-            <div class="row"><label>θ3</label><input type="range" id="j2" min="-170" max="170" value="-40"><span class="val" id="j2v"></span></div>
+            <div class="row"><label>θ1</label><input type="range" id="j0" min="-180" max="180" value="80"><span class="val" id="j0v"></span></div>
+            <div class="row"><label>θ2</label><input type="range" id="j1" min="-170" max="170" value="-100"><span class="val" id="j1v"></span></div>
+            <div class="row"><label>θ3</label><input type="range" id="j2" min="-170" max="170" value="-30"><span class="val" id="j2v"></span></div>
             <div class="result" id="resJ"></div>
             <button id="clrJ">軌跡を消す</button>
         </div>
@@ -96,9 +96,9 @@
             <h2>直交空間で指令（Cartesian）</h2>
             <div class="sub">手先の位置・向きを指定（●をドラッグ）→ 関節角はIKで「結果」として決まる</div>
             <canvas id="cvC"></canvas>
-            <div class="row"><label>x</label><input type="range" id="cx" min="-2.2" max="2.2" step="0.01" value="1.2"><span class="val" id="cxv"></span></div>
-            <div class="row"><label>y</label><input type="range" id="cy" min="-1.0" max="2.2" step="0.01" value="0.9"><span class="val" id="cyv"></span></div>
-            <div class="row"><label>向き φ</label><input type="range" id="cphi" min="-180" max="180" value="-45"><span class="val" id="cphiv"></span></div>
+            <div class="row"><label>x</label><input type="range" id="cx" min="-2.2" max="2.2" step="0.01" value="1.18"><span class="val" id="cxv"></span></div>
+            <div class="row"><label>y</label><input type="range" id="cy" min="-1.0" max="2.2" step="0.01" value="0.40"><span class="val" id="cyv"></span></div>
+            <div class="row"><label>向き φ</label><input type="range" id="cphi" min="-180" max="180" value="-50"><span class="val" id="cphiv"></span></div>
             <div class="result" id="resC"></div>
             <button id="clrC">軌跡を消す</button>
         </div>
@@ -289,7 +289,8 @@
         const cy = document.getElementById('cy');
         const cphi = document.getElementById('cphi');
         const traceC = [];
-        let qC = ik(+cx.value, +cy.value, cphi.value * DEG, null) || [0, 0, 0];
+        // 初期姿勢は関節空間側と同じ (特異点から離れた肘を曲げた姿勢)
+        let qC = ik(+cx.value, +cy.value, cphi.value * DEG, [80 * DEG, -100 * DEG, -30 * DEG]) || [0, 0, 0];
         let viewC = null;
 
         function updateCart() {

@@ -143,10 +143,14 @@
                                     <div style="flex: 1; border: 2px solid #2dd4bf; border-radius: 8px; padding: 6px 10px;">
                                         <strong style="color: #2dd4bf;">CIRC</strong> 円弧<br>→ <code>movec()</code>
                                     </div>
+                                    <div style="flex: 1; border: 2px dashed #4ade80; border-radius: 8px; padding: 6px 10px;">
+                                        <strong style="color: #4ade80;">自由曲線</strong><br>→ ROSで自作
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <p style="font-size: 0.6em; margin: 10px 0 0;"><strong style="color: #4ade80;">ROSを使う動機</strong>：CPを直線・円弧だけでなく、らせんなどの<strong>複雑な軌道</strong>にしたい</p>
                     <p style="font-size: 0.5em;">詳しくは <a href="../robot-arm-basic-control/index.html#/8" target="_blank" style="color: #3b82f6;">ロボットアーム入門 ~ロボットの基本操作~</a> の第8章</p>
                 </section>
 
@@ -247,83 +251,45 @@
 
                 <section>
                     <h2>アーム制御則は組合せ</h2>
-                    <style>
-                        .custom-table {
-                            margin: auto;
-                            border-collapse: collapse;
-                            font-weight: bold;
-                            color: #ffffff;
-                        }
-
-                        .custom-table th,
-                        .custom-table td {
-                            border: 2px solid #666;
-                            padding: 16px;
-                            text-align: center;
-                            vertical-align: middle;
-                            /* 上下中央揃え */
-                        }
-
-                        .custom-table th {
-                            background-color: #444;
-                            color: #ffffff;
-                        }
-
-                        /* 各列の背景色 - 黒背景対応 */
-                        .col-control {
-                            background-color: #2d3e5a;
-                            color: #87ceeb;
-                        }
-
-                        .col-coords {
-                            background-color: #5a2d2d;
-                            color: #ffb3b3;
-                        }
-
-                        .col-action {
-                            background-color: #2d5a3d;
-                            color: #90ee90;
-                        }
-
-                        .caption {
-                            margin-top: 20px;
-                            font-size: 0.8em;
-                            text-align: left;
-                            color: #ffffff;
-                        }
-                    </style>
-
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>ロボット関節の制御</th>
-                                <th>指定したい座標系</th>
-                                <th>ユーザーが実現したい制御</th>
-                            </tr>
-                        <tbody>
-                            </thead>
-                            <tr>
-                                <td class="col-control">位置</td>
-                                <td class="col-coords">関節座標系</td>
-                                <td class="col-action">位置</td>
-                            </tr>
-                            <tr>
-                                <td class="col-control">速度</td>
-                                <td class="col-coords">直交座標系</td>
-                                <td class="col-action">速度</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
+                    <svg viewBox="0 0 960 300" style="width: 100%; max-height: 46vh;">
+                        <defs><marker id="ctlArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker></defs>
+                        <g font-family="Noto Sans JP, sans-serif" text-anchor="middle">
+                            <!-- ユーザー側 -->
+                            <text x="160" y="28" font-size="22" fill="#e5e7eb" font-weight="bold">ユーザーの指示</text>
+                            <rect x="20" y="45" width="280" height="105" rx="10" fill="#1e3a2a" stroke="#90ee90" stroke-width="2"/>
+                            <text x="160" y="78" font-size="18" fill="#90ee90">何をしたい？</text>
+                            <text x="160" y="110" font-size="20" fill="#e5e7eb">軌道を追従・速度で動かす</text>
+                            <text x="160" y="135" font-size="15" fill="#9ca3af">Trajectory / Velocity …</text>
+                            <rect x="20" y="165" width="280" height="105" rx="10" fill="#3a1e1e" stroke="#ffb3b3" stroke-width="2"/>
+                            <text x="160" y="198" font-size="18" fill="#ffb3b3">どの座標で指定？</text>
+                            <text x="160" y="230" font-size="20" fill="#e5e7eb">関節角 or 手先のXYZ</text>
+                            <text x="160" y="255" font-size="15" fill="#9ca3af">Joint / Cartesian</text>
+                            <!-- コントローラ -->
+                            <line x1="305" y1="157" x2="375" y2="157" stroke="#9ca3af" stroke-width="4" marker-end="url(#ctlArrow)"/>
+                            <rect x="385" y="95" width="190" height="125" rx="10" fill="#374151"/>
+                            <text x="480" y="140" font-size="20" fill="#e5e7eb">ROS</text>
+                            <text x="480" y="168" font-size="20" fill="#e5e7eb">コントローラ</text>
+                            <text x="480" y="198" font-size="14" fill="#9ca3af">（必要ならIKで変換）</text>
+                            <line x1="580" y1="157" x2="650" y2="157" stroke="#9ca3af" stroke-width="4" marker-end="url(#ctlArrow)"/>
+                            <!-- ロボット側 -->
+                            <text x="800" y="28" font-size="22" fill="#e5e7eb" font-weight="bold">ロボットの関節モータ</text>
+                            <rect x="660" y="95" width="280" height="125" rx="10" fill="#1e2a3e" stroke="#87ceeb" stroke-width="2"/>
+                            <text x="800" y="128" font-size="18" fill="#87ceeb">モータに何を送る？</text>
+                            <text x="800" y="163" font-size="20" fill="#e5e7eb">関節の位置 or 速度</text>
+                            <text x="800" y="192" font-size="15" fill="#9ca3af">position / velocity</text>
+                            <text x="800" y="255" font-size="15" fill="#9ca3af">ロボットが対応しているものだけ</text>
+                        </g>
+                    </svg>
                     <div class="caption">
-
-                        <h4>ROSコントローラ命名則</h4>
-                        <p style="font-size: 1.2em; text-align: center; font-family: monospace;">
+                        <h4 style="margin: 10px 0 0;">ROSコントローラ命名則 = 3つの組合せ</h4>
+                        <p style="font-size: 0.9em; text-align: center; font-family: monospace; margin: 5px 0;">
                             <span style="color: #87ceeb;">position_controllers</span>/<span
                                 style="color: #ffb3b3;">Joint</span><span
                                 style="color: #90ee90;">TrajectoryController</span>
                         </p>
-
+                        <p style="font-size: 0.55em; text-align: center; color: #aaa; margin: 0;">
+                            <span style="color: #87ceeb;">モータへの指令</span> / <span style="color: #ffb3b3;">指定する座標</span> + <span style="color: #90ee90;">やりたいこと</span>
+                        </p>
                     </div>
                 </section>
 
@@ -378,9 +344,10 @@
                             <img src="media/ur_robot.png" alt="代表的なロボット" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
-                            <h3>位置/速度制御</h3>
-                            <p>position_controllers, velocity_controllersのみ使用可</p>
-                            <p style="font-size: 0.6em; color: #aaa;">トルク（電流）ベースの制御は力制御のスライドで扱います</p>
+                            <p>世の中のロボットのほとんどは<strong>位置/速度制御</strong></p>
+                            <p style="font-size: 0.7em;">position_controllers, velocity_controllersのみ使用可</p>
+                            <p style="font-size: 0.6em; color: #aaa;">トルク（電流）ベースの制御は
+                                <a href="../ros-arm-force-control/index_ros2.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">力制御のスライド</a>で扱います</p>
                             <ul>
                                 <li>Universal Robot</li>
                                 <li>DENSO</li>
@@ -556,6 +523,16 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 <section data-background-image="media/ur_jtc_rqt.png" data-background-opacity="0.5">
                     <h2>JointTrajectoryControllerによるアーム制御の基本</h2>
                 </section>
+                <section>
+                    <h2>JTCとは</h2>
+                    <p style="font-size: 0.5em; margin: 0 0 6px;">
+                        JointTrajectoryController：「関節の目標値＋到着時刻」の点を送ると、時刻どおりに点から点へ動かす
+                        （<a href="interactive_app/jtc_basics.html" target="_blank"
+                            style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>）
+                    </p>
+                    <iframe data-src="interactive_app/jtc_basics.html" width="100%" height="520"
+                        frameborder="0"></iframe>
+                </section>
 
                 <section>
                     <h2>JTCの実装4ステップ<br><span style="font-size: 0.5em;">（JTC = JointTrajectoryController）</span></h2>
@@ -572,6 +549,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
 
+            </section>
+
+            <section>
                 <section>
                     <h2>step1:waypointsの計算</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -774,21 +754,39 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                 <section>
                     <h2>なぜ正規化が必要？</h2>
-                    <ul style="font-size: 0.7em;">
-                        <li>回転を表せるのは<strong>長さ1</strong>のクォータニオンだけ（w² + x² + y² + z² = 1）</li>
-                        <li>長さ1でないと「回転＋拡大縮小」が混ざってしまう</li>
-                        <li>ロボットでは手書きの丸めた値（0.707など）や、補間・掛け算の誤差でズレる</li>
-                        <li>TFやMoveItは正規化されていないとエラーや警告を出す</li>
-                    </ul>
-                    <pre style="width: 80%;"><code class="language-python" data-trim>
-import numpy as np
-
-q = np.array([0.0, 0.0, 0.7, 0.7])  # x, y, z, w
-print(np.linalg.norm(q))  # 0.9899 → 長さ1でない
-
-q = q / np.linalg.norm(q)  # 正規化
-print(np.linalg.norm(q))  # 1.0
-                    </code></pre>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 400 260" style="width: 100%; max-height: 46vh;">
+                                <defs>
+                                    <marker id="nmA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker>
+                                    <marker id="nmG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
+                                    <marker id="nmR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                                </defs>
+                                <g font-family="Noto Sans JP, sans-serif" font-size="15">
+                                    <!-- 長さ1 -->
+                                    <text x="100" y="22" text-anchor="middle" fill="#4ade80">長さ1のq</text>
+                                    <circle cx="100" cy="150" r="80" fill="none" stroke="#475569" stroke-dasharray="4 4"/>
+                                    <line x1="100" y1="150" x2="180" y2="150" stroke="#9ca3af" stroke-width="4" marker-end="url(#nmA)"/>
+                                    <line x1="100" y1="150" x2="143" y2="83" stroke="#4ade80" stroke-width="4" marker-end="url(#nmG)"/>
+                                    <text x="100" y="250" text-anchor="middle" fill="#86efac">向きだけ変わる</text>
+                                    <!-- 長さ1.2 -->
+                                    <text x="300" y="22" text-anchor="middle" fill="#f87171">長さ1.2のq</text>
+                                    <circle cx="300" cy="150" r="80" fill="none" stroke="#475569" stroke-dasharray="4 4"/>
+                                    <line x1="300" y1="150" x2="380" y2="150" stroke="#9ca3af" stroke-width="4" marker-end="url(#nmA)"/>
+                                    <line x1="300" y1="150" x2="362" y2="53" stroke="#f87171" stroke-width="4" marker-end="url(#nmR)"/>
+                                    <text x="300" y="250" text-anchor="middle" fill="#fca5a5">回る＋1.44倍に伸びる</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; font-size: 0.7em;">
+                            <ul>
+                                <li>qで回すとベクトルの長さは<strong style="white-space: nowrap;">|q|²倍</strong></li>
+                                <li>|q| ≠ 1 だと回転に<strong>伸び縮み</strong>が混ざる</li>
+                                <li>計算を重ねると<strong>誤差が積み重なって</strong>|q|が1からずれる</li>
+                                <li>→ q / |q| で長さ1に戻す</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
@@ -848,13 +846,12 @@ print(np.linalg.norm(q))  # 1.0
                                 </g>
                             </svg>
                         </div>
-                        <div style="flex: 1; font-size: 0.7em;">
+                        <div style="flex: 1; font-size: 0.62em;">
                             <ul>
-                                <li>回転を表すクォータニオンは長さ1 → すべて<strong>球面の上</strong>の点</li>
-                                <li>ふつうに線形補間すると、途中が球の<strong>内側</strong>を通る
-                                    <ul><li>長さが1でなくなり、回る速さもムラになる</li></ul></li>
-                                <li>球面に沿って（大円上を）進めば、長さ1のまま<strong>一定の角速度</strong>で回る</li>
-                                <li>これが<strong>球面線形補間（SLERP）</strong></li>
+                                <li>クォータニオンは<strong>球面の上</strong>の点</li>
+                                <li>線形補間は球の<strong>内側</strong>を通る → 回る速さにムラ</li>
+                                <li><strong>位置</strong>は綺麗でも<strong>向き</strong>の変化が不均一 → 手首が一部で急に速く回る</li>
+                                <li><strong>SLERP</strong>なら一定の角速度で回る</li>
                             </ul>
                         </div>
                     </div>
@@ -925,6 +922,9 @@ print(np.linalg.norm(q))  # 1.0
                     <p style="font-size: 0.5em; color: #aaa;">ROSのメッセージ（geometry_msgs/Pose）はクォータニオンしか受け付けない点に注意</p>
                 </section>
 
+            </section>
+
+            <section>
                 <section>
                     <h2>step2:逆運動学(IK)</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
@@ -1009,8 +1009,11 @@ print(np.linalg.norm(q))  # 1.0
                     </ul>
                 </section>
 
+            </section>
+
+            <section>
                 <section>
-                    <h2>軌跡・軌道生成</h2>
+                    <h2>step3:軌跡・軌道生成</h2>
 
                     <ul style="font-size: 0.9em;">
                         <li><strong>軌跡：</strong>逆運動学で得た解, 時間情報なし</li>
@@ -1022,8 +1025,11 @@ print(np.linalg.norm(q))  # 1.0
 
                 </section>
 
+            </section>
+
+            <section>
                 <section>
-                    <h2>JointTrajectoryの送信方法</h2>
+                    <h2>step4:実行<br><span style="font-size: 0.7em;">JointTrajectoryの送信方法</span></h2>
                     <ul style="font-size: 0.9em;">
                         <li><strong>Topic(こっちは簡易的、もしくは連続でGoalを 送る場合)</strong></li>
                         <ul>
@@ -1070,6 +1076,9 @@ print(np.linalg.norm(q))  # 1.0
                     </div>
                 </section>
 
+            </section>
+
+            <section>
                 <section>
                     <h2>JTCの実装例</h2>
                     <table style="font-size: 0.8em; margin: auto;">

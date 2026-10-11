@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JointTrajectoryControllerの動き</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #7dd3fc;
+            --point: #fbbf24;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            overscroll-behavior: none;
+        }
+        .top { display: flex; gap: 10px; flex-wrap: wrap; }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+        }
+        .arm { flex: 1 1 300px; }
+        .ctrl { flex: 1 1 340px; display: flex; flex-direction: column; gap: 6px; }
+        h3 { margin: 0 0 4px; font-size: 14px; color: var(--accent); }
+        canvas { width: 100%; display: block; background: #0b1220; border-radius: 6px; }
+        #cvArm { height: 190px; }
+        #cvPlot { height: 100px; }
+        .row { display: flex; align-items: center; gap: 6px; }
+        .row label { width: 70px; }
+        .row input[type=range] { flex: 1; }
+        .row .val { width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+        .row input[type=number] {
+            width: 60px; background: #0b1220; color: var(--text);
+            border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px;
+        }
+        .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        button {
+            background: #334155; color: var(--text); border: 1px solid #475569;
+            border-radius: 6px; padding: 4px 10px; font-family: inherit; font-size: 12px; cursor: pointer;
+        }
+        button:hover { background: #475569; }
+        button.primary { background: #0369a1; border-color: #0284c7; }
+        button.primary:hover { background: #0284c7; }
+        button:disabled { opacity: 0.4; cursor: default; }
+        pre {
+            margin: 0; padding: 6px 8px; background: #0b1220; border-radius: 6px;
+            font-size: 11px; line-height: 1.35; color: #cbd5e1; max-height: 105px; overflow: auto;
+        }
+        .k { color: #7dd3fc; }
+        .n { color: #fbbf24; }
+        .status { color: var(--muted); font-size: 12px; }
+        .bottom { margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="top">
+        <div class="panel arm">
+            <h3>ロボット（点線 = 送った目標の点）</h3>
+            <canvas id="cvArm"></canvas>
+            <div class="status" id="status">目標の点を並べて「実行」を押してください</div>
+        </div>
+        <div class="panel ctrl">
+            <h3>① 目標の関節角と到着時刻を決める</h3>
+            <div class="row"><label>joint1</label><input type="range" id="t0" min="-180" max="180" value="120"><span class="val" id="t0v"></span></div>
+            <div class="row"><label>joint2</label><input type="range" id="t1" min="-150" max="150" value="-60"><span class="val" id="t1v"></span></div>
+            <div class="row"><label>joint3</label><input type="range" id="t2" min="-150" max="150" value="-30"><span class="val" id="t2v"></span></div>
+            <div class="row"><label>到着時刻</label><input type="number" id="tfs" min="0.5" step="0.5" value="6"><span>秒後（time_from_start）</span></div>
+            <div class="btns">
+                <button id="add">② 点を追加</button>
+                <button id="undo">最後の点を消す</button>
+                <button class="primary" id="run">③ 実行（コントローラに送る）</button>
+                <button id="reset">最初から</button>
+            </div>
+            <pre id="msg"></pre>
+        </div>
+    </div>
+    <div class="panel bottom">
+        <h3>関節角の時間変化（● = 送った点、線 = コントローラが点の間を補間して動かした結果）</h3>
+        <canvas id="cvPlot"></canvas>
+    </div>
+
+    <script>
+        const L = [1.0, 0.8, 0.4];
+        const DEG = Math.PI / 180;
+        const COLORS = ['#f472b6', '#4ade80', '#7dd3fc'];
+        const START = [90, -90, 0];  // 現在の関節角 [deg]
+
+        // 送る軌道: 最初の点は現在姿勢 (time_from_start = 0)
+        const DEFAULT_POINTS = [
+            { q: [45, -45, -45], t: 2 },
+            { q: [150, -60, -30], t: 4 },
+        ];
+        let points = DEFAULT_POINTS.map(p => ({ q: [...p.q], t: p.t }));
+        let current = [...START];
+        let runStart = [...START];  // 実行開始時の姿勢 (軌道の t=0)
+        let running = false;
+        let startTime = 0;
+        let elapsed = 0;
+        let trail = [];
+
+        const sliders = [0, 1, 2].map(i => document.getElementById('t' + i));
+        const tfs = document.getElementById('tfs');
+
+        function setupCanvas(cv) {
+            const dpr = window.devicePixelRatio || 1;
+            const r = cv.getBoundingClientRect();
+            cv.width = r.width * dpr;
+            cv.height = r.height * dpr;
+            const ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: r.width, h: r.height };
+        }
+
+        function fk(qDeg) {
+            const pts = [[0, 0]];
+            let x = 0, y = 0, a = 0;
+            for (let i = 0; i < 3; i++) {
+                a += qDeg[i] * DEG;
+                x += L[i] * Math.cos(a);
+                y += L[i] * Math.sin(a);
+                pts.push([x, y]);
+            }
+            return pts;
+        }
+
+        // 軌道全体 (実行開始時の姿勢を t=0 として先頭に付ける。実機のJTCも現在姿勢から動き出す)
+        function fullTrajectory() {
+            return [{ q: [...(running ? runStart : current)], t: 0 }, ...points];
+        }
+
+        // positions だけを送った場合の JTC と同じく、点の間を線形補間する
+        function sample(t) {
+            const tr = fullTrajectory();
+            if (t <= 0) return [...tr[0].q];
+            for (let i = 1; i < tr.length; i++) {
+                if (t <= tr[i].t) {
+                    const a = tr[i - 1], b = tr[i];
+                    const s = (t - a.t) / (b.t - a.t);
+                    return a.q.map((v, j) => v + (b.q[j] - v) * s);
+                }
+            }
+            return [...tr[tr.length - 1].q];
+        }
+
+        function drawArm() {
+            const { ctx, w, h } = setupCanvas(document.getElementById('cvArm'));
+            const scale = Math.min(w / 4.6, h / 2.7);
+            const ox = w / 2, oy = h - 0.45 * scale;
+            const to = p => [ox + p[0] * scale, oy - p[1] * scale];
+            ctx.clearRect(0, 0, w, h);
+
+            // 目標の点のゴースト
+            points.forEach((p, k) => {
+                const c = fk(p.q).map(to);
+                ctx.strokeStyle = 'rgba(251,191,36,0.55)';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                c.forEach((pt, i) => i ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1]));
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = '12px sans-serif';
+                ctx.fillText(`点${k + 1} (${p.t}s)`, c[3][0] + 6, c[3][1] - 6);
+            });
+
+            // 編集中の目標 (スライダ)
+            if (!running) {
+                const q = sliders.map(s => +s.value);
+                const c = fk(q).map(to);
+                ctx.strokeStyle = 'rgba(148,163,184,0.45)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([2, 4]);
+                ctx.beginPath();
+                c.forEach((pt, i) => i ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1]));
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 実際のアーム
+            const c = fk(current).map(to);
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(c[0][0] - 20, c[0][1], 40, 10);
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = i === 2 ? 8 : 12;
+                ctx.beginPath();
+                ctx.moveTo(c[i][0], c[i][1]);
+                ctx.lineTo(c[i + 1][0], c[i + 1][1]);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(c[i][0], c[i][1], 7, 0, 2 * Math.PI);
+                ctx.fillStyle = COLORS[i];
+                ctx.fill();
+            }
+        }
+
+        function drawPlot() {
+            const { ctx, w, h } = setupCanvas(document.getElementById('cvPlot'));
+            ctx.clearRect(0, 0, w, h);
+            const tr = fullTrajectory();
+            const tMax = Math.max(tr[tr.length - 1].t, 1) * 1.05;
+            const pad = { l: 38, r: 10, t: 8, b: 18 };
+            const X = t => pad.l + (t / tMax) * (w - pad.l - pad.r);
+            const Y = d => pad.t + (1 - (d + 180) / 360) * (h - pad.t - pad.b);
+
+            ctx.strokeStyle = '#334155';
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px sans-serif';
+            ctx.lineWidth = 1;
+            [-180, -90, 0, 90, 180].forEach(d => {
+                ctx.beginPath(); ctx.moveTo(pad.l, Y(d)); ctx.lineTo(w - pad.r, Y(d)); ctx.stroke();
+                ctx.fillText(d + '°', 4, Y(d) + 3);
+            });
+            for (let s = 0; s <= tMax; s += 1) {
+                ctx.fillText(s + 's', X(s) - 6, h - 4);
+            }
+
+            // 補間後の軌道 (実行前は予定として薄く)
+            for (let j = 0; j < 3; j++) {
+                ctx.strokeStyle = COLORS[j];
+                ctx.globalAlpha = 0.35;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                tr.forEach((p, i) => i ? ctx.lineTo(X(p.t), Y(p.q[j])) : ctx.moveTo(X(p.t), Y(p.q[j])));
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+                // 実際に動いた履歴
+                if (trail.length > 1) {
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    trail.forEach((hp, i) => i ? ctx.lineTo(X(hp.t), Y(hp.q[j])) : ctx.moveTo(X(hp.t), Y(hp.q[j])));
+                    ctx.stroke();
+                }
+                // 送った点
+                tr.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(X(p.t), Y(p.q[j]), 4, 0, 2 * Math.PI);
+                    ctx.fillStyle = COLORS[j];
+                    ctx.fill();
+                });
+            }
+
+            if (running || elapsed > 0) {
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(X(elapsed), pad.t); ctx.lineTo(X(elapsed), h - pad.b); ctx.stroke();
+            }
+        }
+
+        function renderMsg() {
+            const names = `<span class="k">joint_names</span>: [joint1, joint2, joint3]`;
+            const pts = points.map(p =>
+                `  - <span class="k">positions</span>: [${p.q.map(v => (v * DEG).toFixed(2)).join(', ')}]  <span style="color:#64748b"># rad</span>\n` +
+                `    <span class="k">time_from_start</span>: <span class="n">${p.t}</span> s`
+            ).join('\n');
+            document.getElementById('msg').innerHTML =
+                `<span style="color:#64748b"># trajectory_msgs/JointTrajectory</span>\n${names}\n<span class="k">points</span>:\n${pts || '  (まだ点がありません)'}`;
+        }
+
+        function refresh() {
+            sliders.forEach((s, i) => document.getElementById(`t${i}v`).textContent = s.value + '°');
+            document.getElementById('undo').disabled = running || points.length === 0;
+            document.getElementById('add').disabled = running;
+            document.getElementById('run').disabled = running || points.length === 0;
+            renderMsg();
+            drawArm();
+            drawPlot();
+        }
+
+        sliders.forEach(s => s.addEventListener('input', refresh));
+
+        document.getElementById('add').onclick = () => {
+            const last = points.length ? points[points.length - 1].t : 0;
+            let t = +tfs.value;
+            if (!(t > last)) t = last + 2;  // 時刻は前の点より後でないといけない
+            points.push({ q: sliders.map(s => +s.value), t });
+            tfs.value = t + 2;
+            document.getElementById('status').textContent = '点を追加しました（時刻は前の点より後にする必要があります）';
+            refresh();
+        };
+
+        document.getElementById('undo').onclick = () => {
+            points.pop();
+            refresh();
+        };
+
+        document.getElementById('reset').onclick = () => {
+            running = false;
+            points = DEFAULT_POINTS.map(p => ({ q: [...p.q], t: p.t }));
+            current = [...START];
+            elapsed = 0;
+            trail = [];
+            tfs.value = 6;
+            document.getElementById('status').textContent = '目標の点を並べて「実行」を押してください';
+            refresh();
+        };
+
+        document.getElementById('run').onclick = () => {
+            runStart = [...current];
+            running = true;
+            trail = [];
+            elapsed = 0;
+            startTime = performance.now();
+            document.getElementById('status').textContent = '実行中：コントローラが時刻どおりに点から点へ動かしています';
+            refresh();
+            requestAnimationFrame(step);
+        };
+
+        function step(now) {
+            if (!running) return;
+            const tr = fullTrajectory();
+            const tEnd = tr[tr.length - 1].t;
+            elapsed = Math.min((now - startTime) / 1000, tEnd);
+            current = sample(elapsed);
+            trail.push({ t: elapsed, q: [...current] });
+            drawArm();
+            drawPlot();
+            if (elapsed >= tEnd) {
+                running = false;
+                document.getElementById('status').textContent = `完了：最後の点に ${tEnd} 秒で到着しました`;
+                refresh();
+                return;
+            }
+            requestAnimationFrame(step);
+        }
+
+        window.addEventListener('resize', refresh);
+        refresh();
+    </script>
+</body>
+</html>

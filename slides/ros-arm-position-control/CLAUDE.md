@@ -51,6 +51,7 @@
 - **縦スライド6-12**: 最適化ベースの手法（STOMP）
 
 ### 4. JointTrajectoryControllerによるアーム制御編（水平スライド7 + 縦スライド）
+※ ROS2版（index_ros2.html）では縦に長すぎたため横に分割：基本（JTCとは・4ステップ）/ step1 waypoints（姿勢・クォータニオン）/ step2 IK / step3 軌跡・軌道生成 / step4 実行 / JTCの実装例 の6章
 **スライド7: JointTrajectoryControllerによるアーム制御の基本**（メインスライド）
 - **縦スライド7-1**: JTCの実装4ステップ
 - **縦スライド7-2**: step1: waypointsの計算
