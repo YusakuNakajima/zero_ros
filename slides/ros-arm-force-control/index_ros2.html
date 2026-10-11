@@ -730,35 +730,9 @@
 
                 <!-- ROS2での力制御実装 -->
                 <section>
-                    <h2>ROS2での力制御実装</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/moveit_algorithm.png" alt="力制御アーキテクチャ" style="width: 100%;">
-                            <p style="font-size: 0.6em;">ROS2力制御システムの構成
-                            </p>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>センサーブロードキャスター</strong>
-                                    <ul>
-                                        <li>force_torque_sensor_broadcaster</li>
-                                    </ul>
-                                </li>
-                                <li><strong>力制御コントローラ</strong>
-                                    <ul>
-                                        <li>admittance_controller</li>
-                                        <li>cartesian_compliance_controller</li>
-                                    </ul>
-                                </li>
-                                <li><strong>安全機能</strong>
-                                    <ul>
-                                        <li>力制限、緊急停止</li>
-                                        <li>衝突検出</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    <h2 style="font-size: 1.3em;">ROS2での力制御実装</h2>
+                    <img src="media/ros2_force_control_arch.drawio.svg" alt="ROS2 力制御の構成: hardware_interface・admittance_controller・トピック" style="width: 78%; max-height: 62vh; margin: 0;">
+                    <p style="font-size: 0.5em; margin: 6px 0 0;">admittance_controller は力を <strong>State Interface から直接</strong>読む ／ <code>~/wrench</code> トピックは監視・安全停止用の出口</p>
                 </section>
 
                 <!-- 力/トルクセンサーのセットアップ -->
