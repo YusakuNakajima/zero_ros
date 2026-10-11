@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>位置制御の限界</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --line: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --pos: #f472b6;
+            --frc: #4ade80;
+            --danger: #ef4444;
+            --work: #a16207;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+        }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 4px 12px; align-items: end; }
+        @media (max-width: 520px) { .controls { grid-template-columns: 1fr 1fr; } }
+        label { display: block; color: var(--muted); }
+        label b { color: var(--text); float: right; }
+        input[type="range"] { width: 100%; margin: 2px 0 0; }
+        .buttons { display: flex; gap: 4px; }
+        button {
+            padding: 4px 8px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #374151;
+            color: var(--text);
+            font: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        button:hover { background: #4b5563; }
+        button.primary { background: #2563eb; border-color: #2563eb; }
+        canvas { width: 100%; display: block; margin-top: 6px; background: var(--panel); border-radius: 6px; }
+        .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; color: var(--muted); }
+        .legend span::before { content: ""; display: inline-block; width: 16px; height: 3px; margin-right: 4px; vertical-align: middle; background: currentColor; }
+        .pos { color: var(--pos); }
+        .frc { color: var(--frc); }
+        .dng { color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div>
+            <label>ワークの位置ずれ <b id="errVal"></b></label>
+            <input type="range" id="err" min="-1" max="1.5" step="0.1" value="0.5">
+        </div>
+        <div>
+            <label>表面の凹凸 <b id="bumpVal"></b></label>
+            <input type="range" id="bump" min="0" max="1" step="0.05" value="0.3">
+        </div>
+        <div>
+            <label>ワークの硬さ <b id="keVal"></b></label>
+            <input type="range" id="ke" min="4" max="6" step="0.1" value="5.5">
+        </div>
+        <div class="buttons">
+            <button id="playPause" class="primary">⏸</button>
+            <button id="reset">⟲</button>
+        </div>
+    </div>
+    <canvas id="scene" height="150"></canvas>
+    <canvas id="plot" height="105"></canvas>
+    <div class="legend">
+        <span class="pos">位置制御（高さを守る）</span>
+        <span class="frc">力制御（押す力 10 N を守る）</span>
+        <span class="dng">破損ライン 40 N</span>
+    </div>
+
+    <script>
+        // ---- モデル (Z方向 1自由度・準静的) ----
+        // 工具は X 方向に一定速度で動き、Z 方向でワーク表面に押し付ける (研磨のイメージ)
+        const F_DES = 10;            // 狙いの押し付け力 [N]
+        const F_BREAK = 40;          // これを超えると工具・ワークが傷む [N]
+        const K_SERVO = 1e5;         // 位置制御の硬さ (サーボ剛性) [N/m]
+        const ADM_BW = 2 * Math.PI * 6;  // 力制御の応答の速さ [rad/s] (ワークの硬さに合わせてゲイン調整済み)
+        const V_MAX = 0.02;          // 力制御で Z が動ける最大速度 [m/s]
+        const FEED = 0.03;           // X 方向の送り速度 [m/s]
+        const WINDOW = 4;            // プロットの時間幅 [s]
+        const DT = 1e-4;
+
+        const $ = id => document.getElementById(id);
+        let params, t, xFeed, zFrc, history, running = true;
+
+        function readParams() {
+            params = {
+                err: parseFloat($('err').value) / 1000,
+                bump: parseFloat($('bump').value) / 1000,
+                ke: Math.pow(10, parseFloat($('ke').value)),
+            };
+            // 位置制御は「ずれが無ければ 10 N になる高さ」を教示してある
+            params.kSeries = K_SERVO * params.ke / (K_SERVO + params.ke);
+            params.zCmd = -F_DES / params.kSeries;
+            $('errVal').textContent = (params.err >= 0 ? '+' : '') + (params.err * 1000).toFixed(1) + ' mm';
+            $('bumpVal').textContent = '±' + (params.bump * 1000).toFixed(2) + ' mm';
+            $('keVal').textContent = params.ke >= 1e6 ? (params.ke / 1e6).toFixed(1) + ' MN/m' : (params.ke / 1000).toFixed(0) + ' kN/m';
+        }
+
+        // ワーク表面の高さ [m] (教示した表面 = 0)
+        function surface(x) {
+            const b = params.bump;
+            return params.err + b * (0.6 * Math.sin(x * 140) + 0.4 * Math.sin(x * 330 + 1.3));
+        }
+
+        function forcePos(h) {
+            // サーボのばねとワークのばねが直列に押し合う
+            return Math.max(0, (h - params.zCmd) * params.kSeries);
+        }
+
+        function reset() {
+            readParams();
+            t = 0;
+            xFeed = 0;
+            zFrc = surface(0);
+            history = [];
+        }
+
+        let fPos = 0, fFrc = 0;
+        function step() {
+            xFeed += FEED * DT;
+            const h = surface(xFeed);
+            fPos = forcePos(h);
+            // 力制御: 測った力が狙いより大きければ逃げ、小さければ押し込む
+            fFrc = Math.max(0, params.ke * (h - zFrc));
+            const vz = Math.max(-V_MAX, Math.min(V_MAX, ADM_BW / params.ke * (fFrc - F_DES)));
+            zFrc += vz * DT;
+            t += DT;
+        }
+
+        // ---- 描画 ----
+        const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+        function fitCanvas(c) {
+            const ratio = window.devicePixelRatio || 1;
+            const w = c.clientWidth, h = parseInt(c.getAttribute('height'), 10);
+            if (c.width !== Math.round(w * ratio)) {
+                c.width = Math.round(w * ratio);
+                c.height = Math.round(h * ratio);
+                c.style.height = h + 'px';
+            }
+            const ctx = c.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            return { ctx, w, h };
+        }
+
+        function drawLane(ctx, w, y0, laneH, name, color, zTool, force) {
+            const MM = 22;                     // 1 mm を何 px で描くか (Z は拡大表示)
+            const zPx = z => y0 + laneH * 0.62 - z * 1000 * MM;
+            const toolX = w * 0.5;
+            const SPAN = 0.04;                 // 画面幅に映る X 範囲 [m]
+            // ワーク (工具の下を左へ流れる)
+            ctx.fillStyle = css('--work');
+            ctx.beginPath();
+            ctx.moveTo(0, y0 + laneH);
+            for (let px = 0; px <= w; px += 3) {
+                const x = xFeed + (px - toolX) / w * SPAN;
+                ctx.lineTo(px, zPx(surface(x)));
+            }
+            ctx.lineTo(w, y0 + laneH);
+            ctx.fill();
+            // 教示した表面 (ずれが無い場合の高さ)
+            ctx.strokeStyle = css('--muted');
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, zPx(0));
+            ctx.lineTo(w, zPx(0));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // 工具: 表面より下には描かない (めり込みはワークの変形として扱う)
+            const hHere = surface(xFeed);
+            const tipPx = zPx(Math.max(zTool, Math.min(hHere, zTool + 1)));
+            const broken = force > F_BREAK, lost = force <= 0.01;
+            ctx.fillStyle = '#6b7280';
+            ctx.fillRect(toolX - 6, y0 + 4, 12, tipPx - 18 - y0 - 4);
+            ctx.fillStyle = color;
+            ctx.fillRect(toolX - 16, tipPx - 18, 32, 18);
+            // 力のメーター
+            const barX = w - 120, barW = 100, barY = y0 + 22;
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(barX, barY, barW, 10);
+            ctx.fillStyle = broken ? css('--danger') : color;
+            ctx.fillRect(barX, barY, Math.min(barW, force / 60 * barW), 10);
+            ctx.fillStyle = css('--text');
+            ctx.fillRect(barX + F_DES / 60 * barW, barY - 3, 2, 16);
+            ctx.fillStyle = css('--danger');
+            ctx.fillRect(barX + F_BREAK / 60 * barW, barY - 3, 2, 16);
+            ctx.font = '12px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = broken ? css('--danger') : css('--text');
+            ctx.fillText(force.toFixed(1) + ' N', barX - 6, barY + 10);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = color;
+            ctx.font = 'bold 13px "Noto Sans JP", sans-serif';
+            ctx.fillText(name, 8, y0 + 16);
+            if (broken || lost) {
+                ctx.fillStyle = broken ? css('--danger') : '#fbbf24';
+                ctx.font = 'bold 13px "Noto Sans JP", sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(broken ? '押し付けすぎ！' : '離れて研磨できない', toolX - 24, tipPx - 4);
+            }
+        }
+
+        function drawScene() {
+            const { ctx, w, h } = fitCanvas($('scene'));
+            ctx.clearRect(0, 0, w, h);
+            drawLane(ctx, w, 0, h / 2, '位置制御', css('--pos'), params.zCmd, fPos);
+            ctx.fillStyle = css('--bg');
+            ctx.fillRect(0, h / 2 - 1, w, 3);
+            drawLane(ctx, w, h / 2, h / 2, '力制御', css('--frc'), zFrc, fFrc);
+        }
+
+        function drawPlot() {
+            const { ctx, w, h } = fitCanvas($('plot'));
+            ctx.clearRect(0, 0, w, h);
+            const pad = { l: 34, r: 8, t: 16, b: 16 };
+            const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+            const t0 = Math.max(0, t - WINDOW);
+            const X = tt => pad.l + (tt - t0) / WINDOW * pw;
+            const Y = f => pad.t + ph - Math.min(f, 60) / 60 * ph;
+            ctx.strokeStyle = css('--line');
+            ctx.strokeRect(pad.l, pad.t, pw, ph);
+            ctx.fillStyle = css('--muted');
+            ctx.font = '11px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('押し付け力 [N]', pad.l, 11);
+            ctx.textAlign = 'right';
+            ctx.fillText('60', pad.l - 4, pad.t + 8);
+            ctx.fillText('0', pad.l - 4, pad.t + ph);
+            ctx.fillText('時間 →', pad.l + pw, h - 3);
+            for (const [f, col] of [[F_DES, css('--muted')], [F_BREAK, css('--danger')]]) {
+                ctx.strokeStyle = col;
+                ctx.setLineDash([3, 4]);
+                ctx.beginPath();
+                ctx.moveTo(pad.l, Y(f));
+                ctx.lineTo(pad.l + pw, Y(f));
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            for (const [key, col] of [['p', css('--pos')], ['f', css('--frc')]]) {
+                ctx.strokeStyle = col;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                history.forEach((s, i) => i ? ctx.lineTo(X(s.t), Y(s[key])) : ctx.moveTo(X(s.t), Y(s[key])));
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
+        }
+
+        let last = null, sampleAcc = 0;
+        function loop(now) {
+            if (last === null) last = now;
+            const elapsed = Math.min((now - last) / 1000, 0.05);
+            last = now;
+            if (running) {
+                const n = Math.round(elapsed / DT);
+                for (let i = 0; i < n; i++) {
+                    step();
+                    if (++sampleAcc % 100 === 0) history.push({ t, p: fPos, f: fFrc });
+                }
+                while (history.length && history[0].t < t - WINDOW) history.shift();
+            }
+            drawScene();
+            drawPlot();
+            requestAnimationFrame(loop);
+        }
+
+        // 実行中にスライダを動かすと、その場で条件が変わる
+        for (const id of ['err', 'bump', 'ke']) $(id).addEventListener('input', readParams);
+        $('playPause').addEventListener('click', () => {
+            running = !running;
+            $('playPause').textContent = running ? '⏸' : '▶';
+        });
+        $('reset').addEventListener('click', reset);
+
+        reset();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
