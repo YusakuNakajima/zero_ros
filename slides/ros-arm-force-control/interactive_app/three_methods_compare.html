@@ -137,7 +137,7 @@
         const Y_REF = Y_SURF - F_DES / KD;
 
         const $ = id => document.getElementById(id);
-        let params, t, k, arms, history, running = true, pushUntil = -1, autoPush = false;
+        let params, t, k, arms, history, running = true, pushUntil = -1, autoPush = false, groove = false;
 
         function readParams() {
             params = {
@@ -152,10 +152,15 @@
             $('fcVal').textContent = params.fc.toFixed(1) + ' N·m';
         }
 
-        // ワーク表面の高さ (場所によって凹凸がある)
+        // 溝: 中心 0.43 m、深さ 20 mm、壁は 45°
+        const GROOVE_X = 0.43, GROOVE_D = 0.02, GROOVE_TOP = 0.03;
+        function grooveDepth(x) {
+            return groove ? Math.max(0, Math.min(GROOVE_D, GROOVE_TOP - Math.abs(x - GROOVE_X))) : 0;
+        }
+        // ワーク表面の高さ (場所によって凹凸や溝がある)
         function surfaceY(x) {
             const b = params.bump;
-            return Y_SURF + b * (0.6 * Math.sin(2 * Math.PI * x / 0.09) + 0.4 * Math.sin(2 * Math.PI * x / 0.04 + 1));
+            return Y_SURF - grooveDepth(x) + b * (0.6 * Math.sin(2 * Math.PI * x / 0.09) + 0.4 * Math.sin(2 * Math.PI * x / 0.04 + 1));
         }
         // 手先の目標 X: ゆっくり往復
         function targetX(time) { return 0.40 + 0.10 * Math.sin(2 * Math.PI * time / 8); }
@@ -244,12 +249,15 @@
             const push = t < pushUntil ? PUSH_F : 0;
             for (const a of arms) {
                 const p = fk(a.q), J = jacobian(a.q);
-                // ワークからの反力 (表面に食い込んだ分だけ上向き)
-                const pen = surfaceY(p.tip[0]) - p.tip[1];
+                // ワークからの反力: 表面に食い込んだ分だけ、面に垂直な向きに押し返す
                 const v = [0, 1, 2].map(r => J[r][0] * a.qd[0] + J[r][1] * a.qd[1] + J[r][2] * a.qd[2]);
-                const fn = pen > 0 ? Math.max(0, params.ke * pen - 2 * 0.05 * Math.sqrt(params.ke * 0.3) * v[1]) : 0;
+                const h = 5e-4, slope = (surfaceY(p.tip[0] + h) - surfaceY(p.tip[0] - h)) / (2 * h);
+                const nl = Math.hypot(slope, 1), n = [-slope / nl, 1 / nl];
+                const pen = (surfaceY(p.tip[0]) - p.tip[1]) / nl;
+                const vn = v[0] * n[0] + v[1] * n[1];
+                const fn = pen > 0 ? Math.max(0, params.ke * pen - 2 * 0.05 * Math.sqrt(params.ke * 0.3) * vn) : 0;
                 a.fn = fn;
-                const fExt = [push, fn];
+                const fExt = [push + fn * n[0], fn * n[1]];
                 if (doCtrl) {
                     a.sensor.shift();
                     a.sensor.push(fExt.slice());
@@ -299,7 +307,14 @@
             // ワーク (実寸。凹凸は小さいので拡大窓で見る)
             ctx.fillStyle = css('--work');
             const [, ys] = P(0, Y_SURF);
-            ctx.fillRect(x0 + 2, ys, pw - 4, h - ys - 2);
+            ctx.beginPath();
+            ctx.moveTo(x0 + 2, h - 2);
+            for (let px = x0 + 2; px <= x0 + pw - 2; px += 2) {
+                const xw = (px - bx) / s;
+                ctx.lineTo(px, P(xw, surfaceY(xw))[1]);
+            }
+            ctx.lineTo(x0 + pw - 2, h - 2);
+            ctx.fill();
             // 目標 X
             const [txp] = P(targetX(t), 0);
             ctx.strokeStyle = css('--muted');
@@ -462,12 +477,12 @@
 
         // ---- 各方式が苦手な極端な条件 ----
         const PRESETS = {
-            imp: { bump: 2, ke: 4, fc: 2, T: '0.004', push: false,
+            imp: { bump: 2, ke: 4, fc: 2, T: '0.004', push: false, groove: false,
                    note: '関節摩擦が大 → センサを使わないので位置がずれ、力も揺れる' },
-            adm: { bump: 0, ke: 5.5, fc: 0.5, T: '0.004', push: false,
+            adm: { bump: 0, ke: 5.5, fc: 0.5, T: '0.004', push: false, groove: false,
                    note: '硬いワーク × 制御周期 → 力を測って動くまでの遅れで振動' },
-            hyb: { bump: 1, ke: 4, fc: 0.5, T: '0.004', push: true,
-                   note: '3 秒ごとに人が横から押す → X を位置で固めるので逃げない' },
+            hyb: { bump: 0, ke: 4, fc: 0.5, T: '0.004', push: false, groove: true,
+                   note: '溝がある → 接触が抜けると力を求めて沈み込み、X は位置固定なので斜面に激突' },
         };
         document.querySelectorAll('[data-preset]').forEach(btn => btn.addEventListener('click', () => {
             const pr = PRESETS[btn.dataset.preset];
@@ -476,6 +491,7 @@
             $('fc').value = pr.fc;
             $('T').value = pr.T;
             autoPush = pr.push;
+            groove = pr.groove;
             $('presetNote').textContent = pr.note;
             document.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('sel', b === btn));
             reset();
