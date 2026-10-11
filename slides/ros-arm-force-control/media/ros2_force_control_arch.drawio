@@ -1,0 +1,155 @@
+<mxfile>
+  <diagram name="Page-1" id="ros2_force_control_arch">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" connect="1" arrows="1" page="1" pageWidth="827" pageHeight="1169">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6FA;strokeColor=none;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="760" height="470" as="geometry"/>
+        </mxCell>
+        <mxCell id="robotFrame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6FF;strokeColor=#CC66FF;strokeWidth=3;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="520" y="92" width="225" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="driver" value="ドライバ（例: UR）&lt;br&gt;関節モータ ＋ FTセンサ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="535" y="105" width="195" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="hw" value="hardware_interface&lt;br&gt;:SystemInterface" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="290" y="105" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="state" value="State Interface&lt;br&gt;関節角度・力/トルク" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="190" y="190" width="170" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd" value="Command Interface&lt;br&gt;関節の位置指令" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="400" y="190" width="170" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="cm" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CCFFFF;strokeColor=#33CCFF;strokeWidth=2;fontSize=13;fontColor=#000000;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="150" y="262" width="595" height="112" as="geometry"/>
+        </mxCell>
+        <mxCell id="ftsb" value="force_torque_sensor&lt;br&gt;_broadcaster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="165" y="280" width="190" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="adm" value="admittance_controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#0066CC;strokeWidth=2;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="380" y="280" width="170" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="jtc" value="joint_trajectory&lt;br&gt;_controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="575" y="280" width="155" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="user" value="自作ノード / rqt / RViz&lt;br&gt;（監視・ログ・安全停止）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="165" y="410" width="190" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="planner" value="MoveIt / 自作ノード" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="575" y="410" width="155" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="title" value="ROS2 力制御の構成" style="text;html=1;align=left;verticalAlign=middle;fontSize=28;fontColor=#0066CC;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="18" y="14" width="320" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="sub" value="admittance_controller を使う例" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontColor=#333333;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="20" y="52" width="320" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="note1" value="・admittance_controller は FT センサの値を" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="16" width="320" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="note2" value="  State Interface から直接読む（トピック不要）" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="33" width="320" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="note3" value="・トピックは人や他のノードが見るための出口" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="50" width="320" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="robotLbl" value="ロボット実機" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontColor=#CC66FF;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="472.0" y="71" width="320" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmLbl" value="Controller manager" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="287.0" y="351" width="320" height="21" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_hw_drv" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="122" as="sourcePoint"/>
+            <mxPoint x="535" y="122" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_drv_hw" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="535" y="140" as="sourcePoint"/>
+            <mxPoint x="460" y="140" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_hw_state" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="155" as="sourcePoint"/>
+            <mxPoint x="275" y="190" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="330" y="172"/>
+              <mxPoint x="275" y="172"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cmd_hw" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485" y="190" as="sourcePoint"/>
+            <mxPoint x="420" y="155" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="485" y="172"/>
+              <mxPoint x="420" y="172"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_state_ftsb" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="236" as="sourcePoint"/>
+            <mxPoint x="240" y="280" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_state_adm" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="320" y="236" as="sourcePoint"/>
+            <mxPoint x="430" y="280" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="320" y="252"/>
+              <mxPoint x="430" y="252"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_adm_cmd" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="280" as="sourcePoint"/>
+            <mxPoint x="500" y="236" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_jtc_adm" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="575" y="303" as="sourcePoint"/>
+            <mxPoint x="550" y="303" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_jtc_adm_lbl" value="目標（チェイン）" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="452.0" y="331" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_ftsb_user" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="326" as="sourcePoint"/>
+            <mxPoint x="260" y="410" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_ftsb_user_lbl" value="~/wrench (WrenchStamped)" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="268" y="384" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_plan_jtc" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="652" y="410" as="sourcePoint"/>
+            <mxPoint x="652" y="326" as="targetPoint"/>
+            <Array as="points"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_plan_jtc_lbl" value="follow_joint_trajectory" style="text;html=1;align=right;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="425" y="384" width="220" height="20" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

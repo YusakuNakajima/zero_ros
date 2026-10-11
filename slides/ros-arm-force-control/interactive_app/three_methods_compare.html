@@ -16,6 +16,7 @@
             --adm: #4fc3f7;
             --hyb: #fbbf24;
             --work: #a16207;
+            --force: #ef4444;
         }
         * { box-sizing: border-box; }
         body {
@@ -26,13 +27,12 @@
             font-family: 'Noto Sans JP', sans-serif;
             font-size: 12px;
         }
-        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 10px; align-items: end; }
+        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px 10px; align-items: end; }
         @media (max-width: 560px) { .controls { grid-template-columns: 1fr 1fr; } }
         label { display: block; color: var(--muted); white-space: nowrap; }
         label b { color: var(--text); float: right; }
         input[type="range"], select { width: 100%; margin: 2px 0 0; }
         select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 2px; font: inherit; }
-        .buttons { display: flex; gap: 4px; justify-content: flex-end; margin-top: 4px; }
         button {
             padding: 3px 8px;
             border: 1px solid var(--line);
@@ -45,28 +45,30 @@
         }
         button:hover { background: #4b5563; }
         button.primary { background: #2563eb; border-color: #2563eb; }
+        button.on { background: #b45309; border-color: #b45309; }
         canvas { width: 100%; display: block; margin-top: 4px; background: var(--panel); border-radius: 6px; }
-        .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-top: 4px; }
+        .row { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-top: 4px; }
         .legend { display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); }
         .legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 4px; vertical-align: middle; background: currentColor; }
         .imp { color: var(--imp); }
         .adm { color: var(--adm); }
         .hyb { color: var(--hyb); }
+        .buttons { display: flex; gap: 4px; }
     </style>
 </head>
 <body>
     <div class="controls">
         <div>
             <label>表面の凹凸 <b id="bumpVal"></b></label>
-            <input type="range" id="bump" min="0" max="3" step="0.1" value="2">
+            <input type="range" id="bump" min="0" max="5" step="0.5" value="4">
         </div>
         <div>
             <label>ワークの硬さ <b id="keVal"></b></label>
-            <input type="range" id="ke" min="3.5" max="5.5" step="0.1" value="4">
+            <input type="range" id="ke" min="3.5" max="5.5" step="0.1" value="3.6">
         </div>
         <div>
             <label>関節摩擦 <b id="fcVal"></b></label>
-            <input type="range" id="fc" min="0" max="10" step="0.5" value="4">
+            <input type="range" id="fc" min="0" max="2" step="0.1" value="1">
         </div>
         <div>
             <label>制御周期</label>
@@ -77,41 +79,51 @@
             </select>
         </div>
     </div>
-    <canvas id="scene" height="135"></canvas>
-    <canvas id="plot" height="105"></canvas>
+    <canvas id="scene" height="145"></canvas>
+    <canvas id="plot" height="112"></canvas>
     <div class="row">
         <div class="legend">
             <span class="imp">インピーダンス</span>
             <span class="adm">アドミッタンス</span>
-            <span class="hyb">ハイブリッド（Z を力制御）</span>
+            <span class="hyb">ハイブリッド</span>
         </div>
         <div class="buttons">
+            <button id="push">→ 横から押す</button>
             <button id="playPause" class="primary">⏸</button>
             <button id="reset">⟲</button>
         </div>
     </div>
 
     <script>
-        // ---- 1自由度 (押し付け方向) のモデル ----
-        // 工具を凹凸のあるワークに 10 N で押し付けながら横に送る (研磨のイメージ)。
-        // 3つの方式で押し付け方向だけを制御し、力の出方を比べる。
-        const MASS = 2.0, VISCOUS = 2.0;     // ロボットの質量 [kg]・関節粘性 [N s/m]
-        const F_DES = 10;                     // 狙いの押し付け力 [N]
-        const DT = 1e-5;                      // 物理シミュレーションの刻み [s]
+        // ================= モデル =================
+        // 水平面に置いた 3 リンクの平面アーム (重力なし)。手先を X 方向に往復させながら、
+        // 下にあるワーク表面へ Y 方向に 10 N で押し付ける (研磨のイメージ)。
+        // 関節の慣性は簡単のため対角 (連成なし) とする。
+        const L = [0.35, 0.30, 0.12];         // リンク長 [m]
+        const INERTIA = [0.5, 0.25, 0.03];    // 関節の慣性 [kg m^2]
+        const TAU_MAX = [60, 40, 10];         // モータが出せるトルクの上限 [N m]
+        const JOINT_VISC = 0.05;              // 関節粘性 [N m s/rad]
+        const DT = 5e-5;                      // 物理シミュレーションの刻み [s]
         const PLAYBACK = 0.5;                 // 実時間の 1/2 で再生
-        const WINDOW = 4;                     // プロットの時間幅 [s]
-        // インピーダンス / アドミッタンス共通の目標インピーダンス
-        const KD = 2000, MD = 2.0, DD = 2 * 0.9 * Math.sqrt(KD * MD);
-        // 目標位置: 硬い表面なら 10 N になるよう、表面の少し奥に置く (凹凸は知らない)
-        const X_REF = F_DES / KD;
-        // アドミッタンス / ハイブリッドの内側の位置制御 (帯域 20 Hz)
-        const WP = 2 * Math.PI * 20;
-        const KP_POS = MASS * WP * WP, KV_POS = 2 * MASS * WP * 0.9;
-        // ハイブリッドの力制御: 力の誤差 → 速度。応答 6 Hz 相当、硬さに合わせて調整済み
-        const HYB_BW = 2 * Math.PI * 6;
+        const WINDOW = 6;                     // プロットの時間幅 [s]
+        const F_DES = 10;                     // 狙いの押し付け力 [N]
+        const Y_SURF = -0.30;                 // ワーク表面の平均高さ [m]
+        const PHI_D = -Math.PI / 2;           // 工具は真下向き
+        const PUSH_F = 15, PUSH_TIME = 0.6;   // 「横から押す」の力 [N]・時間 [s]
+
+        // 目標インピーダンス (インピーダンス / アドミッタンス共通)
+        const KD = 1500, MD = 1.0, DD = 2 * 0.9 * Math.sqrt(KD * MD);
+        const KPHI = 30, DPHI = 1.0;          // 工具の向きを保つ回転ばね
+        // 内側の関節位置制御 (アドミッタンス / ハイブリッド): 帯域 30 Hz
+        const WJ = 2 * Math.PI * 30;
+        const KPJ = INERTIA.map(I => I * WJ * WJ), KVJ = INERTIA.map(I => 2 * I * WJ * 0.9);
+        // ハイブリッドの力制御: 力の誤差 → Y 速度 (応答 8 Hz 相当)
+        const HYB_BW = 2 * Math.PI * 8;
+        // インピーダンス / アドミッタンスの目標 Y: 硬い表面なら 10 N になる深さ
+        const Y_REF = Y_SURF - F_DES / KD;
 
         const $ = id => document.getElementById(id);
-        let params, t, step_i, robots, history, running = true;
+        let params, t, k, arms, history, running = true, pushUntil = -1;
 
         function readParams() {
             params = {
@@ -122,69 +134,132 @@
             };
             params.ctrlEvery = Math.round(params.T / DT);
             $('bumpVal').textContent = '±' + (params.bump * 1000).toFixed(1) + ' mm';
-            $('keVal').textContent = params.ke >= 1e5 ? (params.ke / 1000).toFixed(0) + ' kN/m' : (params.ke / 1000).toFixed(1) + ' kN/m';
-            $('fcVal').textContent = params.fc.toFixed(1) + ' N';
+            $('keVal').textContent = (params.ke / 1000).toFixed(params.ke >= 1e5 ? 0 : 1) + ' kN/m';
+            $('fcVal').textContent = params.fc.toFixed(1) + ' N·m';
         }
 
-        // ワーク表面の位置 [m] (押し付け方向が正、平均 0)
-        function surface(time) {
+        // ワーク表面の高さ (場所によって凹凸がある)
+        function surfaceY(x) {
             const b = params.bump;
-            return b * (0.6 * Math.sin(2 * Math.PI * 0.5 * time) + 0.4 * Math.sin(2 * Math.PI * 1.3 * time + 1));
+            return Y_SURF + b * (0.6 * Math.sin(2 * Math.PI * x / 0.09) + 0.4 * Math.sin(2 * Math.PI * x / 0.04 + 1));
         }
+        // 手先の目標 X: ゆっくり往復
+        function targetX(time) { return 0.40 + 0.10 * Math.sin(2 * Math.PI * time / 8); }
+        function targetVX(time) { return 0.10 * 2 * Math.PI / 8 * Math.cos(2 * Math.PI * time / 8); }
 
-        function newRobot(mode) {
-            return { mode, x: surface(0), v: 0, u: 0, xc: surface(0), vc: 0, sensor: [0, 0], force: 0 };
+        // ---- 運動学 ----
+        function fk(q) {
+            const a1 = q[0], a2 = a1 + q[1], a3 = a2 + q[2];
+            const j1 = [L[0] * Math.cos(a1), L[0] * Math.sin(a1)];
+            const j2 = [j1[0] + L[1] * Math.cos(a2), j1[1] + L[1] * Math.sin(a2)];
+            const tip = [j2[0] + L[2] * Math.cos(a3), j2[1] + L[2] * Math.sin(a3)];
+            return { j1, j2, tip, phi: a3 };
+        }
+        function jacobian(q) {
+            const a1 = q[0], a2 = a1 + q[1], a3 = a2 + q[2];
+            const s = [Math.sin(a1), Math.sin(a2), Math.sin(a3)], c = [Math.cos(a1), Math.cos(a2), Math.cos(a3)];
+            return [
+                [-L[0] * s[0] - L[1] * s[1] - L[2] * s[2], -L[1] * s[1] - L[2] * s[2], -L[2] * s[2]],
+                [L[0] * c[0] + L[1] * c[1] + L[2] * c[2], L[1] * c[1] + L[2] * c[2], L[2] * c[2]],
+                [1, 1, 1],
+            ];
+        }
+        // 手先 (x, y, phi) → 関節角 (肘を上にした解)
+        function ik(x, y, phi) {
+            const wx = x - L[2] * Math.cos(phi), wy = y - L[2] * Math.sin(phi);
+            const c2 = Math.max(-1, Math.min(1, (wx * wx + wy * wy - L[0] * L[0] - L[1] * L[1]) / (2 * L[0] * L[1])));
+            const q2 = -Math.acos(c2);
+            const q1 = Math.atan2(wy, wx) - Math.atan2(L[1] * Math.sin(q2), L[0] + L[1] * Math.cos(q2));
+            return [q1, q2, phi - q1 - q2];
+        }
+        const jtMul = (J, f) => [0, 1, 2].map(i => J[0][i] * f[0] + J[1][i] * f[1] + J[2][i] * f[2]);
+
+        function newArm(mode) {
+            const x = targetX(0), y = surfaceY(x);
+            const q = ik(x, y, PHI_D);
+            return { mode, q, qd: [0, 0, 0], tau: [0, 0, 0], qc: q.slice(), qcPrev: q.slice(),
+                     xc: [x, y], vc: [0, 0], sensor: [[0, 0], [0, 0]], fn: 0, err: 0 };
         }
 
         function reset() {
             readParams();
             t = 0;
-            step_i = 0;
-            robots = [newRobot('imp'), newRobot('adm'), newRobot('hyb')];
+            k = 0;
+            pushUntil = -1;
+            arms = [newArm('imp'), newArm('adm'), newArm('hyb')];
             history = [];
         }
 
-        function step() {
-            const w = surface(t);
-            const doCtrl = step_i % params.ctrlEvery === 0;
-            for (const r of robots) {
-                const pen = r.x - w;
-                const fEnv = pen > 0 ? params.ke * pen : 0;
-                if (doCtrl) {
-                    r.sensor.shift();
-                    r.sensor.push(fEnv);           // 力センサは 1 周期遅れ
-                    const fMeas = r.sensor[0];
-                    if (r.mode === 'imp') {
-                        // 位置のずれ → トルク(力)指令。センサは使わない
-                        r.u = KD * (X_REF - r.x) - DD * r.v;
-                    } else if (r.mode === 'adm') {
-                        // 測った力 → 位置指令 → 位置制御
-                        const acc = (-fMeas - DD * r.vc - KD * (r.xc - X_REF)) / MD;
-                        r.vc += acc * params.T;
-                        r.xc += r.vc * params.T;
-                        r.u = KP_POS * (r.xc - r.x) + KV_POS * (r.vc - r.v);
-                    } else {
-                        // ハイブリッド: 押し付け方向は「力」を目標にする (X は位置制御だがここでは省略)
-                        r.vc = Math.max(-0.05, Math.min(0.05, HYB_BW / params.ke * (F_DES - fMeas)));
-                        r.xc += r.vc * params.T;
-                        r.u = KP_POS * (r.xc - r.x) + KV_POS * (r.vc - r.v);
-                    }
-                }
-                const drive = r.u - fEnv;
-                let fr;
-                if (Math.abs(r.v) > 1e-4) fr = -params.fc * Math.sign(r.v);
-                else fr = -Math.max(-params.fc, Math.min(params.fc, drive));
-                const a = (drive + fr - VISCOUS * r.v) / MASS;
-                r.v += a * DT;
-                r.x += r.v * DT;
-                r.force = fEnv;
+        function control(a) {
+            const T = params.T;
+            const xd = targetX(t), vxd = targetVX(t);
+            const fMeas = a.sensor[0];                       // 力センサ (1 周期遅れ)
+            if (a.mode === 'imp') {
+                // インピーダンス: 手先の位置・速度のずれ → 力 → 関節トルク (センサ不要)
+                const p = fk(a.q), J = jacobian(a.q);
+                const v = [0, 1, 2].map(r => J[r][0] * a.qd[0] + J[r][1] * a.qd[1] + J[r][2] * a.qd[2]);
+                const F = [KD * (xd - p.tip[0]) + DD * (vxd - v[0]),
+                           KD * (Y_REF - p.tip[1]) - DD * v[1],
+                           KPHI * (PHI_D - p.phi) - DPHI * v[2]];
+                a.tau = jtMul(J, F);
+                return;
             }
-            if (step_i % 500 === 0) history.push({ t, f: robots.map(r => r.force) });
-            t += DT;
-            step_i++;
+            if (a.mode === 'adm') {
+                // アドミッタンス: 測った力 → 仮想の質量・ダンパ・ばね → 手先の位置指令
+                const ref = [xd, Y_REF], vref = [vxd, 0];
+                for (let i = 0; i < 2; i++) {
+                    const acc = (fMeas[i] - DD * (a.vc[i] - vref[i]) - KD * (a.xc[i] - ref[i])) / MD;
+                    a.vc[i] += acc * T;
+                    a.xc[i] += a.vc[i] * T;
+                }
+            } else {
+                // ハイブリッド: X は位置 (軌道どおり)、Y は力を目標にする
+                a.xc[0] = xd;
+                const vy = Math.max(-0.05, Math.min(0.05, -HYB_BW / params.ke * (F_DES - fMeas[1])));
+                a.xc[1] += vy * T;
+            }
+            // 位置指令 → IK → 関節の位置制御
+            a.qcPrev = a.qc;
+            a.qc = ik(a.xc[0], a.xc[1], PHI_D);
+            const qcd = a.qc.map((v, i) => (v - a.qcPrev[i]) / T);
+            a.tau = a.qc.map((v, i) => KPJ[i] * (v - a.q[i]) + KVJ[i] * (qcd[i] - a.qd[i]));
         }
 
-        // ---- 描画 ----
+        function step() {
+            const doCtrl = k % params.ctrlEvery === 0;
+            const push = t < pushUntil ? PUSH_F : 0;
+            for (const a of arms) {
+                const p = fk(a.q), J = jacobian(a.q);
+                // ワークからの反力 (表面に食い込んだ分だけ上向き)
+                const pen = surfaceY(p.tip[0]) - p.tip[1];
+                const v = [0, 1, 2].map(r => J[r][0] * a.qd[0] + J[r][1] * a.qd[1] + J[r][2] * a.qd[2]);
+                const fn = pen > 0 ? Math.max(0, params.ke * pen - 2 * 0.05 * Math.sqrt(params.ke * 0.3) * v[1]) : 0;
+                a.fn = fn;
+                const fExt = [push, fn];
+                if (doCtrl) {
+                    a.sensor.shift();
+                    a.sensor.push(fExt.slice());
+                    control(a);
+                }
+                const tauExt = jtMul(J, [fExt[0], fExt[1], 0]);
+                a.tau = a.tau.map((v, i) => Math.max(-TAU_MAX[i], Math.min(TAU_MAX[i], v)));
+                for (let i = 0; i < 3; i++) {
+                    const drive = a.tau[i] + tauExt[i];
+                    let fr;
+                    if (Math.abs(a.qd[i]) > 1e-4) fr = -params.fc * Math.sign(a.qd[i]);
+                    else fr = -Math.max(-params.fc, Math.min(params.fc, drive));   // 静止摩擦
+                    const acc = (drive + fr - JOINT_VISC * a.qd[i]) / INERTIA[i];
+                    a.qd[i] += acc * DT;
+                    a.q[i] += a.qd[i] * DT;
+                }
+                a.err = p.tip[0] - targetX(t);
+            }
+            if (k % 400 === 0) history.push({ t, f: arms.map(a => a.fn), e: arms.map(a => a.err) });
+            t += DT;
+            k++;
+        }
+
+        // ================= 描画 =================
         const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
         function fitCanvas(c) {
             const ratio = window.devicePixelRatio || 1;
@@ -198,87 +273,147 @@
             ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
             return { ctx, w, h };
         }
+        const NAMES = ['インピーダンス', 'アドミッタンス', 'ハイブリッド'];
+        const COLS = ['--imp', '--adm', '--hyb'];
 
-        const LANES = [
-            { name: 'インピーダンス', col: '--imp' },
-            { name: 'アドミッタンス', col: '--adm' },
-            { name: 'ハイブリッド', col: '--hyb' },
-        ];
+        function drawArmPanel(ctx, a, i, x0, pw, h) {
+            const col = css(COLS[i]);
+            // 表示範囲: x -0.05〜0.6 m、y -0.33〜+0.28 m (肘が上に来る)
+            const s = Math.min((pw - 10) / 0.65, (h - 22) / 0.61);
+            const bx = x0 + 6 + 0.05 * s, by = 20 + 0.28 * s;
+            const P = (x, y) => [bx + x * s, by - y * s];
+            // ワーク (実寸。凹凸は小さいので拡大窓で見る)
+            ctx.fillStyle = css('--work');
+            const [, ys] = P(0, Y_SURF);
+            ctx.fillRect(x0 + 2, ys, pw - 4, h - ys - 2);
+            // 目標 X
+            const [txp] = P(targetX(t), 0);
+            ctx.strokeStyle = css('--muted');
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(txp, by + 8);
+            ctx.lineTo(txp, ys);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // アーム
+            const f = fk(a.q);
+            const pts = [[0, 0], f.j1, f.j2, f.tip].map(p => P(p[0], p[1]));
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            pts.forEach((p, k2) => k2 ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#4b5563';
+            ctx.fillRect(pts[0][0] - 8, pts[0][1] - 6, 16, 12);
+            ctx.fillStyle = col;
+            for (const p of pts.slice(1, 3)) { ctx.beginPath(); ctx.arc(p[0], p[1], 3.5, 0, 7); ctx.fill(); }
+            ctx.fillRect(pts[3][0] - 4, pts[3][1] - 6, 8, 6);
+            // 横から押す力
+            if (t < pushUntil) {
+                ctx.strokeStyle = css('--force');
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(pts[3][0] - 26, pts[3][1] - 10);
+                ctx.lineTo(pts[3][0] - 8, pts[3][1] - 10);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
+            // 名前
+            ctx.fillStyle = col;
+            ctx.font = 'bold 12px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(NAMES[i], x0 + 6, 14);
+            // 拡大窓 (×10): 手先まわりの凹凸と食い込み
+            const zw = pw * 0.45, zh = 44, zx = x0 + 4, zy = ys - zh - 6;   // アームの無い左下に置く
+            ctx.fillStyle = css('--bg');
+            ctx.fillRect(zx, zy, zw, zh);
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(zx, zy, zw, zh);
+            ctx.clip();
+            const Z = s * 10, cx = zx + zw / 2, cy = zy + zh * 0.45;
+            const ZP = (x, y) => [cx + (x - f.tip[0]) * Z, cy - (y - Y_SURF) * Z];
+            ctx.fillStyle = css('--work');
+            ctx.beginPath();
+            ctx.moveTo(zx, zy + zh);
+            for (let px = 0; px <= zw; px += 2) {
+                const xw = f.tip[0] + (zx + px - cx) / Z;
+                const p = ZP(xw, surfaceY(xw));
+                ctx.lineTo(p[0], p[1]);
+            }
+            ctx.lineTo(zx + zw, zy + zh);
+            ctx.fill();
+            const tp = ZP(f.tip[0], Math.max(f.tip[1], surfaceY(f.tip[0])));
+            ctx.fillStyle = col;
+            ctx.fillRect(tp[0] - 5, tp[1] - 10, 10, 10);
+            ctx.restore();
+            ctx.strokeStyle = css('--line');
+            ctx.strokeRect(zx, zy, zw, zh);
+            ctx.fillStyle = css('--muted');
+            ctx.font = '10px "Noto Sans JP", sans-serif';
+            ctx.fillText('×10', zx + 3, zy + 11);
+            // 力の値
+            ctx.fillStyle = a.fn > 2 * F_DES ? css('--force') : css('--text');
+            ctx.font = '12px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(a.fn.toFixed(1) + ' N', x0 + pw - 6, 14);
+        }
 
         function drawScene() {
             const { ctx, w, h } = fitCanvas($('scene'));
             ctx.clearRect(0, 0, w, h);
-            const laneH = h / 3;
-            const MM = 6;                         // 1 mm を何 px で描くか (押し付け方向は拡大)
-            const toolX = w * 0.42, SPAN = 6;     // 画面幅に映る時間幅 [s] 分の表面
-            robots.forEach((r, i) => {
-                const y0 = i * laneH, base = y0 + laneH * 0.55;
-                const yPx = x => base + x * 1000 * MM;
-                // ワーク (工具の下を左へ流れる)
-                ctx.fillStyle = css('--work');
-                ctx.beginPath();
-                ctx.moveTo(0, y0 + laneH);
-                for (let px = 0; px <= w; px += 3) {
-                    const tt = t + (px - toolX) / w * SPAN;
-                    ctx.lineTo(px, yPx(surface(tt)));
-                }
-                ctx.lineTo(w, y0 + laneH);
-                ctx.fill();
-                // 工具
-                const tip = Math.min(yPx(r.x), yPx(Math.max(r.x, surface(t))));
-                ctx.fillStyle = '#6b7280';
-                ctx.fillRect(toolX - 4, y0 + 2, 8, Math.max(0, tip - 12 - y0 - 2));
-                ctx.fillStyle = css(LANES[i].col);
-                ctx.fillRect(toolX - 12, tip - 12, 24, 12);
-                // 名前と力
-                ctx.font = 'bold 12px "Noto Sans JP", sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(LANES[i].name, 6, y0 + 15);
-                ctx.textAlign = 'right';
-                ctx.fillStyle = css('--text');
-                ctx.font = '12px "Noto Sans JP", sans-serif';
-                ctx.fillText(r.force.toFixed(1) + ' N', w - 8, y0 + 15);
-                if (i > 0) {
-                    ctx.fillStyle = css('--bg');
-                    ctx.fillRect(0, y0 - 1, w, 2);
-                }
-            });
+            const pw = w / 3;
+            arms.forEach((a, i) => drawArmPanel(ctx, a, i, i * pw, pw, h));
+            ctx.fillStyle = css('--bg');
+            ctx.fillRect(pw - 1, 0, 2, h);
+            ctx.fillRect(2 * pw - 1, 0, 2, h);
         }
 
         function drawPlot() {
             const { ctx, w, h } = fitCanvas($('plot'));
             ctx.clearRect(0, 0, w, h);
-            const pad = { l: 28, r: 8, t: 16, b: 14 };
-            const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
             const t0 = Math.max(0, t - WINDOW);
-            const X = tt => pad.l + (tt - t0) / WINDOW * pw;
-            const yMax = 30;
-            const Y = f => pad.t + ph - Math.min(Math.max(f, 0), yMax) / yMax * ph;
-            ctx.strokeStyle = css('--line');
-            ctx.strokeRect(pad.l, pad.t, pw, ph);
-            ctx.fillStyle = css('--muted');
-            ctx.font = '11px "Noto Sans JP", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('押し付け力 [N]（点線 = 目標 10 N）', pad.l, 11);
-            ctx.textAlign = 'right';
-            ctx.fillText(yMax, pad.l - 4, pad.t + 8);
-            ctx.fillText('0', pad.l - 4, pad.t + ph);
-            ctx.fillText('時間 →', pad.l + pw, h - 2);
-            ctx.strokeStyle = css('--muted');
-            ctx.setLineDash([3, 4]);
-            ctx.beginPath();
-            ctx.moveTo(pad.l, Y(F_DES));
-            ctx.lineTo(pad.l + pw, Y(F_DES));
-            ctx.stroke();
-            ctx.setLineDash([]);
-            LANES.forEach((lane, i) => {
-                ctx.strokeStyle = css(lane.col);
-                ctx.lineWidth = 2;
+            const panels = [
+                { title: '押し付け力 [N]（点線 = 目標 10 N）', key: 'f', min: 0, max: 30, ref: F_DES, scale: 1 },
+                { title: '横方向の位置ずれ [mm]', key: 'e', min: -15, max: 15, ref: 0, scale: 1000 },
+            ];
+            const ph0 = h / 2;
+            panels.forEach((pn, j) => {
+                const pad = { l: 28, r: 8, t: 14, b: 4 };
+                const top = j * ph0;
+                const pw = w - pad.l - pad.r, ph = ph0 - pad.t - pad.b;
+                const X = tt => pad.l + (tt - t0) / WINDOW * pw;
+                const Y = v => top + pad.t + ph - (Math.min(Math.max(v, pn.min), pn.max) - pn.min) / (pn.max - pn.min) * ph;
+                ctx.strokeStyle = css('--line');
+                ctx.strokeRect(pad.l, top + pad.t, pw, ph);
+                ctx.fillStyle = css('--muted');
+                ctx.font = '11px "Noto Sans JP", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(pn.title, pad.l, top + 11);
+                ctx.textAlign = 'right';
+                ctx.fillText(pn.max, pad.l - 3, top + pad.t + 8);
+                ctx.fillText(pn.min, pad.l - 3, top + pad.t + ph);
+                ctx.strokeStyle = css('--muted');
+                ctx.setLineDash([3, 4]);
                 ctx.beginPath();
-                history.forEach((p, k) => k ? ctx.lineTo(X(p.t), Y(p.f[i])) : ctx.moveTo(X(p.t), Y(p.f[i])));
+                ctx.moveTo(pad.l, Y(pn.ref));
+                ctx.lineTo(pad.l + pw, Y(pn.ref));
                 ctx.stroke();
+                ctx.setLineDash([]);
+                [0, 1, 2].forEach(i => {
+                    ctx.strokeStyle = css(COLS[i]);
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    history.forEach((p, m) => {
+                        const px = X(p.t), py = Y(p[pn.key][i] * pn.scale);
+                        m ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+                    });
+                    ctx.stroke();
+                });
+                ctx.lineWidth = 1;
             });
-            ctx.lineWidth = 1;
         }
 
         let last = null;
@@ -290,6 +425,7 @@
                 const n = Math.round(elapsed * PLAYBACK / DT);
                 for (let i = 0; i < n; i++) step();
                 while (history.length && history[0].t < t - WINDOW) history.shift();
+                $('push').classList.toggle('on', t < pushUntil);
             }
             drawScene();
             drawPlot();
@@ -299,6 +435,7 @@
         // 実行中にスライダを動かすと、その場で条件が変わる
         for (const id of ['bump', 'ke', 'fc']) $(id).addEventListener('input', readParams);
         $('T').addEventListener('change', readParams);
+        $('push').addEventListener('click', () => { pushUntil = t + PUSH_TIME; });
         $('playPause').addEventListener('click', () => {
             running = !running;
             $('playPause').textContent = running ? '⏸' : '▶';

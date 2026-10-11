@@ -226,16 +226,16 @@
                                 <a href="interactive_app/three_methods_compare.html" target="_blank"
                                     style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
                             </p>
-                            <iframe data-src="interactive_app/three_methods_compare.html" width="100%" height="400"
+                            <iframe data-src="interactive_app/three_methods_compare.html" width="100%" height="430"
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1; font-size: 0.55em; text-align: left;">
-                            <p style="margin-top: 0;">凹凸のあるワークを 10 N で押して研磨</p>
+                            <p style="margin-top: 0;">3リンクアームで、凹凸のあるワークを 10 N で押しながら横に研磨</p>
                             <ul>
                                 <li><strong>ハイブリッド</strong>：力が目標なので平均 10 N</li>
                                 <li><strong>インピーダンス／アドミッタンス</strong>：凹凸で揺れ、柔らかいと力不足</li>
-                                <li>摩擦↑ → インピーダンスがずれる</li>
-                                <li>硬い × 遅い周期 → アドミッタンスが振動</li>
+                                <li>「横から押す」→ 2つは逃げる、ハイブリッドは X を守る</li>
+                                <li>摩擦↑ → インピーダンスだけ位置がずれる</li>
                             </ul>
                         </div>
                     </div>
@@ -572,7 +572,7 @@
                     <h2>インピーダンス制御とは</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png" alt="インピーダンス制御の概念" style="width: 100%;">
+                            <img src="media/impedance_msd.svg" alt="目標位置と手先を仮想のばね K・ダンパ D でつないだ質量 M のモデル" style="width: 100%;">
                         </div>
                         <div style="flex: 1;">
                             <ul>
@@ -593,7 +593,7 @@
                                 <p><strong>F = Mẍ + Dẋ + K(x - x_d)</strong></p>
                                 <ul style="font-size: 0.8em; margin-top: 1em;">
                                     <li><strong>F</strong>: 発生する力</li>
-                                    <li><strong>M</strong>: 仮想悅性</li>
+                                    <li><strong>M</strong>: 仮想慣性</li>
                                     <li><strong>D</strong>: 仮想粘性</li>
                                     <li><strong>K</strong>: 仮想弾性</li>
                                     <li><strong>x - x_d</strong>: 位置誤差</li>
@@ -605,20 +605,12 @@
 
                 <!-- インピーダンスパラメータの調整 -->
                 <section>
-                    <h2>インピーダンスパラメータの調整</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png" alt="パラメータ調整" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <ul>
-                                <li><strong>K(弾性)</strong>: 大きい→硬い、小さい→柔らかい</li>
-                                <li><strong>D(粘性)</strong>: 振動を抑制、安定性向上</li>
-                                <li><strong>M(慣性)</strong>: 動的な応答を決定</li>
-                                <li>作業に応じてパラメータを調整</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <h2 style="font-size: 1.3em;">インピーダンスパラメータの調整</h2>
+                    <img src="media/impedance_params.svg" alt="K・D・M を変えたときの押したあとの動き" style="width: 90%; margin: 0;">
+                    <ul style="font-size: 0.55em;">
+                        <li><strong>K</strong>：硬さ（押されたときの逃げにくさ）　<strong>D</strong>：揺れの止まりやすさ　<strong>M</strong>：重さ（動き出しの遅さ）</li>
+                        <li>作業に合わせて調整（例：人と協調 → K 小・D 大、位置決め → K 大）</li>
+                    </ul>
                 </section>
             </section>
 
