@@ -63,7 +63,7 @@
                     </div>
                     <div style="flex: 1; font-size: 0.6em; text-align: left;">
                         <ul>
-                            <li><strong>位置制御</strong>は「高さ」を守る<br>→ 0.5 mm のずれで力が数倍、逆なら離れる</li>
+                            <li><strong>位置制御</strong>は「高さ」を守る<br>→ 1 mm 程度のずれ・凹凸で力が数倍、逆なら離れる</li>
                             <li>硬いワークほど、わずかなずれで力が急増</li>
                             <li><strong>力制御</strong>は「押す力」を守る<br>→ ずれ・凹凸に倣って一定の力</li>
                             <li>研磨・嵌合・人との協調作業に必要</li>
@@ -168,6 +168,143 @@
                                 <li><strong>直接的</strong>: 力そのものを目標値に制御（ハイブリッド制御）</li>
                                 <li><strong>間接的</strong>: 力と動きの関係を制御（インピーダンス制御）</li>
                                 <li>柔軟に変更できる反面、周期・安定性の制約あり</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 能動コンプライアンス3方式の比較 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">能動コンプライアンス 3方式の比較</h2>
+                    <table class="custom-table" style="font-size: 0.5em;">
+                        <tr>
+                            <th></th>
+                            <th style="color: #f472b6;">インピーダンス制御</th>
+                            <th style="color: #4fc3f7;">アドミッタンス制御</th>
+                            <th style="color: #fbbf24;">ハイブリッド位置/力制御</th>
+                        </tr>
+                        <tr>
+                            <th style="white-space: nowrap;">何を制御</th>
+                            <td>力と動きの関係（間接的）</td>
+                            <td>力と動きの関係（間接的）</td>
+                            <td>力そのもの（直接的）</td>
+                        </tr>
+                        <tr>
+                            <th>計算</th>
+                            <td>位置のずれ → <strong>トルク指令</strong></td>
+                            <td>測った力 → <strong>位置指令</strong></td>
+                            <td>方向ごとに<strong>位置か力か</strong>を選択</td>
+                        </tr>
+                        <tr>
+                            <th style="white-space: nowrap;">必要なもの</th>
+                            <td>トルク制御ロボット</td>
+                            <td>位置制御ロボット ＋ FTセンサ</td>
+                            <td>FTセンサ ＋ 左のどちらか</td>
+                        </tr>
+                        <tr>
+                            <th>得意</th>
+                            <td>硬い物との接触・人との協調</td>
+                            <td>位置が正確・産業用ロボットで手軽</td>
+                            <td>一定の力で押す（研磨・ならい）</td>
+                        </tr>
+                        <tr>
+                            <th>苦手</th>
+                            <td>摩擦・モデル誤差で位置がずれる</td>
+                            <td>硬い物 × 遅い周期で振動</td>
+                            <td>接触の瞬間・切り替え</td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 0.5em; color: #aaa;">↓ アプリで比較。詳しくは 6章（インピーダンス）・7章（アドミッタンス）</p>
+                </section>
+
+                <!-- 3方式の比較アプリ -->
+                <section>
+                    <h2 style="font-size: 1.3em;">3方式をアプリで比べる</h2>
+                    <div style="display: flex; align-items: center; gap: 1.5em;">
+                        <div style="flex: 1.4;">
+                            <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
+                                <a href="interactive_app/three_methods_compare.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
+                            </p>
+                            <iframe data-src="interactive_app/three_methods_compare.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.55em; text-align: left;">
+                            <p style="margin-top: 0;">凹凸のあるワークを 10 N で押して研磨</p>
+                            <ul>
+                                <li><strong>ハイブリッド</strong>：力が目標なので平均 10 N</li>
+                                <li><strong>インピーダンス／アドミッタンス</strong>：凹凸で揺れ、柔らかいと力不足</li>
+                                <li>摩擦↑ → インピーダンスがずれる</li>
+                                <li>硬い × 遅い周期 → アドミッタンスが振動</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- インピーダンス vs アドミッタンス比較 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">インピーダンス vs アドミッタンス</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <p style="text-align: center; margin-bottom: 10px;">
+                                <a href="interactive_app/impedance_vs_admittance.html" target="_blank"
+                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                            </p>
+                            <iframe src="interactive_app/impedance_vs_admittance.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.6em;">
+                                <li><strong>インピーダンス制御</strong>
+                                    <ul>
+                                        <li>位置誤差から力（トルク）を計算</li>
+                                        <li>硬い環境との接触に強い</li>
+                                        <li>摩擦やモデル誤差で位置がずれやすい</li>
+                                    </ul>
+                                </li>
+                                <li><strong>アドミッタンス制御</strong>
+                                    <ul>
+                                        <li>力から位置指令を計算</li>
+                                        <li>位置制御ベースで正確・産業用ロボット向き</li>
+                                        <li>硬い環境 × 遅い制御周期で振動しやすい</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ハイブリッド位置/力制御 -->
+                <section>
+                    <h2>ハイブリッド位置/力制御</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 500 300" style="width: 100%; max-height: 50vh;">
+                                <defs>
+                                    <marker id="hz" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                                    <marker id="hx" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
+                                </defs>
+                                <rect x="20" y="220" width="420" height="40" fill="#6b7280"/>
+                                <text x="230" y="247" fill="#e5e7eb" font-size="16" text-anchor="middle">ワーク表面</text>
+                                <rect x="200" y="20" width="60" height="14" fill="#9ca3af"/>
+                                <rect x="200" y="34" width="60" height="18" fill="#f59e0b"/>
+                                <rect x="218" y="52" width="24" height="140" fill="#4b5563"/>
+                                <rect x="190" y="192" width="80" height="28" rx="4" fill="#d1d5db"/>
+                                <line x1="300" y1="60" x2="300" y2="180" stroke="#f87171" stroke-width="6" marker-end="url(#hz)"/>
+                                <text x="312" y="105" fill="#f87171" font-size="18" font-weight="bold">Z：力制御</text>
+                                <text x="312" y="130" fill="#f87171" font-size="15">例：10 N で押し続ける</text>
+                                <line x1="40" y1="280" x2="420" y2="280" stroke="#4ade80" stroke-width="6" stroke-dasharray="14 8" marker-end="url(#hx)"/>
+                                <text x="40" y="200" fill="#4ade80" font-size="18" font-weight="bold">X/Y：位置制御</text>
+                                <text x="40" y="168" fill="#4ade80" font-size="15">軌道どおりに動かす</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.6em;">
+                                <li><strong>最適アプローチ:</strong> 方向ごとに位置/力制御を切り替え</li>
+                                <li><strong>例:</strong> Z軸方向は力制御、XY平面は位置制御</li>
+                                <li><strong>用途:</strong> 研削、研磨、組み立て作業</li>
+                                <li><strong>実装:</strong> ros2_controllers の標準には無い（admittance_controller は「押されたら逃げる」制御で別物）</li>
+                                <li>近い動きは FZI の cartesian_compliance_controller で作れる（Z の剛性を下げて目標力を与える）</li>
                             </ul>
                         </div>
                     </div>
@@ -385,13 +522,13 @@
                     <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: left;">
                         <div style="flex: 1; border: 2px solid #f59e0b; border-radius: 10px; padding: 8px;">
                             <div style="text-align: center;"><strong style="color: #f59e0b;">A. 位置制御ロボット ＋ 手先FTセンサ</strong><br>（UR、一般の産業用ロボット）</div>
-                            <div style="text-align: center;"><svg viewBox="0 0 270 145" style="width: 70%; max-height: 22vh;">
+                            <div style="display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 270 145" style="flex: 1; max-height: 20vh;">
                                 <rect x="20" y="105" width="50" height="20" fill="#9ca3af"/>
                                 <polyline points="45,105 45,50 140,30 175,70" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
                                 <rect x="168" y="80" width="14" height="28" fill="#4b5563"/>
                                 <circle cx="175" cy="76" r="9" fill="#f59e0b"/>
                                 <text x="192" y="80" fill="#f59e0b" font-size="16">FTセンサ</text>
-                            </svg></div>
+                            </svg><img src="media/ur_robot.png" alt="UR（e-Series）" style="height: 18vh; margin: 0; background: #fff; border-radius: 8px; padding: 4px;"></div>
                             <ul>
                                 <li>必要：<strong>手先の6軸力覚センサ</strong></li>
                                 <li>できる：<strong>アドミッタンス制御</strong></li>
@@ -401,7 +538,7 @@
                         </div>
                         <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 8px;">
                             <div style="text-align: center;"><strong style="color: #4ade80;">B. トルク制御ロボット</strong><br>（Franka、KUKA iiwa）</div>
-                            <div style="text-align: center;"><svg viewBox="0 0 270 145" style="width: 70%; max-height: 22vh;">
+                            <div style="display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 270 145" style="flex: 1; max-height: 20vh;">
                                 <rect x="20" y="105" width="50" height="20" fill="#9ca3af"/>
                                 <polyline points="45,105 45,50 140,30 175,70" fill="none" stroke="#9ca3af" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
                                 <rect x="168" y="80" width="14" height="28" fill="#4b5563"/>
@@ -410,7 +547,7 @@
                                 <circle cx="140" cy="30" r="8" fill="none" stroke="#4ade80" stroke-width="4"/>
                                 <circle cx="175" cy="70" r="8" fill="none" stroke="#4ade80" stroke-width="4"/>
                                 <text x="150" y="16" fill="#4ade80" font-size="16" text-anchor="middle">関節トルクセンサ</text>
-                            </svg></div>
+                            </svg><img src="media/franka_robot.png" alt="Franka" style="height: 18vh; margin: 0; background: #fff; border-radius: 8px; padding: 4px;"></div>
                             <ul>
                                 <li>必要：<strong>関節トルクセンサ</strong>（内蔵）</li>
                                 <li>できる：<strong>インピーダンスもアドミッタンスも</strong></li>
@@ -420,23 +557,6 @@
                         </div>
                     </div>
                     <p style="font-size: 0.55em; margin-top: 12px;"><strong>関節トルクを出せるかどうか</strong>で、使える力制御が大きく変わる</p>
-                </section>
-                <section>
-                    <h2>力制御対応ロボット</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/franka_robot.png" alt="コンプライアントロボット" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>コンプライアントロボット</h3>
-                            <p>力制御やインピーダンス制御が可能</p>
-                            <ul>
-                                <li>Franka Robotics (Panda)</li>
-                                <li>KUKA (iiwa)</li>
-                                <li>URシリーズ（力センサー付き）</li>
-                            </ul>
-                        </div>
-                    </div>
                 </section>
 
             </section>
@@ -736,82 +856,6 @@ admittance_controller:
                                 <li>インピーダンスパラメータの設定</li>
                                 <li>安全性監視と緊急停止機能</li>
                                 <li>実際の力制御アプリケーションでの実装パターン</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-            </section>
-
-            <!-- 制御方式の比較 -->
-            <section>
-                <section data-background-image="media/moveit.png" data-background-opacity="0.5">
-                    <h2>制御方式の比較</h2>
-                </section>
-
-                <!-- インピーダンス vs アドミッタンス比較 -->
-                <section>
-                    <h2 style="font-size: 1.3em;">インピーダンス vs アドミッタンス</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/impedance_vs_admittance.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/impedance_vs_admittance.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.6em;">
-                                <li><strong>インピーダンス制御</strong>
-                                    <ul>
-                                        <li>位置誤差から力（トルク）を計算</li>
-                                        <li>硬い環境との接触に強い</li>
-                                        <li>摩擦やモデル誤差で位置がずれやすい</li>
-                                    </ul>
-                                </li>
-                                <li><strong>アドミッタンス制御</strong>
-                                    <ul>
-                                        <li>力から位置指令を計算</li>
-                                        <li>位置制御ベースで正確・産業用ロボット向き</li>
-                                        <li>硬い環境 × 遅い制御周期で振動しやすい</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ハイブリッド位置/力制御 -->
-                <section>
-                    <h2>ハイブリッド位置/力制御</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <svg viewBox="0 0 500 300" style="width: 100%; max-height: 50vh;">
-                                <defs>
-                                    <marker id="hz" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
-                                    <marker id="hx" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
-                                </defs>
-                                <rect x="20" y="220" width="420" height="40" fill="#6b7280"/>
-                                <text x="230" y="247" fill="#e5e7eb" font-size="16" text-anchor="middle">ワーク表面</text>
-                                <rect x="200" y="20" width="60" height="14" fill="#9ca3af"/>
-                                <rect x="200" y="34" width="60" height="18" fill="#f59e0b"/>
-                                <rect x="218" y="52" width="24" height="140" fill="#4b5563"/>
-                                <rect x="190" y="192" width="80" height="28" rx="4" fill="#d1d5db"/>
-                                <line x1="300" y1="60" x2="300" y2="180" stroke="#f87171" stroke-width="6" marker-end="url(#hz)"/>
-                                <text x="312" y="105" fill="#f87171" font-size="18" font-weight="bold">Z：力制御</text>
-                                <text x="312" y="130" fill="#f87171" font-size="15">例：10 N で押し続ける</text>
-                                <line x1="40" y1="280" x2="420" y2="280" stroke="#4ade80" stroke-width="6" stroke-dasharray="14 8" marker-end="url(#hx)"/>
-                                <text x="40" y="200" fill="#4ade80" font-size="18" font-weight="bold">X/Y：位置制御</text>
-                                <text x="40" y="168" fill="#4ade80" font-size="15">軌道どおりに動かす</text>
-                            </svg>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.6em;">
-                                <li><strong>最適アプローチ:</strong> 方向ごとに位置/力制御を切り替え</li>
-                                <li><strong>例:</strong> Z軸方向は力制御、XY平面は位置制御</li>
-                                <li><strong>用途:</strong> 研削、研磨、組み立て作業</li>
-                                <li><strong>実装:</strong> ros2_controllers の標準には無い（admittance_controller は「押されたら逃げる」制御で別物）</li>
-                                <li>近い動きは FZI の cartesian_compliance_controller で作れる（Z の剛性を下げて目標力を与える）</li>
                             </ul>
                         </div>
                     </div>

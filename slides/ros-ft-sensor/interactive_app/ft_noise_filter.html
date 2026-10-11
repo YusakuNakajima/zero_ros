@@ -44,6 +44,7 @@
         button:hover { background: #4b5563; }
         button.primary { background: #2563eb; border-color: #2563eb; }
         button.on { background: #b45309; border-color: #b45309; }
+        #filterBtn.on { background: #15803d; border-color: #15803d; }
         canvas { width: 100%; display: block; margin-top: 6px; background: var(--panel); border-radius: 6px; }
         .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; color: var(--muted); }
         .legend span::before { content: ""; display: inline-block; width: 16px; height: 3px; margin-right: 4px; vertical-align: middle; background: currentColor; }
@@ -64,16 +65,17 @@
             <input type="range" id="order" min="1" max="4" step="1" value="2">
         </div>
         <div class="buttons">
+            <button id="filterBtn" class="on">フィルタ ON</button>
             <button id="press">✋ 押す</button>
             <button id="playPause" class="primary">⏸</button>
             <button id="reset">⟲</button>
         </div>
     </div>
-    <canvas id="wave" height="150"></canvas>
-    <canvas id="spec" height="150"></canvas>
+    <canvas id="wave" height="135"></canvas>
+    <canvas id="spec" height="135"></canvas>
     <div class="legend">
         <span class="raw">生データ</span>
-        <span class="flt">フィルタ後</span>
+        <span class="flt">出力</span>
         <span class="true">本当の力</span>
         <span class="cut">ローパスフィルタの特性</span>
     </div>
@@ -92,7 +94,7 @@
         const PLAYBACK = 0.5;            // 実時間の 1/2 で再生
 
         const $ = id => document.getElementById(id);
-        let running = true, pressed = false;
+        let running = true, pressed = false, filterOn = true;
         let n, trueF, buf, sections;
 
         function gauss() {
@@ -142,7 +144,7 @@
             trueF += (target - trueF) * 0.02;    // 手で押すので少しなめらかに変化
             const t = n / FS;
             const raw = trueF + NOISE * gauss() + VIB_A * Math.sin(2 * Math.PI * VIB_F * t);
-            const flt = filterSample(raw);
+            const flt = filterSample(raw);   // OFF の間もフィルタは回しておき、ON にした瞬間に飛ばないようにする
             buf.push({ t, raw, flt, tr: trueF });
             if (buf.length > Math.max(WINDOW * FS, NFFT)) buf.shift();
             n++;
@@ -221,7 +223,8 @@
             ctx.fillText('0', pad.l - 4, Y(0) + 4);
             ctx.fillText('時間 →', pad.l + pw, h - 3);
             const view = buf.filter(p => p.t >= t0);
-            for (const [key, col, lw] of [['raw', css('--raw'), 1], ['tr', css('--true'), 1.5], ['flt', css('--flt'), 2]]) {
+            const out = filterOn ? 'flt' : 'raw';
+            for (const [key, col, lw] of [['raw', css('--raw'), 1], ['tr', css('--true'), 1.5], [out, css('--flt'), 2]]) {
                 ctx.strokeStyle = col;
                 ctx.lineWidth = lw;
                 ctx.beginPath();
@@ -253,7 +256,7 @@
             ctx.fillText('500 Hz', X(500) - 14, h - 3);
             if (buf.length >= NFFT) {
                 const seg = buf.slice(-NFFT);
-                for (const [key, col, lw] of [['raw', css('--raw'), 1], ['flt', css('--flt'), 1.5]]) {
+                for (const [key, col, lw] of [['raw', css('--raw'), 1], [filterOn ? 'flt' : 'raw', css('--flt'), 1.5]]) {
                     // 直流分 (平均) を引き、ハン窓をかける
                     const mean = seg.reduce((a, p) => a + p[key], 0) / NFFT;
                     const x = seg.map((p, i) => (p[key] - mean) * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (NFFT - 1))) * 2);
@@ -268,7 +271,8 @@
                     ctx.stroke();
                 }
             }
-            // フィルタ特性 (0 dB 基準を上端に)
+            // フィルタ特性 (0 dB 基準を上端に)。OFF のときは薄く表示
+            ctx.globalAlpha = filterOn ? 1 : 0.25;
             ctx.strokeStyle = css('--cut');
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -287,7 +291,8 @@
             ctx.setLineDash([]);
             ctx.fillStyle = css('--cut');
             ctx.textAlign = 'left';
-            ctx.fillText('カットオフ', X(filter.fc) + 4, pad.t + 12);
+            ctx.fillText(filterOn ? 'カットオフ' : 'フィルタ OFF', X(filter.fc) + 4, pad.t + 12);
+            ctx.globalAlpha = 1;
             ctx.fillStyle = css('--muted');
             ctx.textAlign = 'right';
             ctx.fillText('振動 120 Hz', X(VIB_F) - 4, pad.t + 26);
@@ -309,6 +314,11 @@
 
         $('fc').addEventListener('input', () => { filter = designFilter(); });
         $('order').addEventListener('input', () => { filter = designFilter(); });
+        $('filterBtn').addEventListener('click', () => {
+            filterOn = !filterOn;
+            $('filterBtn').classList.toggle('on', filterOn);
+            $('filterBtn').textContent = filterOn ? 'フィルタ ON' : 'フィルタ OFF';
+        });
         $('press').addEventListener('click', () => {
             pressed = !pressed;
             $('press').classList.toggle('on', pressed);

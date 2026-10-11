@@ -56,15 +56,15 @@
     <div class="controls">
         <div>
             <label>ワークの位置ずれ <b id="errVal"></b></label>
-            <input type="range" id="err" min="-1" max="1.5" step="0.1" value="0.5">
+            <input type="range" id="err" min="-1" max="1.5" step="0.1" value="0.9">
         </div>
         <div>
             <label>表面の凹凸 <b id="bumpVal"></b></label>
-            <input type="range" id="bump" min="0" max="1" step="0.05" value="0.3">
+            <input type="range" id="bump" min="0" max="1" step="0.05" value="0.9">
         </div>
         <div>
             <label>ワークの硬さ <b id="keVal"></b></label>
-            <input type="range" id="ke" min="4" max="6" step="0.1" value="5.5">
+            <input type="range" id="ke" min="4" max="6" step="0.1" value="4.5">
         </div>
         <div class="buttons">
             <button id="playPause" class="primary">⏸</button>
@@ -74,8 +74,8 @@
     <canvas id="scene" height="150"></canvas>
     <canvas id="plot" height="105"></canvas>
     <div class="legend">
-        <span class="pos">位置制御（高さを守る）</span>
-        <span class="frc">力制御（押す力 10 N を守る）</span>
+        <span class="pos">位置制御</span>
+        <span class="frc">力制御（目標 10 N）</span>
         <span class="dng">破損ライン 40 N</span>
     </div>
 
