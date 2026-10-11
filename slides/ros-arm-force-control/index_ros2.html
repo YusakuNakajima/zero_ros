@@ -530,7 +530,7 @@
                             </svg><img src="media/ur_robot.png" alt="UR（e-Series）" style="height: 18vh; margin: 0; background: #fff; border-radius: 8px; padding: 4px;"></div>
                             <ul>
                                 <li>必要：<strong>手先の6軸力覚センサ</strong></li>
-                                <li>できる：<strong>アドミッタンス制御</strong></li>
+                                <li>できる：<strong>アドミッタンス制御</strong><br>（位置制御主体＋手先FTセンサ向けの方法）</li>
                                 <li>できない：<strong>インピーダンス制御</strong><br>（トルクを直接出せない）</li>
                                 <li>関節電流から力を推定する機種も<br>（精度はロボット次第）</li>
                             </ul>
@@ -550,6 +550,7 @@
                             <ul>
                                 <li>必要：<strong>関節トルクセンサ</strong>（内蔵）</li>
                                 <li>できる：<strong>インピーダンスもアドミッタンスも</strong></li>
+                                <li>柔らかく動かすなら<strong>インピーダンスが自然</strong><br>（例：FR3 の<br>cartesian_impedance_controller<br>→ 手先FTセンサなしで柔らかくできる）</li>
                                 <li>関節空間 → トルクをそのまま使う</li>
                                 <li>直交空間 → 手先の力に変換<br>（F = J<sup>−T</sup>τ）</li>
                             </ul>
