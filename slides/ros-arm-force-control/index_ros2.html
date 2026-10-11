@@ -530,6 +530,123 @@
                         </div>
                     </div>
                 </section>
+                <!-- 活用事例：フリードライブ -->
+                <section>
+                    <h2>活用事例：フリードライブ</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <svg viewBox="0 0 460 300" style="flex: 1; max-height: 48vh;">
+                            <defs><marker id="fd-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker></defs>
+                            <line x1="20" y1="290" x2="440" y2="290" stroke="#6b7280" stroke-width="3"/>
+                            <!-- 動かした後の姿勢（薄く） -->
+                            <g opacity="0.3">
+                                <polyline points="95,250 95,145 255,120 350,180" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                                <rect x="338" y="180" width="24" height="45" fill="#4b5563"/>
+                            </g>
+                            <!-- 今の姿勢 -->
+                            <rect x="60" y="250" width="70" height="40" fill="#9ca3af"/>
+                            <polyline points="95,250 95,145 230,90 300,145" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                            <rect x="288" y="145" width="24" height="45" fill="#4b5563"/>
+                            <!-- 手 -->
+                            <ellipse cx="292" cy="118" rx="22" ry="16" fill="#f1c27d"/>
+                            <rect x="272" y="124" width="9" height="26" rx="4" fill="#f1c27d"/>
+                            <rect x="283" y="127" width="9" height="28" rx="4" fill="#f1c27d"/>
+                            <rect x="294" y="127" width="9" height="27" rx="4" fill="#f1c27d"/>
+                            <rect x="305" y="124" width="9" height="23" rx="4" fill="#f1c27d"/>
+                            <path d="M325,110 Q365,115 375,160" fill="none" stroke="#60a5fa" stroke-width="5" stroke-dasharray="10 6" marker-end="url(#fd-a)"/>
+                            <text x="370" y="105" fill="#60a5fa" font-size="20">手で押す</text>
+                        </svg>
+                        <div style="flex: 1; font-size: 0.6em; text-align: left;">
+                            <ul>
+                                <li>ロボットを<strong>手で掴んで動かせる</strong>モード</li>
+                                <li>教示・位置合わせに使う（ペンダントより速い）</li>
+                                <li>中身は多くの場合<strong>アドミッタンス制御</strong>：<br>押された力 → 位置・速度の指令</li>
+                                <li>ただし「アドミッタンス制御 ＝ 手で動かせること」ではない↓</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 制御則とモードは別の軸 -->
+                <section>
+                    <h2>制御則とモードは別の軸</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.6em;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
+                            <strong>軸A：制御則</strong><br>インピーダンス / アドミッタンス<br>→ 中でどう計算するか
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 8px;">
+                            <strong>軸B：モード（機能）</strong><br>フリードライブ / 接触作業 / 位置制御<br>→ 使う人にどう見えるか
+                        </div>
+                    </div>
+                    <table style="font-size: 0.5em; margin: 16px auto 0;">
+                        <thead>
+                            <tr><th></th><th>インピーダンス型</th><th>アドミッタンス型</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>フリードライブ</strong></td><td>重力補償してトルクほぼ0<br>（Franka、KUKA iiwa）</td><td>外力を推定して位置・速度指令に<br>（関節トルク制御ができない機種）</td></tr>
+                            <tr><td><strong>接触作業</strong><br>（嵌合・研磨）</td><td>直交インピーダンス制御<br>（Franka など）</td><td>FTセンサ ＋ 位置制御<br>（ROS2 の admittance_controller）</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.45em; color: #aaa;">
+                        ※ ブレーキを外して手で押すだけの教示モード（制御則なし）もある。PTP/CP とブレンドを分けたのと同じ考え方
+                    </p>
+                </section>
+
+                <!-- K があるかないか -->
+                <section>
+                    <h2>違いはばね K があるか</h2>
+                    <svg viewBox="0 0 720 230" style="width: 85%; max-height: 36vh;">
+                        <defs>
+                            <marker id="kd-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker>
+                            <marker id="kd-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
+                        </defs>
+                        <g font-size="20" fill="#e5e7eb" text-anchor="middle">
+                            <!-- 左：K = 0 -->
+                            <text x="180" y="28" font-weight="bold">フリードライブ（K = 0）</text>
+                            <line x1="30" y1="150" x2="330" y2="150" stroke="#6b7280" stroke-width="3"/>
+                            <rect x="60" y="95" width="60" height="55" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 4"/>
+                            <rect x="210" y="95" width="60" height="55" fill="#4b5563"/>
+                            <line x1="125" y1="80" x2="200" y2="80" stroke="#60a5fa" stroke-width="5" marker-end="url(#kd-p)"/>
+                            <text x="162" y="68" fill="#60a5fa" font-size="17">押す</text>
+                            <text x="180" y="190">離してもその場に止まる</text>
+                            <!-- 右：K > 0 -->
+                            <text x="540" y="28" font-weight="bold">接触作業（K &gt; 0）</text>
+                            <line x1="390" y1="150" x2="700" y2="150" stroke="#6b7280" stroke-width="3"/>
+                            <line x1="400" y1="85" x2="400" y2="150" stroke="#f472b6" stroke-width="4"/>
+                            <text x="400" y="78" fill="#f472b6" font-size="17">x_d（目標）</text>
+                            <path d="M400,122 l10,-12 l15,24 l15,-24 l15,24 l15,-24 l15,24 l15,-24 l15,24 l10,-12" fill="none" stroke="#fbbf24" stroke-width="3"/>
+                            <text x="470" y="100" fill="#fbbf24" font-size="17">K</text>
+                            <rect x="540" y="95" width="60" height="55" fill="#4b5563"/>
+                            <line x1="600" y1="80" x2="530" y2="80" stroke="#4ade80" stroke-width="5" marker-end="url(#kd-r)"/>
+                            <text x="565" y="68" fill="#4ade80" font-size="17">戻る</text>
+                            <text x="540" y="190">離すと目標位置に戻る</text>
+                        </g>
+                    </svg>
+                    <p style="font-size: 0.6em; margin: 4px 0;">M x″ + D x′ + K (x − x<sub>d</sub>) = F<sub>ext</sub></p>
+                    <ul style="font-size: 0.55em;">
+                        <li>フリードライブの「重さ」＝仮想質量 M、「軸ロック」＝方向ごとに無効化（admittance_controller の selected_axes 相当）</li>
+                        <li>使う人の言葉と制御パラメータがほぼ 1:1 で対応する</li>
+                    </ul>
+                </section>
+
+                <!-- 呼び方はメーカーで違う -->
+                <section>
+                    <h2>フリードライブの呼び方</h2>
+                    <table style="font-size: 0.55em; margin: 0 auto;">
+                        <thead>
+                            <tr><th>立場</th><th>呼び方</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>UR</td><td>フリードライブ（Freedrive）</td></tr>
+                            <tr><td>ABB</td><td>リードスルー（lead-through）</td></tr>
+                            <tr><td>FANUC</td><td>ハンドガイド・直接教示</td></tr>
+                            <tr><td>安川</td><td>ダイレクトティーチ</td></tr>
+                            <tr><td>安全規格</td><td>hand guiding（ISO 10218 の協働運転4方式の1つ）</td></tr>
+                            <tr><td>研究</td><td>direct teaching / kinesthetic teaching</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.55em;">ブレンド半径と同じく、<strong>概念は同じでもメーカーごとに名前が違う</strong></p>
+                </section>
+
                 <section>
                     <h2>力/トルクセンサーの種類</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
