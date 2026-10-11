@@ -35,11 +35,11 @@
             <!-- スライド2: 初めにフォーストルクセンサ -->
             <section>
                 <h2>本スライドの担当範囲</h2>
+                <p>FTセンサ全般で使う次の3つを説明します</p>
                 <ul>
-                    <li>使い方は人それぞれなので詳細は触れず、例だけ紹介します</li>
-                    <li>全般で使える内容として、データの読み出し、ノイズ除去、座標変換を扱います</li>
-                    <li>実装の詳細よりも基本概念を重視</li>
-                    <li>ROSでの統合方法に焦点</li>
+                    <li>データの読み出し</li>
+                    <li>ノイズ除去</li>
+                    <li>座標変換</li>
                 </ul>
             </section>
 
@@ -79,6 +79,27 @@
                         <li>ROS では <code>geometry_msgs/WrenchStamped</code> の <code>force</code> / <code>torque</code></li>
                         <li>向きの基準は <code>header.frame_id</code> のセンサ座標系 → 軸の向きは本体の刻印やデータシートで確認</li>
                     </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">ROS のメッセージ：WrenchStamped</h2>
+                    <div style="display: flex; gap: 24px; align-items: center;">
+                        <pre style="flex: 1.2; font-size: 0.4em;"><code class="language-yaml" data-trim>
+# geometry_msgs/msg/WrenchStamped
+header:
+  stamp: {sec: 1728600000, nanosec: 120000000}
+  frame_id: ft_sensor_link
+wrench:
+  force:  {x: 0.12, y: -0.05, z: -9.81}  # N
+  torque: {x: 0.01, y: 0.02, z: 0.00}    # N·m
+                        </code></pre>
+                        <ul style="flex: 1; font-size: 0.55em; text-align: left;">
+                            <li>力＋トルクの組 ＝ <strong>レンチ（wrench）</strong></li>
+                            <li><code>stamp</code>：いつ測ったか（他のデータと時刻を合わせる）</li>
+                            <li><code>frame_id</code>：<strong>どこで測ったか</strong>（後の座標変換で使う）</li>
+                            <li>確認：<code>ros2 topic echo /ft_sensor/wrench</code></li>
+                        </ul>
+                    </div>
                 </section>
 
                 <section>
@@ -159,47 +180,6 @@
                 </section>
             </section>
 
-            <!-- スライド3: フォーストルクセンサの用途 -->
-            <section>
-                <section>
-                    <h2>フォーストルクセンサの用途</h2>
-                    <p>均一な力をかける制御や接触時のデータ収集に使います↓</p>
-                </section>
-
-                <section>
-                    <h2>フォース制御、コンプライアンス制御のために追加</h2>
-                    <ul>
-                        <li>位置制御だけでは不十分な作業</li>
-                        <li>柔軟な物体への対応</li>
-                        <li>過度な力の抑制</li>
-                        <li>繊細な作業の実現</li>
-                        <li>環境適応制御</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>力を均一にかけるためのセンシング</h2>
-                    <ul>
-                        <li>粉体粉砕ではXY軸の平均値を見て乳鉢中心推定などを行っています</li>
-                        <li>研磨・磨き作業での力分布</li>
-                        <li>表面処理の品質向上</li>
-                        <li>接触面の姿勢推定</li>
-                        <li>力のバランス制御</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>ロボット学習での活用</h2>
-                    <ul>
-                        <li>ロボット学習の情報として、位置だけでは分からない情報を追加することでより良いモーションにつながります</li>
-                        <li>触覚情報の学習データ化</li>
-                        <li>巧緻動作の習得支援</li>
-                        <li>環境認識の向上</li>
-                        <li>模倣学習への応用</li>
-                    </ul>
-                </section>
-            </section>
-
             <!-- スライド4: フォーストルクセンサの読み出し -->
             <section>
                 <section>
@@ -266,15 +246,45 @@
 
             <!-- スライド5: ノイズ除去 -->
             <section>
-                <h2>ノイズ除去</h2>
-                <ul>
-                    <li>ホワイトノイズを除去します</li>
-                    <li>FTセンサに何も力を加えていないデータを撮って、FFTをかけて低周波領域をカットするフィルタをかけます</li>
-                    <li>フィルタにはscipy.signal.butterなどを使います</li>
-                    <li>移動平均フィルタの適用</li>
-                    <li>外れ値の除去</li>
-                    <li>周波数ドメインでのフィルタリング</li>
-                </ul>
+                <section>
+                    <h2>ノイズ除去</h2>
+                    <div style="display: flex; align-items: center; gap: 1.5em;">
+                        <div style="flex: 1.3;">
+                            <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
+                                <a href="interactive_app/ft_noise_filter.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
+                            </p>
+                            <iframe data-src="interactive_app/ft_noise_filter.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.55em; text-align: left;">
+                            <ol>
+                                <li>何も触れずにデータを取る</li>
+                                <li>FFT で周波数成分を見る<br>→ 全体に広がる<strong>ホワイトノイズ</strong>と振動のピーク</li>
+                                <li>使いたい力の変化より<strong>高い周波数をカット</strong>（ローパス）</li>
+                            </ol>
+                            <p>カットオフを下げすぎると<strong>押した力への反応が遅れる</strong>（「押す」で確認）</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Python でのフィルタ例</h2>
+                    <pre style="font-size: 0.5em;"><code class="language-python" data-trim>
+from scipy import signal
+
+fs = 1000.0                          # サンプリング周波数 [Hz]
+f, P = signal.welch(fz_idle, fs)     # 無負荷データの周波数成分を見る
+
+b, a = signal.butter(2, 20, btype="low", fs=fs)  # 20 Hz ローパス
+fz_offline = signal.filtfilt(b, a, fz)  # 記録データ：前後から掛けて遅れゼロ
+fz_online = signal.lfilter(b, a, fz)    # リアルタイム：遅れが出る
+                    </code></pre>
+                    <ul style="font-size: 0.55em;">
+                        <li>カットオフは「無負荷のスペクトル」と「作業で必要な速さ」の間で決める</li>
+                        <li>移動平均も簡単なローパスの一種（ただし切れ味は悪い）</li>
+                    </ul>
+                </section>
             </section>
 
             <!-- スライド6: 座標変換 -->
@@ -360,12 +370,10 @@ tf2::doTransform(msg, out, tf);  // 回転 ＋ p × f まで計算してくれ�
             <section>
                 <h2>まとめ</h2>
                 <ul>
-                    <li>フォーストルクセンサの基本的な活用方法</li>
-                    <li>データ読み出しとROSへの統合</li>
-                    <li>ノイズ除去の重要性</li>
-                    <li>座標変換の正しい実装</li>
-                    <li>用途に応じた適切な利用</li>
-                    <li>ロボット学習への応用可能性</li>
+                    <li>6軸の力・トルクは WrenchStamped で扱う。取り付け位置とツールの重さに注意</li>
+                    <li>データの読み出し：パッケージを入れてトピックを確認</li>
+                    <li>ノイズ除去：無負荷データの周波数を見てローパス</li>
+                    <li>座標変換：トルクは測る点で変わる → tf2 で変換</li>
                 </ul>
                 <br>
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">←
