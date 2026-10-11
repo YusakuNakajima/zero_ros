@@ -199,7 +199,7 @@
                             <th style="white-space: nowrap;">必要なもの</th>
                             <td>トルク制御ロボット</td>
                             <td>位置制御ロボット ＋ FTセンサ</td>
-                            <td>FTセンサ ＋ 左のどちらか</td>
+                            <td>位置制御ロボット ＋ FTセンサでOK</td>
                         </tr>
                         <tr>
                             <th>得意</th>
@@ -211,7 +211,7 @@
                             <th>苦手</th>
                             <td>摩擦・モデル誤差で位置がずれる</td>
                             <td>硬い物 × 遅い周期で振動</td>
-                            <td>接触の瞬間・切り替え</td>
+                            <td>接触が抜ける所（溝・端）</td>
                         </tr>
                     </table>
                     <p style="font-size: 0.5em; color: #aaa;">↓ アプリで比較。詳しくは 6章（インピーダンス）・7章（アドミッタンス）</p>
@@ -299,11 +299,11 @@
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.6em;">
-                                <li><strong>最適アプローチ:</strong> 方向ごとに位置/力制御を切り替え</li>
-                                <li><strong>例:</strong> Z軸方向は力制御、XY平面は位置制御</li>
-                                <li><strong>用途:</strong> 研削、研磨、組み立て作業</li>
-                                <li><strong>実装:</strong> ros2_controllers の標準には無い（admittance_controller は「押されたら逃げる」制御で別物）</li>
-                                <li>近い動きは FZI の cartesian_compliance_controller で作れる（Z の剛性を下げて目標力を与える）</li>
+                                <li>方向ごとに位置/力制御を切り替え（例: Z は力、XY は位置）</li>
+                                <li><strong>位置制御ロボット ＋ FTセンサでできる</strong>（トルク制御は不要）</li>
+                                <li>そのため産業用ロボットで<strong>よく使われる</strong>：研削・研磨・嵌合</li>
+                                <li>例: UR の <code>force_mode()</code>（力で制御する軸を選び、目標の力を指定）</li>
+                                <li>ROS2 では FZI の cartesian_compliance_controller で近い動きを作れる</li>
                             </ul>
                         </div>
                     </div>
