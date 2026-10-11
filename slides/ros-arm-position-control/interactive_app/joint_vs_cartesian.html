@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>関節空間 vs 直交空間の指令</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --joint: #f9a8d4;
+            --cart: #7dd3fc;
+            --tip: #fbbf24;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+            overscroll-behavior: none;
+        }
+        .wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+        .panel {
+            flex: 1 1 360px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+        }
+        .panel.joint { border-color: var(--joint); }
+        .panel.cart { border-color: var(--cart); }
+        h2 { margin: 0 0 2px; font-size: 17px; }
+        .joint h2 { color: var(--joint); }
+        .cart h2 { color: var(--cart); }
+        .sub { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+        canvas {
+            width: 100%;
+            height: 230px;
+            background: #0b1220;
+            border-radius: 8px;
+            display: block;
+            touch-action: none;
+        }
+        .cart canvas { cursor: grab; }
+        .row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .row label { width: 54px; font-size: 13px; }
+        .row input { flex: 1; }
+        .row .val { width: 62px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+        .cmd { color: var(--text); }
+        .result {
+            margin-top: 6px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #0b1220;
+            font-size: 12px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .result b { color: var(--tip); font-weight: 700; }
+        .warn { color: #f87171; }
+        .bar { display: inline-block; height: 8px; background: var(--cart); border-radius: 4px; vertical-align: middle; }
+        button {
+            margin-top: 6px;
+            background: #334155;
+            color: var(--text);
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        button:hover { background: #475569; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="panel joint">
+            <h2>関節空間で指令（Joint）</h2>
+            <div class="sub">各関節の角度を指定 → 手先の位置は「結果」として決まる</div>
+            <canvas id="cvJ"></canvas>
+            <div class="row"><label>θ1</label><input type="range" id="j0" min="-180" max="180" value="60"><span class="val" id="j0v"></span></div>
+            <div class="row"><label>θ2</label><input type="range" id="j1" min="-170" max="170" value="-70"><span class="val" id="j1v"></span></div>
+            <div class="row"><label>θ3</label><input type="range" id="j2" min="-170" max="170" value="-40"><span class="val" id="j2v"></span></div>
+            <div class="result" id="resJ"></div>
+            <button id="clrJ">軌跡を消す</button>
+        </div>
+        <div class="panel cart">
+            <h2>直交空間で指令（Cartesian）</h2>
+            <div class="sub">手先の位置・向きを指定（●をドラッグ）→ 関節角はIKで「結果」として決まる</div>
+            <canvas id="cvC"></canvas>
+            <div class="row"><label>x</label><input type="range" id="cx" min="-2.2" max="2.2" step="0.01" value="1.2"><span class="val" id="cxv"></span></div>
+            <div class="row"><label>y</label><input type="range" id="cy" min="-1.0" max="2.2" step="0.01" value="0.9"><span class="val" id="cyv"></span></div>
+            <div class="row"><label>向き φ</label><input type="range" id="cphi" min="-180" max="180" value="-45"><span class="val" id="cphiv"></span></div>
+            <div class="result" id="resC"></div>
+            <button id="clrC">軌跡を消す</button>
+        </div>
+    </div>
+
+    <script>
+        // 3リンク平面アーム (単位: m)
+        const L = [1.0, 0.8, 0.4];
+        const DEG = Math.PI / 180;
+        const TRACE_MAX = 600;
+
+        function fk(q) {
+            const pts = [[0, 0]];
+            let x = 0, y = 0, a = 0;
+            for (let i = 0; i < 3; i++) {
+                a += q[i];
+                x += L[i] * Math.cos(a);
+                y += L[i] * Math.sin(a);
+                pts.push([x, y]);
+            }
+            return { pts, phi: a };
+        }
+
+        // 手先位置(x,y)と向きphiから関節角を解析的に求める (肘上解)
+        function ik(x, y, phi, prev) {
+            const wx = x - L[2] * Math.cos(phi);
+            const wy = y - L[2] * Math.sin(phi);
+            const r2 = wx * wx + wy * wy;
+            const c2 = (r2 - L[0] * L[0] - L[1] * L[1]) / (2 * L[0] * L[1]);
+            if (c2 < -1 || c2 > 1) return null;
+            const s = Math.sqrt(1 - c2 * c2);
+            // 2つの解のうち、直前の姿勢に近い方を選ぶ
+            const cands = [s, -s].map(s2 => {
+                const q2 = Math.atan2(s2, c2);
+                const q1 = Math.atan2(wy, wx) - Math.atan2(L[1] * s2, L[0] + L[1] * c2);
+                const q3 = phi - q1 - q2;
+                return [q1, q2, q3].map(wrap);
+            });
+            if (!prev) return cands[0];
+            const dist = q => q.reduce((acc, v, i) => acc + Math.abs(wrap(v - prev[i])), 0);
+            return dist(cands[0]) <= dist(cands[1]) ? cands[0] : cands[1];
+        }
+
+        function wrap(a) {
+            while (a > Math.PI) a -= 2 * Math.PI;
+            while (a < -Math.PI) a += 2 * Math.PI;
+            return a;
+        }
+
+        function setupCanvas(cv) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = cv.getBoundingClientRect();
+            cv.width = rect.width * dpr;
+            cv.height = rect.height * dpr;
+            const ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        // ワールド座標 → キャンバス座標
+        function view(w, h) {
+            const scale = Math.min(w / 5.0, h / 3.4);
+            const ox = w / 2, oy = h - 0.9 * scale;
+            return {
+                scale,
+                to: (p) => [ox + p[0] * scale, oy - p[1] * scale],
+                from: (cx, cy) => [(cx - ox) / scale, (oy - cy) / scale],
+            };
+        }
+
+        function drawScene(cv, q, trace, color, target) {
+            const { ctx, w, h } = setupCanvas(cv);
+            const v = view(w, h);
+            ctx.clearRect(0, 0, w, h);
+
+            // 床とグリッド
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let gx = -3; gx <= 3; gx += 0.5) {
+                const [a] = v.to([gx, 0]);
+                ctx.beginPath(); ctx.moveTo(a, 0); ctx.lineTo(a, h); ctx.stroke();
+            }
+            for (let gy = -1; gy <= 3; gy += 0.5) {
+                const [, b] = v.to([0, gy]);
+                ctx.beginPath(); ctx.moveTo(0, b); ctx.lineTo(w, b); ctx.stroke();
+            }
+
+            // 手先の軌跡
+            if (trace.length > 1) {
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                trace.forEach((p, i) => {
+                    const [a, b] = v.to(p);
+                    i ? ctx.lineTo(a, b) : ctx.moveTo(a, b);
+                });
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+
+            const { pts, phi } = fk(q);
+            const c = pts.map(v.to);
+
+            // 土台
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(c[0][0] - 22, c[0][1], 44, 12);
+
+            // リンク
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = i === 2 ? '#64748b' : '#94a3b8';
+                ctx.lineWidth = i === 2 ? 8 : 12;
+                ctx.beginPath();
+                ctx.moveTo(c[i][0], c[i][1]);
+                ctx.lineTo(c[i + 1][0], c[i + 1][1]);
+                ctx.stroke();
+            }
+
+            // 関節 (関節空間側は関節を強調)
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(c[i][0], c[i][1], 8, 0, 2 * Math.PI);
+                ctx.fillStyle = color === 'joint' ? '#f9a8d4' : '#334155';
+                ctx.fill();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // 手先の座標軸 (直交空間側は手先を強調)
+            const tip = c[3];
+            const ax = 26;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#f87171';
+            ctx.beginPath(); ctx.moveTo(tip[0], tip[1]);
+            ctx.lineTo(tip[0] + ax * Math.cos(phi), tip[1] - ax * Math.sin(phi)); ctx.stroke();
+            ctx.strokeStyle = '#4ade80';
+            ctx.beginPath(); ctx.moveTo(tip[0], tip[1]);
+            ctx.lineTo(tip[0] - ax * Math.sin(phi), tip[1] - ax * Math.cos(phi)); ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(tip[0], tip[1], color === 'cart' ? 10 : 6, 0, 2 * Math.PI);
+            ctx.fillStyle = color === 'cart' ? '#7dd3fc' : '#fbbf24';
+            ctx.fill();
+
+            // 到達できない目標
+            if (target) {
+                const [a, b] = v.to(target);
+                ctx.strokeStyle = '#f87171';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.arc(a, b, 12, 0, 2 * Math.PI); ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            return v;
+        }
+
+        function pushTrace(trace, p) {
+            const last = trace[trace.length - 1];
+            if (last && Math.hypot(last[0] - p[0], last[1] - p[1]) < 0.005) return;
+            trace.push(p);
+            if (trace.length > TRACE_MAX) trace.shift();
+        }
+
+        const fmtDeg = r => (r / DEG).toFixed(0).padStart(4) + '°';
+
+        // ---------- 関節空間 ----------
+        const cvJ = document.getElementById('cvJ');
+        const js = [0, 1, 2].map(i => document.getElementById('j' + i));
+        const traceJ = [];
+
+        function updateJoint() {
+            const q = js.map(s => s.value * DEG);
+            js.forEach((s, i) => document.getElementById('j' + i + 'v').textContent = s.value + '°');
+            const { pts, phi } = fk(q);
+            pushTrace(traceJ, pts[3]);
+            drawScene(cvJ, q, traceJ, 'joint');
+            document.getElementById('resJ').innerHTML =
+                `結果 → 手先 x=<b>${pts[3][0].toFixed(2)}</b> y=<b>${pts[3][1].toFixed(2)}</b> φ=<b>${fmtDeg(wrap(phi))}</b>`;
+        }
+        js.forEach(s => s.addEventListener('input', updateJoint));
+        document.getElementById('clrJ').onclick = () => { traceJ.length = 0; updateJoint(); };
+
+        // ---------- 直交空間 ----------
+        const cvC = document.getElementById('cvC');
+        const cx = document.getElementById('cx');
+        const cy = document.getElementById('cy');
+        const cphi = document.getElementById('cphi');
+        const traceC = [];
+        let qC = ik(+cx.value, +cy.value, cphi.value * DEG, null) || [0, 0, 0];
+        let viewC = null;
+
+        function updateCart() {
+            document.getElementById('cxv').textContent = (+cx.value).toFixed(2);
+            document.getElementById('cyv').textContent = (+cy.value).toFixed(2);
+            document.getElementById('cphiv').textContent = cphi.value + '°';
+            const tx = +cx.value, ty = +cy.value, tphi = cphi.value * DEG;
+            const sol = ik(tx, ty, tphi, qC);
+            let unreachable = null;
+            if (sol) {
+                qC = sol;
+                pushTrace(traceC, fk(qC).pts[3]);
+            } else {
+                unreachable = [tx, ty];
+            }
+            viewC = drawScene(cvC, qC, traceC, 'cart', unreachable);
+            const bars = qC.map((a, i) =>
+                `θ${i + 1}=<b>${fmtDeg(a)}</b> <span class="bar" style="width:${Math.abs(a / Math.PI) * 40}px"></span>`
+            ).join('&nbsp;&nbsp;');
+            document.getElementById('resC').innerHTML = unreachable
+                ? `<span class="warn">届かない位置です（IKの解なし）</span>`
+                : `結果 → ${bars}`;
+        }
+        [cx, cy, cphi].forEach(s => s.addEventListener('input', updateCart));
+        document.getElementById('clrC').onclick = () => { traceC.length = 0; updateCart(); };
+
+        // 手先をドラッグして目標を指定
+        let dragging = false;
+        function dragTo(e) {
+            const r = cvC.getBoundingClientRect();
+            const [x, y] = viewC.from(e.clientX - r.left, e.clientY - r.top);
+            cx.value = Math.max(+cx.min, Math.min(+cx.max, x));
+            cy.value = Math.max(+cy.min, Math.min(+cy.max, y));
+            updateCart();
+        }
+        cvC.addEventListener('pointerdown', e => {
+            dragging = true;
+            cvC.setPointerCapture(e.pointerId);
+            cvC.style.cursor = 'grabbing';
+            dragTo(e);
+        });
+        cvC.addEventListener('pointermove', e => { if (dragging) dragTo(e); });
+        cvC.addEventListener('pointerup', () => { dragging = false; cvC.style.cursor = 'grab'; });
+
+        function redraw() { updateJoint(); updateCart(); }
+        window.addEventListener('resize', redraw);
+        redraw();
+    </script>
+</body>
+</html>

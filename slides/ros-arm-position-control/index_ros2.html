@@ -54,17 +54,127 @@
             <section>
                 <h2>ロボット制御参考資料</h2>
                 <p>本スライド(実践)、教科書(理論)の併用がおススメ</p>
-                <ol>
+                <div style="font-size: 0.75em;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 14%; margin-right: 20px;">
+                        <p style="margin: 0; text-align: left;">イラストが豊富で分かりやすいながらも基礎的な数式を扱っていて最初に読むのにちょうど良い<br>最も基本の位置制御まで扱っている</p>
+                    </div>
                     <div style="display: flex; align-items: center;">
-                        <img src="media/イラストで学ぶロボット工学.jpg" style="width: 20%; margin-right: 20px;">
-                        <p>イラストが豊富で分かりやすいながらも基礎的な数式を扱っていて最初に読むのにちょうど良い<br>最も基本の位置制御まで扱っている</p>
+                        <img src="media/実践ロボット制御.jpg" style="width: 14%; margin-right: 20px;">
+                        <p style="margin: 0; text-align: left;">教科書「ロボット制御基礎論」を現在版にブラッシュアップ、理論的な詳しさと実装面までの手引きが充実</p>
                     </div>
-                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-                        <img src="media/実践ロボット制御.jpg" style="width: 20%; margin-right: 20px;">
-                        <p>教科書「ロボット制御基礎論」を現在版にブラッシュアップ、理論的な詳しさと実装面までの手引きが充実</p>
-                    </div>
+                </div>
+            </section>
 
-                </ol>
+            <section>
+                <section>
+                    <h2>位置制御とは</h2>
+                    <p style="font-size: 0.7em;">手先を目標の位置・姿勢へ動かす制御。動かし方は大きく3種類</p>
+                    <div style="display: flex; gap: 20px; font-size: 0.5em; align-items: stretch;">
+                        <div style="flex: 2; border: 2px dashed #9ca3af; border-radius: 12px; padding: 10px;">
+                            <div style="color: #d1d5db; margin-bottom: 8px;">基本の動作指令（付属コントローラでもできる）</div>
+                            <div style="display: flex; gap: 15px;">
+                                <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
+                                    <strong style="color: #f472b6;">① PTP</strong>
+                                    <svg viewBox="0 0 200 120" style="width: 100%; max-height: 22vh;">
+                                        <path d="M30,95 C60,10 140,10 170,40" fill="none" stroke="#f472b6" stroke-width="3" stroke-dasharray="6 5"/>
+                                        <circle cx="30" cy="95" r="7" fill="#9ca3af"/>
+                                        <circle cx="170" cy="40" r="9" fill="none" stroke="#fbbf24" stroke-width="3"/>
+                                        <circle cx="170" cy="40" r="3" fill="#fbbf24"/>
+                                        <text x="100" y="115" font-size="14" text-anchor="middle" fill="#f9a8d4">途中は問わない</text>
+                                    </svg>
+                                    ゴールに着けばOK
+                                </div>
+                                <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 8px;">
+                                    <strong style="color: #4fc3f7;">② CP</strong>
+                                    <svg viewBox="0 0 200 120" style="width: 100%; max-height: 22vh;">
+                                        <line x1="30" y1="95" x2="170" y2="40" stroke="#4fc3f7" stroke-width="4"/>
+                                        <circle cx="30" cy="95" r="7" fill="#9ca3af"/>
+                                        <circle cx="170" cy="40" r="9" fill="none" stroke="#fbbf24" stroke-width="3"/>
+                                        <circle cx="170" cy="40" r="3" fill="#fbbf24"/>
+                                        <text x="100" y="115" font-size="14" text-anchor="middle" fill="#7dd3fc">直線・円弧で通る</text>
+                                    </svg>
+                                    途中の経路も指定
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex: 1; border: 2px dashed #4ade80; border-radius: 12px; padding: 10px;">
+                            <div style="color: #86efac; margin-bottom: 8px;">ROS・研究用途で多い</div>
+                            <div style="border: 2px solid #4ade80; border-radius: 10px; padding: 8px;">
+                                <strong style="color: #4ade80;">③ パスプランニング</strong>
+                                <svg viewBox="0 0 200 120" style="width: 100%; max-height: 22vh;">
+                                    <rect x="80" y="45" width="40" height="55" rx="4" fill="#6b7280"/>
+                                    <text x="100" y="78" font-size="13" text-anchor="middle" fill="#e5e7eb">障害物</text>
+                                    <path d="M30,95 C40,20 140,10 170,60" fill="none" stroke="#4ade80" stroke-width="3"/>
+                                    <circle cx="30" cy="95" r="7" fill="#9ca3af"/>
+                                    <circle cx="170" cy="60" r="9" fill="none" stroke="#fbbf24" stroke-width="3"/>
+                                    <circle cx="170" cy="60" r="3" fill="#fbbf24"/>
+                                    <text x="100" y="115" font-size="14" text-anchor="middle" fill="#86efac">避ける経路を自動生成</text>
+                                </svg>
+                                障害物回避の経路を計算
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.6em;">①②は振り返り、③がROSで加わる部分↓</p>
+                </section>
+
+                <section>
+                    <h2>振り返り：PTPとCP</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1;">
+                            <video data-autoplay width="100%" muted loop>
+                                <source data-src="../robot-arm-basic-control/media/motion_demo.mp4" type="video/mp4">
+                                動画を再生できません。
+                            </video>
+                        </div>
+                        <div style="flex: 1.2; font-size: 0.6em; text-align: left;">
+                            <div style="border: 2px solid #f472b6; border-radius: 10px; padding: 10px 15px; margin-bottom: 15px;">
+                                <strong style="color: #f472b6;">PTP</strong>（Point To Point）<br>
+                                経路を規定しない・<strong>関節空間</strong>で補間<br>
+                                → UR: <code>movej()</code>
+                            </div>
+                            <div style="border: 2px solid #4fc3f7; border-radius: 10px; padding: 10px 15px;">
+                                <strong style="color: #4fc3f7;">CP</strong>（Continuous Path）<br>
+                                TCPの経路形状を規定・<strong>直交空間</strong>で補間
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <div style="flex: 1; border: 2px solid #fb923c; border-radius: 8px; padding: 6px 10px;">
+                                        <strong style="color: #fb923c;">LIN</strong> 直線<br>→ <code>movel()</code>
+                                    </div>
+                                    <div style="flex: 1; border: 2px solid #2dd4bf; border-radius: 8px; padding: 6px 10px;">
+                                        <strong style="color: #2dd4bf;">CIRC</strong> 円弧<br>→ <code>movec()</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.5em;">詳しくは <a href="../robot-arm-basic-control/index.html#/8" target="_blank" style="color: #3b82f6;">ロボットアーム入門 ~ロボットの基本操作~</a> の第8章</p>
+                </section>
+
+                <section>
+                    <h2>③ パスプランニング</h2>
+                    <div style="display: flex; align-items: center; gap: 30px;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 400 260" style="width: 100%; max-height: 50vh;">
+                                <rect x="160" y="90" width="80" height="150" rx="6" fill="#6b7280"/>
+                                <text x="200" y="170" font-size="20" text-anchor="middle" fill="#e5e7eb">障害物</text>
+                                <line x1="40" y1="220" x2="360" y2="220" stroke="#f87171" stroke-width="3" stroke-dasharray="8 6"/>
+                                <text x="100" y="250" font-size="16" text-anchor="middle" fill="#fca5a5">直線(CP)だと衝突</text>
+                                <path d="M40,220 C60,40 330,30 360,220" fill="none" stroke="#4ade80" stroke-width="4"/>
+                                <text x="200" y="40" font-size="16" text-anchor="middle" fill="#86efac">プランナが経路を探索</text>
+                                <circle cx="40" cy="220" r="9" fill="#9ca3af"/>
+                                <circle cx="360" cy="220" r="11" fill="none" stroke="#fbbf24" stroke-width="3"/>
+                                <circle cx="360" cy="220" r="4" fill="#fbbf24"/>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; text-align: left;">
+                            <ul style="font-size: 0.8em;">
+                                <li>ゴールと障害物だけ与えると経路を自動で計算</li>
+                                <li>付属コントローラには基本的にない機能</li>
+                                <li>ROSでは<strong>MoveIt</strong>が担当</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
             </section>
 
             <section>
@@ -72,17 +182,46 @@
                 <div style="display: flex;">
                     <div style="flex: 1;">
                         <h4>ROSコントローラ</h4>
-                        <ul>
+                        <svg viewBox="0 0 400 250" style="width: 100%; max-height: 34vh;">
+                            <defs><marker id="rm1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker></defs>
+                            <g font-size="17" text-anchor="middle" fill="#e5e7eb">
+                                <rect x="60" y="5" width="280" height="50" rx="8" fill="#1e3a5f"/>
+                                <text x="200" y="27">PC（ROS / MoveIt）</text>
+                                <text x="200" y="47" font-size="14" fill="#93c5fd">軌道を全部ここで計算</text>
+                                <line x1="200" y1="55" x2="200" y2="90" stroke="#9ca3af" stroke-width="3" marker-end="url(#rm1)"/>
+                                <text x="300" y="80" font-size="14" fill="#fbbf24">細かい点の列</text>
+                                <rect x="60" y="95" width="280" height="44" rx="8" fill="#374151"/>
+                                <text x="200" y="123">コントローラ：追従するだけ</text>
+                                <path d="M40.0,195.0 L42.8,192.1 L45.5,189.3 L48.2,186.5 L51.0,183.8 L53.8,181.3 L56.5,179.0 L59.2,176.8 L62.0,174.9 L64.8,173.2 L67.5,171.8 L70.2,170.6 L73.0,169.7 L75.8,169.1 L78.5,168.7 L81.2,168.6 L84.0,168.6 L86.8,168.9 L89.5,169.4 L92.2,170.1 L95.0,170.9 L97.8,171.7 L100.5,172.7 L103.2,173.7 L106.0,174.7 L108.8,175.7 L111.5,176.7 L114.2,177.6 L117.0,178.5 L119.8,179.2 L122.5,179.9 L125.2,180.5 L128.0,181.0 L130.8,181.3 L133.5,181.6 L136.2,181.9 L139.0,182.0 L141.8,182.1 L144.5,182.3 L147.2,182.4 L150.0,182.5 L152.8,182.7 L155.5,183.0 L158.2,183.3 L161.0,183.8 L163.8,184.5 L166.5,185.3 L169.2,186.2 L172.0,187.4 L174.8,188.7 L177.5,190.3 L180.2,192.0 L183.0,193.9 L185.8,195.9 L188.5,198.1 L191.2,200.4 L194.0,202.8 L196.8,205.3 L199.5,207.7 L202.2,210.2 L205.0,212.7 L207.8,215.0 L210.5,217.3 L213.2,219.4 L216.0,221.4 L218.8,223.1 L221.5,224.6 L224.2,225.8 L227.0,226.8 L229.8,227.4 L232.5,227.8 L235.2,227.8 L238.0,227.6 L240.8,227.1 L243.5,226.3 L246.2,225.2 L249.0,223.9 L251.8,222.3 L254.5,220.6 L257.2,218.7 L260.0,216.7 L262.8,214.5 L265.5,212.4 L268.2,210.2 L271.0,208.0 L273.8,205.8 L276.5,203.7 L279.2,201.8 L282.0,199.9 L284.8,198.2 L287.5,196.6 L290.2,195.1 L293.0,193.9 L295.8,192.7 L298.5,191.8 L301.2,191.0 L304.0,190.3 L306.8,189.7 L309.5,189.3 L312.2,188.9 L315.0,188.5 L317.8,188.2 L320.5,187.9 L323.2,187.6 L326.0,187.2 L328.8,186.8 L331.5,186.3 L334.2,185.6 L337.0,184.9 L339.8,184.1 L342.5,183.2 L345.2,182.1 L348.0,181.0 L350.8,179.7 L353.5,178.4 L356.2,177.0 L359.0,175.6 L361.8,174.1 L364.5,172.7 L367.2,171.3 L370.0,170.0" fill="none" stroke="#4ade80" stroke-width="3"/>
+                                <g fill="#4ade80"><circle cx="40.0" cy="195.0" r="3"/><circle cx="63.6" cy="173.9" r="3"/><circle cx="87.1" cy="169.0" r="3"/><circle cx="110.7" cy="176.4" r="3"/><circle cx="134.3" cy="181.7" r="3"/><circle cx="157.9" cy="183.3" r="3"/><circle cx="181.4" cy="192.8" r="3"/><circle cx="205.0" cy="212.7" r="3"/><circle cx="228.6" cy="227.2" r="3"/><circle cx="252.1" cy="222.1" r="3"/><circle cx="275.7" cy="204.3" r="3"/><circle cx="299.3" cy="191.5" r="3"/><circle cx="322.9" cy="187.6" r="3"/><circle cx="346.4" cy="181.6" r="3"/><circle cx="370.0" cy="170.0" r="3"/></g>
+                                <text x="200" y="245" font-size="14" fill="#4ade80">自由な曲線も作れる</text>
+                            </g>
+                        </svg>
+                        <ul style="font-size: 0.55em;">
                             <li>PC上で完全に動作を計算して実行できる</li>
                             <li>軌道制御などをさせたいときはこっち</li>
                         </ul>
                     </div>
                     <div style="flex: 1;">
                         <h4>付属コントローラ</h4>
-                        <ul>
-                            <li>ロボット付属のコントローラで動作を計算・実行</li>
-                            <li>初期姿勢と最終姿勢は指定できるが中間の動きは指定できない</li>
-                            <li>直線など単純な動きならこちらで問題ない</li>
+                        <svg viewBox="0 0 400 250" style="width: 100%; max-height: 34vh;">
+                            <defs><marker id="rm2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker></defs>
+                            <g font-size="17" text-anchor="middle" fill="#e5e7eb">
+                                <rect x="60" y="5" width="280" height="50" rx="8" fill="#374151"/>
+                                <text x="200" y="27">PC / ペンダント</text>
+                                <text x="200" y="47" font-size="14" fill="#d1d5db">教示点と命令だけ送る</text>
+                                <line x1="200" y1="55" x2="200" y2="90" stroke="#9ca3af" stroke-width="3" marker-end="url(#rm2)"/>
+                                <text x="300" y="80" font-size="14" fill="#fbbf24">movel(p1), movel(p2)…</text>
+                                <rect x="60" y="95" width="280" height="44" rx="8" fill="#b45309"/>
+                                <text x="200" y="123">コントローラ：軌道を計算</text>
+                                <polyline points="40,215 150,170 260,215 370,170" fill="none" stroke="#f472b6" stroke-width="3"/>
+                                <g fill="#f472b6"><circle cx="40" cy="215" r="6"/><circle cx="150" cy="170" r="6"/><circle cx="260" cy="215" r="6"/><circle cx="370" cy="170" r="6"/></g>
+                                <text x="200" y="245" font-size="14" fill="#f472b6">直線・円弧の組合せ</text>
+                            </g>
+                        </svg>
+                        <ul style="font-size: 0.55em;">
+                            <li>初期・最終姿勢は指定できるが中間の動きは指定できない</li>
+                            <li>直線など単純な動きならこちらで十分</li>
                         </ul>
                     </div>
                 </div>
@@ -170,12 +309,8 @@
                             </tr>
                             <tr>
                                 <td class="col-control">速度</td>
-                                <td class="col-coords" rowspan="2">直交座標系</td>
+                                <td class="col-coords">直交座標系</td>
                                 <td class="col-action">速度</td>
-                            </tr>
-                            <tr>
-                                <td class="col-control">トルク</td>
-                                <td class="col-action">力(トルク)</td>
                             </tr>
                         </tbody>
                     </table>
@@ -193,6 +328,16 @@
                 </section>
 
                 <section>
+                    <h2>関節空間と直交空間の指令</h2>
+                    <p style="font-size: 0.5em; margin: 0 0 6px;">
+                        <a href="interactive_app/joint_vs_cartesian.html" target="_blank"
+                            style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                        ／ 左は関節を1つずつ、右は手先を直線に動かして軌跡を比べてみよう
+                    </p>
+                    <iframe data-src="interactive_app/joint_vs_cartesian.html" width="100%" height="480"
+                        frameborder="0"></iframe>
+                </section>
+                <section>
                     <h2>よく使うROSの関節空間の<br>アームコントローラ</h2>
                     <div style="margin-bottom: 2em;">
                         <p style="font-size: 0.8em; margin-bottom: 0.5em;">
@@ -204,7 +349,6 @@
                         <ul style="font-size: 0.9em;">
                             <li><strong>position_controllers/JointTrajectoryController</strong></li>
                             <li><strong>velocity_controllers/JointTrajectoryController</strong></li>
-                            <li><strong>effort_controllers/JointTrajectoryController</strong></li>
                         </ul>
                     </div>
                 </section>
@@ -236,26 +380,11 @@
                         <div style="flex: 1;">
                             <h3>位置/速度制御</h3>
                             <p>position_controllers, velocity_controllersのみ使用可</p>
+                            <p style="font-size: 0.6em; color: #aaa;">トルク（電流）ベースの制御は力制御のスライドで扱います</p>
                             <ul>
                                 <li>Universal Robot</li>
                                 <li>DENSO</li>
                                 <li>その他多数</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>トルク制御できるロボットもある</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/franka_robot.png" alt="代表的なロボット" style="width: 100%;">
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>トルク制御</h3>
-                            <p>effort_controllersも使用可</p>
-                            <ul>
-                                <li>Franka Robotics</li>
-                                <li>KUKA</li>
                             </ul>
                         </div>
                     </div>
@@ -286,7 +415,7 @@
 
                         <div
                             style="flex: 1; width: 50%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; box-sizing: border-box;">
-                            <h4 style="margin:0 0 10px 0;">JointTrajectoryController</h4>
+                            <h4 style="margin:0 0 10px 0; font-size: 0.65em;"><span style="color: #9ca3af;">（なし）</span>JointTrajectoryController</h4>
                             <ul style="font-size: 0.8em;">
                                 <li>ROSを使ったロボットアーム制御で一般に使われるコントローラです</li>
                             </ul>
@@ -294,17 +423,17 @@
 
                         <div
                             style="flex: 1; width: 50%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; box-sizing: border-box;">
-                            <h4 style="margin:0 0 10px 0; word-break: break-all;">
-                                ScaledJointTrajectoryController</h4>
+                            <h4 style="margin:0 0 10px 0; font-size: 0.65em;">
+                                <span style="color: #fbbf24; background: rgba(251,191,36,0.2); border-radius: 4px; padding: 0 4px;">Scaled</span>JointTrajectoryController</h4>
                             <ul style="font-size: 0.8em;">
-                                <li>URのタブレットの<strong>速度スライダー</strong>に対応したUR専用コントローラ</li>
+                                <li><strong style="color: #fbbf24;">Scaled</strong> = URのタブレットの<strong>速度スライダー</strong>の倍率を反映する</li>
                                 <li>例えば速度スライダーが1%の場合、これがないとROSは100%の速度で計算し制御がずれます</li>
                             </ul>
                         </div>
 
                     </div>
                     <p style="font-size: 0.8em; margin-top: 20px; color: #aaa;">
-                        今回は UR を使用するため、UR 用コントローラとして <code>ScaledJointTrajectoryController</code> を利用します。
+                        今回は UR を使用するため、UR 用コントローラとして <code><span style="color: #fbbf24;">Scaled</span>JointTrajectoryController</code> を利用します。
                     </p>
                 </section>
  <section>
@@ -429,7 +558,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>JTCの実装4ステップ</h2>
+                    <h2>JTCの実装4ステップ<br><span style="font-size: 0.5em;">（JTC = JointTrajectoryController）</span></h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
 
                         <div style="flex: 1;">
@@ -451,8 +580,8 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                         </div>
                         <div style="flex: 1;">
                             <ul>
-                                <li>位置とクオータニオンの7次元を並べてwaypointsを作成</li>
-                                <li>クオータニオンのSlerpを活用すると動作が滑らかになる</li>
+                                <li>目標の姿勢をたくさん並べてwaypointsを作成</li>
+                                <li>例：円やらせんの上に点を並べる</li>
                             </ul>
                         </div>
                     </div>
@@ -461,20 +590,48 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <h2>手先姿勢の表現</h2>
                     <p>位置(position)+向き(orientation)=姿勢(pose)</p>
                     <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <img src="media/robot_arm_structure.png" alt="姿勢表現" style="width: 100%;">
+                        <div style="flex: 1.2;">
+<svg viewBox="0 0 420 300" style="width: 100%; max-height: 52vh;">
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <rect x="5" y="30" width="195" height="230" rx="10" fill="none" stroke="#475569" stroke-width="2"/>
+                                    <rect x="220" y="30" width="195" height="230" rx="10" fill="none" stroke="#475569" stroke-width="2"/>
+                                    <text x="102" y="22" font-size="17" text-anchor="middle" fill="#e5e7eb">姿勢A：真下を向く</text>
+                                    <text x="317" y="22" font-size="17" text-anchor="middle" fill="#e5e7eb">姿勢B：斜めを向く</text>
+                                    <g transform="translate(102,150) rotate(0)">
+                                        <rect x="-18" y="-70" width="36" height="40" rx="5" fill="#94a3b8"/>
+                                        <rect x="-20" y="-30" width="10" height="28" fill="#cbd5e1"/>
+                                        <rect x="10" y="-30" width="10" height="28" fill="#cbd5e1"/>
+                                        <line x1="0" y1="0" x2="60" y2="0" stroke="#f87171" stroke-width="4"/>
+                                        <line x1="0" y1="0" x2="0" y2="60" stroke="#60a5fa" stroke-width="4"/>
+                                        <text x="64" y="6" font-size="16" fill="#f87171">x</text>
+                                        <text x="6" y="76" font-size="16" fill="#60a5fa">z</text>
+                                    </g>
+                                    <circle cx="102" cy="150" r="7" fill="#fbbf24"/>
+                                    <g transform="translate(317,150) rotate(-40)">
+                                        <rect x="-18" y="-70" width="36" height="40" rx="5" fill="#94a3b8"/>
+                                        <rect x="-20" y="-30" width="10" height="28" fill="#cbd5e1"/>
+                                        <rect x="10" y="-30" width="10" height="28" fill="#cbd5e1"/>
+                                        <line x1="0" y1="0" x2="60" y2="0" stroke="#f87171" stroke-width="4"/>
+                                        <line x1="0" y1="0" x2="0" y2="60" stroke="#60a5fa" stroke-width="4"/>
+                                        <text x="64" y="6" font-size="16" fill="#f87171">x</text>
+                                        <text x="6" y="76" font-size="16" fill="#60a5fa">z</text>
+                                    </g>
+                                    <circle cx="317" cy="150" r="7" fill="#fbbf24"/>
+                                    <text x="102" y="250" font-size="15" text-anchor="middle" fill="#fbbf24">位置 (0.4, 0.2, 0.3)</text>
+                                    <text x="317" y="250" font-size="15" text-anchor="middle" fill="#fbbf24">位置 (0.4, 0.2, 0.3)</text>
+                                    <text x="210" y="290" font-size="16" text-anchor="middle" fill="#7dd3fc">位置は同じ、手先座標系の向きが違う → 別の姿勢</text>
+                                </g>
+                            </svg>
                         </div>
                         <div style="flex: 1;">
-                            <ul>
-                                <li><strong>位置：</strong>XYZで表す</li>
-                                <li><strong>向き：</strong>オイラー角 or クオータニオン</li>
-                                <li>ROSでは内部計算でクオータニオンを使う</li>
-
-
+                            <ul style="font-size: 0.75em;">
+                                <li><strong>位置：</strong>XYZの3つで表す</li>
+                                <li><strong>向き：</strong>手先座標系の傾き</li>
+                                <li>向きの表し方は複数ある（オイラー角・クォータニオン…）</li>
+                                <li>ROSでは<strong>クォータニオン</strong>をよく使う</li>
                             </ul>
                         </div>
                     </div>
-                    <p>実用上は最初と最後の姿勢をオイラー角で指定、クオータニオンに変換後に補完してROSに渡す</p>
                 </section>
 
                 <section>
@@ -540,6 +697,101 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
+                    <h2>クォータニオンってなに？</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 360 300" style="width: 100%; max-height: 50vh;">
+                                <defs>
+                                    <marker id="qAx" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+                                    <marker id="qRot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7dd3fc"/></marker>
+                                </defs>
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <!-- 回転軸 -->
+                                    <line x1="110" y1="260" x2="250" y2="40" stroke="#fbbf24" stroke-width="5" marker-end="url(#qAx)"/>
+                                    <text x="258" y="40" font-size="18" fill="#fbbf24">回転軸 n</text>
+                                    <!-- 軸まわりの回転 -->
+                                    <ellipse cx="180" cy="150" rx="85" ry="32" transform="rotate(-57 180 150)" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="5 5"/>
+                                    <path d="M 120,185 A 85,32 -57 0 1 145,85" transform="rotate(0)" fill="none" stroke="#7dd3fc" stroke-width="5" marker-end="url(#qRot)"/>
+                                    <text x="40" y="140" font-size="18" fill="#7dd3fc">回転角 θ</text>
+                                    <!-- 手先 -->
+                                    <rect x="200" y="120" width="44" height="30" rx="5" fill="#94a3b8" transform="rotate(-20 222 135)"/>
+                                    <text x="180" y="295" font-size="16" text-anchor="middle" fill="#e5e7eb">「この軸まわりに θ 回す」で向きが決まる</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; font-size: 0.8em;">
+                            <ul>
+                                <li>どんな向きも<strong>1本の軸まわりの1回の回転</strong>で表せる</li>
+                                <li>その軸と角度を4つの数に詰めたもの</li>
+                            </ul>
+                            <p style="font-family: monospace; font-size: 0.85em; background: #222; padding: 10px; border-radius: 8px;">
+                                w = cos(θ/2)<br>(x, y, z) = <span style="color: #fbbf24;">n</span>·sin(θ/2)
+                            </p>
+                            <p style="font-size: 0.7em; color: #aaa;">例：z軸まわりに90° → (w, x, y, z) = (0.707, 0, 0, 0.707)</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>ジンバルロックしない理由</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.6em;">
+                        <div style="flex: 1; border: 2px solid #f87171; border-radius: 12px; padding: 10px;">
+                            <strong style="color: #f87171;">オイラー角：3つの軸で順番に回す</strong>
+                            <svg viewBox="0 0 300 200" style="width: 100%; max-height: 30vh;">
+                                <g font-family="Noto Sans JP, sans-serif" font-size="16">
+                                    <rect x="10" y="70" width="70" height="40" rx="6" fill="#7f1d1d"/>
+                                    <text x="45" y="96" text-anchor="middle" fill="#fecaca">Roll</text>
+                                    <text x="95" y="96" fill="#9ca3af">→</text>
+                                    <rect x="115" y="70" width="70" height="40" rx="6" fill="#b45309"/>
+                                    <text x="150" y="90" text-anchor="middle" fill="#fde68a">Pitch</text>
+                                    <text x="150" y="106" text-anchor="middle" font-size="13" fill="#fde68a">= 90°</text>
+                                    <text x="200" y="96" fill="#9ca3af">→</text>
+                                    <rect x="220" y="70" width="70" height="40" rx="6" fill="#7f1d1d"/>
+                                    <text x="255" y="96" text-anchor="middle" fill="#fecaca">Yaw</text>
+                                    <path d="M45,115 C45,175 255,175 255,115" fill="none" stroke="#f87171" stroke-width="3" stroke-dasharray="6 4"/>
+                                    <text x="150" y="190" text-anchor="middle" fill="#fca5a5">RollとYawの軸が重なる</text>
+                                    <text x="150" y="40" text-anchor="middle" fill="#e5e7eb">3つの数 → 2方向しか回せない</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 12px; padding: 10px;">
+                            <strong style="color: #4ade80;">クォータニオン：1軸で1回だけ回す</strong>
+                            <svg viewBox="0 0 300 200" style="width: 100%; max-height: 30vh;">
+                                <defs><marker id="qAx2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker></defs>
+                                <g font-family="Noto Sans JP, sans-serif" font-size="16">
+                                    <line x1="110" y1="170" x2="190" y2="30" stroke="#fbbf24" stroke-width="4" marker-end="url(#qAx2)"/>
+                                    <ellipse cx="150" cy="100" rx="55" ry="20" transform="rotate(-60 150 100)" fill="none" stroke="#4ade80" stroke-width="3"/>
+                                    <text x="150" y="195" text-anchor="middle" fill="#86efac">回す順番も、重なる軸もない</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.7em;">
+                        <li>ジンバルロックは「軸を順番に回す」表し方の副作用</li>
+                        <li>クォータニオンは向きを<strong>丸ごと1つの回転</strong>として持つので、特別な角度がない</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>なぜ正規化が必要？</h2>
+                    <ul style="font-size: 0.7em;">
+                        <li>回転を表せるのは<strong>長さ1</strong>のクォータニオンだけ（w² + x² + y² + z² = 1）</li>
+                        <li>長さ1でないと「回転＋拡大縮小」が混ざってしまう</li>
+                        <li>ロボットでは手書きの丸めた値（0.707など）や、補間・掛け算の誤差でズレる</li>
+                        <li>TFやMoveItは正規化されていないとエラーや警告を出す</li>
+                    </ul>
+                    <pre style="width: 80%;"><code class="language-python" data-trim>
+import numpy as np
+
+q = np.array([0.0, 0.0, 0.7, 0.7])  # x, y, z, w
+print(np.linalg.norm(q))  # 0.9899 → 長さ1でない
+
+q = q / np.linalg.norm(q)  # 正規化
+print(np.linalg.norm(q))  # 1.0
+                    </code></pre>
+                </section>
+
+                <section>
                     <h2>クォータニオン補間の利点</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
@@ -571,6 +823,44 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
+                    <h2>なぜ球面線形補間（SLERP）？</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 360 335" style="width: 100%; max-height: 52vh;">
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <circle cx="180" cy="180" r="140" fill="none" stroke="#475569" stroke-width="2"/>
+                                    <circle cx="180" cy="180" r="4" fill="#9ca3af"/>
+                                    <text x="180" y="230" font-size="14" text-anchor="middle" fill="#9ca3af">長さ1の球面</text>
+                                    <line x1="58.8" y1="110" x2="301.2" y2="110" stroke="#f87171" stroke-width="3" stroke-dasharray="6 5"/>
+                                    <g fill="#f87171">
+                                        <circle cx="119.4" cy="110" r="5"/><circle cx="180" cy="110" r="5"/><circle cx="240.6" cy="110" r="5"/>
+                                    </g>
+                                    <text x="180" y="140" font-size="14" text-anchor="middle" fill="#fca5a5">線形補間：内側を通る（長さ&lt;1）</text>
+                                    <path d="M58.8,110 A140,140 0 0 1 301.2,110" fill="none" stroke="#4ade80" stroke-width="4"/>
+                                    <g fill="#4ade80">
+                                        <circle cx="110" cy="58.8" r="6"/><circle cx="180" cy="40" r="6"/><circle cx="250" cy="58.8" r="6"/>
+                                    </g>
+                                    <text x="180" y="22" font-size="14" text-anchor="middle" fill="#86efac">SLERP：球面に沿って等間隔</text>
+                                    <circle cx="58.8" cy="110" r="8" fill="#fbbf24"/>
+                                    <circle cx="301.2" cy="110" r="8" fill="#fbbf24"/>
+                                    <text x="30" y="100" font-size="16" fill="#fbbf24">q₀</text>
+                                    <text x="312" y="100" font-size="16" fill="#fbbf24">q₁</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; font-size: 0.7em;">
+                            <ul>
+                                <li>回転を表すクォータニオンは長さ1 → すべて<strong>球面の上</strong>の点</li>
+                                <li>ふつうに線形補間すると、途中が球の<strong>内側</strong>を通る
+                                    <ul><li>長さが1でなくなり、回る速さもムラになる</li></ul></li>
+                                <li>球面に沿って（大円上を）進めば、長さ1のまま<strong>一定の角速度</strong>で回る</li>
+                                <li>これが<strong>球面線形補間（SLERP）</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
                     <h2>クォータニオンを扱う方法</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
@@ -592,13 +882,47 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
-                    <h2>姿勢の表現 - オススメの実装</h2>
-                    <ul>
-                        <li>最初と最後の姿勢は<strong>直観的にわかりやすいオイラー角</strong>で指定</li>
-                        <li>最初→最後の間のwaypointsの計算では<strong>オイラー角→クォータニオンに変換</strong>してSlerpで補完</li>
-                        <li>ROSはクオータニオンしか扱えない点に注意</li>
-                    </ul>
-
+                    <h2>姿勢の表現 - 使い分け</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.55em;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 12px; padding: 10px;">
+                            <strong style="color: #f472b6;">最初と最後だけ指定（PTP的）</strong>
+                            <svg viewBox="0 0 300 170" style="width: 100%; max-height: 28vh;">
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <path d="M30,120 C90,10 210,10 270,120" fill="none" stroke="#f472b6" stroke-width="3" stroke-dasharray="6 5"/>
+                                    <g transform="translate(30,120) rotate(0)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#94a3b8"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(270,120) rotate(-60)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#94a3b8"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <text x="30" y="155" font-size="14" text-anchor="middle" fill="#e5e7eb">(R, P, Y)</text>
+                                    <text x="270" y="155" font-size="14" text-anchor="middle" fill="#e5e7eb">(R, P, Y)</text>
+                                    <text x="150" y="100" font-size="14" text-anchor="middle" fill="#f9a8d4">途中はコントローラ任せ</text>
+                                </g>
+                            </svg>
+                            → 人が読み書きしやすい<strong style="color: #f472b6;">オイラー角</strong>でOK
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 12px; padding: 10px;">
+                            <strong style="color: #4fc3f7;">途中の姿勢も全部並べる（CP的）</strong>
+                            <svg viewBox="0 0 300 170" style="width: 100%; max-height: 28vh;">
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <path d="M30.0,120.0 L64.3,94.0 L98.6,73.1 L132.9,61.5 L167.1,61.5 L201.4,73.1 L235.7,94.0 L270.0,120.0" fill="none" stroke="#4fc3f7" stroke-width="2"/>
+                                    <g transform="translate(30.0,120.0) rotate(-0.0)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(64.3,94.0) rotate(-8.6)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(98.6,73.1) rotate(-17.1)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(132.9,61.5) rotate(-25.7)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(167.1,61.5) rotate(-34.3)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(201.4,73.1) rotate(-42.9)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(235.7,94.0) rotate(-51.4)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <g transform="translate(270.0,120.0) rotate(-60.0)"><rect x="-10" y="-22" width="20" height="14" rx="3" fill="#7dd3fc"/><rect x="-11" y="-8" width="6" height="12" fill="#cbd5e1"/><rect x="5" y="-8" width="6" height="12" fill="#cbd5e1"/></g>
+                                    <text x="30" y="155" font-size="14" text-anchor="middle" fill="#e5e7eb">q₀</text>
+                                    <text x="270" y="155" font-size="14" text-anchor="middle" fill="#e5e7eb">q₁</text>
+                                    <text x="150" y="155" font-size="14" text-anchor="middle" fill="#7dd3fc">向きが少しずつ回る</text>
+                                </g>
+                            </svg>
+                            → <strong style="color: #4fc3f7;">クォータニオン</strong>＋<strong>SLERP</strong>で補間
+                        </div>
+                    </div>
+                    <p style="font-size: 0.6em; margin-top: 15px;">
+                        おすすめ：両端は<span style="color: #f472b6;">オイラー角</span>で書く → <span style="color: #4fc3f7;">クォータニオン</span>に変換 → SLERP → ROSへ
+                    </p>
+                    <p style="font-size: 0.5em; color: #aaa;">ROSのメッセージ（geometry_msgs/Pose）はクォータニオンしか受け付けない点に注意</p>
                 </section>
 
                 <section>
