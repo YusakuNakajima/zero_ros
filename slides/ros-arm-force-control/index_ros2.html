@@ -602,6 +602,32 @@
                     </div>
                 </section>
 
+                <!-- 手先の力と関節トルク：ヤコビアン -->
+                <section>
+                    <h2 style="font-size: 1.3em;">手先の力 ⇔ 関節トルク：ヤコビアン</h2>
+                    <div style="display: flex; align-items: center; gap: 1.5em;">
+                        <div style="flex: 1.2;">
+                            <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
+                                <a href="interactive_app/jacobian_force.html" target="_blank"
+                                    style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
+                            </p>
+                            <iframe data-src="interactive_app/jacobian_force.html" width="100%" height="400"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.55em; text-align: left;">
+                            <p style="background: #1f2937; padding: 10px; border-radius: 8px; text-align: center; margin-top: 0;">
+                                τ = J<sup>T</sup> F　　F = J<sup>−T</sup> τ
+                            </p>
+                            <ul>
+                                <li>インピーダンス制御は手先で力 F を計算 → <strong>τ = J<sup>T</sup> F</strong> で関節トルクにしてモータへ</li>
+                                <li>関節トルクセンサから手先の力を知るときは逆向き（F = J<sup>−T</sup> τ）</li>
+                                <li>J は「関節速度 → 手先速度」と同じ行列。姿勢で変わる</li>
+                                <li>腕が伸びきる（特異姿勢）と J<sup>−T</sup> が求まらない</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- インピーダンスパラメータの調整 -->
                 <section>
                     <h2 style="font-size: 1.3em;">インピーダンスパラメータの調整</h2>
@@ -653,34 +679,24 @@
                 <!-- アドミッタンス制御の数式 -->
                 <section>
                     <h2>アドミッタンス制御の数式</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
+                    <p style="font-size: 0.9em; margin: 0.3em 0;"><strong>M a<sub>c</sub> + D (v<sub>c</sub> − v<sub>d</sub>) + K (x<sub>c</sub> − x<sub>d</sub>) = F</strong></p>
+                    <div style="display: flex; gap: 2em; font-size: 0.55em; text-align: left;">
                         <div style="flex: 1;">
-                            <div style="margin-top: 2em; font-size: 1.2em;">
-                                <p><strong>ẍ = M⁻¹[F - Dẋ - K(x - x_d)]</strong></p>
-                                <ul style="font-size: 0.8em; margin-top: 1em;">
-                                    <li>力入力から加速度を計算</li>
-                                    <li>加速度を積分して位置を求める</li>
-                                    <li>インピーダンス制御の逆関数</li>
-                                </ul>
-                            </div>
+                            <ul>
+                                <li><strong>F</strong>：FTセンサで<strong>測った外力</strong>（入力）</li>
+                                <li><strong>x<sub>c</sub></strong>：計算した<strong>手先の位置指令</strong>（出力）。v<sub>c</sub>, a<sub>c</sub> はその速度・加速度（v<sub>d</sub> は目標の速度）</li>
+                                <li><strong>x<sub>d</sub></strong>：本来の目標位置（軌道）</li>
+                                <li><strong>M / D / K</strong>：仮想の重さ / ダンパ / ばね（自分で決める）</li>
+                            </ul>
                         </div>
                         <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>特徴</strong>
-                                    <ul>
-                                        <li>力を入力、位置を出力</li>
-                                        <li>人間の力に応じて動く</li>
-                                        <li>柔軟な動作が可能</li>
-                                    </ul>
-                                </li>
-                                <li><strong>適用例</strong>
-                                    <ul>
-                                        <li>手動誘導(ティーチング)</li>
-                                        <li>人間との協調作業</li>
-                                        <li>組み立て作業</li>
-                                    </ul>
-                                </li>
-                            </ul>
+                            <ol>
+                                <li>F を測る</li>
+                                <li>a<sub>c</sub> = M<sup>−1</sup> [F − D(v<sub>c</sub> − v<sub>d</sub>) − K(x<sub>c</sub> − x<sub>d</sub>)]</li>
+                                <li>積分して v<sub>c</sub>, x<sub>c</sub> を更新</li>
+                                <li>x<sub>c</sub> を位置制御に渡す（制御周期ごとに繰り返す）</li>
+                            </ol>
+                            <p style="margin: 0;">力が 0 なら x<sub>c</sub> → x<sub>d</sub>（ふつうの位置制御と同じ）</p>
                         </div>
                     </div>
                 </section>

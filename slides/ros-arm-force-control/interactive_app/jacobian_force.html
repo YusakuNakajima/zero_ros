@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手先の力と関節トルク</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827;
+            --panel: #1f2937;
+            --line: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --force: #f87171;
+            --t1: #60a5fa;
+            --t2: #4ade80;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+        }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+        label { display: block; color: var(--muted); white-space: nowrap; }
+        label b { color: var(--text); float: right; }
+        input[type="range"] { width: 100%; margin: 2px 0 0; }
+        canvas { width: 100%; display: block; margin-top: 6px; background: var(--panel); border-radius: 6px; cursor: crosshair; }
+        .eq { margin-top: 6px; font-family: monospace; font-size: 13px; line-height: 1.5; }
+        .t1 { color: var(--t1); }
+        .t2 { color: var(--t2); }
+        .f { color: var(--force); }
+        .warn { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div>
+            <label>関節1 q<sub>1</sub> <b id="q1Val"></b></label>
+            <input type="range" id="q1" min="-30" max="120" step="1" value="30">
+        </div>
+        <div>
+            <label>関節2 q<sub>2</sub> <b id="q2Val"></b></label>
+            <input type="range" id="q2" min="-160" max="0" step="1" value="-80">
+        </div>
+        <div>
+            <label>手先の力の向き <b id="angVal"></b></label>
+            <input type="range" id="ang" min="-180" max="180" step="5" value="-90">
+        </div>
+        <div>
+            <label>手先の力の大きさ <b id="magVal"></b></label>
+            <input type="range" id="mag" min="0" max="30" step="1" value="10">
+        </div>
+    </div>
+    <canvas id="c" height="230"></canvas>
+    <div class="eq" id="eq"></div>
+
+    <script>
+        // 2 リンクの平面アーム。手先の力 F から、それを出すのに必要な関節トルク τ = Jᵀ F を計算する。
+        const L1 = 0.40, L2 = 0.30;     // リンク長 [m]
+        const $ = id => document.getElementById(id);
+        const deg = d => d * Math.PI / 180;
+
+        function state() {
+            const q1 = deg(+$('q1').value), q2 = deg(+$('q2').value);
+            const a = deg(+$('ang').value), m = +$('mag').value;
+            const F = [m * Math.cos(a), m * Math.sin(a)];
+            const s1 = Math.sin(q1), c1 = Math.cos(q1), s12 = Math.sin(q1 + q2), c12 = Math.cos(q1 + q2);
+            // ヤコビアン J (手先速度 = J × 関節速度)
+            const J = [[-L1 * s1 - L2 * s12, -L2 * s12],
+                       [ L1 * c1 + L2 * c12,  L2 * c12]];
+            // τ = Jᵀ F
+            const tau = [J[0][0] * F[0] + J[1][0] * F[1], J[0][1] * F[0] + J[1][1] * F[1]];
+            const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
+            const elbow = [L1 * c1, L1 * s1], tip = [elbow[0] + L2 * c12, elbow[1] + L2 * s12];
+            return { q1, q2, F, J, tau, det, elbow, tip, m };
+        }
+
+        const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+        function fitCanvas(c) {
+            const r = window.devicePixelRatio || 1, w = c.clientWidth, h = +c.getAttribute('height');
+            if (c.width !== Math.round(w * r)) { c.width = Math.round(w * r); c.height = Math.round(h * r); c.style.height = h + 'px'; }
+            const ctx = c.getContext('2d');
+            ctx.setTransform(r, 0, 0, r, 0, 0);
+            return { ctx, w, h };
+        }
+
+        function arrow(ctx, x0, y0, x1, y1, col, wdt) {
+            const a = Math.atan2(y1 - y0, x1 - x0), hl = 9;
+            ctx.strokeStyle = ctx.fillStyle = col;
+            ctx.lineWidth = wdt;
+            ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x1 - hl * Math.cos(a - 0.45), y1 - hl * Math.sin(a - 0.45));
+            ctx.lineTo(x1 - hl * Math.cos(a + 0.45), y1 - hl * Math.sin(a + 0.45));
+            ctx.fill();
+            ctx.lineWidth = 1;
+        }
+
+        // 関節トルクを円弧の矢印で描く (反時計回りが正)
+        function torqueArc(ctx, x, y, tau, col, label) {
+            const r = 20, span = Math.min(Math.abs(tau) / 6, 1) * Math.PI * 1.6;
+            if (span < 0.05) return;
+            ctx.strokeStyle = ctx.fillStyle = col;
+            ctx.lineWidth = 3;
+            const start = -Math.PI / 2, end = tau > 0 ? start - span : start + span;  // 画面は y 下向き
+            ctx.beginPath(); ctx.arc(x, y, r, start, end, tau > 0); ctx.stroke();
+            const ex = x + r * Math.cos(end), ey = y + r * Math.sin(end), dir = tau > 0 ? -1 : 1;
+            const tx = -Math.sin(end) * dir, ty = Math.cos(end) * dir;
+            ctx.beginPath();
+            ctx.moveTo(ex + tx * 8, ey + ty * 8);
+            ctx.lineTo(ex - ty * 5, ey + tx * 5);
+            ctx.lineTo(ex + ty * 5, ey - tx * 5);
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.font = 'bold 12px "Noto Sans JP", sans-serif';
+            ctx.fillText(label, x + r + 4, y - r);
+        }
+
+        function draw() {
+            const st = state();
+            $('q1Val').textContent = $('q1').value + '°';
+            $('q2Val').textContent = $('q2').value + '°';
+            $('angVal').textContent = $('ang').value + '°';
+            $('magVal').textContent = st.m + ' N';
+            const { ctx, w, h } = fitCanvas($('c'));
+            ctx.clearRect(0, 0, w, h);
+            // アーム (左 60%) とトルクの棒グラフ (右 40%)
+            const aw = w * 0.62, s = Math.min(aw / 0.9, h / 0.85);
+            const ox = aw * 0.32, oy = h * 0.72;
+            const P = p => [ox + p[0] * s, oy - p[1] * s];
+            const b = P([0, 0]), e = P(st.elbow), t = P(st.tip);
+            ctx.fillStyle = '#4b5563';
+            ctx.fillRect(b[0] - 18, b[1], 36, 12);
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 9;
+            ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(...b); ctx.lineTo(...e); ctx.lineTo(...t); ctx.stroke();
+            ctx.lineWidth = 1;
+            for (const p of [b, e]) { ctx.fillStyle = '#e5e7eb'; ctx.beginPath(); ctx.arc(p[0], p[1], 5, 0, 7); ctx.fill(); }
+            // 手先の力
+            const fs = 3;
+            arrow(ctx, t[0], t[1], t[0] + st.F[0] * fs, t[1] - st.F[1] * fs, css('--force'), 4);
+            ctx.fillStyle = css('--force');
+            ctx.font = 'bold 13px "Noto Sans JP", sans-serif';
+            ctx.fillText('F', t[0] + st.F[0] * fs + 6, t[1] - st.F[1] * fs);
+            // 関節トルク
+            torqueArc(ctx, b[0], b[1], st.tau[0], css('--t1'), 'τ₁');
+            torqueArc(ctx, e[0], e[1], st.tau[1], css('--t2'), 'τ₂');
+            // 棒グラフ
+            const gx = aw + 10, gw = w - aw - 20, mid = h / 2, scale = (h / 2 - 30) / 12;
+            ctx.strokeStyle = css('--line');
+            ctx.beginPath(); ctx.moveTo(gx, mid); ctx.lineTo(gx + gw, mid); ctx.stroke();
+            ctx.fillStyle = css('--muted');
+            ctx.font = '11px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('必要な関節トルク [N·m]', gx + gw / 2, 14);
+            [[st.tau[0], css('--t1'), 'τ₁'], [st.tau[1], css('--t2'), 'τ₂']].forEach(([v, col, name], i) => {
+                const bx = gx + gw * (0.2 + i * 0.4), bw = gw * 0.25;
+                const hh = Math.max(-h / 2 + 30, Math.min(h / 2 - 30, v * scale));
+                ctx.fillStyle = col;
+                ctx.fillRect(bx, mid - Math.max(hh, 0), bw, Math.abs(hh));
+                ctx.fillStyle = css('--text');
+                ctx.fillText(name + ' ' + v.toFixed(2), bx + bw / 2, v >= 0 ? mid - hh - 4 : mid - hh + 14);
+            });
+            ctx.textAlign = 'left';
+            // 式
+            const f = v => (v >= 0 ? ' ' : '') + v.toFixed(2);
+            const sing = Math.abs(st.det) < 0.02;
+            $('eq').innerHTML =
+                `<span class="t1">τ₁</span> = ${f(st.J[0][0])}·<span class="f">Fx</span> + ${f(st.J[1][0])}·<span class="f">Fy</span> = <span class="t1">${f(st.tau[0])}</span> N·m<br>` +
+                `<span class="t2">τ₂</span> = ${f(st.J[0][1])}·<span class="f">Fx</span> + ${f(st.J[1][1])}·<span class="f">Fy</span> = <span class="t2">${f(st.tau[1])}</span> N·m　（τ = Jᵀ F）` +
+                (sing ? '<br><span class="warn">特異姿勢（腕が伸びきり）：腕の向きの力はトルク 0 で支えられる → 逆に τ から F は求められない</span>' : '');
+        }
+
+        for (const id of ['q1', 'q2', 'ang', 'mag']) $(id).addEventListener('input', draw);
+        // キャンバスをクリック / ドラッグ → 手先の力の向きと大きさ
+        let dragging = false;
+        function setForce(ev) {
+            const st = state(), c = $('c'), r = c.getBoundingClientRect();
+            const w = c.clientWidth, h = +c.getAttribute('height'), aw = w * 0.62, s = Math.min(aw / 0.9, h / 0.85);
+            const tx = aw * 0.32 + st.tip[0] * s, ty = h * 0.72 - st.tip[1] * s;
+            const dx = ev.clientX - r.left - tx, dy = -(ev.clientY - r.top - ty);
+            $('ang').value = Math.round(Math.atan2(dy, dx) * 180 / Math.PI / 5) * 5;
+            $('mag').value = Math.min(30, Math.round(Math.hypot(dx, dy) / 3));
+            draw();
+        }
+        $('c').addEventListener('pointerdown', e => { dragging = true; setForce(e); });
+        window.addEventListener('pointermove', e => { if (dragging) setForce(e); });
+        window.addEventListener('pointerup', () => { dragging = false; });
+        window.addEventListener('resize', draw);
+        draw();
+    </script>
+</body>
+</html>
