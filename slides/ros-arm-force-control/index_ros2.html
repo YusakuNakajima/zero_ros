@@ -162,7 +162,7 @@
                                 <li>受動コンプライアンスで<strong>事足りる作業</strong>も多い</li>
                                 <li>能動制御は「計測→計算→指令」の周期ぶん遅れる</li>
                                 <li>ばね・ゲルは接触の瞬間から力を受け流す</li>
-                                <li class="fragment">「常に一定の力で押す」なら<strong>受動の方が有利</strong>な場合も</li>
+                                <li>「常に一定の力で押す」なら<strong>受動の方が有利</strong>な場合も</li>
                             </ul>
                         </div>
                     </div>
@@ -311,7 +311,7 @@
                             <li><strong>force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster</strong></li>
                             <li><strong>joint_trajectory_controller/JointTrajectoryController</strong> (組み合わせ用)</li>
                         </ul>
-                        <p style="font-size: 0.8em;">admittance_controller は <strong>Humble（Ubuntu 22.04）から標準</strong>（Foxy / Galactic には無い）</p>
+                        <p style="font-size: 0.8em;">admittance_controller は <strong>Humble（Ubuntu 22）から標準</strong></p>
                         <p style="font-size: 0.8em; color: #ffb3b3;">インピーダンス制御・ハイブリッド制御は標準には無い</p>
                     </div>
                 </section> <!-- よく使うROSのアームコントローラ -->
@@ -601,7 +601,7 @@
                         </defs>
                         <g font-size="20" fill="#e5e7eb" text-anchor="middle">
                             <!-- 左：K = 0 -->
-                            <text x="180" y="28" font-weight="bold">フリードライブ（K = 0）</text>
+                            <text x="180" y="28" font-weight="bold">フリードライブの典型例（K = 0）</text>
                             <line x1="30" y1="150" x2="330" y2="150" stroke="#6b7280" stroke-width="3"/>
                             <rect x="60" y="95" width="60" height="55" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 4"/>
                             <rect x="210" y="95" width="60" height="55" fill="#4b5563"/>
@@ -609,7 +609,7 @@
                             <text x="162" y="68" fill="#60a5fa" font-size="17">押す</text>
                             <text x="180" y="190">離してもその場に止まる</text>
                             <!-- 右：K > 0 -->
-                            <text x="540" y="28" font-weight="bold">接触作業（K &gt; 0）</text>
+                            <text x="540" y="28" font-weight="bold">接触作業の典型例（K &gt; 0）</text>
                             <line x1="390" y1="150" x2="700" y2="150" stroke="#6b7280" stroke-width="3"/>
                             <line x1="400" y1="85" x2="400" y2="150" stroke="#f472b6" stroke-width="4"/>
                             <text x="400" y="78" fill="#f472b6" font-size="17">x_d（目標）</text>
@@ -623,7 +623,7 @@
                     </svg>
                     <p style="font-size: 0.6em; margin: 4px 0;">M x″ + D x′ + K (x − x<sub>d</sub>) = F<sub>ext</sub></p>
                     <ul style="font-size: 0.55em;">
-                        <li>フリードライブの「重さ」＝仮想質量 M、「軸ロック」＝方向ごとに無効化（admittance_controller の selected_axes 相当）</li>
+                        <li>フリードライブの「重さ」＝仮想質量 M、「軸ロック」＝その方向をアドミッタンス計算から外す（admittance_controller の selected_axes）</li>
                         <li>使う人の言葉と制御パラメータがほぼ 1:1 で対応する</li>
                     </ul>
                 </section>
@@ -640,7 +640,7 @@
                             <tr><td>ABB</td><td>リードスルー（lead-through）</td></tr>
                             <tr><td>FANUC</td><td>ハンドガイド・直接教示</td></tr>
                             <tr><td>安川</td><td>ダイレクトティーチ</td></tr>
-                            <tr><td>安全規格</td><td>hand guiding（ISO 10218 の協働運転4方式の1つ）</td></tr>
+                            <tr><td>安全規格</td><td>hand guiding（ISO 10218:2011 の協働運転4方式の1つ）</td></tr>
                             <tr><td>研究</td><td>direct teaching / kinesthetic teaching</td></tr>
                         </tbody>
                     </table>
@@ -781,7 +781,7 @@ admittance_controller:
       damping_ratio: [2.83, 2.83, 2.83, 2.83, 2.83, 2.83]
       stiffness:     [214.1, 214.2, 214.3, 214.4, 214.5, 214.6]
                             </code></pre>
-                            <p style="font-size: 0.4em; color: #aaa; margin: 4px 0 0;">ros2_controllers（humble）の test_params.yaml を抜粋・簡略化</p>
+                            <p style="font-size: 0.4em; color: #aaa; margin: 4px 0 0;">ros2_controllers（humble）の test_params.yaml を抜粋・簡略化（joints・interfaces などは省略。そのままでは動かない）</p>
                         </div>
                         <div style="flex: 1;">
                             <ul style="font-size: 0.6em;">
