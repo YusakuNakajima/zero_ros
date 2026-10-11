@@ -54,6 +54,13 @@
         .adm { color: var(--adm); }
         .hyb { color: var(--hyb); }
         .buttons { display: flex; gap: 4px; }
+        .presets { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin-top: 4px; color: var(--muted); }
+        .presets button { padding: 2px 6px; }
+        .presets button.imp { color: var(--imp); }
+        .presets button.adm { color: var(--adm); }
+        .presets button.hyb { color: var(--hyb); }
+        .presets button.sel { background: #4b5563; border-color: var(--text); }
+        #presetNote { color: var(--text); }
     </style>
 </head>
 <body>
@@ -79,8 +86,15 @@
             </select>
         </div>
     </div>
-    <canvas id="scene" height="145"></canvas>
-    <canvas id="plot" height="112"></canvas>
+    <div class="presets">
+        <span>苦手な条件：</span>
+        <button data-preset="imp" class="imp">インピーダンス</button>
+        <button data-preset="adm" class="adm">アドミッタンス</button>
+        <button data-preset="hyb" class="hyb">ハイブリッド</button>
+        <span id="presetNote"></span>
+    </div>
+    <canvas id="scene" height="135"></canvas>
+    <canvas id="plot" height="100"></canvas>
     <div class="row">
         <div class="legend">
             <span class="imp">インピーダンス</span>
@@ -123,7 +137,7 @@
         const Y_REF = Y_SURF - F_DES / KD;
 
         const $ = id => document.getElementById(id);
-        let params, t, k, arms, history, running = true, pushUntil = -1;
+        let params, t, k, arms, history, running = true, pushUntil = -1, autoPush = false;
 
         function readParams() {
             params = {
@@ -423,7 +437,11 @@
             last = now;
             if (running) {
                 const n = Math.round(elapsed * PLAYBACK / DT);
-                for (let i = 0; i < n; i++) step();
+                for (let i = 0; i < n; i++) {
+                    // 「ハイブリッドが苦手」では 3 秒ごとに人が横から押す
+                    if (autoPush && t % 3 < DT && t > 1) pushUntil = t + PUSH_TIME;
+                    step();
+                }
                 while (history.length && history[0].t < t - WINDOW) history.shift();
                 $('push').classList.toggle('on', t < pushUntil);
             }
@@ -441,6 +459,27 @@
             $('playPause').textContent = running ? '⏸' : '▶';
         });
         $('reset').addEventListener('click', reset);
+
+        // ---- 各方式が苦手な極端な条件 ----
+        const PRESETS = {
+            imp: { bump: 2, ke: 4, fc: 2, T: '0.004', push: false,
+                   note: '関節摩擦が大 → センサを使わないので位置がずれ、力も揺れる' },
+            adm: { bump: 0, ke: 5.5, fc: 0.5, T: '0.004', push: false,
+                   note: '硬いワーク × 制御周期 → 力を測って動くまでの遅れで振動' },
+            hyb: { bump: 1, ke: 4, fc: 0.5, T: '0.004', push: true,
+                   note: '3 秒ごとに人が横から押す → X を位置で固めるので逃げない' },
+        };
+        document.querySelectorAll('[data-preset]').forEach(btn => btn.addEventListener('click', () => {
+            const pr = PRESETS[btn.dataset.preset];
+            $('bump').value = pr.bump;
+            $('ke').value = pr.ke;
+            $('fc').value = pr.fc;
+            $('T').value = pr.T;
+            autoPush = pr.push;
+            $('presetNote').textContent = pr.note;
+            document.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('sel', b === btn));
+            reset();
+        }));
 
         reset();
         requestAnimationFrame(loop);
