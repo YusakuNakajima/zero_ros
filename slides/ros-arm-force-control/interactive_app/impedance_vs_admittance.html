@@ -88,16 +88,20 @@
             <div class="buttons">
                 <button id="presetSoft">スポンジ</button>
                 <button id="presetHard">金属</button>
-                <button id="restart" class="primary">再スタート</button>
+            </div>
+            <div class="buttons">
+                <button id="playPause" class="primary">⏸ 一時停止</button>
+                <button id="reset">⟲ リセット</button>
             </div>
             <div class="stats">
                 <div></div><div class="imp">インピ.</div><div class="adm">アドミ.</div>
                 <div>自由空間の追従誤差</div><div id="errImp">-</div><div id="errAdm">-</div>
-                <div>最大接触力</div><div id="fmaxImp">-</div><div id="fmaxAdm">-</div>
+                <div>最大接触力 (直近)</div><div id="fmaxImp">-</div><div id="fmaxAdm">-</div>
             </div>
             <div class="notes">
                 <strong class="imp">インピーダンス</strong>: 位置の誤差 → トルクを出力。センサ不要で硬い壁にも安定だが、摩擦で位置がずれる。<br>
-                <strong class="adm">アドミッタンス</strong>: 力センサの値 → 位置指令。位置制御が強いので正確だが、硬い壁 × 長い制御周期で振動しやすい。
+                <strong class="adm">アドミッタンス</strong>: 力センサの値 → 位置指令。位置制御が強いので正確だが、硬い壁 × 長い制御周期で振動しやすい。<br>
+                ※ 実行中にスライダを動かすと、その場で条件が切り替わります。
             </div>
         </div>
     </div>
@@ -109,7 +113,7 @@
         const WALL_X = 0.10;             // 壁の位置 [m]
         const X_GOAL = 0.12;             // 目標位置 (壁の 2cm 奥) [m]
         const RAMP_TIME = 1.0;           // 目標位置が動く時間 [s]
-        const SIM_END = 2.5;             // [s]
+        const WINDOW = 2.5;              // プロットに表示する時間幅 [s]
         const DT = 1e-5;                 // 物理シミュレーションの刻み [s]
         const SENSOR_DELAY = 1;          // 力センサの遅れ [制御周期]
 
@@ -130,7 +134,7 @@
         }
 
         function newRobot(mode) {
-            return { mode, x: 0, v: 0, u: 0, xc: 0, vc: 0, sensor: new Array(SENSOR_DELAY + 1).fill(0), force: 0, fmax: 0, errMax: 0, touched: false };
+            return { mode, x: 0, v: 0, u: 0, xc: 0, vc: 0, sensor: new Array(SENSOR_DELAY + 1).fill(0), force: 0, errMax: 0, touched: false };
         }
 
         function readParams() {
@@ -156,7 +160,11 @@
             history = [];
             t = 0;
             stepCount = 0;
-            running = true;
+        }
+
+        function setRunning(on) {
+            running = on;
+            $('playPause').textContent = on ? '⏸ 一時停止' : '▶ 再生';
         }
 
         function contactForce(r) {
@@ -193,13 +201,13 @@
                 r.v += a * DT;
                 r.x += r.v * DT;
                 r.force = fEnv;
-                r.fmax = Math.max(r.fmax, fEnv);
                 if (fEnv > 0) r.touched = true;
                 // 追従誤差は最初に壁に触れるまで（自由空間）だけで測る
                 if (!r.touched && t > 0.2) r.errMax = Math.max(r.errMax, Math.abs(ref.x - r.x));
             }
             if (stepCount % 200 === 0) {
                 history.push({ t, ref: ref.x, x: robots.map(r => r.x), f: robots.map(r => r.force) });
+                while (history.length && history[0].t < t - WINDOW) history.shift();
             }
             t += DT;
             stepCount++;
@@ -227,8 +235,9 @@
             const col = COLORS();
             ctx.clearRect(0, 0, w, h);
             const left = 70, right = w - 30;
-            const toPx = x => left + (x / 0.13) * (right - left);
-            const wallPx = toPx(WALL_X);
+            const SCENE_END = 0.15;          // 表示範囲 [m]。壁は WALL_X〜SCENE_END、右端で固定
+            const toPx = x => left + (Math.min(x, SCENE_END) / SCENE_END) * (right - left);
+            const wallPx = toPx(WALL_X), backPx = toPx(SCENE_END);
             const hardness = (parseFloat(ui.ke.value) - 2) / 3.5;
             const ref = reference(t);
 
@@ -239,9 +248,30 @@
                 ctx.font = '12px "Noto Sans JP", sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillText(lane.name, 4, lane.y - 28);
-                // 壁 (硬いほど明るい灰色、柔らかいほど黄色っぽく)
+                // 壁: 右端が固定され、押されると表面が奥へ縮む (柔らかいほどよく縮む)
+                const facePx = toPx(Math.max(WALL_X, lane.r.x));
                 ctx.fillStyle = `hsl(${45 - hardness * 45}, ${70 - hardness * 60}%, ${45 + hardness * 10}%)`;
-                ctx.fillRect(wallPx, lane.y - 30, 26, 60);
+                ctx.fillRect(facePx, lane.y - 30, backPx - facePx, 60);
+                // 縮み具合が見えるよう、等間隔の縦線を表面〜固定端に配置
+                ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+                for (let i = 1; i < 6; i++) {
+                    const lx = facePx + (backPx - facePx) * i / 6;
+                    ctx.beginPath();
+                    ctx.moveTo(lx, lane.y - 30);
+                    ctx.lineTo(lx, lane.y + 30);
+                    ctx.stroke();
+                }
+                // 固定端
+                ctx.fillStyle = col.line;
+                ctx.fillRect(backPx, lane.y - 34, 6, 68);
+                // 壁の元の表面位置
+                ctx.strokeStyle = col.muted;
+                ctx.setLineDash([2, 3]);
+                ctx.beginPath();
+                ctx.moveTo(wallPx, lane.y - 34);
+                ctx.lineTo(wallPx, lane.y + 34);
+                ctx.stroke();
+                ctx.setLineDash([]);
                 // 目標位置
                 ctx.strokeStyle = col.ref;
                 ctx.setLineDash([4, 4]);
@@ -250,8 +280,8 @@
                 ctx.lineTo(toPx(ref.x), lane.y + 30);
                 ctx.stroke();
                 ctx.setLineDash([]);
-                // ロボット (ばねで目標と結ばれているイメージ)
-                const rx = toPx(Math.min(lane.r.x, WALL_X + 0.02));
+                // ロボット (右端 = 手先位置)
+                const rx = toPx(lane.r.x);
                 ctx.fillStyle = lane.color;
                 ctx.fillRect(rx - 34, lane.y - 16, 34, 32);
                 ctx.fillStyle = col.muted;
@@ -281,7 +311,7 @@
             ctx.fillStyle = col.muted;
             ctx.textAlign = 'center';
             ctx.font = '12px "Noto Sans JP", sans-serif';
-            ctx.fillText('壁 (' + formatStiffness(params.ke) + ')', wallPx + 13, h - 6);
+            ctx.fillText('壁 (' + formatStiffness(params.ke) + ')', (wallPx + backPx) / 2, h - 6);
         }
 
         function drawPlot(canvasId, title, getSeries, yMin, yMax, unit) {
@@ -290,7 +320,8 @@
             ctx.clearRect(0, 0, w, h);
             const pad = { l: 44, r: 10, t: 18, b: 22 };
             const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
-            const X = time => pad.l + (time / SIM_END) * pw;
+            const t0 = Math.max(0, t - WINDOW);
+            const X = time => pad.l + ((time - t0) / WINDOW) * pw;
             const Y = v => pad.t + ph - ((Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin)) * ph;
 
             ctx.strokeStyle = col.line;
@@ -304,6 +335,8 @@
             ctx.fillText(yMin + unit, pad.l - 4, pad.t + ph);
             ctx.textAlign = 'center';
             ctx.fillText('時間 [s]', pad.l + pw / 2, h - 4);
+            ctx.fillText(t0.toFixed(1), pad.l, h - 4);
+            ctx.fillText((t0 + WINDOW).toFixed(1), pad.l + pw - 8, h - 4);
 
             for (const s of getSeries(col)) {
                 if (s.hline !== undefined) {
@@ -334,8 +367,9 @@
             const fmt = (v, d, u) => v.toFixed(d) + ' ' + u;
             $('errImp').textContent = fmt(robots[0].errMax * 1000, 1, 'mm');
             $('errAdm').textContent = fmt(robots[1].errMax * 1000, 1, 'mm');
-            $('fmaxImp').textContent = fmt(robots[0].fmax, 1, 'N');
-            $('fmaxAdm').textContent = fmt(robots[1].fmax, 1, 'N');
+            const fmax = i => history.reduce((m, p) => Math.max(m, p.f[i]), 0);
+            $('fmaxImp').textContent = fmt(fmax(0), 1, 'N');
+            $('fmaxAdm').textContent = fmt(fmax(1), 1, 'N');
         }
 
         function draw() {
@@ -362,21 +396,23 @@
             lastFrame = now;
             if (running) {
                 const steps = Math.round(elapsed * PLAYBACK / DT);
-                for (let i = 0; i < steps && t < SIM_END; i++) step();
-                if (t >= SIM_END) running = false;
+                for (let i = 0; i < steps; i++) step();
             }
             draw();
             requestAnimationFrame(loop);
         }
 
-        ui.ke.addEventListener('input', restart);
-        ui.T.addEventListener('change', restart);
-        ui.fc.addEventListener('input', restart);
-        $('restart').addEventListener('click', restart);
-        $('presetSoft').addEventListener('click', () => { ui.ke.value = 2.5; ui.T.value = '0.004'; restart(); });
-        $('presetHard').addEventListener('click', () => { ui.ke.value = 5.5; ui.T.value = '0.004'; restart(); });
+        // パラメータ変更は実行中のシミュレーションにそのまま反映する
+        ui.ke.addEventListener('input', readParams);
+        ui.T.addEventListener('change', readParams);
+        ui.fc.addEventListener('input', readParams);
+        $('playPause').addEventListener('click', () => setRunning(!running));
+        $('reset').addEventListener('click', () => { restart(); setRunning(true); });
+        $('presetSoft').addEventListener('click', () => { ui.ke.value = 2.5; ui.T.value = '0.004'; readParams(); });
+        $('presetHard').addEventListener('click', () => { ui.ke.value = 5.5; ui.T.value = '0.004'; readParams(); });
 
         restart();
+        setRunning(true);
         requestAnimationFrame(loop);
     </script>
 </body>

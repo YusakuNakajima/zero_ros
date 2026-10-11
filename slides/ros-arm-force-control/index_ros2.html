@@ -767,40 +767,39 @@ admittance_controller:
                                 <li>ロボットを<strong>手で掴んで動かせる</strong>モード</li>
                                 <li>教示・位置合わせに使う（ペンダントより速い）</li>
                                 <li>中身は多くの場合<strong>アドミッタンス制御</strong>：<br>押された力 → 位置・速度の指令</li>
-                                <li>ただし「アドミッタンス制御 ＝ 手で動かせること」ではない↓</li>
+                                <li>実装方法はロボットによって違う↓</li>
                             </ul>
                         </div>
                     </div>
                 </section>
 
-                <!-- 制御則とモードは別の軸 -->
+                <!-- フリードライブの実装方法 -->
                 <section>
-                    <h2>制御則とモードは別の軸</h2>
-                    <div style="display: flex; gap: 20px; font-size: 0.6em;">
+                    <h2>フリードライブの実装方法</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: center;">
                         <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
-                            <strong>軸A：制御則</strong><br>インピーダンス / アドミッタンス<br>→ 中でどう計算するか
+                            <strong style="color: #f472b6;">Franka（インピーダンス型）</strong>
+                            <div style="margin: 8px auto; padding: 4px; background: #374151; border-radius: 6px;">手の力</div>↓
+                            <div style="margin: 8px auto; padding: 4px; background: #374151; border-radius: 6px;">全関節の<strong>トルクセンサ</strong></div>↓
+                            <div style="margin: 8px auto; padding: 4px; background: #374151; border-radius: 6px;">重力補償だけのトルク指令<br>τ = g(q)（K = 0）</div>
+                            <p style="margin: 6px 0;">手首のボタンを押しながら動かす</p>
                         </div>
                         <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 8px;">
-                            <strong>軸B：モード（機能）</strong><br>フリードライブ / 接触作業 / 位置制御<br>→ 使う人にどう見えるか
+                            <strong style="color: #4fc3f7;">UR（アドミッタンス型）</strong>
+                            <div style="margin: 8px auto; padding: 4px; background: #374151; border-radius: 6px;">手の力</div>↓
+                            <div style="margin: 8px auto; padding: 4px; background: #374151; border-radius: 6px;">手首の<strong>FTセンサ</strong> / 関節電流で推定</div>↓
+                            <div style="margin: 8px auto; padding: 4px; background: #374151; border-radius: 6px;">力 → <strong>速度指令</strong><br>→ 関節の位置・速度制御</div>
+                            <p style="margin: 6px 0;">ペンダント背面のボタン / URScript の freedrive_mode()</p>
                         </div>
                     </div>
-                    <table style="font-size: 0.5em; margin: 16px auto 0;">
-                        <thead>
-                            <tr><th></th><th>インピーダンス型</th><th>アドミッタンス型</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><strong>フリードライブ</strong></td><td>重力補償してトルクほぼ0<br>（Franka、KUKA iiwa）</td><td>外力を推定して位置・速度指令に<br>（関節トルク制御ができない機種）</td></tr>
-                            <tr><td><strong>接触作業</strong><br>（嵌合・研磨）</td><td>直交インピーダンス制御<br>（Franka など）</td><td>FTセンサ ＋ 位置制御<br>（ROS2 の admittance_controller）</td></tr>
-                        </tbody>
-                    </table>
-                    <p style="font-size: 0.45em; color: #aaa;">
-                        ※ ブレーキを外して手で押すだけの教示モード（制御則なし）もある。PTP/CP とブレンドを分けたのと同じ考え方
+                    <p style="font-size: 0.5em; color: #aaa;">
+                        トルクを直接出せる機種はインピーダンス型、出せない機種はアドミッタンス型になりやすい
                     </p>
                 </section>
 
-                <!-- K があるかないか -->
+                <!-- フリードライブと接触作業の違い -->
                 <section>
-                    <h2>違いはばね K があるか</h2>
+                    <h2 style="font-size: 1.1em;">フリードライブと接触作業の制御的な違い</h2>
                     <svg viewBox="0 0 720 230" style="width: 85%; max-height: 36vh;">
                         <defs>
                             <marker id="kd-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker>
@@ -830,29 +829,14 @@ admittance_controller:
                     </svg>
                     <p style="font-size: 0.6em; margin: 4px 0;">M x″ + D x′ + K (x − x<sub>d</sub>) = F<sub>ext</sub></p>
                     <ul style="font-size: 0.55em;">
-                        <li>フリードライブの「重さ」＝仮想質量 M、「軸ロック」＝その方向をアドミッタンス計算から外す（admittance_controller の selected_axes）</li>
-                        <li>使う人の言葉と制御パラメータがほぼ 1:1 で対応する</li>
+                        <li>同じ式で、違いは<strong>ばね K（と目標 x<sub>d</sub>）があるか</strong>だけ</li>
+                        <li>接触作業：目標を壁の少し奥に置くと、押し付け力 ≈ K (x<sub>d</sub> − x)</li>
+                        <li>フリードライブの「重さ」＝仮想質量 M（動かしやすさ）</li>
+                        <li>「軸ロック」＝特定の方向をアドミッタンス計算から外す → XY 平面だけ動かせる</li>
                     </ul>
                 </section>
 
-                <!-- 呼び方はメーカーで違う -->
-                <section>
-                    <h2>フリードライブの呼び方</h2>
-                    <table style="font-size: 0.55em; margin: 0 auto;">
-                        <thead>
-                            <tr><th>立場</th><th>呼び方</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>UR</td><td>フリードライブ（Freedrive）</td></tr>
-                            <tr><td>ABB</td><td>リードスルー（lead-through）</td></tr>
-                            <tr><td>FANUC</td><td>ハンドガイド・直接教示</td></tr>
-                            <tr><td>安川</td><td>ダイレクトティーチ</td></tr>
-                            <tr><td>安全規格</td><td>hand guiding（ISO 10218:2011 の協働運転4方式の1つ）</td></tr>
-                            <tr><td>研究</td><td>direct teaching / kinesthetic teaching</td></tr>
-                        </tbody>
-                    </table>
-                    <p style="font-size: 0.55em;">ブレンド半径と同じく、<strong>概念は同じでもメーカーごとに名前が違う</strong></p>
-                </section>
+            </section>
             </section>
 
          
