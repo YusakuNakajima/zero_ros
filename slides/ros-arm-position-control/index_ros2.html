@@ -525,13 +525,22 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
                 <section>
                     <h2>JTCとは</h2>
-                    <p style="font-size: 0.5em; margin: 0 0 6px;">
-                        JointTrajectoryController：「関節の目標値＋到着時刻」の点を送ると、時刻どおりに点から点へ動かす
-                        （<a href="interactive_app/jtc_basics.html" target="_blank"
-                            style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>）
-                    </p>
-                    <iframe data-src="interactive_app/jtc_basics.html" width="100%" height="520"
-                        frameborder="0"></iframe>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1.1;">
+                            <iframe data-src="interactive_app/jtc_basics.html" width="100%" height="572"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.7em; text-align: left;">
+                            <p><strong>JointTrajectoryController</strong></p>
+                            <ul>
+                                <li>「関節の目標値＋到着時刻」の点を並べて送る</li>
+                                <li>コントローラが<strong>時刻どおりに点から点へ</strong>動かす</li>
+                                <li>点の間はコントローラが補間する</li>
+                            </ul>
+                            <p style="font-size: 0.8em;"><a href="interactive_app/jtc_basics.html" target="_blank"
+                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
@@ -940,33 +949,64 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>逆運動学の解き方(IKソルバー)</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/IK.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/IK.html" width="100%" height="400" frameborder="0"></iframe>
+                    <h2>IKの解き方は2種類</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1.15;">
+                            <iframe data-src="interactive_app/ik_solvers.html#analytic" width="100%" height="480"
+                                frameborder="0"></iframe>
                         </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>解析解</strong>
-                                    <ul>
-                                        <li>特定のロボット構造に基づいた数式</li>
-                                        <li>関節角度を直接計算</li>
-                                    </ul>
-                                </li>
-                                <li><strong>数値解</strong>
-                                    <ul>
-                                        <li>最適化計算による近似解法</li>
-                                        <li>左のアプリのように徐々に近づける</li>
-                                    </ul>
-                                </li>
+                        <div style="flex: 1; font-size: 0.62em; text-align: left;">
+                            <ul>
+                                <li><strong>解析解</strong>：ロボットの形から式を作り、代入して一発で解く
+                                    <ul><li>速い・解が全部出る／ロボットごとに式が要る</li></ul></li>
+                                <li><strong>数値解</strong>：今の姿勢から少しずつ近づける（反復計算）
+                                    <ul><li>どのロボットでも使える／初期値しだいで失敗も</li></ul></li>
                             </ul>
+                            <p>今は汎用性が高く、速度・精度も十分な<strong>数値解</strong>が主流</p>
+                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html#analytic" target="_blank"
+                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
                         </div>
                     </div>
-                    <p>現在は汎用性が高く速度も精度も十分になったので数値解を使うことが多い</p>
+                </section>
+                <section>
+                    <h2>数値解のしくみ：ニュートン法</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1.15;">
+                            <iframe data-src="interactive_app/ik_solvers.html#newton" width="100%" height="480"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.62em; text-align: left;">
+                            <ul>
+                                <li>f(x) = 0 の x を、<strong>接線をたどって</strong>探す方法</li>
+                                <li>数ステップで答えにぐっと近づく</li>
+                                <li>IKでは
+                                    <ul><li>x → 関節角 q</li><li>f → 目標と手先の誤差 e</li><li>傾き → ヤコビアン J</li></ul></li>
+                            </ul>
+                            <p>タブ③で実際のアームに当てはめた様子が見られる</p>
+                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html#newton" target="_blank"
+                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>KDL と TRAC-IK の違い</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1.15;">
+                            <iframe data-src="interactive_app/ik_solvers.html#trac" width="100%" height="480"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.62em; text-align: left;">
+                            <ul>
+                                <li><strong>KDL</strong>：ニュートン法そのもの
+                                    <ul><li>関節制限にぶつかると行き詰まることがある</li></ul></li>
+                                <li><strong>TRAC-IK</strong>：KDL＋SQP を同時に走らせ、行き詰まったら別の初期値からやり直す
+                                    <ul><li>成功率が高い → UR の MoveIt でもデフォルト</li></ul></li>
+                                <li><strong>IKFast</strong>：解析解を自動生成（タブ②）</li>
+                            </ul>
+                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html#trac" target="_blank"
+                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
@@ -983,7 +1023,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                         <li><strong><a
                                     href="https://moveit.github.io/moveit_tutorials/doc/trac_ik/trac_ik_tutorial.html"
                                     target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK</a></strong>
+                                    style="color: #4CAF50; text-decoration: underline;">TRAC-IK</a></strong>
                             -
                             数値解ソルバーでニュートン法とSQP(逐次二次計画法)のハイブリッド, KDLより収束性が良い, Universal RobotのMoveItでデフォルト</li>
                         <li><strong><a href="https://moveit.github.io/moveit_tutorials/doc/ikfast/ikfast_tutorial.html"
@@ -1001,7 +1041,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
                     <ul style="font-size: 0.8em;">
                         <li><strong><a href="https://traclabs.com/projects/trac-ik/" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">TRACK-IK-PYTHON</a>(オススメ)</strong>
+                                    style="color: #4CAF50; text-decoration: underline;">TRAC-IK-PYTHON</a>(オススメ)</strong>
                             - MoveItでも使われている手法, 安定性と計算速度のバランスが良い</li>
                         <li><strong><a href="https://github.com/stack-of-tasks/pinocchio" target="_blank"
                                     style="color: #4CAF50; text-decoration: underline;">Pinocchio</a></strong> -
@@ -1014,15 +1054,68 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
             <section>
                 <section>
                     <h2>step3:軌跡・軌道生成</h2>
-
-                    <ul style="font-size: 0.9em;">
-                        <li><strong>軌跡：</strong>逆運動学で得た解, 時間情報なし</li>
-                        <li><strong>軌道：</strong>時間情報を加えたもの</li>
-                        <p style="font-size: 0.6em;">※軌跡と軌道の言葉の定義は書籍「実践 ロボット制御」での定義を使っています</p>
-                        <li>JointTrajectoryControllerでは、少なくともPositionとTimeFromStartを渡すと軌道計算と実行が可能</li>
-                        <li>振動を抑える場合は厳密な速度, 加速度が必要だが、実用上はpositionだけでも問題ないことも多い</li>
+                    <div style="display: flex; gap: 20px; font-size: 0.6em;">
+                        <div style="flex: 1; border: 2px solid #fb923c; border-radius: 12px; padding: 10px;">
+                            <strong style="color: #fb923c;">軌跡（path）＝ 通る点の並び</strong>
+                            <svg viewBox="0 0 320 180" style="width: 100%; max-height: 28vh;">
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <polyline points="40,150 95,95 160,70 225,85 280,130" fill="none" stroke="#fb923c" stroke-width="3"/>
+                                    <circle cx="40" cy="150" r="7" fill="#fbbf24"/><circle cx="95" cy="95" r="7" fill="#fbbf24"/><circle cx="160" cy="70" r="7" fill="#fbbf24"/><circle cx="225" cy="85" r="7" fill="#fbbf24"/><circle cx="280" cy="130" r="7" fill="#fbbf24"/>
+                                    <text x="160" y="172" font-size="15" text-anchor="middle" fill="#fdba74">IKで解いた点をつなぐ（時間なし）</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #7dd3fc; border-radius: 12px; padding: 10px;">
+                            <strong style="color: #7dd3fc;">軌道（trajectory）＝ 軌跡＋時間</strong>
+                            <svg viewBox="0 0 320 180" style="width: 100%; max-height: 28vh;">
+                                <g font-family="Noto Sans JP, sans-serif">
+                                    <polyline points="40,150 95,95 160,70 225,85 280,130" fill="none" stroke="#7dd3fc" stroke-width="3"/>
+                                    <circle cx="40" cy="150" r="7" fill="#fbbf24"/><circle cx="95" cy="95" r="7" fill="#fbbf24"/><circle cx="160" cy="70" r="7" fill="#fbbf24"/><circle cx="225" cy="85" r="7" fill="#fbbf24"/><circle cx="280" cy="130" r="7" fill="#fbbf24"/>
+                                    <text x="40" y="136" font-size="14" text-anchor="middle" fill="#7dd3fc">t=0s</text><text x="95" y="81" font-size="14" text-anchor="middle" fill="#7dd3fc">t=1s</text><text x="160" y="56" font-size="14" text-anchor="middle" fill="#7dd3fc">t=2s</text><text x="225" y="71" font-size="14" text-anchor="middle" fill="#7dd3fc">t=3s</text><text x="280" y="116" font-size="14" text-anchor="middle" fill="#7dd3fc">t=4s</text>
+                                    <text x="160" y="172" font-size="15" text-anchor="middle" fill="#bae6fd">「いつ・どこに」いるかが決まる</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.6em; margin-top: 12px;">
+                        <li>JTCには少なくとも <code>positions</code> と <code>time_from_start</code> を渡せば軌道になる</li>
+                        <li>振動を抑えたいときは速度・加速度も渡す（→ 速度・加速度制御の章）</li>
                     </ul>
-
+                    <p style="font-size: 0.45em; color: #aaa;">※軌跡と軌道の言葉の定義は書籍「実践 ロボット制御」に従っています</p>
+                </section>
+                <section>
+                    <h2>ロボットはどう動いている？</h2>
+                    <svg viewBox="0 0 960 300" style="width: 100%; max-height: 50vh;">
+                        <defs><marker id="flowA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker></defs>
+                        <g font-family="Noto Sans JP, sans-serif" text-anchor="middle">
+                            <rect x="10" y="20" width="585" height="200" rx="12" fill="none" stroke="#4ade80" stroke-width="2" stroke-dasharray="8 6"/>
+                            <text x="305" y="48" font-size="20" fill="#86efac" font-weight="bold">ROS（PC）で全部計算する</text>
+                            <rect x="30" y="75" width="150" height="100" rx="10" fill="#1e3a2a"/>
+                            <text x="105" y="115" font-size="18" fill="#e5e7eb">IK</text>
+                            <text x="105" y="145" font-size="14" fill="#9ca3af">手先 → 関節角</text>
+                            <line x1="185" y1="125" x2="215" y2="125" stroke="#9ca3af" stroke-width="3" marker-end="url(#flowA)"/>
+                            <rect x="220" y="75" width="160" height="100" rx="10" fill="#1e3a2a"/>
+                            <text x="300" y="115" font-size="18" fill="#e5e7eb">軌道を作る</text>
+                            <text x="300" y="145" font-size="14" fill="#9ca3af">点 ＋ 時刻</text>
+                            <line x1="385" y1="125" x2="415" y2="125" stroke="#9ca3af" stroke-width="3" marker-end="url(#flowA)"/>
+                            <text x="400" y="105" font-size="12" fill="#fbbf24">Action</text>
+                            <rect x="420" y="75" width="165" height="100" rx="10" fill="#1e3a2a"/>
+                            <text x="502" y="108" font-size="18" fill="#e5e7eb">JTC</text>
+                            <text x="502" y="135" font-size="14" fill="#9ca3af">点の間を補間し</text>
+                            <text x="502" y="155" font-size="14" fill="#9ca3af">毎周期の関節角を出す</text>
+                            <line x1="600" y1="125" x2="680" y2="125" stroke="#9ca3af" stroke-width="4" marker-end="url(#flowA)"/>
+                            <text x="642" y="105" font-size="12" fill="#fbbf24">関節角を</text>
+                            <text x="642" y="150" font-size="12" fill="#fbbf24">500Hzで送る</text>
+                            <rect x="690" y="40" width="260" height="170" rx="12" fill="#374151"/>
+                            <text x="820" y="75" font-size="20" fill="#e5e7eb" font-weight="bold">ロボットのコントローラ</text>
+                            <text x="820" y="115" font-size="17" fill="#fbbf24" font-family="monospace">servoj(q)</text>
+                            <text x="820" y="150" font-size="15" fill="#e5e7eb">送られた関節角に</text>
+                            <text x="820" y="172" font-size="15" fill="#e5e7eb">追従するだけ</text>
+                            <text x="820" y="198" font-size="13" fill="#9ca3af">（軌道の計算はしない）</text>
+                            <text x="480" y="270" font-size="16" fill="#9ca3af">URの場合：ur_robot_driver がロボット側で servoj を実行し、ROSから届く関節角を追いかける</text>
+                        </g>
+                    </svg>
+                    <p style="font-size: 0.6em;">付属コントローラの <code>movel</code> などと違い、<strong>途中の軌道もすべてROS側</strong>が決めている</p>
                 </section>
 
             </section>
@@ -1210,26 +1303,14 @@ ros2 run ros_study jtc_with_ik_demo
 
                 <section>
                     <h2>軌道補間の方法</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/interpolation_methods.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/interpolation_methods.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>主な補間方法</h3>
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>線形補間</strong> - 最も単純</li>
-                                <li><strong>3次スプライン</strong> - 滑らかな位置と速度</li>
-                                <li><strong>5次スプライン</strong> - 滑らかな位置、速度、加速度</li>
-                                <li><strong>台形</strong> - 動作が速い</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <p style="font-size: 0.8em;">※教科書で出てくる時間多項式とスプラインは等価です<br>2点→時間多項式, 複数点→スプラインという違いです</p>
+                    <p style="font-size: 0.5em; margin: 0 0 6px;">
+                        同じ経由点でも、点の間のつなぎ方（補間）で動きと揺れが変わる
+                        （<a href="interactive_app/interpolation_motion.html" target="_blank"
+                            style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>）
+                    </p>
+                    <iframe data-src="interactive_app/interpolation_motion.html" width="100%" height="500"
+                        frameborder="0"></iframe>
+                    <p style="font-size: 0.45em; color: #aaa;">※教科書の時間多項式とスプラインは等価（2点→時間多項式、複数点→スプライン）</p>
                 </section>
 
                 <section>
@@ -1238,7 +1319,7 @@ ros2 run ros_study jtc_with_ik_demo
                         .comparison-table {
                             margin: auto;
                             border-collapse: collapse;
-                            font-size: 0.8em;
+                            font-size: 0.62em;
                             width: 90%;
                             color: #ffffff;
                         }
@@ -1290,28 +1371,28 @@ ros2 run ros_study jtc_with_ik_demo
                                 <td><strong>線形補間</strong></td>
                                 <td class="good">低</td>
                                 <td class="poor">低</td>
-                                <td>C⁰</td>
+                                <td>C⁰（速度が飛ぶ）</td>
                                 <td>高速動作・簡単制御</td>
                             </tr>
                             <tr>
                                 <td><strong>3次スプライン</strong></td>
                                 <td class="medium">中</td>
                                 <td class="medium">中</td>
-                                <td>C¹</td>
+                                <td>C¹（加速度が飛ぶ）</td>
                                 <td>一般的なロボット制御</td>
                             </tr>
                             <tr>
                                 <td><strong>5次スプライン</strong></td>
                                 <td class="poor">高</td>
                                 <td class="good">高</td>
-                                <td>C²</td>
+                                <td>C²（ジャークが飛ぶ）</td>
                                 <td>高精度作業・振動抑制</td>
                             </tr>
                             <tr>
                                 <td><strong>台形補間</strong></td>
                                 <td class="good">低</td>
                                 <td class="medium">中</td>
-                                <td>C¹</td>
+                                <td>C¹（加速度が飛ぶ）</td>
                                 <td>高速動作・効率重視</td>
                             </tr>
                         </tbody>
@@ -1343,6 +1424,34 @@ ros2 run ros_study jtc_with_ik_demo
                     <p style="font-size: 0.8em; margin-top: 0; margin-bottom: 10px;">それでも厳密な速度計算が必要という方は↓</p>
                 </section>
 
+                <section>
+                    <h2>JTCの補間次数の決まり方</h2>
+                    <table style="font-size: 0.6em; margin: 0 auto;">
+                        <thead>
+                            <tr><th>JointTrajectoryPoint に入れた情報</th><th>実際の補間</th><th>連続性</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>positions のみ</td><td><strong>線形</strong></td><td>C⁰（速度が飛ぶ）</td></tr>
+                            <tr><td>positions + velocities</td><td>3次（Hermite）</td><td>C¹（<strong>加速度が飛ぶ</strong>）</td></tr>
+                            <tr><td>positions + velocities + accelerations</td><td><strong>5次</strong></td><td>C²</td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="font-size: 0.6em; margin-top: 20px;">
+                        <li>5次の6係数 ＝ 両端の 位置・速度・加速度（3条件 × 2）→ C² でつなぐため</li>
+                        <li>positions だけ送るとJTCは線形補間 → 経由点で速度が飛ぶ</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>補間次数を比べる</h2>
+                    <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
+                        <a href="interactive_app/jtc_spline_order.html" target="_blank"
+                            style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
+                        　同じ waypoint でも、点に入れる情報で加速度の形がまったく変わる
+                    </p>
+                    <iframe data-src="interactive_app/jtc_spline_order.html" width="100%" height="400"
+                        frameborder="0"></iframe>
+                    <p style="font-size: 0.5em;">※ 5次でも節点で連続なのは加速度まで。ジャークは節点で折れる（実用上は十分）</p>
+                </section>
                 <section>
                     <h2>速度・加速度つき JTC 実装</h2>
                     <div class="slide-layout-code-text">
@@ -1429,7 +1538,7 @@ ros2 run ros_study jtc_with_ik_demo
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #fb923c; border-radius: 10px; padding: 10px;"><strong>② 経由点の扱い</strong><br>ブレンド半径<br>なぜ丸めるのか</div>
                         <div style="align-self: center;">→</div>
-                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 10px;"><strong>③ 連続性の階層</strong><br>C⁰ / C¹ / C²<br>とジャーク</div>
+                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 10px;"><strong>③ 形と時間の滑らかさ</strong><br>G と C の対応<br>とジャーク</div>
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #a3e635; border-radius: 10px; padding: 10px;"><strong>④ ROSの実装</strong><br>幾何 → 時間則<br>→ 補間</div>
                     </div>
@@ -1480,19 +1589,19 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2>連続性の階層</h2>
-                    <table style="font-size: 0.5em; margin: 0 auto;">
+                    <h2>G と C の対応</h2>
+                    <table style="font-size: 0.55em; margin: 0 auto;">
                         <thead>
-                            <tr><th>経路の幾何</th><th>達成できる時間連続性</th><th>不連続になる量</th><th>物理的な意味</th></tr>
+                            <tr><th>経路の形（G）</th><th>止まらずに通ると</th><th>実際どうなる</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>G⁰ のみ（接線が折れる）</td><td>C⁰</td><td><strong>速度</strong></td><td>通過不可。止まるしかない</td></tr>
-                            <tr><td>G¹（接線連続：円弧ブレンド）</td><td>C¹</td><td><strong>加速度</strong></td><td>通れる。トルクが段差状に飛ぶ</td></tr>
-                            <tr style="background: rgba(79, 195, 247, 0.15);"><td>G²（曲率連続：クロソイド等）</td><td>C²</td><td><strong>ジャーク</strong></td><td>トルクが連続。<strong>実用上の合格線</strong></td></tr>
-                            <tr><td>G³</td><td>C³</td><td>ジャークの微分</td><td>高速・柔軟な機構で意味を持つ</td></tr>
+                            <tr><td>G⁰：角がある</td><td>C⁰ まで</td><td>通過不可。止まるしかない</td></tr>
+                            <tr><td>G¹：円弧ブレンド</td><td>C¹ まで</td><td>通れる。トルクが段差状に飛ぶ</td></tr>
+                            <tr style="background: rgba(79, 195, 247, 0.15);"><td>G²：曲率連続（クロソイド等）</td><td>C² まで</td><td>トルクが連続。<strong>実用上の合格線</strong></td></tr>
                         </tbody>
                     </table>
-                    <p style="font-size: 0.7em; margin-top: 30px;">C¹ は「止まらずに通れる」最低条件<br><strong>「振動させない」条件は C²（＝ G²）</strong></p>
+                    <p style="font-size: 0.7em; margin-top: 30px;">形が G<sup>k</sup> なら、どんな時間則でも C<sup>k</sup> が上限<br><strong>「振動させない」には形から G² にする</strong></p>
+                    <p style="font-size: 0.5em; color: #aaa;">C⁰/C¹/C² で何が飛ぶかは「速度・加速度制御」の章を参照</p>
                 </section>
 
                 <section>
@@ -1637,39 +1746,19 @@ ros2 run ros_study jtc_with_ik_demo
 
                 <section>
                     <h2>チェック②：5次が本当に5次になっているか</h2>
-                    <table style="font-size: 0.5em; margin: 0 auto;">
-                        <thead>
-                            <tr><th>JointTrajectoryPoint に入れた情報</th><th>実際の補間</th><th>連続性</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>positions のみ</td><td><strong>線形</strong></td><td>C⁰（速度が飛ぶ）</td></tr>
-                            <tr><td>positions + velocities</td><td>3次（Hermite）</td><td>C¹（<strong>加速度が飛ぶ</strong>）</td></tr>
-                            <tr><td>positions + velocities + accelerations</td><td><strong>5次</strong></td><td>C²</td></tr>
-                        </tbody>
-                    </table>
                     <pre><code class="language-python" data-trim>
 point = JointTrajectoryPoint()
 point.positions = q
 point.velocities = dq       # 空だと線形補間
 point.accelerations = ddq   # 空だと静かに3次に落ちる
                     </code></pre>
-                    <ul style="font-size: 0.55em;">
-                        <li>5次の6係数 ＝ 両端の 位置・速度・加速度（3条件 × 2）→ C² でつなぐため</li>
+                    <ul style="font-size: 0.6em;">
+                        <li>accelerations が空だと<strong>エラーにならず静かに3次</strong>に落ちる</li>
                         <li>点が密なほど、次数が落ちたときの段差が<strong>頻繁</strong>に出る</li>
                     </ul>
+                    <p style="font-size: 0.5em; color: #aaa;">入れる情報と補間次数の対応・比較アプリは「速度・加速度制御」の章</p>
                 </section>
 
-                <section>
-                    <h2>補間次数を比べる</h2>
-                    <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
-                        <a href="interactive_app/jtc_spline_order.html" target="_blank"
-                            style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                        　同じ waypoint でも、点に入れる情報で加速度の形がまったく変わる
-                    </p>
-                    <iframe data-src="interactive_app/jtc_spline_order.html" width="100%" height="400"
-                        frameborder="0"></iframe>
-                    <p style="font-size: 0.5em;">※ 5次でも節点で連続なのは加速度まで。ジャークは節点で折れる（実用上は十分）</p>
-                </section>
 
                 <section>
                     <h2>チェック③：時間パラメータ化はジャークを抑えているか</h2>
@@ -2264,23 +2353,22 @@ ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
 
                 <section>
                     <h2>機能2：座標の時間管理</h2>
-                    <div class="slide-layout-image">
-                        <div class="image-section">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/tf_6d.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/tf_6d.html" width="100%" height="200px"
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1.25;">
+                            <iframe data-src="interactive_app/tf_time.html" width="100%" height="520"
                                 frameborder="0"></iframe>
                         </div>
-                        <div class="text-section">
+                        <div style="flex: 1; font-size: 0.6em; text-align: left;">
                             <ul>
-                                <li>TFは最新の座標を使わない、指定した時間 or 少しだけ前の座標を使うことで、座標系間での同期をとっている。</li>
-                                <li>アプリは雰囲気で正確ではありません</li>
-                                <li>実際の同期の仕組みは<a href="https://www.slideshare.net/slideshow/tftf2/46875007"
-                                        target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">TF完全理解</a>を参照</li>
+                                <li>座標を<strong>時刻つきで保存</strong>している</li>
+                                <li>「いつの座標か」を指定して引ける</li>
+                                <li>処理が遅れても<strong>撮影時刻の姿勢</strong>で変換できる</li>
+                                <li>古いデータはバッファから消える</li>
                             </ul>
+                            <p style="font-size: 0.8em;">仕組みの詳細は<a href="https://www.slideshare.net/slideshow/tftf2/46875007"
+                                target="_blank" style="color: #3b82f6; text-decoration: underline;">TF完全理解</a>
+                                ／<a href="interactive_app/tf_time.html" target="_blank"
+                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
                         </div>
                     </div>
                 </section>

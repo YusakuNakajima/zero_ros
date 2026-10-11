@@ -85,11 +85,20 @@
 - 加速度 = 時間則 + 幾何（accel_geometry_timing.html）、ジャークと残留振動（jerk_vibration.html）
 - ROS の3段構造（幾何パス → 時間パラメータ化 → JTC補間）とチェック①〜⑤（密度と幾何精度、JTCの補間次数＝jtc_spline_order.html、TOTG vs Ruckig、密にしすぎ、角は消えない）、特異点、実務上の判断、まとめ
 
+※ 重複整理（ROS2版）：C⁰/C¹/C² の説明は速度・加速度制御の章に集約（interpolation_motion.html・比較表・JTCの補間次数の決まり方・jtc_spline_order.html）。ブレンド半径の章は「G と C の対応」とROS実装チェックに絞り、チェック②は12章を参照
+
 ### 6. waypointsの表示編（水平スライド9 + 縦スライド）
 **スライド9: waypointsの表示**（メインスライド）
 - **縦スライド9-1**: デバッグ用にwaypointsを表示したいことはよくある、方法を紹介
 - **縦スライド9-2**: **VisualizationMarkerを使った表示**（画像表示）
 - **縦スライド9-3**: **TFを使った表示**（画像表示）
+
+## インタラクティブアプリ（ROS2版で追加）
+- `joint_vs_cartesian.html`：関節空間と直交空間の指令の比較
+- `jtc_basics.html`：JTCに「関節目標＋到着時刻」の点を送ると時刻どおりに動く様子（縦長）
+- `ik_solvers.html`：タブで ①ニュートン法 ②解析解(IKFast) ③数値解(KDL) ④TRAC-IK（#newton 等のハッシュで初期タブ指定）
+- `interpolation_motion.html`：線形/台形/3次/5次で実際のアームの動き・手先の揺れ・関節の位置/速度/加速度を比較（速度・加速度制御の章）
+- `tf_time.html`：手先カメラ画像の処理遅れを例に、TFが撮影時刻の姿勢を引く意義とバッファ
 
 ## 実装デモファイル
 

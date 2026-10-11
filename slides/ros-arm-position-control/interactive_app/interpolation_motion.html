@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>補間方法と実際の動き</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            overscroll-behavior: none;
+        }
+        .bar {
+            display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+            background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+            padding: 8px; margin-bottom: 8px;
+        }
+        .bar .sp { flex: 1; }
+        button {
+            background: #0b1220; color: var(--text); border: 1px solid #475569;
+            border-radius: 6px; padding: 4px 10px; font-family: inherit; font-size: 12px; cursor: pointer;
+            text-align: left; line-height: 1.3;
+        }
+        button small { color: var(--muted); }
+        button.on { border-color: var(--c); color: var(--c); box-shadow: 0 0 0 1px var(--c) inset; }
+        button.play { background: #0369a1; border-color: #0284c7; }
+        .main { display: flex; gap: 8px; flex-wrap: wrap; }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+        .left { flex: 1 1 340px; }
+        .right { flex: 1.2 1 380px; display: flex; flex-direction: column; gap: 4px; }
+        h3 { margin: 0 0 4px; font-size: 13px; color: var(--muted); font-weight: 400; }
+        canvas { width: 100%; display: block; background: #0b1220; border-radius: 6px; }
+        #cvArm { height: 300px; }
+        .plot { height: 92px; }
+        .note { margin-top: 6px; font-size: 13px; min-height: 2.6em; }
+        .meter { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--muted); }
+        .meter .track { flex: 1; height: 8px; background: #0b1220; border-radius: 4px; overflow: hidden; }
+        .meter .fill { height: 100%; width: 0; border-radius: 4px; transition: width 0.2s; }
+    </style>
+</head>
+<body>
+    <div class="bar" id="methods">
+        <button data-m="linear" style="--c:#fbbf24">線形補間<br><small>positions のみ / C⁰</small></button>
+        <button data-m="trap" style="--c:#60a5fa">台形（各点で停止）<br><small>C¹</small></button>
+        <button data-m="cubic" style="--c:#4ade80">3次スプライン<br><small>+ velocities / C¹</small></button>
+        <button data-m="quintic" style="--c:#f472b6">5次スプライン<br><small>+ accelerations / C²</small></button>
+        <span class="sp"></span>
+        <button class="play" id="play">▶ もう一度再生</button>
+    </div>
+    <div class="main">
+        <div class="panel left">
+            <h3>実際の動き（手先にばねで重りを吊るしている）</h3>
+            <canvas id="cvArm"></canvas>
+            <div class="note" id="note"></div>
+            <div class="meter">到着後の揺れ<div class="track"><div class="fill" id="fill"></div></div><span id="resid"></span></div>
+        </div>
+        <div class="panel right">
+            <h3>関節1の位置 q（● = 経由点）</h3>
+            <canvas class="plot" id="pq"></canvas>
+            <h3>関節1の速度 q'</h3>
+            <canvas class="plot" id="pv"></canvas>
+            <h3>関節1の加速度 q''（↕ = 無限大のとび）</h3>
+            <canvas class="plot" id="pa"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const L = [1.0, 0.8];
+        const COLORS = { linear: '#fbbf24', trap: '#60a5fa', cubic: '#4ade80', quintic: '#f472b6' };
+        const NOTES = {
+            linear: '経由点で<b>速度が瞬間的に切り替わる</b>（加速度が無限大）→ ガクッと衝撃が入り、重りが大きく揺れる',
+            trap: '各点で一度止まるので速度はつながる。ただし<b>加速度がステップ状</b>に変わり、点ごとに止まるので遅い',
+            cubic: '止まらずに通過でき速度もなめらか。ただし経由点で<b>加速度が折れる</b>ので少し揺れが残る',
+            quintic: '加速度まで連続。<b>揺れが最も小さい</b>（振動を抑えたい作業向き）',
+        };
+
+        // 関節空間の経由点 [rad] と到着時刻 [s]
+        const T = [0, 1.2, 2.4, 3.6];
+        const Q = [
+            [1.9, 1.6, 1.0, 0.6],      // joint1 (一方向に回る。区間ごとに速さが違う)
+            [-1.0, -0.8, -0.8, -1.0],  // joint2
+        ];
+        const T_END = T[T.length - 1];
+        const T_HOLD = 1.6;          // 到着後に揺れを見る時間
+        const DT = 0.002;
+
+        // ---------- 補間 ----------
+        function segIndex(t) {
+            for (let i = 0; i < T.length - 1; i++) if (t <= T[i + 1]) return i;
+            return T.length - 2;
+        }
+
+        // 経由点での速度・加速度の推定 (端点は 0)
+        function knotVel(q) {
+            return q.map((_, i) => {
+                if (i === 0 || i === q.length - 1) return 0;
+                const s0 = (q[i] - q[i - 1]) / (T[i] - T[i - 1]);
+                const s1 = (q[i + 1] - q[i]) / (T[i + 1] - T[i]);
+                return s0 * s1 <= 0 ? 0 : (s0 + s1) / 2;
+            });
+        }
+        function knotAcc(q, v) {
+            return q.map((_, i) => {
+                if (i === 0 || i === q.length - 1) return 0;
+                return (v[i + 1] - v[i - 1]) / (T[i + 1] - T[i - 1]);
+            });
+        }
+
+        function evalJoint(method, j, t) {
+            const q = Q[j];
+            if (t >= T_END) return [q[q.length - 1], 0, 0];
+            if (t <= 0) return [q[0], 0, 0];
+            const i = segIndex(t);
+            const h = T[i + 1] - T[i];
+            const s = (t - T[i]) / h;
+            const dq = q[i + 1] - q[i];
+
+            if (method === 'linear') {
+                return [q[i] + dq * s, dq / h, 0];
+            }
+            if (method === 'trap') {
+                // 加速 25% / 等速 50% / 減速 25%、各点で停止
+                const ta = 0.25 * h;
+                const vmax = dq / (h - ta);
+                const a = vmax / ta;
+                const u = t - T[i];
+                if (u < ta) return [q[i] + 0.5 * a * u * u, a * u, a];
+                if (u < h - ta) return [q[i] + 0.5 * a * ta * ta + vmax * (u - ta), vmax, 0];
+                const r = h - u;
+                return [q[i + 1] - 0.5 * a * r * r, a * r, -a];
+            }
+            const v = knotVel(q);
+            if (method === 'cubic') {
+                // 3次エルミート (JTC: positions + velocities)
+                const p0 = q[i], p1 = q[i + 1], m0 = v[i] * h, m1 = v[i + 1] * h;
+                const s2 = s * s, s3 = s2 * s;
+                const pos = (2 * s3 - 3 * s2 + 1) * p0 + (s3 - 2 * s2 + s) * m0 + (-2 * s3 + 3 * s2) * p1 + (s3 - s2) * m1;
+                const d1 = (6 * s2 - 6 * s) * p0 + (3 * s2 - 4 * s + 1) * m0 + (-6 * s2 + 6 * s) * p1 + (3 * s2 - 2 * s) * m1;
+                const d2 = (12 * s - 6) * p0 + (6 * s - 4) * m0 + (-12 * s + 6) * p1 + (6 * s - 2) * m1;
+                return [pos, d1 / h, d2 / (h * h)];
+            }
+            // 5次エルミート (JTC: positions + velocities + accelerations)
+            const acc = knotAcc(q, v);
+            const p0 = q[i], p1 = q[i + 1];
+            const v0 = v[i] * h, v1 = v[i + 1] * h;
+            const a0 = acc[i] * h * h, a1 = acc[i + 1] * h * h;
+            const c0 = p0, c1 = v0, c2 = a0 / 2;
+            const c3 = 10 * (p1 - p0) - 6 * v0 - 4 * v1 - 1.5 * a0 + 0.5 * a1;
+            const c4 = -15 * (p1 - p0) + 8 * v0 + 7 * v1 + 1.5 * a0 - a1;
+            const c5 = 6 * (p1 - p0) - 3 * v0 - 3 * v1 - 0.5 * a0 + 0.5 * a1;
+            const pos = c0 + s * (c1 + s * (c2 + s * (c3 + s * (c4 + s * c5))));
+            const d1 = c1 + s * (2 * c2 + s * (3 * c3 + s * (4 * c4 + s * 5 * c5)));
+            const d2 = 2 * c2 + s * (6 * c3 + s * (12 * c4 + s * 20 * c5));
+            return [pos, d1 / h, d2 / (h * h)];
+        }
+
+        function tcp(q1, q2) {
+            const a = q1, b = q1 + q2;
+            return [
+                [0, 0],
+                [L[0] * Math.cos(a), L[0] * Math.sin(a)],
+                [L[0] * Math.cos(a) + L[1] * Math.cos(b), L[0] * Math.sin(a) + L[1] * Math.sin(b)],
+            ];
+        }
+
+        // ---------- 手先に吊るした重り (ばね-ダンパ) のシミュレーション ----------
+        const OMEGA = 2 * Math.PI * 2.2;
+        const ZETA = 0.04;
+
+        function simulate(method) {
+            const n = Math.round((T_END + T_HOLD) / DT) + 1;
+            const out = [];
+            let prevP = null, prevV = null;
+            let r = [0, 0], rv = [0, 0];
+            for (let k = 0; k < n; k++) {
+                const t = k * DT;
+                const j1 = evalJoint(method, 0, t), j2 = evalJoint(method, 1, t);
+                const p = tcp(j1[0], j2[0])[2];
+                // 手先の速度・加速度 (数値微分。速度が跳ぶと加速度はインパルスになる)
+                const v = prevP ? [(p[0] - prevP[0]) / DT, (p[1] - prevP[1]) / DT] : [0, 0];
+                const a = prevV ? [(v[0] - prevV[0]) / DT, (v[1] - prevV[1]) / DT] : [0, 0];
+                // 相対変位 r: r'' = -ω² r - 2ζω r' - a_tcp
+                for (let d = 0; d < 2; d++) {
+                    const acc = -OMEGA * OMEGA * r[d] - 2 * ZETA * OMEGA * rv[d] - a[d];
+                    rv[d] += acc * DT;
+                    r[d] += rv[d] * DT;
+                }
+                out.push({ t, j1, j2, r: [...r] });
+                prevP = p; prevV = v;
+            }
+            let resid = 0;
+            out.forEach(o => { if (o.t > T_END) resid = Math.max(resid, Math.hypot(o.r[0], o.r[1])); });
+            return { frames: out, resid };
+        }
+
+        const SIMS = {};
+        ['linear', 'trap', 'cubic', 'quintic'].forEach(m => SIMS[m] = simulate(m));
+        const RESID_MAX = Math.max(...Object.values(SIMS).map(s => s.resid));
+
+        // ---------- 描画 ----------
+        function setup(cv) {
+            const dpr = window.devicePixelRatio || 1;
+            const r = cv.getBoundingClientRect();
+            cv.width = r.width * dpr; cv.height = r.height * dpr;
+            const ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: r.width, h: r.height };
+        }
+
+        let method = 'linear';
+        let t0 = performance.now();
+
+        function drawArm(frame) {
+            const { ctx, w, h } = setup(document.getElementById('cvArm'));
+            const scale = Math.min(w / 4.2, h / 2.6);
+            const ox = w / 2, oy = h * 0.78;
+            const to = p => [ox + p[0] * scale, oy - p[1] * scale];
+            ctx.clearRect(0, 0, w, h);
+
+            // 経由点の手先位置
+            for (let i = 0; i < T.length; i++) {
+                const p = to(tcp(Q[0][i], Q[1][i])[2]);
+                ctx.beginPath(); ctx.arc(p[0], p[1], 5, 0, 2 * Math.PI);
+                ctx.fillStyle = '#fbbf24'; ctx.globalAlpha = 0.6; ctx.fill(); ctx.globalAlpha = 1;
+            }
+            // 手先の軌跡
+            const sim = SIMS[method].frames;
+            ctx.strokeStyle = COLORS[method]; ctx.globalAlpha = 0.35; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let k = 0; k < sim.length; k += 10) {
+                const p = to(tcp(sim[k].j1[0], sim[k].j2[0])[2]);
+                k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]);
+            }
+            ctx.stroke(); ctx.globalAlpha = 1;
+
+            // アーム
+            const pts = tcp(frame.j1[0], frame.j2[0]).map(to);
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(pts[0][0] - 20, pts[0][1], 40, 10);
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#cbd5e1';
+            for (let i = 0; i < 2; i++) {
+                ctx.lineWidth = 12 - i * 3;
+                ctx.beginPath(); ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[i + 1][0], pts[i + 1][1]); ctx.stroke();
+            }
+            [0, 1].forEach(i => {
+                ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 7, 0, 2 * Math.PI);
+                ctx.fillStyle = i === 0 ? '#f472b6' : '#94a3b8'; ctx.fill();
+            });
+
+            // 吊るした重り (揺れを見やすく拡大して表示)
+            const VIS = 12;
+            const tip = pts[2];
+            const rest = 0.45 * scale;
+            let bx = tip[0] + frame.r[0] * VIS * scale;
+            let by = tip[1] + rest - frame.r[1] * VIS * scale;
+            const dx = bx - tip[0], dy = by - tip[1];
+            const len = Math.hypot(dx, dy), maxLen = rest * 1.8;
+            if (len > maxLen) { bx = tip[0] + dx / len * maxLen; by = tip[1] + dy / len * maxLen; }
+            ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            const N = 10;
+            for (let k = 0; k <= N; k++) {
+                const f = k / N;
+                const x = tip[0] + (bx - tip[0]) * f + (k % 2 ? 5 : -5) * (k > 0 && k < N);
+                const y = tip[1] + (by - tip[1]) * f;
+                k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+            }
+            ctx.stroke();
+            ctx.beginPath(); ctx.arc(bx, by, 11, 0, 2 * Math.PI);
+            ctx.fillStyle = COLORS[method]; ctx.fill();
+            ctx.beginPath(); ctx.arc(tip[0], tip[1], 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#e2e8f0'; ctx.fill();
+
+            ctx.fillStyle = '#94a3b8'; ctx.font = '12px sans-serif';
+            ctx.fillText(frame.t <= T_END ? `t = ${frame.t.toFixed(2)} s` : `到着後 ${(frame.t - T_END).toFixed(1)} s`, 10, 18);
+        }
+
+        function drawPlot(id, idx, tNow) {
+            const { ctx, w, h } = setup(document.getElementById(id));
+            ctx.clearRect(0, 0, w, h);
+            const tMax = T_END + 0.3;
+            const pad = { l: 8, r: 8, t: 6, b: 6 };
+            const X = t => pad.l + (t / tMax) * (w - pad.l - pad.r);
+
+            // 縦軸の範囲は全手法共通 (加速度は5次・台形の大きさに合わせ、線形のインパルスははみ出す)
+            const lim = [null, null, null];
+            let lo = Infinity, hi = -Infinity;
+            ['trap', 'cubic', 'quintic'].forEach(m => {
+                for (let t = 0; t <= tMax; t += 0.01) {
+                    const v = evalJoint(m, 0, t)[idx];
+                    lo = Math.min(lo, v); hi = Math.max(hi, v);
+                }
+            });
+            if (idx === 0) { lo = Math.min(lo, ...Q[0]); hi = Math.max(hi, ...Q[0]); }
+            const m = (hi - lo) * 0.12 || 1;
+            lo -= m; hi += m;
+            const Y = v => pad.t + (1 - (v - lo) / (hi - lo)) * (h - pad.t - pad.b);
+
+            // ゼロ線と経由点の時刻
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+            if (lo < 0 && hi > 0) { ctx.beginPath(); ctx.moveTo(pad.l, Y(0)); ctx.lineTo(w - pad.r, Y(0)); ctx.stroke(); }
+            ctx.setLineDash([3, 4]);
+            T.forEach(tk => { ctx.beginPath(); ctx.moveTo(X(tk), pad.t); ctx.lineTo(X(tk), h - pad.b); ctx.stroke(); });
+            ctx.setLineDash([]);
+
+            // ほかの手法は薄く
+            ['linear', 'trap', 'cubic', 'quintic'].forEach(mm => {
+                const active = mm === method;
+                ctx.strokeStyle = COLORS[mm];
+                ctx.globalAlpha = active ? 1 : 0.15;
+                ctx.lineWidth = active ? 2.5 : 1.5;
+                ctx.beginPath();
+                let prev = null;
+                for (let t = 0; t <= tMax + 1e-9; t += 0.005) {
+                    const v = evalJoint(mm, 0, t)[idx];
+                    const y = Math.max(pad.t, Math.min(h - pad.b, Y(v)));
+                    prev === null ? ctx.moveTo(X(t), y) : ctx.lineTo(X(t), y);
+                    prev = v;
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            });
+
+            // 線形補間の加速度はインパルス (無限大) を矢印で
+            if (idx === 2 && method === 'linear') {
+                const v = knotless();
+                ctx.strokeStyle = COLORS.linear; ctx.lineWidth = 2.5;
+                T.forEach((tk, i) => {
+                    const dv = v[i + 1] - v[i];
+                    if (Math.abs(dv) < 1e-9) return;
+                    const x = X(tk);
+                    const yEnd = dv > 0 ? pad.t + 2 : h - pad.b - 2;
+                    ctx.beginPath(); ctx.moveTo(x, Y(0)); ctx.lineTo(x, yEnd); ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x - 4, yEnd + (dv > 0 ? 6 : -6)); ctx.lineTo(x, yEnd); ctx.lineTo(x + 4, yEnd + (dv > 0 ? 6 : -6));
+                    ctx.stroke();
+                });
+            }
+
+            if (idx === 0) {
+                ctx.fillStyle = '#fbbf24';
+                T.forEach((tk, i) => { ctx.beginPath(); ctx.arc(X(tk), Y(Q[0][i]), 4, 0, 2 * Math.PI); ctx.fill(); });
+            }
+
+            // 時刻カーソル
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+            const tc = Math.min(tNow, tMax);
+            ctx.beginPath(); ctx.moveTo(X(tc), pad.t); ctx.lineTo(X(tc), h - pad.b); ctx.stroke();
+        }
+
+        // 線形補間の各区間の速度 (前後に 0 を付ける)
+        function knotless() {
+            const v = [0];
+            for (let i = 0; i < T.length - 1; i++) v.push((Q[0][i + 1] - Q[0][i]) / (T[i + 1] - T[i]));
+            v.push(0);
+            return v;
+        }
+
+        function selectMethod(m) {
+            method = m;
+            document.querySelectorAll('#methods button[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+            document.getElementById('note').innerHTML = NOTES[m];
+            const resid = SIMS[m].resid;
+            const fill = document.getElementById('fill');
+            fill.style.width = (resid / RESID_MAX * 100).toFixed(0) + '%';
+            fill.style.background = COLORS[m];
+            document.getElementById('resid').textContent = (resid * 1000).toFixed(1) + ' mm';
+            t0 = performance.now();
+        }
+
+        document.querySelectorAll('#methods button[data-m]').forEach(b => b.onclick = () => selectMethod(b.dataset.m));
+        document.getElementById('play').onclick = () => { t0 = performance.now(); };
+
+        function loop(now) {
+            const total = T_END + T_HOLD;
+            let t = (now - t0) / 1000;
+            if (t > total + 0.6) { t0 = now; t = 0; }
+            t = Math.max(0, Math.min(t, total));
+            const frames = SIMS[method].frames;
+            const frame = frames[Math.min(frames.length - 1, Math.round(t / DT))];
+            drawArm(frame);
+            drawPlot('pq', 0, t);
+            drawPlot('pv', 1, t);
+            drawPlot('pa', 2, t);
+            requestAnimationFrame(loop);
+        }
+
+        selectMethod('linear');
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

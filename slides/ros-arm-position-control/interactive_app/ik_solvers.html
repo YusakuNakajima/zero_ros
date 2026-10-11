@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IKソルバーのしくみ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #7dd3fc;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 8px;
+            background: var(--bg); color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif; font-size: 13px;
+            overscroll-behavior: none;
+        }
+        .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+        .tabs button { flex: 1 1 0; min-width: 0; white-space: nowrap; padding: 5px 4px; }
+        button {
+            background: #0b1220; color: var(--text); border: 1px solid #475569;
+            border-radius: 6px; padding: 5px 8px; font-family: inherit; font-size: 12px; cursor: pointer;
+        }
+        button:hover { background: #1e293b; }
+        button.on { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+        button.primary { background: #0369a1; border-color: #0284c7; }
+        button:disabled { opacity: 0.4; cursor: default; }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+        canvas { width: 100%; height: 255px; display: block; background: #0b1220; border-radius: 6px; touch-action: none; }
+        .ctrl { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+        .info { margin-top: 6px; font-size: 13px; line-height: 1.55; min-height: 4.6em; }
+        .info b { color: #fbbf24; }
+        .mono { font-family: monospace; font-size: 12px; color: #cbd5e1; }
+        .hint { color: var(--muted); font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="tabs" id="tabs">
+        <button data-tab="newton">① ニュートン法</button>
+        <button data-tab="analytic">② 解析解</button>
+        <button data-tab="kdl">③ 数値解(KDL)</button>
+        <button data-tab="trac">④ TRAC-IK</button>
+    </div>
+    <div class="panel">
+        <canvas id="cv"></canvas>
+        <div class="ctrl" id="ctrl"></div>
+        <div class="info" id="info"></div>
+    </div>
+
+    <script>
+        const cv = document.getElementById('cv');
+        const ctrl = document.getElementById('ctrl');
+        const info = document.getElementById('info');
+        const DEG = Math.PI / 180;
+        const L = [1.0, 0.8];
+        // KDL / TRAC-IK で使う関節制限
+        // 関節1は真上 (90°) に可動範囲の切れ目がある (-270°〜90°)。肘は片側にしか曲がらない
+        const LIM = [[-270 * DEG, 90 * DEG], [5 * DEG, 160 * DEG]];
+
+        function setup() {
+            const dpr = window.devicePixelRatio || 1;
+            const r = cv.getBoundingClientRect();
+            cv.width = r.width * dpr; cv.height = r.height * dpr;
+            const ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: r.width, h: r.height };
+        }
+
+        // ---------- アーム共通 ----------
+        function fk(q) {
+            const e = [L[0] * Math.cos(q[0]), L[0] * Math.sin(q[0])];
+            const t = [e[0] + L[1] * Math.cos(q[0] + q[1]), e[1] + L[1] * Math.sin(q[0] + q[1])];
+            return [[0, 0], e, t];
+        }
+        function jac(q) {
+            const s1 = Math.sin(q[0]), c1 = Math.cos(q[0]);
+            const s12 = Math.sin(q[0] + q[1]), c12 = Math.cos(q[0] + q[1]);
+            return [[-L[0] * s1 - L[1] * s12, -L[1] * s12], [L[0] * c1 + L[1] * c12, L[1] * c12]];
+        }
+        function armView(w, h) {
+            const scale = Math.min(w / 4.4, h / 2.2);
+            const ox = w / 2, oy = h * 0.82;
+            return {
+                to: p => [ox + p[0] * scale, oy - p[1] * scale],
+                from: (x, y) => [(x - ox) / scale, (oy - y) / scale],
+                scale,
+            };
+        }
+        function drawArm(ctx, v, q, opt = {}) {
+            const pts = fk(q).map(v.to);
+            ctx.globalAlpha = opt.alpha ?? 1;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = opt.color || '#cbd5e1';
+            ctx.lineWidth = opt.width || 10;
+            ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+            ctx.lineTo(pts[1][0], pts[1][1]); ctx.lineTo(pts[2][0], pts[2][1]); ctx.stroke();
+            if (!opt.ghost) {
+                [0, 1].forEach(i => {
+                    ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = i ? '#4ade80' : '#f472b6'; ctx.fill();
+                });
+            }
+            ctx.beginPath(); ctx.arc(pts[2][0], pts[2][1], opt.ghost ? 3 : 5, 0, 2 * Math.PI);
+            ctx.fillStyle = opt.color || '#e2e8f0'; ctx.fill();
+            ctx.globalAlpha = 1;
+            return pts;
+        }
+        function drawBase(ctx, v, showReach) {
+            const o = v.to([0, 0]);
+            if (showReach) {
+                ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+                [L[0] + L[1], L[0] - L[1]].forEach(r => {
+                    ctx.beginPath(); ctx.arc(o[0], o[1], r * v.scale, 0, 2 * Math.PI); ctx.stroke();
+                });
+            }
+            ctx.fillStyle = '#475569'; ctx.fillRect(o[0] - 18, o[1], 36, 9);
+        }
+        function drawTarget(ctx, v, p) {
+            const [x, y] = v.to(p);
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, 10, 0, 2 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x - 14, y); ctx.lineTo(x + 14, y); ctx.moveTo(x, y - 14); ctx.lineTo(x, y + 14); ctx.stroke();
+        }
+
+        // ニュートン法 1 ステップ (Δq = J⁻¹ e、関節制限でクランプ)
+        function newtonStep(q, target, useLimits) {
+            const tip = fk(q)[2];
+            const e = [target[0] - tip[0], target[1] - tip[1]];
+            const J = jac(q);
+            const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
+            // 特異点付近では減衰付き最小二乗 (DLS) で暴れないようにする
+            const lam = 0.02;
+            const a = J[0][0], b = J[0][1], c = J[1][0], d = J[1][1];
+            const JJt = [[a * a + b * b + lam, a * c + b * d], [a * c + b * d, c * c + d * d + lam]];
+            const dd = JJt[0][0] * JJt[1][1] - JJt[0][1] * JJt[1][0];
+            const y = [(JJt[1][1] * e[0] - JJt[0][1] * e[1]) / dd, (-JJt[1][0] * e[0] + JJt[0][0] * e[1]) / dd];
+            let dq = [a * y[0] + c * y[1], b * y[0] + d * y[1]];
+            // 1回に動く量を制限 (大きく飛びすぎないように)
+            const n = Math.hypot(dq[0], dq[1]), MAX = 0.5;
+            if (n > MAX) dq = dq.map(v => v * MAX / n);
+            let next = [q[0] + dq[0], q[1] + dq[1]];
+            if (useLimits) next = next.map((v, i) => Math.min(LIM[i][1], Math.max(LIM[i][0], v)));
+            return { next, err: Math.hypot(e[0], e[1]), e, det };
+        }
+        function solveNewton(q0, target, useLimits, maxIter = 40, tol = 1e-3) {
+            const path = [q0];
+            let q = q0;
+            for (let k = 0; k < maxIter; k++) {
+                const s = newtonStep(q, target, useLimits);
+                if (s.err < tol) return { ok: true, q, path };
+                q = s.next;
+                path.push(q);
+                // 動かなくなった = 行き詰まり
+                const prev = path[path.length - 2];
+                if (Math.hypot(q[0] - prev[0], q[1] - prev[1]) < 1e-5) break;
+            }
+            const err = Math.hypot(target[0] - fk(q)[2][0], target[1] - fk(q)[2][1]);
+            return { ok: err < tol, q, path };
+        }
+        function analytic(p) {
+            const r2 = p[0] * p[0] + p[1] * p[1];
+            const c2 = (r2 - L[0] * L[0] - L[1] * L[1]) / (2 * L[0] * L[1]);
+            if (c2 < -1 || c2 > 1) return [];
+            return [1, -1].map(sg => {
+                const q2 = sg * Math.acos(c2);
+                const q1 = Math.atan2(p[1], p[0]) - Math.atan2(L[1] * Math.sin(q2), L[0] + L[1] * Math.cos(q2));
+                return [q1, q2];
+            });
+        }
+
+        // ---------- 状態 ----------
+        let tab = 'newton';
+        const S = {
+            newton: { x0: 2.6, iters: [] },
+            analytic: { target: [0.9, 1.1] },
+            kdl: { target: [0.1, 1.35], seed: [0 * DEG, 30 * DEG], q: null, path: [], done: false },
+            trac: { target: null, attempts: [], result: null },
+        };
+
+        // ================= ① ニュートン法 (1次元) =================
+        const f = x => x * x * x - 2 * x - 2;
+        const df = x => 3 * x * x - 2;
+        function drawNewton() {
+            const { ctx, w, h } = setup();
+            const X0 = -0.5, X1 = 3.2, Y0 = -5, Y1 = 18;
+            const X = x => 30 + (x - X0) / (X1 - X0) * (w - 45);
+            const Y = y => 12 + (1 - (y - Y0) / (Y1 - Y0)) * (h - 30);
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(X(X0), Y(0)); ctx.lineTo(X(X1), Y(0)); ctx.stroke();
+            ctx.fillStyle = '#64748b'; ctx.font = '12px sans-serif';
+            ctx.fillText('x（IKでは関節角 q）→', w - 150, h - 6);
+            ctx.fillText('f(x)（IKでは手先の誤差）', 36, 24);
+
+            ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 2.5; ctx.beginPath();
+            for (let x = X0; x <= X1; x += 0.01) { const y = f(x); x === X0 ? ctx.moveTo(X(x), Y(y)) : ctx.lineTo(X(x), Y(y)); }
+            ctx.stroke();
+
+            const st = S.newton;
+            let x = st.x0;
+            const xs = [x];
+            st.iters.forEach(() => { x = x - f(x) / df(x); xs.push(x); });
+            xs.forEach((xi, i) => {
+                const last = i === xs.length - 1;
+                ctx.globalAlpha = last ? 1 : 0.45;
+                // f(xi) までの縦線
+                ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(X(xi), Y(0)); ctx.lineTo(X(xi), Y(f(xi))); ctx.stroke(); ctx.setLineDash([]);
+                // 接線 → x 軸との交点が次の x
+                if (i < xs.length - 1) {
+                    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(X(xi), Y(f(xi))); ctx.lineTo(X(xs[i + 1]), Y(0)); ctx.stroke();
+                }
+                ctx.beginPath(); ctx.arc(X(xi), Y(f(xi)), 5, 0, 2 * Math.PI); ctx.fillStyle = '#fbbf24'; ctx.fill();
+                ctx.beginPath(); ctx.arc(X(xi), Y(0), 4, 0, 2 * Math.PI); ctx.fillStyle = '#f472b6'; ctx.fill();
+                ctx.fillStyle = '#f9a8d4'; ctx.fillText('x' + subscript(i), X(xi) - 6, Y(0) + 16 + (i % 2) * 12);
+                ctx.globalAlpha = 1;
+            });
+            const xl = xs[xs.length - 1];
+            info.innerHTML =
+                `<b>f(x) = 0 になる x を探す</b>方法。いまの点で<b>接線</b>を引き、接線が 0 になる所へ進む → これを繰り返す<br>` +
+                `<span class="mono">x_next = x − f(x) / f'(x)</span>　　ステップ ${st.iters.length}：x = ${xl.toFixed(4)}、f(x) = ${f(xl).toFixed(4)}<br>` +
+                `<span class="hint">IKでは「x → 関節角」「f → 目標との誤差」「傾き f' → ヤコビアン J」に置き換わる（③）</span>`;
+        }
+        function subscript(n) { return String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c]).join(''); }
+
+        // ================= ② 解析解 =================
+        function drawAnalytic() {
+            const { ctx, w, h } = setup();
+            const v = armView(w, h);
+            ctx.clearRect(0, 0, w, h);
+            drawBase(ctx, v, true);
+            const p = S.analytic.target;
+            const sols = analytic(p);
+            const cols = ['#4ade80', '#f472b6'];
+            sols.forEach((q, i) => drawArm(ctx, v, q, { color: cols[i], width: 9, alpha: 0.9 }));
+            drawTarget(ctx, v, p);
+            const r = Math.hypot(p[0], p[1]);
+            info.innerHTML = sols.length
+                ? `<b>式に代入するだけ</b>で答えが出る。反復なし・<b>解が全部（肘上／肘下）</b>出る<br>` +
+                  `<span class="mono">cos θ₂ = (x² + y² − L₁² − L₂²) / (2 L₁ L₂)</span><br>` +
+                  `<span style="color:#4ade80">解1</span>: (${(sols[0][0] / DEG).toFixed(0)}°, ${(sols[0][1] / DEG).toFixed(0)}°)　` +
+                  `<span style="color:#f472b6">解2</span>: (${(sols[1][0] / DEG).toFixed(0)}°, ${(sols[1][1] / DEG).toFixed(0)}°)　` +
+                  `<span class="hint">IKFast は6軸ロボット用にこの式を自動で導いて C++ コードにする</span>`
+                : `<b style="color:#f87171">届かない位置</b>（r = ${r.toFixed(2)} > L₁ + L₂ = 1.8）→ 解析解は「解なし」とすぐ分かる`;
+            return v;
+        }
+
+        // ================= ③ 数値解 KDL =================
+        function drawKdl() {
+            const { ctx, w, h } = setup();
+            const v = armView(w, h);
+            ctx.clearRect(0, 0, w, h);
+            drawBase(ctx, v, true);
+            const st = S.kdl;
+            const q = st.q || st.seed;
+            st.path.forEach((pq, i) => drawArm(ctx, v, pq, { ghost: true, color: '#7dd3fc', width: 3, alpha: 0.15 + 0.5 * i / Math.max(1, st.path.length) }));
+            const pts = drawArm(ctx, v, q);
+            drawTarget(ctx, v, st.target);
+            // 誤差ベクトル
+            const tp = v.to(st.target);
+            ctx.strokeStyle = '#f87171'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(pts[2][0], pts[2][1]); ctx.lineTo(tp[0], tp[1]); ctx.stroke(); ctx.setLineDash([]);
+            const s = newtonStep(q, st.target, true);
+            info.innerHTML =
+                `① と同じ考え方：<b>誤差 e</b>（赤い点線）を<b>ヤコビアン J</b> で関節の動きに直して少しずつ近づける<br>` +
+                `<span class="mono">Δq = J⁻¹ e　→　q ← q + Δq</span>　　ステップ ${st.path.length - 1}：誤差 ${(s.err * 1000).toFixed(1)} mm` +
+                (s.err < 1e-3 ? '　<b style="color:#4ade80">収束！</b>' : '') + `<br>` +
+                `<span class="hint">初期値（スタートの姿勢）に近い解が1つだけ見つかる。目標をドラッグ → 「1ステップ」</span>`;
+            return v;
+        }
+        function kdlReset() { S.kdl.q = [...S.kdl.seed]; S.kdl.path = [S.kdl.q]; }
+
+        // ================= ④ TRAC-IK =================
+        // KDL (初期値固定) が関節制限で行き詰まる目標を探しておく
+        const TRAC_SEED = [60 * DEG, 40 * DEG];
+        function findStuckTarget() {
+            const seed = TRAC_SEED;
+            for (let a = 165; a >= 95; a -= 5) {
+                for (let r = 1.0; r <= 1.7; r += 0.1) {
+                    const p = [r * Math.cos(a * DEG), r * Math.sin(a * DEG)];
+                    const sols = analytic(p).filter(q => q[1] >= LIM[1][0] && q[1] <= LIM[1][1] && wrapIn(q[0], LIM[0]));
+                    if (!sols.length) continue;
+                    if (!solveNewton(seed, p, true).ok) return p;
+                }
+            }
+            return [-1.1, -0.3];
+        }
+        function wrapIn(a, lim) {
+            for (let k = -1; k <= 1; k++) { const b = a + 2 * Math.PI * k; if (b >= lim[0] && b <= lim[1]) return true; }
+            return false;
+        }
+        // 再現性のある疑似乱数
+        let seedRng = 7;
+        function rand() { seedRng = (seedRng * 16807) % 2147483647; return (seedRng - 1) / 2147483646; }
+        function runTrac() {
+            const st = S.trac;
+            st.attempts = [];
+            st.result = null;
+            seedRng = 7;
+            let q0 = [...TRAC_SEED];
+            for (let k = 0; k < 15; k++) {
+                const res = solveNewton(q0, st.target, true);
+                st.attempts.push(res);
+                if (res.ok) { st.result = res; break; }
+                // 行き詰まったらランダムな初期値からやり直す
+                q0 = LIM.map(l => l[0] + rand() * (l[1] - l[0]));
+            }
+        }
+        function drawTrac() {
+            const { ctx, w, h } = setup();
+            const v = armView(w, h);
+            ctx.clearRect(0, 0, w, h);
+            drawBase(ctx, v, true);
+            // 関節1の可動範囲の切れ目 (真上)
+            const o = v.to([0, 0]);
+            ctx.strokeStyle = '#f87171'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]);
+            ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(o[0], o[1] - 1.9 * v.scale); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#fca5a5'; ctx.font = '12px sans-serif';
+            ctx.fillText('関節1はここを越えられない', o[0] + 6, o[1] - 1.75 * v.scale);
+            const st = S.trac;
+            st.attempts.forEach((res, i) => {
+                const good = res.ok;
+                drawArm(ctx, v, res.q, { color: good ? '#4ade80' : '#f87171', width: good ? 9 : 5, alpha: good ? 1 : 0.45, ghost: !good });
+            });
+            drawTarget(ctx, v, st.target);
+            const n = st.attempts.length;
+            const firstFail = n && !st.attempts[0].ok;
+            info.innerHTML =
+                `KDL（③）は関節制限にぶつかると<b>行き詰まる</b>ことがある（<span style="color:#f87171">赤</span>）<br>` +
+                `TRAC-IK は<b>行き詰まったら別の初期値からやり直す</b>（＋SQP という別の解き方も同時に走らせる）→ 成功率が高い<br>` +
+                (st.result
+                    ? `<span class="hint">初回 ${firstFail ? '失敗' : '成功'} → ${n} 回目で<span style="color:#4ade80">成功</span>（目標をドラッグして試せる）</span>`
+                    : `<span class="hint">${n} 回試して解なし（届かない／関節制限の外）</span>`);
+            return v;
+        }
+
+        // ---------- タブとコントロール ----------
+        let view = null;
+        function render() {
+            view = { newton: drawNewton, analytic: drawAnalytic, kdl: drawKdl, trac: drawTrac }[tab]();
+        }
+        let timer = null;
+        function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+        function buildCtrl() {
+            stopTimer();
+            ctrl.innerHTML = '';
+            const btn = (label, fn, cls) => {
+                const b = document.createElement('button');
+                b.textContent = label; b.onclick = fn; if (cls) b.className = cls;
+                ctrl.appendChild(b); return b;
+            };
+            const hint = t => { const s = document.createElement('span'); s.className = 'hint'; s.textContent = t; ctrl.appendChild(s); };
+            if (tab === 'newton') {
+                btn('1ステップ', () => { if (S.newton.iters.length < 6) S.newton.iters.push(1); render(); }, 'primary');
+                btn('最初から', () => { S.newton.iters = []; render(); });
+                hint('グラフをクリックすると開始点 x₀ を変えられる');
+            } else if (tab === 'analytic') {
+                hint('黄色の目標をドラッグ → 2つの解がその場で出る');
+            } else if (tab === 'kdl') {
+                btn('1ステップ', () => {
+                    const s = newtonStep(S.kdl.q, S.kdl.target, true);
+                    if (s.err >= 1e-3) { S.kdl.q = s.next; S.kdl.path.push(s.next); }
+                    render();
+                }, 'primary');
+                btn('自動で解く', () => {
+                    stopTimer();
+                    timer = setInterval(() => {
+                        const s = newtonStep(S.kdl.q, S.kdl.target, true);
+                        if (s.err < 1e-3 || S.kdl.path.length > 40) { stopTimer(); render(); return; }
+                        S.kdl.q = s.next; S.kdl.path.push(s.next); render();
+                    }, 250);
+                });
+                btn('初期値に戻す', () => { kdlReset(); render(); });
+            } else if (tab === 'trac') {
+                btn('もう一度解く', () => { runTrac(); render(); }, 'primary');
+                btn('KDLが行き詰まる目標', () => { S.trac.target = findStuckTarget(); runTrac(); render(); });
+            }
+        }
+
+        function selectTab(t) {
+            tab = t;
+            document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+            buildCtrl();
+            render();
+        }
+        document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+        // ドラッグで目標を動かす
+        let dragging = false;
+        function pointer(e) {
+            const r = cv.getBoundingClientRect();
+            const x = e.clientX - r.left, y = e.clientY - r.top;
+            if (tab === 'newton') {
+                const w = r.width;
+                const X0 = -0.5, X1 = 3.2;
+                const xv = X0 + (x - 30) / (w - 45) * (X1 - X0);
+                if (Math.abs(df(xv)) > 0.3) { S.newton.x0 = xv; S.newton.iters = []; render(); }
+                return;
+            }
+            const p = view.from(x, y);
+            if (tab === 'analytic') S.analytic.target = p;
+            if (tab === 'kdl') { S.kdl.target = p; kdlReset(); stopTimer(); }
+            if (tab === 'trac') { S.trac.target = p; runTrac(); }
+            render();
+        }
+        cv.addEventListener('pointerdown', e => { dragging = true; cv.setPointerCapture(e.pointerId); pointer(e); });
+        cv.addEventListener('pointermove', e => { if (dragging && tab !== 'newton') pointer(e); });
+        cv.addEventListener('pointerup', () => { dragging = false; });
+        window.addEventListener('resize', render);
+
+        kdlReset();
+        S.trac.target = findStuckTarget();
+        runTrac();
+        const initial = (location.hash || '').replace('#', '');
+        selectTab(['newton', 'analytic', 'kdl', 'trac'].includes(initial) ? initial : 'newton');
+    </script>
+</body>
+</html>
