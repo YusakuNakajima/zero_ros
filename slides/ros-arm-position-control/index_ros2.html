@@ -969,6 +969,152 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
+                    <h2>数値解のカギ：ヤコビアン</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1;">
+                            <svg viewBox="0 0 320 240" style="width: 100%; max-height: 50vh;">
+                                <defs>
+                                    <marker id="jac-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M0,0 L10,5 L0,10 z" fill="#fb923c"/>
+                                    </marker>
+                                </defs>
+                                <rect x="30" y="200" width="60" height="14" fill="#555"/>
+                                <!-- 動かした後（点線） -->
+                                <polyline points="60,200 134.7,105.5 236.7,107.8" fill="none" stroke="#4fc3f7" stroke-width="5" stroke-dasharray="8 6" opacity="0.7"/>
+                                <!-- 動かす前 -->
+                                <polyline points="60,200 150,120 250,140" fill="none" stroke="#ddd" stroke-width="7" stroke-linecap="round"/>
+                                <circle cx="60" cy="200" r="9" fill="#a3e635"/>
+                                <circle cx="150" cy="120" r="7" fill="#888"/>
+                                <circle cx="250" cy="140" r="7" fill="#ddd"/>
+                                <!-- Δq -->
+                                <path d="M100,164 A54,54 0 0 0 93,153" fill="none" stroke="#a3e635" stroke-width="3"/>
+                                <text x="104" y="180" fill="#a3e635" font-size="16">Δq</text>
+                                <!-- Δx -->
+                                <line x1="250" y1="140" x2="239" y2="113" stroke="#fb923c" stroke-width="3" marker-end="url(#jac-arrow)"/>
+                                <text x="262" y="125" fill="#fb923c" font-size="16">Δx</text>
+                                <text x="160" y="232" fill="#aaa" font-size="14" text-anchor="middle">関節を少し回す → 手先が少し動く</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; font-size: 0.62em; text-align: left;">
+                            <ul>
+                                <li><strong>ヤコビアン J</strong>：関節を少し動かすと手先がどれだけ動くかの表
+                                    <ul><li>Δx ≈ J Δq（関節の微小変化 → 手先の微小変化）</li></ul></li>
+                                <li>逆向きに使うと Δq ≈ J⁻¹ Δx（正方でなければ疑似逆行列 J⁺）</li>
+                                <li>目標との誤差を Δx として少しずつ詰める → 繰り返すと解に収束</li>
+                            </ul>
+                            <p>IKの式を解かなくても、<strong>J さえ計算できれば数値的に解ける</strong></p>
+                            <p style="font-size: 0.8em; color: #aaa;">J の詳細は「速度・加速度制御」の章で</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>補足：2種類のヤコビ行列</h2>
+                    <table style="font-size: 0.55em; width: 95%;">
+                        <thead>
+                            <tr><th></th><th style="color: #a3e635;">解析ヤコビ行列</th><th style="color: #fb923c;">幾何ヤコビ行列</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>作り方</td><td>手先姿勢（位置＋オイラー角）の式を q で偏微分</td><td>根元のリンクから手先へ<strong>漸化的に外積</strong>で計算</td></tr>
+                            <tr><td>計算量</td><td>自由度が増えると微分が大量で<strong>重い</strong></td><td>外積だけなので<strong>軽い</strong></td></tr>
+                            <tr><td>得られるもの</td><td>J(q) が <strong>q の式（解析解）</strong>で得られる</td><td>今の姿勢での<strong>数値だけ</strong></td></tr>
+                            <tr><td>特異姿勢</td><td>式から<strong>事前に求められる</strong></td><td>事前には求めにくい</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.65em;">今は計算が速いので、数値解をたくさん求めれば十分実用的<br>→ <strong>幾何ヤコビ行列を使うことが多い</strong></p>
+                </section>
+                <section>
+                    <h2>補足：幾何ヤコビ行列の作り方</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 0.9;">
+                            <svg viewBox="0 0 320 240" style="width: 100%; max-height: 50vh;">
+                                <defs>
+                                    <marker id="gj-arrow-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M0,0 L10,5 L0,10 z" fill="#aaa"/>
+                                    </marker>
+                                    <marker id="gj-arrow-v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M0,0 L10,5 L0,10 z" fill="#fb923c"/>
+                                    </marker>
+                                </defs>
+                                <!-- 関節 i（軸 zi は紙面手前向き） -->
+                                <circle cx="70" cy="170" r="16" fill="none" stroke="#a3e635" stroke-width="3"/>
+                                <circle cx="70" cy="170" r="4" fill="#a3e635"/>
+                                <text x="40" y="208" fill="#a3e635" font-size="15">関節 i（軸 zᵢ）</text>
+                                <!-- p - pi -->
+                                <line x1="70" y1="170" x2="246" y2="92" stroke="#aaa" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#gj-arrow-r)"/>
+                                <text x="140" y="150" fill="#aaa" font-size="15">p − pᵢ</text>
+                                <!-- 手先 -->
+                                <circle cx="250" cy="90" r="7" fill="#ddd"/>
+                                <text x="262" y="112" fill="#ddd" font-size="15">手先 p</text>
+                                <!-- zi × (p - pi) -->
+                                <line x1="250" y1="90" x2="227" y2="38" stroke="#fb923c" stroke-width="3.5" marker-end="url(#gj-arrow-v)"/>
+                                <text x="150" y="28" fill="#fb923c" font-size="15">zᵢ × (p − pᵢ)</text>
+                                <text x="160" y="232" fill="#aaa" font-size="14" text-anchor="middle">関節 i だけ回したときの手先の速度の向き</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1.1; font-size: 0.6em; text-align: left;">
+                            <ul>
+                                <li>根元のリンクから順に、各関節の軸 zᵢ と位置 pᵢ を求める（順運動学のついで）</li>
+                                <li><strong>手先速度ベクトル V = (v, ω)</strong>（並進速度＋角速度）を定義し<br><strong>幾何ヤコビ行列</strong> J<sub>G</sub>：V = J<sub>G</sub> q′ を使う</li>
+                                <li>関節 i の列 = [ zᵢ × (p − pᵢ) ; zᵢ ] → <strong>外積だけ</strong>で計算できる</li>
+                            </ul>
+                            <p style="font-size: 0.85em; color: #aaa;">姿勢誤差は回転ベクトルで表して J<sub>G</sub> に掛ける（KDL などもこの方式）</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>特異姿勢（特異点）とは</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 0.65;">
+                            <svg viewBox="0 0 320 220" style="width: 100%; max-height: 45vh;">
+                                <defs>
+                                    <marker id="sg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M0,0 L10,5 L0,10 z" fill="#fb923c"/>
+                                    </marker>
+                                </defs>
+                                <path d="M 245 40 A 200 200 0 0 1 245 200" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="5 5"/>
+                                <text x="200" y="30" fill="#94a3b8" font-size="14">届く限界</text>
+                                <rect x="20" y="128" width="40" height="12" fill="#555"/>
+                                <polyline points="40,128 140,124 238,120" fill="none" stroke="#ddd" stroke-width="8" stroke-linecap="round"/>
+                                <circle cx="40" cy="128" r="8" fill="#a3e635"/>
+                                <circle cx="140" cy="124" r="7" fill="#a3e635"/>
+                                <circle cx="238" cy="120" r="6" fill="#fbbf24"/>
+                                <line x1="244" y1="120" x2="300" y2="118" stroke="#fb923c" stroke-width="3" marker-end="url(#sg-arrow)"/>
+                                <text x="285" y="108" fill="#ef4444" font-size="22" font-weight="bold">✕</text>
+                                <text x="140" y="160" fill="#a3e635" font-size="14" text-anchor="middle">肘が伸びきった姿勢</text>
+                                <text x="160" y="200" fill="#94a3b8" font-size="14" text-anchor="middle">外向きにはどの関節を回しても動けない</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1.35; font-size: 0.6em; text-align: left;">
+                            <ul>
+                                <li>J のランクが落ち、<strong>手先をある方向へ動かせない</strong>姿勢</li>
+                                <li>手先速度 v を指令すると <strong>q′ = J⁻¹ v が発散</strong> → 関節が急回転</li>
+                                <li>一番困るのは<strong>速度の計算</strong>（直線動作・サーボ制御）</li>
+                                <li>IK でも数値解が不安定に／解（肘上・肘下）がここで合流</li>
+                            </ul>
+                            <p style="font-size: 0.85em; color: #aaa;">対策：特異点を避けた経路・PTP（関節補間）で通過・DLS</p>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <h2>特異姿勢は3種類</h2>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex: 1.3;">
+                            <iframe data-src="interactive_app/singularity_types.html#shoulder" width="100%" height="480"
+                                frameborder="0"></iframe>
+                        </div>
+                        <div style="flex: 1; font-size: 0.6em; text-align: left;">
+                            <ul>
+                                <li><strong>肩</strong>：手首中心が J1 軸の真上 → J1 が急回転</li>
+                                <li><strong>肘</strong>：腕が伸びきる（J3 = 0）→ 外へ動けない</li>
+                                <li><strong>手首</strong>：J5 = 0 で J4 と J6 が一直線 → J4・J6 が逆向きに急回転</li>
+                            </ul>
+                            <p>どれも<strong>手先は一定速度</strong>なのに、近くを通るだけで関節速度が上限を超える</p>
+                            <p style="font-size: 0.8em;"><a href="interactive_app/singularity_types.html#shoulder" target="_blank"
+                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
+                        </div>
+                    </div>
+                </section>
+                <section>
                     <h2>数値解のしくみ：ニュートン法</h2>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 1.15;">
@@ -1841,7 +1987,7 @@ point.accelerations = ddq   # 空だと静かに3次に落ちる
                         <li>compute_cartesian_path に <strong>jump_threshold</strong> があるのはこのため</li>
                         <li>密な IK サンプリング方式で<strong>一番危険</strong>なのはここ</li>
                     </ul>
-                    <p style="font-size: 0.55em; color: #aaa;">ヤコビアンと特異点は「速度・加速度制御」の章のアプリで確認できます</p>
+                    <p style="font-size: 0.55em; color: #aaa;">特異姿勢の3種類は「step2:逆運動学」の章、ヤコビアンは「速度・加速度制御」の章のアプリで確認できます</p>
                 </section>
 
                 <section>

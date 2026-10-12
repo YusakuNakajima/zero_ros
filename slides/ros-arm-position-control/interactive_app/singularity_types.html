@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特異姿勢の3種類</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #7dd3fc;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 8px;
+            background: var(--bg); color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif; font-size: 13px;
+            overscroll-behavior: none;
+        }
+        .tabs { display: flex; gap: 4px; margin-bottom: 6px; }
+        .tabs button { flex: 1 1 0; min-width: 0; white-space: nowrap; padding: 5px 4px; }
+        button {
+            background: #0b1220; color: var(--text); border: 1px solid #475569;
+            border-radius: 6px; padding: 5px 8px; font-family: inherit; font-size: 12px; cursor: pointer;
+        }
+        button:hover { background: #1e293b; }
+        button.on { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+        canvas { width: 100%; height: 300px; display: block; background: #0b1220; border-radius: 6px; }
+        .ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+        .ctrl input[type=range] { flex: 1 1 140px; }
+        .info { margin-top: 6px; font-size: 13px; line-height: 1.55; min-height: 3.2em; }
+        .info b { color: #fbbf24; }
+        .hint { color: var(--muted); font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="tabs" id="tabs">
+        <button data-tab="shoulder">① 肩特異点</button>
+        <button data-tab="elbow">② 肘特異点</button>
+        <button data-tab="wrist">③ 手首特異点</button>
+    </div>
+    <div class="panel">
+        <canvas id="cv"></canvas>
+        <div class="ctrl">
+            <button id="play">⏸ 停止</button>
+            <span id="sliderLabel" class="hint"></span>
+            <input type="range" id="slider">
+            <span id="sliderVal" class="hint" style="min-width: 4.5em;"></span>
+        </div>
+        <div class="info" id="info"></div>
+    </div>
+
+    <script>
+        const cv = document.getElementById('cv');
+        const ctx = cv.getContext('2d');
+        const slider = document.getElementById('slider');
+        const info = document.getElementById('info');
+        const DEG = Math.PI / 180;
+        const LIMIT = 180; // UR5e の関節速度上限 [deg/s]
+        const YMAX = 540;  // グラフの縦軸上限 [deg/s]
+
+        // 手先を一定速度で動かしたときの関節角を返す。各シナリオは
+        //   duration: 1周期の秒数, angles(t): {関節名: 角度[rad]}, draw(t): 図の描画
+        const L1 = 0.4, L2 = 0.4, R = L1 + L2;
+        const scenarios = {
+            shoulder: {
+                label: '手首中心と J1 軸の距離 d',
+                min: 0.01, max: 0.3, step: 0.01, value: 0.06,
+                fmt: v => (v * 100).toFixed(0) + ' cm',
+                v: 0.25, half: 0.5,
+                get duration() { return 2 * this.half / this.v; },
+                pos(t) { return { x: -this.half + this.v * t, y: slider.valueAsNumber }; },
+                angles(t) { const p = this.pos(t); return { J1: Math.atan2(p.y, p.x) }; },
+                info: '上から見た図。手首中心が <b>J1（根元の旋回軸）の真上</b>を通ると、J1 をどちらに回せばよいか決まらない。' +
+                    '近くを通るだけでも <b>J1 が一気に半回転</b>する（手先は 250 mm/s 一定）。',
+                draw(t, s) {
+                    const p = this.pos(t);
+                    const cx = s.x + s.w / 2, cy = s.y + s.h / 2, k = s.h * 0.75;
+                    const P = [cx + p.x * k, cy - p.y * k];
+                    dashed([[cx - this.half * k, P[1]], [cx + this.half * k, P[1]]], '#64748b');
+                    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+                    line(cx, cy, P[0], P[1]);
+                    ctx.fillStyle = '#fbbf24'; circle(P[0], P[1], 6);
+                    ctx.strokeStyle = '#a3e635'; ctx.lineWidth = 3; ring(cx, cy, 13); ctx.fillStyle = '#a3e635'; circle(cx, cy, 4);
+                    text('J1 軸', cx + 16, cy + 22, '#a3e635');
+                    text('手首中心', P[0] + 8, P[1] - 10, '#fbbf24');
+                    text('上から見た図', s.x + 6, s.y + 16, '#94a3b8');
+                }
+            },
+            elbow: {
+                label: '伸びきりまでの残り d',
+                min: 0.002, max: 0.06, step: 0.002, value: 0.006,
+                fmt: v => (v * 1000).toFixed(0) + ' mm',
+                v: 0.25, r0: 0.45, phi: 15 * DEG,
+                get reach() { return (R - slider.valueAsNumber - this.r0) / this.v; },
+                get duration() { return this.reach + 0.6; },
+                r(t) { return this.r0 + this.v * Math.min(t, this.reach); },
+                angles(t) {
+                    const r = this.r(t);
+                    const c = Math.min(1, (r * r - L1 * L1 - L2 * L2) / (2 * L1 * L2));
+                    const q3 = -Math.acos(c);
+                    const q2 = this.phi - Math.atan2(L2 * Math.sin(q3), L1 + L2 * Math.cos(q3));
+                    return { J2: q2, J3: q3 };
+                },
+                info: '横から見た図。手先を外へまっすぐ伸ばしていき、<b>肘が伸びきる（J3 = 0）</b>直前になると、' +
+                    'あと少し伸ばすだけで <b>J2・J3 が急回転</b>する（手先は 250 mm/s 一定、端で停止）。伸びきると外向きには 1 mm も動けない。',
+                draw(t, s) {
+                    const a = this.angles(t);
+                    const k = s.w * 0.95 / R, ox = s.x + s.w * 0.04, oy = s.y + s.h * 0.82;
+                    const E = [ox + L1 * Math.cos(a.J2) * k, oy - L1 * Math.sin(a.J2) * k];
+                    const H = [E[0] + L2 * Math.cos(a.J2 + a.J3) * k, E[1] - L2 * Math.sin(a.J2 + a.J3) * k];
+                    const far = R * k;
+                    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+                    ctx.beginPath(); ctx.arc(ox, oy, far, -0.5, 0.1); ctx.stroke(); ctx.setLineDash([]);
+                    text('届く限界', ox + far * Math.cos(-0.45) - 50, oy + far * Math.sin(-0.45) - 6, '#64748b');
+                    dashed([[ox + this.r0 * k * Math.cos(this.phi), oy - this.r0 * k * Math.sin(this.phi)],
+                        [ox + far * Math.cos(this.phi), oy - far * Math.sin(this.phi)]], '#64748b');
+                    ctx.fillStyle = '#475569'; ctx.fillRect(ox - 18, oy, 36, 10);
+                    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+                    line(ox, oy, E[0], E[1]); line(E[0], E[1], H[0], H[1]);
+                    ctx.fillStyle = '#a3e635'; circle(ox, oy, 7); circle(E[0], E[1], 7);
+                    ctx.fillStyle = '#fbbf24'; circle(H[0], H[1], 6);
+                    text('J2', ox - 8, oy + 26, '#a3e635'); text('J3（肘）', E[0] - 30, E[1] - 14, '#a3e635');
+                    text('横から見た図', s.x + 6, s.y + 16, '#94a3b8');
+                }
+            },
+            wrist: {
+                label: 'J5 の最小角 δ',
+                min: 1, max: 30, step: 1, value: 6,
+                fmt: v => v + '°',
+                w: 30 * DEG, half: 40 * DEG,
+                get duration() { return 2 * this.half / this.w; },
+                pos(t) { return { x: -this.half + this.w * t, y: slider.valueAsNumber * DEG }; },
+                angles(t) {
+                    const p = this.pos(t);
+                    const q4 = Math.atan2(p.y, p.x);
+                    return { J4: q4, J6: -q4 };
+                },
+                info: '手首を J4 軸の方向から見た図（中心 = J5 = 0 で <b>J4 と J6 が一直線</b>）。工具の向きを一定の速さで変えても、' +
+                    '中心の近くを通ると <b>J4 と J6 が逆向きに同じ速さで急回転</b>する（いわゆる手首フリップ）。',
+                draw(t, s) {
+                    const p = this.pos(t);
+                    const cx = s.x + s.w / 2, cy = s.y + s.h / 2, k = s.h * 0.42 / this.half;
+                    const P = [cx + p.x * k, cy - p.y * k];
+                    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5; ring(cx, cy, this.half * k);
+                    dashed([[cx - this.half * k, P[1]], [cx + this.half * k, P[1]]], '#64748b');
+                    // J4 のねじれ（中心から工具方向へのアーム）
+                    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+                    line(cx, cy, P[0], P[1]);
+                    ctx.fillStyle = '#fbbf24'; circle(P[0], P[1], 6);
+                    ctx.strokeStyle = '#a3e635'; ctx.lineWidth = 3; ring(cx, cy, 10); ctx.fillStyle = '#a3e635'; circle(cx, cy, 3);
+                    text('J4 軸 = J6 軸', cx + 14, cy + 22, '#a3e635');
+                    text('工具の向き', P[0] + 8, P[1] - 10, '#fbbf24');
+                    text('J4 軸の方向から見た図', s.x + 6, s.y + 16, '#94a3b8');
+                }
+            }
+        };
+        const COLORS = { J1: '#38bdf8', J2: '#38bdf8', J3: '#f472b6', J4: '#38bdf8', J6: '#f472b6' };
+
+        let tab = 'shoulder', t0 = performance.now(), playing = true, pauseT = 0;
+
+        function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+        function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); }
+        function ring(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.stroke(); }
+        function text(s, x, y, c, size = 12) { ctx.fillStyle = c; ctx.font = `${size}px 'Noto Sans JP', sans-serif`; ctx.fillText(s, x, y); }
+        function dashed(pts, c) {
+            ctx.strokeStyle = c; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]);
+            line(pts[0][0], pts[0][1], pts[1][0], pts[1][1]); ctx.setLineDash([]);
+        }
+
+        // 関節速度 [deg/s]（角度を数値微分。atan2 の巻き戻りを補正）
+        function speeds(sc, t) {
+            const h = 1e-4, a = sc.angles(Math.max(0, t - h)), b = sc.angles(Math.min(sc.duration, t + h));
+            const out = {};
+            for (const j in a) {
+                let d = b[j] - a[j];
+                d = Math.atan2(Math.sin(d), Math.cos(d));
+                out[j] = Math.abs(d / (Math.min(sc.duration, t + h) - Math.max(0, t - h))) / DEG;
+            }
+            return out;
+        }
+
+        function drawPlot(sc, t, s) {
+            const px = v => s.x + 36 + v / sc.duration * (s.w - 44);
+            const py = v => s.y + s.h - 24 - Math.min(v, YMAX) / YMAX * (s.h - 44);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+            line(px(0), py(0), px(sc.duration), py(0)); line(px(0), py(0), px(0), py(YMAX));
+            for (const v of [0, 180, 360, 540]) text(String(v), s.x + 2, py(v) + 4, '#64748b', 10);
+            ctx.strokeStyle = '#ef4444'; ctx.setLineDash([4, 4]); line(px(0), py(LIMIT), px(sc.duration), py(LIMIT)); ctx.setLineDash([]);
+            text('UR5e 上限 180°/s', px(sc.duration) - 100, py(LIMIT) - 5, '#ef4444', 10);
+            text('関節速度 [°/s]', s.x + 36, s.y + 14, '#94a3b8');
+            text('時間', px(sc.duration) - 24, py(0) + 16, '#64748b', 10);
+
+            const N = 300, curves = {};
+            let peak = 0;
+            for (let i = 0; i <= N; i++) {
+                const sp = speeds(sc, sc.duration * i / N);
+                for (const j in sp) { (curves[j] = curves[j] || []).push(sp[j]); peak = Math.max(peak, sp[j]); }
+            }
+            let lx = s.x + 120;
+            for (const j in curves) {
+                ctx.strokeStyle = COLORS[j]; ctx.lineWidth = 2; ctx.setLineDash(j === 'J6' ? [6, 5] : []); ctx.beginPath();
+                curves[j].forEach((v, i) => { const X = px(sc.duration * i / N), Y = py(v); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); });
+                ctx.stroke(); ctx.setLineDash([]);
+                text(j, lx, s.y + 14, COLORS[j]); lx += 28;
+            }
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1; line(px(t), py(0), px(t), py(YMAX));
+            const peakText = peak > YMAX ? `最大 ${peak.toFixed(0)}°/s（グラフ外）` : `最大 ${peak.toFixed(0)}°/s`;
+            text(peakText, px(0) + 6, py(YMAX) + 14, peak > LIMIT ? '#ef4444' : '#a3e635', 12);
+        }
+
+        function frame(now) {
+            const sc = scenarios[tab];
+            const dpr = window.devicePixelRatio || 1;
+            const W = cv.clientWidth, H = cv.clientHeight;
+            if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, W, H);
+            const el = playing ? (now - t0) / 1000 : pauseT;
+            const t = el % sc.duration;
+            const split = W * 0.5;
+            sc.draw(t, { x: 4, y: 4, w: split - 8, h: H - 8 });
+            drawPlot(sc, t, { x: split + 4, y: 4, w: W - split - 8, h: H - 8 });
+            requestAnimationFrame(frame);
+        }
+
+        function setTab(name) {
+            tab = name;
+            const sc = scenarios[name];
+            document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+            slider.min = sc.min; slider.max = sc.max; slider.step = sc.step; slider.value = sc.value;
+            document.getElementById('sliderLabel').textContent = sc.label;
+            document.getElementById('sliderVal').textContent = sc.fmt(sc.value);
+            info.innerHTML = sc.info;
+            t0 = performance.now(); pauseT = 0;
+        }
+
+        document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+        slider.oninput = () => document.getElementById('sliderVal').textContent = scenarios[tab].fmt(slider.valueAsNumber);
+        document.getElementById('play').onclick = e => {
+            if (playing) { pauseT = (performance.now() - t0) / 1000; }
+            else { t0 = performance.now() - pauseT * 1000; }
+            playing = !playing;
+            e.target.textContent = playing ? '⏸ 停止' : '▶ 再生';
+        };
+        const initial = (location.hash || '').replace('#', '');
+        setTab(scenarios[initial] ? initial : 'shoulder');
+        requestAnimationFrame(frame);
+    </script>
+</body>
+</html>
