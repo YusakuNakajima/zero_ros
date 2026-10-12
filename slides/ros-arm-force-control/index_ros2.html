@@ -273,6 +273,43 @@
                     </div>
                 </section>
 
+                <!-- 仮想仕事の原理 -->
+                <section>
+                    <h2>仮想仕事の原理：τ = J<sup>T</sup> F</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 0.9;">
+                            <svg viewBox="0 0 340 260" style="width: 100%; max-height: 50vh;">
+                                <defs>
+                                    <marker id="vw-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                                    <marker id="vw-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3e635"/></marker>
+                                </defs>
+                                <rect x="40" y="210" width="60" height="14" fill="#555"/>
+                                <polyline points="70,210 150,100 260,150" fill="none" stroke="#ddd" stroke-width="9" stroke-linecap="round"/>
+                                <circle cx="70" cy="210" r="9" fill="#a3e635"/>
+                                <circle cx="150" cy="100" r="8" fill="#a3e635"/>
+                                <circle cx="260" cy="150" r="7" fill="#fbbf24"/>
+                                <path d="M 98 222 A 30 30 0 0 0 92 186" fill="none" stroke="#a3e635" stroke-width="3" marker-end="url(#vw-t)"/>
+                                <text x="104" y="246" fill="#a3e635" font-size="17">τ₁</text>
+                                <path d="M 176 112 A 28 28 0 0 0 168 78" fill="none" stroke="#a3e635" stroke-width="3" marker-end="url(#vw-t)"/>
+                                <text x="182" y="80" fill="#a3e635" font-size="17">τ₂</text>
+                                <line x1="260" y1="150" x2="260" y2="225" stroke="#f87171" stroke-width="4" marker-end="url(#vw-f)"/>
+                                <text x="200" y="250" fill="#f87171" font-size="17">F（手先の力）</text>
+                                <rect x="10" y="10" width="320" height="44" rx="8" fill="#1f2937"/>
+                                <text x="170" y="38" fill="#e5e7eb" font-size="16" text-anchor="middle">τᵀδq = Fᵀδx,  δx = Jδq  ⇒  τ = JᵀF</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1.1; font-size: 0.58em; text-align: left;">
+                            <ul>
+                                <li>つり合っていれば<strong>関節がする仮想仕事 = 手先がする仮想仕事</strong></li>
+                                <li>手先に力 F を出したい → 必要な関節トルクは <strong>τ = J<sup>T</sup> F</strong></li>
+                                <li>外力 F<sub>ext</sub> がわかれば <strong>−J<sup>T</sup> F<sub>ext</sub></strong> を足して打ち消せる</li>
+                                <li>逆に関節トルクから手先の力：F = J<sup>−T</sup> τ（特異姿勢でなければ）</li>
+                            </ul>
+                            <p>力を<strong>手先の方向（x, y, z）ごと</strong>に扱える → ハイブリッド制御へ</p>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- ハイブリッド位置/力制御 -->
                 <section>
                     <h2>ハイブリッド位置/力制御</h2>
@@ -305,6 +342,47 @@
                                 <li>例: UR の <code>force_mode()</code>（力で制御する軸を選び、目標の力を指定）</li>
                                 <li>ROS2 では FZI の cartesian_compliance_controller で近い動きを作れる</li>
                             </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 選択行列 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">ハイブリッド制御の中身：選択行列 S</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 0.9;">
+                            <svg viewBox="0 0 340 260" style="width: 100%; max-height: 50vh;">
+                                <defs>
+                                    <marker id="sm-x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
+                                    <marker id="sm-y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                                </defs>
+                                <rect x="10" y="10" width="150" height="96" rx="8" fill="#1f2937"/>
+                                <text x="22" y="64" fill="#e5e7eb" font-size="22">S =</text>
+                                <text x="66" y="66" fill="#94a3b8" font-size="54">[</text>
+                                <text x="150" y="66" fill="#94a3b8" font-size="54" text-anchor="end">]</text>
+                                <text x="95" y="48" fill="#4ade80" font-size="22" font-weight="bold" text-anchor="middle">0</text>
+                                <text x="128" y="48" fill="#64748b" font-size="22" text-anchor="middle">0</text>
+                                <text x="95" y="84" fill="#64748b" font-size="22" text-anchor="middle">0</text>
+                                <text x="128" y="84" fill="#f87171" font-size="22" font-weight="bold" text-anchor="middle">1</text>
+                                <text x="175" y="48" fill="#4ade80" font-size="15">x：0 → 位置制御</text>
+                                <text x="175" y="84" fill="#f87171" font-size="15">y：1 → 力制御</text>
+                                <rect x="20" y="215" width="300" height="30" fill="#6b7280"/>
+                                <rect x="150" y="140" width="24" height="60" fill="#4b5563"/>
+                                <rect x="138" y="198" width="48" height="17" rx="3" fill="#d1d5db"/>
+                                <line x1="230" y1="135" x2="230" y2="200" stroke="#f87171" stroke-width="4" marker-end="url(#sm-y)"/>
+                                <text x="240" y="172" fill="#f87171" font-size="14">y：10 N</text>
+                                <line x1="40" y1="255" x2="300" y2="255" stroke="#4ade80" stroke-width="4" stroke-dasharray="10 6" marker-end="url(#sm-x)"/>
+                                <text x="30" y="170" fill="#4ade80" font-size="14">x：軌道どおり</text>
+                            </svg>
+                        </div>
+                        <div style="flex: 1.1; font-size: 0.58em; text-align: left;">
+                            <ul>
+                                <li><strong>S</strong>：方向ごとに 0 = 位置制御、1 = 力制御</li>
+                                <li>指令 = <strong>(I − S)</strong> 位置制御 ＋ <strong>S</strong> 力制御</li>
+                                <li>関節へは τ = J<sup>T</sup>( … )（仮想仕事の原理）</li>
+                                <li>位置と力の方向が<strong>直交</strong> → 干渉しない</li>
+                            </ul>
+                            <p style="font-size: 0.85em; color: #aaa;">位置制御ロボットでは手先の位置指令に S をかける<br>（位置/力ハイブリッド制御：Raibert &amp; Craig, 1981）</p>
                         </div>
                     </div>
                 </section>

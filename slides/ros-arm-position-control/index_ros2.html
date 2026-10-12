@@ -1315,6 +1315,60 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
 
+                <section>
+                    <h2 style="font-size: 1.3em;">実行の中身：PID 制御</h2>
+                    <svg viewBox="0 0 760 170" style="width: 90%; max-height: 28vh;">
+                        <defs>
+                            <marker id="pid-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="10" y="58" fill="#e5e7eb" font-size="18">目標</text>
+                        <line x1="55" y1="52" x2="118" y2="52" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#pid-a)"/>
+                        <circle cx="132" cy="52" r="13" fill="none" stroke="#cbd5e1" stroke-width="2.5"/>
+                        <text x="132" y="58" fill="#cbd5e1" font-size="16" text-anchor="middle">−</text>
+                        <line x1="145" y1="52" x2="228" y2="52" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#pid-a)"/>
+                        <text x="170" y="40" fill="#fbbf24" font-size="17">誤差 e</text>
+                        <rect x="230" y="12" width="210" height="80" rx="8" fill="#1f2937" stroke="#7dd3fc"/>
+                        <text x="335" y="36" fill="#f87171" font-size="16" text-anchor="middle">P：K<tspan font-size="11">p</tspan> e</text>
+                        <text x="335" y="58" fill="#4ade80" font-size="16" text-anchor="middle">I：K<tspan font-size="11">i</tspan> ∫e dt</text>
+                        <text x="335" y="80" fill="#7dd3fc" font-size="16" text-anchor="middle">D：K<tspan font-size="11">d</tspan> de/dt</text>
+                        <line x1="440" y1="52" x2="518" y2="52" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#pid-a)"/>
+                        <text x="448" y="40" fill="#cbd5e1" font-size="15">指令</text>
+                        <rect x="520" y="22" width="120" height="60" rx="8" fill="#374151"/>
+                        <text x="580" y="58" fill="#e5e7eb" font-size="17" text-anchor="middle">モータ</text>
+                        <line x1="640" y1="52" x2="745" y2="52" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#pid-a)"/>
+                        <text x="660" y="40" fill="#e5e7eb" font-size="15">実際の値</text>
+                        <polyline points="700,52 700,140 132,140 132,68" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#pid-a)"/>
+                        <text x="416" y="160" fill="#94a3b8" font-size="15" text-anchor="middle">センサで測って戻す（関節ごとに高速で繰り返す）</text>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li><strong style="color: #f87171;">P</strong>：誤差に比例した指令で目標へ近づける（基本）</li>
+                        <li><strong style="color: #4ade80;">I</strong>：誤差を積算し、<strong>残り続けるずれ（重力・摩擦などの偏り）</strong>を消す</li>
+                        <li><strong style="color: #7dd3fc;">D</strong>：誤差の変化の速さを見て、行き過ぎ・振動を抑える</li>
+                        <li>UR などはロボット内部で回っている（JTC の gains は速度/トルク指令時）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">位置制御は PD、力制御は PI</h2>
+                    <svg viewBox="0 0 760 120" style="width: 85%; max-height: 20vh;">
+                        <text x="10" y="18" fill="#4ade80" font-size="15">位置：なめらかに変化</text>
+                        <path d="M 10 95 C 120 95, 200 35, 340 35" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="400" y="18" fill="#f87171" font-size="15">力：接触した瞬間に急変</text>
+                        <polyline points="400,95 520,95 522,35 560,50 600,40 640,46 750,44" fill="none" stroke="#f87171" stroke-width="3"/>
+                        <text x="530" y="114" fill="#7dd3fc" font-size="14">← de/dt が跳ねる（D が暴れる）</text>
+                    </svg>
+                    <table style="font-size: 0.5em; width: 92%;">
+                        <thead>
+                            <tr><th></th><th style="color: #4ade80;">位置制御</th><th style="color: #f87171;">力制御</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap;">基本</td><td><strong>PD</strong>（ずれが残るなら PID）</td><td><strong>PI</strong>（目標力のフィードフォワード＋PI）</td></tr>
+                            <tr><td>D</td><td>収束を速め、振動を抑える</td><td>急変・ノイズを増幅 → 制御の遅れで<strong>発散</strong>しやすい</td></tr>
+                            <tr><td>I</td><td>P だけでも動くことが多い。重力・摩擦の偏りが残るときに足す</td><td>摩擦などの偏りを消すのに<strong>必要</strong></td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
             </section>
 
             <section>
