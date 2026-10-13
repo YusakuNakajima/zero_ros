@@ -408,32 +408,21 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>実行結果の確認</h3>
-                    <div style="text-align: left;">
+                    <h2>実行結果の確認</h2>
+                    <div style="text-align: left; font-size: 0.8em;">
                         <ul>
-                            <li><strong>見た目:</strong> RViz上の表示はモデル表示と同じに見えます。</li>
-                            <li><strong>動作:</strong> 別端末で <code>rqt</code> を起動し、プラグインから<strong>「Joint Trajectory
-                                    Controller」</strong>を選択してスライダー操作を行うと動きます。</li>
-                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code>
-                                から配信されます。</li>
+                            <li><strong>見た目:</strong> RViz上はモデル表示と同じに見えます</li>
+                            <li><strong>動作:</strong> rqt の<strong>「Joint Trajectory Controller」</strong>のスライダーで動きます</li>
+                            <li><strong>トピック:</strong> <code>/joint_states</code> は <code>joint_state_broadcaster</code> が配信</li>
                         </ul>
-                        <div
-                            style="background: #333; padding: 15px; border-radius: 5px; margin-top: 15px; font-size: 0.8em;">
-                            <p style="margin:0; font-family: monospace;">$ ros2 run rqt_gui rqt</p>
-                            <p style="margin:5px 0 0 0; color: #aaa; font-size: 0.9em;">
-                                (Plugins > Robot Tools > Joint Trajectory Controller)
-                            </p>
+                        <div style="background: #333; padding: 12px; border-radius: 5px; margin-top: 12px; font-family: monospace; font-size: 0.85em;">
+                            <p style="margin:0;">$ ros2 run rqt_gui rqt</p>
+                            <p style="margin:0; color: #aaa;">(Plugins > Robot Tools > Joint Trajectory Controller)</p>
+                            <p style="margin:10px 0 0 0;">$ ros2 topic info /joint_states</p>
+                            <p style="margin:0; color: #aaa;">Type: sensor_msgs/msg/JointState</p>
+                            <p style="margin:0; color: #aaa;">Publisher count: 1 (joint_state_broadcaster)</p>
                         </div>
-                        <div style="background: #333; padding: 15px; border-radius: 5px; margin-top: 15px;">
-                            <p style="margin:0; font-family: monospace; font-size: 0.8em;">$ ros2 topic info
-                                /joint_states</p>
-                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Type:
-                                sensor_msgs/msg/JointState</p>
-                            <p style="margin:0; color: #aaa; font-family: monospace; font-size: 0.8em;">Publisher count:
-                                1 (joint_state_broadcaster)</p>
-                        </div>
-                        <p style="font-size: 0.7em; margin-top: 20px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。
-                        </p>
+                        <p style="font-size: 0.8em; margin-top: 12px; color: #aaa;">※データフローの詳細は「ros2_control」の章で解説します。</p>
                     </div>
                 </section>
             </section>
@@ -462,15 +451,17 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <a href="media/ros2_control_simplify_with_model_display.drawio.svg" target="_blank">
 
                         <img src="media/ros2_control_simplify_with_model_display.drawio.svg" alt="ロボットモデル表示フロー"
-                            style="max-height: 60vh; width: auto; cursor: zoom-in; border: 1px solid #ccc;">
+                            style="max-height: 45vh; width: auto; cursor: zoom-in; border: 1px solid #ccc;">
                     </a>
                 </section>
                 <section>
-                    <h3>Launchファイルと構成図の対応</h3>
+                    <h2>Launchと構成図の対応</h2>
                     <div class="slide-layout-image-code">
                         <div class="image-section">
-                            <img src="media/ros2_control_simplify_with_model_display.drawio.svg" alt="ros2_control概念図"
-                                style="max-height: 600px; width: auto;">
+                            <a href="media/ros2_control_simplify_with_model_display.drawio.svg" target="_blank">
+                                <img src="media/ros2_control_simplify_with_model_display.drawio.svg" alt="ros2_control概念図"
+                                    style="max-height: 55vh; width: auto; cursor: zoom-in;">
+                            </a>
                         </div>
 
                         <div class="code-section">
@@ -521,100 +512,6 @@ rviz_node = Node(
 
             <section>
                 <section>
-                    <h2>Mock Componentsの裏で動いているコントローラ</h2>
-                    <div class="slide-layout-image">
-                        <div class="slide-content" style="text-align: center;">
-                            <p style="margin: 0 0 18px 0;">
-                                Mock Components では、実機と同様に<br>
-                                <strong style="font-size: 1.4em; color: #3b82f6;">JointTrajectoryController</strong>
-                                を使って関節を制御します。
-                            </p>
-                            <p style="font-size: 0.75em; color: #aaa; margin: 0 0 18px 0;">
-                                詳細は以下のスライドで、この章では概要のみを説明します。
-                            </p>
-                            <p style="margin: 0;">
-                                <a href="../ros-arm-position-control/index_ros2.html"
-                                    style="color: #3b82f6; text-decoration: underline; font-size: 0.8em;">
-                                    → ROS2 アーム位置制御とモーションプランニングへ
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
-                    <h2>JointTrajectoryController</h2>
-                    <div class="comparison-box" style="border-left: 5px solid #3b82f6; margin-bottom: 30px;">
-                        <h3 style="color: #3b82f6; text-align: left;">ROSのアーム制御の標準</h3>
-                        <p style="text-align: left;">
-                            ROSでアームを動かすなら<strong>「まずはこれ」</strong>と言えるデファクトなコントローラです。
-                        </p>
-                    </div>
-                    <div style="text-align: left;">
-                        <p><strong>機能概要：</strong><br>
-                            プログラムから「関節目標軌道（JointTrajectory）」を受け取り、
-                            ロボットがその通りになめらかに動くよう制御します。</p>
-                    </div>
-                </section>
-
-                <section>
-                    <h2>入出力フロー</h2>
-
-                    <div
-                        style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
-                        <div
-                            style="border: 2px solid #fff; padding: 10px; border-radius: 10px; width: 28%; font-size: 0.8em;">
-                            <div style="font-size: 2em;">📨</div>
-                            <strong>指令 (Input)</strong><br>
-                            <span style="color: #aaa;">JointTrajectory Msg</span><br>
-                            <span style="font-size: 0.8em; color: #3b82f6;">[q1, q2, q3...] + 時間</span>
-                        </div>
-
-                        <div style="font-size: 1.5em; color: #aaa;">➡</div>
-
-                        <div
-                            style="background: #3b82f6; color: white; padding: 10px; border-radius: 10px; width: 30%; font-size: 0.8em;">
-                            <strong>Joint Trajectory<br>Controller</strong><br>
-                            <span style="font-size: 0.8em;">時間の補間(Spline)<br>各時刻の目標値を計算</span>
-                        </div>
-
-                        <div style="font-size: 1.5em; color: #aaa;">➡</div>
-
-                        <div
-                            style="border: 2px dashed #fff; padding: 10px; border-radius: 10px; width: 28%; font-size: 0.8em;">
-                            <div style="font-size: 2em;">🤖</div>
-                            <strong>ロボット (Output)</strong><br>
-                            <span style="color: #aaa;">各関節への指令</span><br>
-                            <span style="font-size: 0.8em; color: #4ade80;">位置 / 速度 / トルク</span>
-                        </div>
-                    </div>
-
-                    <div
-                        style="margin-top: 40px; background: rgba(255,255,255,0.08); padding: 15px; border-radius: 15px; border: 1px solid #fbbf24;">
-                        <h4 style="color: #fbbf24; margin: 0 0 10px 0; font-size: 0.9em;">⚠ 注意：手先座標 (XYZ) ではありません</h4>
-                        <div style="display: flex; justify-content: space-around; align-items: flex-start;">
-                            <div style="width: 48%;">
-                                <strong style="font-size: 0.8em; color: #4ade80;">⭕ 関節空間(Joint Space)</strong>
-                                <p style="font-size: 0.6em; text-align: left; margin: 5px 0;">
-                                    「肩を30度、肘を90度」のように<br>
-                                    <strong>全ての関節の指令</strong>が必要です。
-                                </p>
-                            </div>
-                            <div style="border-left: 1px solid #555;"></div>
-                            <div style="width: 48%; opacity: 0.7;">
-                                <strong style="font-size: 0.8em; color: #f87171;">❌ タスク空間(Task Space)</strong>
-                                <p style="font-size: 0.6em; text-align: left; margin: 5px 0;">
-                                    「手を座標(x,y,z)へ」という指令は<br>
-                                    <strong>直接受け付けられません。</strong>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </section>
-
-            <section>
-                <section>
                     <h2>Gazebo</h2>
                     <div class="slide-layout-image">
                         <div class="slide-image">
@@ -634,32 +531,33 @@ rviz_node = Node(
 
                 <section>
                     <h2>【注意】Gazeboは2種類ある</h2>
-                    <p style="font-size: 0.8em;">実は現在、世代交代の過渡期であり2つの「Gazebo」が存在します。<br>ネットで検索する際は区別に注意が必要です。</p>
-                    <div class="comparison-container" style="margin-top: 30px;">
+                    <p style="font-size: 0.7em;">名前がややこしいので、検索するときは区別に注意しましょう</p>
+                    <div class="comparison-container" style="margin-top: 15px;">
                         <div class="comparison-box" style="border: 2px solid #e55; background: rgba(220, 53, 69, 0.1);">
-                            <h3 style="color: #e55; font-size: 1.0em;">Gazebo Classic</h3>
-                            <p style="font-size: 0.7em; color: #aaa;">(通称: 旧Gazebo / Gazebo 11)</p>
-                            <hr style="border-color: #e55;">
-                            <ul style="font-size: 0.8em; text-align: left;">
-                                <li>長年使われてきたバージョン</li>
-                                <li>資料が豊富で安定している</li>
+                            <h3 style="color: #e55; font-size: 0.9em; margin-bottom: 0;">Gazebo Classic</h3>
+                            <p style="font-size: 0.6em; color: #aaa; margin: 0;">(通称: 旧Gazebo / Gazebo 11)</p>
+                            <ul style="font-size: 0.65em; text-align: left;">
+                                <li>長年使われてきた旧版</li>
                                 <li>コマンドは <code>gazebo</code></li>
-                                <li><strong>2025年にサポート終了予定</strong></li>
+                                <li><strong>2025年1月にサポート終了</strong></li>
                             </ul>
                         </div>
                         <div class="comparison-box"
                             style="border: 2px solid #d63384; background: rgba(214, 51, 132, 0.1);">
-                            <h3 style="color: #d63384; font-size: 1.0em;">Gazebo (New)</h3>
-                            <p style="font-size: 0.7em; color: #aaa;">(旧称: Ignition Gazebo)</p>
-                            <hr style="border-color: #d63384;">
-                            <ul style="font-size: 0.8em; text-align: left;">
-                                <li>次世代のモダンなシミュレータ</li>
-                                <li>画像が綺麗で動作も軽量化</li>
+                            <h3 style="color: #d63384; font-size: 0.9em; margin-bottom: 0;">Gazebo (New)</h3>
+                            <p style="font-size: 0.6em; color: #aaa; margin: 0;">(旧称: Ignition Gazebo)</p>
+                            <ul style="font-size: 0.65em; text-align: left;">
+                                <li>次世代のシミュレータ</li>
                                 <li>コマンドは <code>gz sim</code></li>
                                 <li><strong>今後の主流はこちら</strong></li>
                             </ul>
                         </div>
                     </div>
+                    <p style="font-size: 0.55em; margin-top: 15px;">
+                        📖 参考:
+                        <a href="https://qiita.com/porizou1/items/b97e7a5e282a6a749a7d" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">【令和最新版】Gazebo（旧Ignition）の現在 (Qiita)</a>
+                    </p>
                 </section>
 
                 <section>
@@ -770,7 +668,7 @@ export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
                 </section>
 
                 <section>
-                    <h3>ros2_controlタグの書き換え</h3>
+                    <h2>ros2_controlタグの書き換え</h2>
                     <div style="text-align: left;">
                         <p style="margin-bottom: 10px;">urdf/ros2_control.xacro</p>
                         <div class="comparison-container" style="margin-bottom: 20px; align-items: center;">
@@ -800,7 +698,7 @@ export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
                 </section>
 
                 <section>
-                    <h3>Gazeboプラグインの追加</h3>
+                    <h2>Gazeboプラグインの追加</h2>
                     <div style="text-align: left;">
                         <p><code>robot.urdf.xacro</code> の末尾に、Gazebo から ROS 2 制御を呼ぶタグを追加します。</p>
                         <pre><code class="xml" data-trim>
@@ -831,7 +729,7 @@ export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
                 </section>
 
                 <section class="small-code">
-                    <h3>Gazebo起動とSpawn (Python)</h3>
+                    <h2>Gazebo起動とSpawn (Python)</h2>
                     <div style="text-align: left;">
                         <pre><code class="python" data-trim>
 # 1. Gazebo Sim の起動
@@ -956,7 +854,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>言葉の壁（ミドルウェアの違い）</h3>
+                    <h2>言葉の壁（ミドルウェアの違い）</h2>
                     <div style="text-align: left;">
                         <p>ROS 2とGazeboは、裏側で使っている<strong>通信の仕組み（言語）</strong>が異なります。</p>
 
@@ -996,7 +894,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>データの流れ（ダイアグラム）</h3>
+                    <h2>データの流れ（ダイアグラム）</h2>
                     <div class="diagram-container">
 
                         <div style="width: 30%; display: flex; flex-direction: column; gap: 40px;">
@@ -1045,7 +943,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
-                    <h3>Launchファイルの引数の書き方</h3>
+                    <h2>Launchファイルの引数の書き方</h2>
                     <div style="text-align: left; font-size: 0.9em; width: 100%;">
 
                         <div
@@ -1079,7 +977,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>【重要】シミュレーション時間の同期</h3>
+                    <h2>【重要】シミュレーション時間の同期</h2>
                     <div style="display: flex; gap: 30px; align-items: stretch; height: 100%;">
                         <div style="flex: 1; text-align: left;">
                             <p>物理シミュレーションでは、計算負荷によって<strong>「時間の進む速さ」</strong>が現実と異なります。</p>
@@ -1113,7 +1011,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>環境を作る2つの方法</h3>
+                    <h2>環境を作る2つの方法</h2>
                     <div class="comparison-container" style="margin-top: 30px;">
                         <div class="comparison-box"
                             style="border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1);">
@@ -1139,7 +1037,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>A. GUIでの配置 (Gazebo Fuel)</h3>
+                    <h2>A. GUIでの配置 (Gazebo Fuel)</h2>
                     <div style="text-align: left;">
                         <p>Gazebo (New) には<strong>「Resource
                                 Browser」</strong>があり、<br>オンライン上のモデルライブラリ（Fuel）から物体を呼び出せます。
@@ -1162,7 +1060,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section class="small-code">
-                    <h3>B. Worldファイルの作成 (SDF)</h3>
+                    <h2>B. Worldファイルの作成 (SDF)</h2>
                     <div style="text-align: left;">
                         <p>Launchファイルで <code>empty.sdf</code> の代わりに読み込ませる<br>オリジナルの世界ファイル（例:
                             <code>my_world.sdf</code>）を作ります。
@@ -1203,7 +1101,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h3>Launchファイルの変更</h3>
+                    <h2>Launchファイルの変更</h2>
                     <div style="text-align: left;">
                         <p>作ったWorldファイルを読み込むように変更します。</p>
                         <pre><code class="python" data-trim>
@@ -1229,90 +1127,136 @@ gazebo = IncludeLaunchDescription(
                 </section>
 
                 <section>
-                    <h3>【重要】ロボットは障害物が見えるか？</h3>
-                    <div style="text-align: left;">
-                        <p>Gazeboに障害物を置くだけでは、<br>
-                            <strong>UR5eは障害物を認識しません。</strong>
-                        </p>
-                        <div class="comparison-box"
-                            style="margin-top: 20px; background: rgba(220, 53, 69, 0.1); border: 2px solid #dc3545;">
-                            <h4 style="color: #dc3545; font-size: 1.0em; margin-bottom: 10px;">必要なもの：センサー or Planning
-                                Scene</h4>
-                            <p style="font-size: 0.9em; text-align: left;">
-                                衝突回避には、以下が必要です。
-                            </p>
-                            <ol style="font-size: 0.9em;">
-                                <li>Gazeboの<strong>深度カメラ</strong>等で障害物を検出</li>
-                                <li><strong>Planning Scene</strong>へ反映（例: <code>/planning_scene</code>）</li>
-                                <li>MoveItが衝突チェックして回避</li>
-                            </ol>
-                        </div>
+                    <h2>【重要】障害物は見えるか？</h2>
+                    <p>Gazeboに障害物を置くだけでは、<br><strong style="color: #ef4444;">ロボット (MoveIt) は障害物を認識しません。</strong></p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 25px;">
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #888;">Gazebo<br>障害物</div>
+                        <span>→</span>
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #f59e0b;"><strong>認識</strong><br>(既知 / センサ)</div>
+                        <span>→</span>
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #3b82f6; background: rgba(59,130,246,0.15);"><strong>Planning Scene</strong><br>へ反映</div>
+                        <span>→</span>
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #22c55e;">MoveIt<br><strong>衝突判定</strong></div>
                     </div>
+                    <p style="font-size: 0.7em; margin-top: 25px;">
+                        MoveItが衝突判定に使うのは <strong>Planning Scene に入っている物体だけ</strong>。<br>
+                        反映できているか RViz で必ず確認しましょう。
+                    </p>
                 </section>
                 <section>
                     <h2>Planning Sceneへの反映方法</h2>
-                    <div style="text-align: left;">
-                        <ul>
-                            <li><strong>1.</strong> Gazebo の障害物をセンサや既知モデルから取得する</li>
-                            <li><strong>2.</strong> MoveIt の <code>Planning Scene</code> に box / mesh / octomap として追加する
-                            </li>
-                            <li><strong>3.</strong> motion planning 時に衝突チェックへ反映する</li>
-                        </ul>
-                        <div
-                            style="margin-top: 20px; padding: 15px; border-left: 5px solid #3b82f6; background: rgba(59, 130, 246, 0.12);">
-                            <p style="font-size: 0.78em; margin: 0;">
-                                <strong>ポイント:</strong><br>
-                                Gazebo に存在するだけでは MoveIt は見えません。<br>
-                                <code>/planning_scene</code> や <code>PlanningSceneInterface</code>
-                                で明示的に反映してはじめて、経路計画の衝突判定に使われます。
-                            </p>
+                    <div class="comparison-container" style="margin-top: 20px;">
+                        <div class="comparison-box" style="border: 2px solid #3b82f6; background: rgba(59,130,246,0.1);">
+                            <h3 style="color: #3b82f6; font-size: 0.85em;">A. あらかじめ登録</h3>
+                            <ul style="font-size: 0.6em; text-align: left;">
+                                <li>机・壁など<strong>既知</strong>の物体</li>
+                                <li>box / mesh をコードで追加</li>
+                                <li>簡単・確実、動く物体は苦手</li>
+                            </ul>
+                        </div>
+                        <div class="comparison-box" style="border: 2px solid #f59e0b; background: rgba(245,158,11,0.1);">
+                            <h3 style="color: #f59e0b; font-size: 0.85em;">B. デプスカメラで認識</h3>
+                            <ul style="font-size: 0.6em; text-align: left;">
+                                <li><strong>未知・動く</strong>物体にも対応</li>
+                                <li>点群を Octomap に変換して反映</li>
+                                <li>設定すれば MoveIt が自動で取り込む</li>
+                            </ul>
                         </div>
                     </div>
+                    <p style="font-size: 0.6em; margin-top: 20px; color: #aaa;">
+                        ※ どちらの方法でも、RViz の MotionPlanning 表示で障害物が見えていればOK
+                    </p>
                 </section>
             </section>
 
             <section>
-                <h2>ロボットアームの制御方式</h2>
-
-                <p style="font-size: 0.8em; margin-bottom: 20px;">
-                    ロボットアームの関節は主に以下のいずれかで制御されます
-                </p>
-
-                <div class="diagram-container" style="justify-content: center; gap: 20px; margin-top: 10px;">
-                    <div class="diagram-box"
-                        style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
-                        <span style="font-size: 1.8em;">📍</span><br>
-                        <strong style="font-size: 0.9em;">位置</strong><br><span
-                            style="font-size: 0.7em;">(Position)</span>
+                <section>
+                    <h2>ロボットアームの制御方式</h2>
+                    <p style="font-size: 0.8em; margin-bottom: 20px;">
+                        ロボットアームの関節は主に以下のいずれかで制御されます
+                    </p>
+                    <div class="diagram-container" style="justify-content: center; gap: 20px; margin-top: 10px;">
+                        <div class="diagram-box"
+                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                            <span style="font-size: 1.8em;">📍</span><br>
+                            <strong style="font-size: 0.9em;">位置</strong><br><span
+                                style="font-size: 0.7em;">(Position)</span>
+                        </div>
+                        <div class="diagram-box"
+                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                            <span style="font-size: 1.8em;">🚀</span><br>
+                            <strong style="font-size: 0.9em;">速度</strong><br><span
+                                style="font-size: 0.7em;">(Velocity)</span>
+                        </div>
+                        <div class="diagram-box"
+                            style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
+                            <span style="font-size: 1.8em;">💪</span><br>
+                            <strong style="font-size: 0.9em;">トルク</strong><br><span
+                                style="font-size: 0.7em;">(Effort)</span>
+                        </div>
                     </div>
-                    <div class="diagram-box"
-                        style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
-                        <span style="font-size: 1.8em;">🚀</span><br>
-                        <strong style="font-size: 0.9em;">速度</strong><br><span
-                            style="font-size: 0.7em;">(Velocity)</span>
+                    <div style="margin-top: 25px; font-size: 0.7em;">
+                        <p style="margin: 5px 0;">Mock Hardware → <strong style="color: #4ade80;">位置・速度制御</strong>で十分</p>
+                        <p style="margin: 5px 0;">Gazebo 等の物理シミュレータ → <strong style="color: #f87171;">トルク制御</strong>が基本</p>
+                        <p style="margin: 15px 0 0 0; color: #aaa;">なぜ変わるのか？ ↓</p>
                     </div>
-                    <div class="diagram-box"
-                        style="background: rgba(255,255,255,0.1); border: 2px solid #fff; min-width: 100px; padding: 10px;">
-                        <span style="font-size: 1.8em;">💪</span><br>
-                        <strong style="font-size: 0.9em;">トルク</strong><br><span
-                            style="font-size: 0.7em;">(Effort)</span>
-                    </div>
-                </div>
+                </section>
 
-                <div
-                    style="margin-top: 20px; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 10px; text-align: left; font-size: 0.75em;">
-                    <strong style="color: #fbbf24;">📝 シミュレータごとの環境で使う制御</strong>
-                    <ul style="margin-top: 5px; line-height: 1.4; padding-left: 20px;">
-                        <li style="margin-bottom: 5px;">
-                            <strong>Mock Hardware :</strong><br>
-                            物理演算がないため、直接<strong style="color: #4ade80;">「位置制御」</strong>で動かすのが基本
-                        </li>
-                        <li>
-                            <strong>Gazebo 等の物理シミュレータ:</strong><br>
-                            重力や慣性があるので、<strong style="color: #f87171;">「トルク制御」</strong>で動かすのが基本
-                        </li>
+                <section>
+                    <h2>Mock Hardware：位置・速度</h2>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 25px 0;">
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #4ade80;">位置・速度の<br><strong>指令値</strong></div>
+                        <span>→</span>
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #888;">そのまま<br>状態に反映</div>
+                        <span>→</span>
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #4ade80;">関節の<br><strong>位置・速度</strong></div>
+                    </div>
+                    <ul style="font-size: 0.7em;">
+                        <li>物体がどんな<strong>運動方程式</strong>に従うか、という情報を持たない</li>
+                        <li>力や慣性は考えず、<strong>状態がどう変わるか</strong>だけを見る</li>
+                        <li>→ 位置や速度を直接書き換える制御が前提になる</li>
                     </ul>
-                </div>
+                </section>
+
+                <section>
+                    <h2>物理シミュレータ：トルク制御</h2>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0;">
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #f87171;"><strong>トルク τ</strong></div>
+                        <span>→</span>
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #888;"><strong>運動方程式</strong><br>(重力・摩擦・接触)</div>
+                        <span>→</span>
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #888;">加速度を<br><strong>積分</strong></div>
+                        <span>→</span>
+                        <div style="padding: 8px 12px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #f87171;">速度<br>位置</div>
+                    </div>
+                    <ul style="font-size: 0.7em;">
+                        <li>物理シミュレータは<strong>運動方程式</strong>を解いて次の状態を計算する</li>
+                        <li>位置・速度で指令すると、逆に<strong>微分</strong>して力を求める必要がある</li>
+                        <li>少しのずれで<strong>接触力・摩擦が急増</strong> → 計算が不安定に</li>
+                        <li>→ 現実的には<strong style="color: #f87171;">トルク制御</strong>で動かすのが普通</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>【重要】Simと現実のギャップ</h2>
+                    <div class="comparison-container" style="margin-top: 15px;">
+                        <div class="comparison-box" style="border: 2px solid #f87171; background: rgba(248,113,113,0.1);">
+                            <h3 style="color: #f87171; font-size: 0.8em;">物理シミュレータ</h3>
+                            <p style="font-size: 0.6em; margin: 0;"><strong>トルク制御</strong>で学習・動作確認</p>
+                            <p style="font-size: 0.55em; color: #ccc;">力・摩擦が<strong>なめらかに</strong>変化<br>→ 制御が発散しにくい</p>
+                        </div>
+                        <div style="align-self: center; font-size: 0.6em; text-align: center;">移植<br>⇒<br><strong style="color: #fbbf24;">ギャップ</strong></div>
+                        <div class="comparison-box" style="border: 2px solid #4ade80; background: rgba(74,222,128,0.1);">
+                            <h3 style="color: #4ade80; font-size: 0.8em;">現実のロボット</h3>
+                            <p style="font-size: 0.6em; margin: 0;">多くは<strong>位置制御</strong>で動作</p>
+                            <p style="font-size: 0.55em; color: #ccc;">位置を直接いじるので<strong>急激な変化</strong><br>→ 不安定になりやすい</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.65em; margin-top: 20px;">
+                        例: Simで強化学習した動作を実機に移すと、挙動が変わる<br>
+                        Simと現実の差は<strong>制御方式の違い</strong>からも生じることを意識しよう。
+                    </p>
+                </section>
             </section>
 
             <section>
