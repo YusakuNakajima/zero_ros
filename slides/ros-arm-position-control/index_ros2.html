@@ -498,25 +498,17 @@ sudo apt install --reinstall \
                 </section>
                 <section>
                     <h2>動作テスト</h2>
-                    <ul style="font-size: 0.85em;">
-                        <li>ビルドします</li>
-
-                        <pre style="font-size: 0.75em;"><code data-trim class="bash">
+                    <pre style="font-size: 0.6em;"><code data-trim class="bash">
+# 1. ビルド
 cd ~/ros2_ws
 colcon build
 source install/setup.bash
-                        </code></pre>
-
-                        <li>次のコマンドで実行してください</li>
-                        <pre style="font-size: 0.75em;"><code data-trim class="bash">
+# 2. 起動
 ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py
-                        </code></pre>
-                        <li>もう一つ別のターミナルで制御用GUIを起動</li>
-                        <pre style="font-size: 0.75em;"><code data-trim class="bash">  
+# 3. 別のターミナルで制御用GUIを起動
 ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
-</code></pre>
-                        <p>GUIのスライダーを動かして、RViz上のロボットが動くことを確認できれば成功です。</p>
-                    </ul>
+                    </code></pre>
+                    <p style="font-size: 0.65em;">GUIのスライダーを動かして、RViz上のロボットが動けば成功</p>
                 </section>
             </section>
 
@@ -1381,16 +1373,15 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>JointTrajectoryControllerの実装</h2>
-                    <p>関節を指定して補間するだけのシンプルなデモ</p>
-                    <p>ros_study/ros_study/jtc_demo.pyに以下を保存</p>
+                    <h2>JTC の実装</h2>
+                    <p style="font-size: 0.6em;">関節を指定して補間するだけのシンプルなデモ（<code>ros_study/ros_study/jtc_demo.py</code> に保存）</p>
 
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/jtc_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ol>
+                            <ol style="font-size: 0.65em;">
                                 <li>実行<br><code>ros2 run ros_study jtc_demo</code></li>
                                 <li>関節角度を直接指定して動かします</li>
                             </ol>
@@ -1431,16 +1422,15 @@ ros2 run ros_study jtc_demo
 
                 <section>
                     <h2>JTC + IKの実装</h2>
-                    <p>ros_study/ros_study/jtc_with_ik_demo.pyに以下を保存</p>
+                    <p style="font-size: 0.6em;"><code>ros_study/ros_study/jtc_with_ik_demo.py</code> に保存</p>
 
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/jtc_with_ik_demo.py" data-trim style="max-height: 450px; font-size: 0.6em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
-                                <li>IKが得られても軌道が大回りになる場合があるので注意</li>
-                                <p style="font-size: 0.6em;">※実用には関節角度に許容量を持たせて大回りを避ける等の実装をする</p>
+                            <ul style="font-size: 0.65em;">
+                                <li>IKが得られても軌道が大回りになる場合があるので注意<br><span style="font-size: 0.85em; color: #aaa;">※実用には関節角度に許容量を持たせて大回りを避ける等の実装をする</span></li>
                                 <li>FK/IKの計算は簡単なのでMoveItを使っています</li>
 
                             </ul>
@@ -1851,7 +1841,7 @@ ros2 run ros_study jtc_with_ik_demo
                     </div>
                 </section>
                 <section>
-                    <h2>サンプリングベースの手法(RRT)</h2>
+                    <h2>サンプリングベース（RRT）</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <iframe width="100%" height="315"
@@ -1862,7 +1852,7 @@ ros2 run ros_study jtc_with_ik_demo
                         </div>
                         <div style="flex: 1;">
                             <p>MoveItのデフォルト</p>
-                            <ul style="font-size: 0.9em;">
+                            <ul style="font-size: 0.65em;">
                                 <li>ランダムにパスを伸ばして障害物がなかったら採用、を繰り返す</li>
                                 <li>実際は後処理をかけてスムーズに</li>
                                 <li>スタートとゴールから同時に伸ばし収束性を良くしたRRT Connectが使われる</li>
@@ -2009,40 +1999,35 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                 </section>
 
                 <section>
-                    <h2>MoveIt Planning Scene の設置方法</h2>
-                    <div style="display: flex; align-items: flex-start; gap: 2em;">
-                        <div style="flex: 1;">
-                            <h3>GUIで追加する場合</h3>
+                    <h2>Planning Scene の設置方法</h2>
+                    <div style="display: flex; align-items: flex-start; gap: 2em; font-size: 0.65em;">
+                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 12px;">
+                            <h3 style="color: #4fc3f7;">GUIで追加</h3>
                             <ul>
-                                <li>RViz の MoveIt 画面で Planning Scene を確認しながら障害物を追加・調整します</li>
-                                <li>形状や位置を見ながら試行錯誤できるので、寸法合わせや初期確認に向いています</li>
-
+                                <li>RViz の MoveIt 画面で見ながら障害物を追加・調整</li>
+                                <li>寸法合わせや初期確認に向く</li>
                             </ul>
                         </div>
-                        <div style="flex: 1;">
-                            <h3>スクリプトで追加する場合</h3>
+                        <div style="flex: 1; border: 2px solid #a3e635; border-radius: 10px; padding: 12px;">
+                            <h3 style="color: #a3e635;">スクリプトで追加</h3>
                             <ul>
-                                <li><code>/planning_scene</code> に CollisionObject を publish して障害物を追加します</li>
-                                <li>launch に組み込めるので、毎回同じ環境を再現できます</li>
-                                <li>実機運用では「テーブルや乳鉢を自動で読み込む」構成にしておくと扱いやすいです</li>
+                                <li><code>/planning_scene</code> に CollisionObject を publish</li>
+                                <li>launch に組み込めば毎回同じ環境を再現できる</li>
                             </ul>
                         </div>
                     </div>
-                    <div style="margin-top: 1em;">
-                        <ul>
-                            <li>この講義では、再利用しやすいように <code>load_planning_scene</code> ノードとして実装します</li>
-                        </ul>
-                    </div>
+                    <p style="font-size: 0.65em; margin-top: 1em;">この講義では <code>load_planning_scene</code> ノードとして実装し、テーブルや乳鉢を自動で読み込む</p>
                 </section>
 
                 <section>
-                    <h2>追加する CPP コード1: load_planning_scene.cpp</h2>
+                    <h2>CPP コード1：本体</h2>
+                    <p style="font-size: 0.6em; margin: 0 0 8px;"><code>load_planning_scene.cpp</code></p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/src/load_planning_scene.cpp" data-trim style="max-height: 450px; font-size: 0.52em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.65em;">
                                 <li><code>table</code> と <code>mortar</code> を Planning Scene に追加する本体です</li>
                                 <li>起動時に既存オブジェクトを削除してから、テーブルと乳鉢を登録します</li>
                                 <li>今回は mesh の代わりに box で乳鉢の内側領域を近似しています</li>
@@ -2052,13 +2037,14 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                 </section>
 
                 <section>
-                    <h2>追加する CPP コード2: load_planning_scene_main.cpp</h2>
+                    <h2>CPP コード2：main</h2>
+                    <p style="font-size: 0.6em; margin: 0 0 8px;"><code>load_planning_scene_main.cpp</code></p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/src/load_planning_scene_main.cpp" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.65em;">
                                 <li><code>PlanningSceneLoader</code> を standalone ノードとして起動するための <code>main()</code> です
                                 </li>
                                 <li>launch から呼べる実行ファイルにするために追加します</li>
@@ -2069,13 +2055,14 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                 </section>
 
                 <section>
-                    <h2>追加する HPP コード: load_planning_scene.hpp</h2>
+                    <h2>HPP コード：クラス宣言</h2>
+                    <p style="font-size: 0.6em; margin: 0 0 8px;"><code>load_planning_scene.hpp</code></p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-cpp external-code" data-src="../../ros2_ws/src/ros_study_cpp/include/ros_study_cpp/load_planning_scene.hpp" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.65em;">
                                 <li><code>PlanningSceneLoader</code> クラスの宣言です</li>
                                 <li>publisher, timer, 障害物追加用メソッドをまとめています</li>
                                 <li>C++ の実装を <code>.cpp</code> と分離して見通しを良くします</li>
@@ -2090,7 +2077,7 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                             <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study_cpp/config/planning_scene_config.yaml" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.65em;">
                                 <li>テーブル位置や乳鉢位置など、planning scene の寸法と配置を YAML で管理します</li>
                                 <li>config/planning_scene_config.yaml で保存</code></li>
                             </ul>
@@ -2104,7 +2091,7 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/launch/load_planning_scene.launch.py" data-trim style="max-height: 450px; font-size: 0.56em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.65em;">
                                 <li><code>load_planning_scene.launch.py</code>で保存</li>
                                 <li><code>planning_scene_config.yaml</code> をパラメータとしてノードに渡します</li>
                                 <li>planning scene の読み込みを単体で実行できる構成にしています</li>
@@ -2114,31 +2101,18 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                 </section>
                 <section>
                     <h2>ビルドと実行コマンド</h2>
-                    <ul>
-                        <li>乳鉢 mesh は <code>ros2_ws/src/ros_study/meshes/asone_agate_mortar_80x100x36.stl</code>
-                            として保存しておきます</li>
-                        <li>ダウンロード: <a
-                                href="https://raw.githubusercontent.com/quantumbeam/powder_grinding_ros2/main/grinding_scene_description/meshes/asone_agate_mortar_80x100x36.stl"
-                                target="_blank">asone_agate_mortar_80x100x36.stl</a></li>
-                    </ul>
-                    <pre><code data-trim class="bash">
+                    <p style="font-size: 0.6em;">乳鉢の mesh を <a
+                            href="https://raw.githubusercontent.com/quantumbeam/powder_grinding_ros2/main/grinding_scene_description/meshes/asone_agate_mortar_80x100x36.stl"
+                            target="_blank">ダウンロード</a>して <code>ros_study/meshes/</code> に置き、ビルドして起動します</p>
+                    <pre><code data-trim class="bash" style="font-size: 0.75em;">
+# 1. mesh を配置
 cd ~/zero_ros/ros2_ws/src/ros_study/meshes
 cp ~/Downloads/asone_agate_mortar_80x100x36.stl .
-                    </code></pre>
-
-                    <ul>
-                        <li>ワークスペースをビルドします</li>
-                    </ul>
-                    <pre><code data-trim class="bash">
+# 2. ビルド
 cd ~/zero_ros/ros2_ws
 colcon build --packages-select ros_study_cpp ros_study
 source install/setup.bash
-                    </code></pre>
-
-                    <ul>
-                        <li>実機用 launch を起動すると Planning Scene も自動で読み込まれます</li>
-                    </ul>
-                    <pre><code data-trim class="bash">
+# 3. 実機用 launch（Planning Scene も自動で読み込まれる）
 ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
   robot_ip:=192.168.58.42 \
   use_mock_hardware:=false \
@@ -2146,6 +2120,10 @@ ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
                     </code></pre>
                 </section>
 
+
+            </section>
+
+            <section>
                 <section>
                     <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>MoveItの経路計画は実用的？</h2>
                     <p style="font-size: 0.6em; margin: 0 0 12px;">MoveIt 標準の RRT 系（OMPL）は障害物を避けられるが、現場では困ることも</p>
@@ -2193,39 +2171,36 @@ ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
                     <p style="font-size: 0.6em;">証明や最適化より、まず<strong>現実的に意味のある解</strong>を出せることが大事</p>
                     <p style="font-size: 0.45em; color: #9ca3af; margin-top: 12px;">参考: <a href="https://qiita.com/sekky0816/items/6bcea810de99449b4cbc" target="_blank" style="color: #3b82f6;">ロボットアームの動作計画（モーションプランニング）(Qiita)</a> / <a href="https://www.jstage.jst.go.jp/article/jrsj/40/2/40_40_154/_article/-char/ja/" target="_blank" style="color: #3b82f6;">元論文（日本ロボット学会誌 40巻2号）</a></p>
                 </section>
-
             </section>
 
 
 
             <section>
                 <section>
-                    <h2>デバッグのヒント：waypoints表示</h2>
+                    <h2>デバッグ：waypoints の表示</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/marker_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
-                                <li>Marker を使って waypoint 群を可視化する再利用向けユーティリティです</li>
-                                <li>自分の waypoints 計算コードに組み込んで、必要なときだけ Marker を出したい場合に便利です</li>
-                                <li>講義では「そのまま動かすサンプル」より、「他のコードへ埋め込みやすい部品」を優先して残しています</li>
+                            <ul style="font-size: 0.65em;">
+                                <li><strong>Marker</strong> で waypoints を RViz に表示する部品</li>
+                                <li>自分の軌道計算コードに組み込み、必要なときだけ表示できる</li>
                             </ul>
                         </div>
                     </div>
                 </section>
 
                 <section>
-                    <h2>デバッグのヒント：目標姿勢の表示</h2>
+                    <h2>デバッグ：目標姿勢の表示</h2>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/ros_study/tf_publisher.py" data-trim style="max-height: 450px; font-size: 0.58em;"></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
-                                <li>waypoints を TF フレーム群として broadcast する再利用向けユーティリティです</li>
-                                <li>位置だけでなく向きも座標系として確認したいときに使えます</li>
-                                <li>Marker と同様に、自作の軌道生成コードへ組み込む前提の部品として残しています</li>
+                            <ul style="font-size: 0.65em;">
+                                <li>waypoints を <strong>TF フレーム</strong>として表示する部品</li>
+                                <li>位置だけでなく<strong>向き</strong>も座標軸で確認できる</li>
                             </ul>
                         </div>
                     </div>
