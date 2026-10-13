@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>ロボットの遠隔操作とバイラテラル制御</title>
+
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/theme/black.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js-plugins/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- タイトル -->
+            <section>
+                <h1>ロボットの遠隔操作</h1>
+                <h2>バイラテラル制御と模倣学習</h2>
+                <p>大阪大学 中島優作</p>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- 1. 参考資料 -->
+            <section>
+                <h2>参考資料</h2>
+                <ul style="font-size: 0.55em;">
+                    <li>境野 翔：<a href="https://www.jstage.jst.go.jp/article/jrsj/40/9/40_40_778/_pdf" target="_blank" style="color: #3b82f6; text-decoration: underline;">バイラテラルに基づく模倣学習による予測と制御</a>，日本ロボット学会誌，40(9)，pp.778–783，2022</li>
+                    <li>土岐 勇介：<a href="https://research.reazon.jp/_downloads/7ee58a54e5cd4235024b27503b778f1f/openarm-study-group-01-toki.pdf" target="_blank" style="color: #3b82f6; text-decoration: underline;">第一回 openarm 勉強会（バイラテラル制御の種類・4ch 型の実装）</a></li>
+                    <li><a href="https://www.jsme.or.jp/jsme-medwiki/doku.php?id=14%3A1010059" target="_blank" style="color: #3b82f6; text-decoration: underline;">JSME 機械工学事典「バイラテラル制御」</a>（対称型・力逆送型・力帰還型）</li>
+                    <li>D. A. Lawrence: Stability and transparency in bilateral teleoperation, IEEE T-RA, 1993（4ch 型）</li>
+                    <li>Y. Yokokohji, T. Yoshikawa: Bilateral control of master-slave manipulators for ideal kinesthetic coupling, IEEE T-RA, 1994</li>
+                    <li>T. Suzuki, K. Ohnishi: Frequency-domain analysis of time-delayed bilateral control with four-channel structure (acceleration-based bilateral control), IEEE TCST, 2013</li>
+                    <li>T. Z. Zhao et al.: Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware（ALOHA / ACT）, RSS 2023</li>
+                </ul>
+            </section>
+
+            <!-- 2. 遠隔操作とは -->
+            <section>
+                <section>
+                    <h2>なぜ遠隔操作？</h2>
+                    <svg viewBox="0 0 760 170" style="width: 90%; max-height: 28vh;">
+                        <defs>
+                            <marker id="t-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <!-- 人 -->
+                        <circle cx="80" cy="55" r="18" fill="none" stroke="#fbbf24" stroke-width="3"/>
+                        <line x1="80" y1="73" x2="80" y2="120" stroke="#fbbf24" stroke-width="3"/>
+                        <line x1="80" y1="88" x2="125" y2="98" stroke="#fbbf24" stroke-width="3"/>
+                        <line x1="80" y1="120" x2="62" y2="155" stroke="#fbbf24" stroke-width="3"/>
+                        <line x1="80" y1="120" x2="98" y2="155" stroke="#fbbf24" stroke-width="3"/>
+                        <text x="80" y="22" fill="#fbbf24" font-size="15" text-anchor="middle">人（操作する側）</text>
+                        <!-- 操作装置 -->
+                        <rect x="130" y="88" width="50" height="22" rx="5" fill="#7dd3fc"/>
+                        <line x1="200" y1="99" x2="470" y2="99" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#t-a)"/>
+                        <text x="335" y="88" fill="#cbd5e1" font-size="15" text-anchor="middle">指令（ネットワーク越しでもよい）</text>
+                        <!-- ロボット -->
+                        <rect x="520" y="135" width="60" height="20" fill="#9ca3af"/>
+                        <polyline points="550,135 550,80 640,58 680,100" fill="none" stroke="#4ade80" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+                        <text x="610" y="22" fill="#4ade80" font-size="15" text-anchor="middle">ロボット（作業する側）</text>
+                    </svg>
+                    <ul style="font-size: 0.65em;">
+                        <li>もともと：<strong>危険な場所・遠い場所</strong>での作業（原子力、宇宙、医療など）</li>
+                        <li>最近：<strong>人手不足</strong>の現場を遠くから操作（アバターロボット）</li>
+                        <li>そして：<strong>操作したデータがそのまま AI の学習データ</strong>になる（後半の章）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">ロボットを操作する方法</h2>
+                    <table style="font-size: 0.5em; width: 95%;">
+                        <thead>
+                            <tr><th>方法</th><th>何を送る？</th><th>直感的？</th><th>力が返る？</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>ゲームパッド・キーボード</strong><br>（3D マウスも）</td><td>手先の速度（ボタン・スティック）</td><td>△ 慣れが必要</td><td>×</td></tr>
+                            <tr><td><strong>VR コントローラ</strong></td><td>手先の位置・姿勢</td><td>○ 手を動かせば手先が動く</td><td>×（振動くらい）</td></tr>
+                            <tr><td><strong>リーダ・フォロワ</strong><br>（ALOHA、GELLO など）</td><td>リーダの関節角をそのままコピー</td><td>◎ ロボットの形のまま動かせる</td><td>×（ユニラテラル）</td></tr>
+                            <tr><td style="color: #fbbf24;"><strong>バイラテラル制御</strong></td><td>位置と<strong>力</strong>を双方向に</td><td>◎</td><td><strong style="color: #fbbf24;">○ 触った感触・重さが返る</strong></td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.55em;">ロボットの形をした操作装置（リーダ）で動かすほど直感的。さらに<strong>力も返す</strong>のがバイラテラル</p>
+                </section>
+            </section>
+
+            <!-- 3. バイラテラル制御とは -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">バイラテラル制御とは</h2>
+                    <svg viewBox="0 0 760 210" style="width: 90%; max-height: 32vh;">
+                        <defs>
+                            <marker id="b-y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+                            <marker id="b-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                        </defs>
+                        <!-- 人とリーダ -->
+                        <circle cx="45" cy="70" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+                        <line x1="45" y1="85" x2="45" y2="135" stroke="#e2e8f0" stroke-width="3"/>
+                        <line x1="45" y1="100" x2="150" y2="85" stroke="#e2e8f0" stroke-width="3"/>
+                        <rect x="100" y="165" width="56" height="18" fill="#9ca3af"/>
+                        <polyline points="128,165 128,115 200,95 165,82" fill="none" stroke="#7dd3fc" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+                        <text x="150" y="30" fill="#7dd3fc" font-size="17" text-anchor="middle" font-weight="bold">リーダ（人が動かす）</text>
+                        <!-- フォロワ -->
+                        <rect x="560" y="165" width="56" height="18" fill="#9ca3af"/>
+                        <polyline points="588,165 588,115 660,95 690,140" fill="none" stroke="#4ade80" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+                        <rect x="660" y="150" width="70" height="30" fill="#78716c"/>
+                        <text x="695" y="198" fill="#a8a29e" font-size="13" text-anchor="middle">物体</text>
+                        <text x="620" y="30" fill="#4ade80" font-size="17" text-anchor="middle" font-weight="bold">フォロワ（作業する）</text>
+                        <!-- 矢印 -->
+                        <line x1="250" y1="95" x2="510" y2="95" stroke="#fbbf24" stroke-width="3" marker-end="url(#b-y)"/>
+                        <text x="380" y="83" fill="#fbbf24" font-size="16" text-anchor="middle">位置（動き）→</text>
+                        <line x1="510" y1="140" x2="250" y2="140" stroke="#f87171" stroke-width="3" marker-end="url(#b-r)"/>
+                        <text x="380" y="166" fill="#f87171" font-size="16" text-anchor="middle">← 力（触った感触・重さ）</text>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li><strong>ユニラテラル</strong>（一方向）：位置だけ送る。ぶつかっても人には分からない</li>
+                        <li><strong>バイラテラル</strong>（双方向）：位置を送り、<strong>力を返す</strong> → 硬さ・柔らかさが手に伝わる</li>
+                        <li>理想：<strong>位置がそろう</strong>（x<sub>L</sub> = x<sub>F</sub>）＋<strong>力が作用・反作用</strong>（f<sub>L</sub> + f<sub>F</sub> = 0）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">同型と異種で中身が変わる</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80; font-size: 1.3em;">同型</strong><br>リーダとフォロワが同じロボット</div>
+                            <svg viewBox="0 0 300 100" style="width: 100%; max-height: 14vh;">
+                                <rect x="30" y="78" width="40" height="14" fill="#9ca3af"/>
+                                <polyline points="50,78 50,40 100,26 125,56" fill="none" stroke="#7dd3fc" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+                                <text x="150" y="55" fill="#cbd5e1" font-size="20" text-anchor="middle">⇄</text>
+                                <rect x="190" y="78" width="40" height="14" fill="#9ca3af"/>
+                                <polyline points="210,78 210,40 260,26 285,56" fill="none" stroke="#4ade80" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+                            </svg>
+                            <ul>
+                                <li><strong>関節ごとに 1 対 1</strong> でつなげる（関節空間）</li>
+                                <li>重さ・摩擦も<strong>ほぼ同じ</strong> → 打ち消しやすい</li>
+                                <li>ロボットが 2 台必要（高い）</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #f59e0b; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #f59e0b; font-size: 1.3em;">異種</strong><br>形や大きさが違う（小型リーダ、力覚デバイス）</div>
+                            <svg viewBox="0 0 300 100" style="width: 100%; max-height: 14vh;">
+                                <rect x="40" y="82" width="26" height="10" fill="#9ca3af"/>
+                                <polyline points="53,82 53,60 85,52 98,70" fill="none" stroke="#7dd3fc" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+                                <text x="150" y="55" fill="#cbd5e1" font-size="20" text-anchor="middle">⇄</text>
+                                <rect x="190" y="78" width="40" height="14" fill="#9ca3af"/>
+                                <polyline points="210,78 210,40 260,26 285,56" fill="none" stroke="#4ade80" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+                            </svg>
+                            <ul>
+                                <li><strong>手先の位置・力</strong>でつなぐ（作業空間）→ 逆運動学・スケーリングが必要</li>
+                                <li>重さ・摩擦が違う → 操作が<strong>重く</strong>なり、力と位置の制御が<strong>干渉</strong>しやすい</li>
+                                <li>例：ALOHA はリーダが小型（異スケール）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- 4. バイラテラル制御の種類 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">バイラテラル制御の種類</h2>
+                    <table style="font-size: 0.46em; width: 98%;">
+                        <thead>
+                            <tr><th></th><th>リーダ側</th><th>フォロワ側</th><th>力センサ</th><th>操作の軽さ</th><th>安定性</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap;"><strong>位置対称型</strong></td><td>フォロワの位置に追従</td><td>リーダの位置に追従</td><td>不要</td><td>重い（相手の重さ・摩擦も感じる）</td><td>○ 実装が楽</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>力逆送型</strong></td><td>フォロワで測った力をそのまま出す</td><td>リーダの位置に追従</td><td>フォロワ</td><td>重い</td><td>○</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>力帰還型</strong></td><td>力のずれ（リーダ−フォロワ）をフィードバック</td><td>リーダの位置に追従</td><td>両方</td><td>軽い</td><td>△ 不安定になりやすい</td></tr>
+                            <tr><td style="white-space: nowrap; color: #fbbf24;"><strong>4ch 型</strong></td><td colspan="2">両方とも<strong>位置と力の両方</strong>を制御（4 本の信号をやりとり）</td><td>推定でも可</td><td>軽い</td><td>○ そこそこ</td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="font-size: 0.5em;">
+                        <li>評価は 2 つ：<strong>操作性</strong>（動かすときの軽さ）と<strong>再現性</strong>（触った硬さ・柔らかさがどれだけ伝わるか）</li>
+                        <li>4ch 型は両方を狙える。接触時の安定性・性能から<strong>模倣学習にも 4ch 型が好ましい</strong>（境野 2022）</li>
+                    </ul>
+                    <p style="font-size: 0.42em; color: #9ca3af;">出典：JSME 機械工学事典「バイラテラル制御」、土岐（openarm 勉強会）、Lawrence 1993、境野 2022</p>
+                </section>
+            </section>
+
+            <!-- 5. 加速度制御型バイラテラル（ABC） -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">準備：外乱オブザーバ（DOB）</h2>
+                    <svg viewBox="0 0 760 170" style="width: 90%; max-height: 28vh;">
+                        <defs>
+                            <marker id="d-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="40" y="60" fill="#cbd5e1" font-size="15">加速度指令</text>
+                        <line x1="120" y1="55" x2="200" y2="55" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#d-a)"/>
+                        <rect x="205" y="25" width="170" height="60" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="290" y="50" fill="#7dd3fc" font-size="16" text-anchor="middle">モータ・関節</text>
+                        <text x="290" y="72" fill="#cbd5e1" font-size="13" text-anchor="middle">摩擦・重力・モデル誤差</text>
+                        <line x1="375" y1="55" x2="455" y2="55" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#d-a)"/>
+                        <text x="470" y="60" fill="#cbd5e1" font-size="15">実際の動き</text>
+                        <rect x="205" y="110" width="170" height="44" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                        <text x="290" y="137" fill="#fbbf24" font-size="15" text-anchor="middle">外乱オブザーバ</text>
+                        <polyline points="510,70 510,132 380,132" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#d-a)"/>
+                        <polyline points="205,132 160,132 160,72" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#d-a)"/>
+                        <text x="60" y="150" fill="#fbbf24" font-size="13">推定した外乱を打ち消す</text>
+                        <text x="560" y="120" fill="#cbd5e1" font-size="13">「動くはず」と「実際」の差</text>
+                        <text x="560" y="138" fill="#cbd5e1" font-size="13">＝ 外乱（＋外から受けた力）</text>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li>摩擦・重力・モデルの誤差をまとめて<strong>「外乱」として推定し、打ち消す</strong></li>
+                        <li>→ 関節が<strong>「指令どおりに加速する理想的な物体」</strong>に見える（加速度制御）</li>
+                        <li>外乱から摩擦などの分を引くと<strong>外から受けた力</strong>も分かる（反力推定オブザーバ）→ 力センサなしで力が取れる</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">加速度制御型バイラテラル（ABC）</h2>
+                    <svg viewBox="0 0 760 175" style="width: 90%; max-height: 28vh;">
+                        <rect x="20" y="20" width="200" height="130" rx="10" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+                        <text x="120" y="48" fill="#7dd3fc" font-size="17" text-anchor="middle" font-weight="bold">リーダ</text>
+                        <text x="120" y="78" fill="#cbd5e1" font-size="14" text-anchor="middle">位置 x<tspan baseline-shift="sub" font-size="10">L</tspan>・力 f<tspan baseline-shift="sub" font-size="10">L</tspan></text>
+                        <text x="120" y="108" fill="#cbd5e1" font-size="13" text-anchor="middle">DOB で</text>
+                        <text x="120" y="126" fill="#cbd5e1" font-size="13" text-anchor="middle">加速度制御</text>
+                        <rect x="540" y="20" width="200" height="130" rx="10" fill="none" stroke="#4ade80" stroke-width="2"/>
+                        <text x="640" y="48" fill="#4ade80" font-size="17" text-anchor="middle" font-weight="bold">フォロワ</text>
+                        <text x="640" y="78" fill="#cbd5e1" font-size="14" text-anchor="middle">位置 x<tspan baseline-shift="sub" font-size="10">F</tspan>・力 f<tspan baseline-shift="sub" font-size="10">F</tspan></text>
+                        <text x="640" y="108" fill="#cbd5e1" font-size="13" text-anchor="middle">DOB で</text>
+                        <text x="640" y="126" fill="#cbd5e1" font-size="13" text-anchor="middle">加速度制御</text>
+                        <rect x="250" y="25" width="260" height="55" rx="8" fill="#3b1e1e" stroke="#f87171"/>
+                        <text x="380" y="48" fill="#f87171" font-size="15" text-anchor="middle" font-weight="bold">和のモード：力制御</text>
+                        <text x="380" y="70" fill="#e2e8f0" font-size="14" text-anchor="middle">f<tspan baseline-shift="sub" font-size="10">L</tspan> + f<tspan baseline-shift="sub" font-size="10">F</tspan> → 0（作用・反作用）</text>
+                        <rect x="250" y="92" width="260" height="55" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                        <text x="380" y="115" fill="#fbbf24" font-size="15" text-anchor="middle" font-weight="bold">差のモード：位置制御</text>
+                        <text x="380" y="137" fill="#e2e8f0" font-size="14" text-anchor="middle">x<tspan baseline-shift="sub" font-size="10">L</tspan> − x<tspan baseline-shift="sub" font-size="10">F</tspan> → 0（位置をそろえる）</text>
+                        <text x="380" y="170" fill="#9ca3af" font-size="12" text-anchor="middle">どちらも「加速度」の指令に足し合わせて、両方のロボットに配る</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>大西公平先生（慶應義塾大学）のグループが発展させた 4ch 型の実現方法</li>
+                        <li>DOB で外乱を消したうえで、<strong>力（和）と位置（差）を独立に設計</strong>できる → 軽い操作と硬さの再現を両立</li>
+                        <li>性能はハードと周期しだい：低摩擦・低減速比・高い制御周波数（<strong>500 Hz は心もとない、1 kHz うれしい、10 kHz 神</strong>：土岐）</li>
+                    </ul>
+                    <p style="font-size: 0.42em; color: #9ca3af;">出典：Suzuki &amp; Ohnishi, IEEE TCST 2013、土岐（openarm 勉強会）</p>
+                </section>
+            </section>
+
+            <!-- 6. 遠隔操作のデータで学習する -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">遠隔操作のデータ＝学習データ</h2>
+                    <svg viewBox="0 0 760 190" style="width: 92%; max-height: 30vh;">
+                        <defs>
+                            <marker id="l-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="200" y="20" fill="#fbbf24" font-size="15" text-anchor="middle" font-weight="bold">① 人が遠隔操作して記録</text>
+                        <rect x="20" y="35" width="90" height="40" rx="8" fill="none" stroke="#e2e8f0"/>
+                        <text x="65" y="60" fill="#e2e8f0" font-size="14" text-anchor="middle">人</text>
+                        <line x1="110" y1="55" x2="150" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#l-a)"/>
+                        <rect x="155" y="35" width="90" height="40" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="200" y="60" fill="#7dd3fc" font-size="14" text-anchor="middle">リーダ</text>
+                        <line x1="245" y1="55" x2="285" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#l-a)"/>
+                        <rect x="290" y="35" width="90" height="40" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="335" y="60" fill="#4ade80" font-size="14" text-anchor="middle">フォロワ</text>
+                        <rect x="20" y="100" width="360" height="70" rx="8" fill="#1f2937" stroke="#64748b"/>
+                        <text x="200" y="125" fill="#cbd5e1" font-size="13" text-anchor="middle">記録：カメラ画像・関節角・（力）</text>
+                        <text x="200" y="150" fill="#cbd5e1" font-size="13" text-anchor="middle">＋ そのときの指令（＝リーダの動き）</text>
+                        <line x1="200" y1="76" x2="200" y2="96" stroke="#cbd5e1" stroke-width="2" marker-end="url(#l-a)"/>
+                        <line x1="390" y1="135" x2="440" y2="135" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#l-a)"/>
+                        <text x="590" y="20" fill="#f472b6" font-size="15" text-anchor="middle" font-weight="bold">② 人とリーダを AI に置き換え</text>
+                        <rect x="450" y="35" width="150" height="40" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                        <text x="525" y="60" fill="#f472b6" font-size="14" text-anchor="middle">AI（模倣学習）</text>
+                        <line x1="600" y1="55" x2="640" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#l-a)"/>
+                        <rect x="645" y="35" width="90" height="40" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="690" y="60" fill="#4ade80" font-size="14" text-anchor="middle">フォロワ</text>
+                        <text x="590" y="120" fill="#cbd5e1" font-size="13" text-anchor="middle">画像・関節角から</text>
+                        <text x="590" y="140" fill="#cbd5e1" font-size="13" text-anchor="middle">「人ならこう動かす」を出力</text>
+                    </svg>
+                    <ul style="font-size: 0.58em;">
+                        <li>リーダ・フォロワで<strong>操作するだけで、教師データが溜まる</strong>（ALOHA / ACT, 2023）</li>
+                        <li>バイラテラルなら<strong>力の情報も</strong>記録できる → 押す・こする・柔らかい物の作業（Bi-ACT, 2024 など）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>同じロボット 2 台でバイラテ × 学習</h2>
+                    <svg viewBox="0 0 760 160" style="width: 92%; max-height: 25vh;">
+                        <defs>
+                            <marker id="s-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="190" y="18" fill="#f87171" font-size="14" text-anchor="middle" font-weight="bold">従来：人の動き（応答）を指令に使う</text>
+                        <rect x="20" y="35" width="110" height="40" rx="8" fill="none" stroke="#e2e8f0"/>
+                        <text x="75" y="60" fill="#e2e8f0" font-size="13" text-anchor="middle">記録した動き</text>
+                        <line x1="130" y1="55" x2="245" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#s-a)"/>
+                        <text x="188" y="47" fill="#cbd5e1" font-size="12" text-anchor="middle">指令</text>
+                        <rect x="250" y="35" width="110" height="40" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="305" y="60" fill="#4ade80" font-size="13" text-anchor="middle">ロボット</text>
+                        <text x="190" y="105" fill="#f87171" font-size="13" text-anchor="middle">制御の遅れが加わり、教示どおりに動かない</text>
+                        <text x="570" y="18" fill="#4ade80" font-size="14" text-anchor="middle" font-weight="bold">バイラテ：リーダの応答を予測する</text>
+                        <rect x="400" y="35" width="110" height="40" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                        <text x="455" y="54" fill="#f472b6" font-size="13" text-anchor="middle">AI</text>
+                        <text x="455" y="69" fill="#f9a8d4" font-size="11" text-anchor="middle">（リーダの代わり）</text>
+                        <line x1="510" y1="55" x2="625" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#s-a)"/>
+                        <text x="568" y="47" fill="#cbd5e1" font-size="12" text-anchor="middle">指令</text>
+                        <rect x="630" y="35" width="110" height="40" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="685" y="60" fill="#4ade80" font-size="13" text-anchor="middle">フォロワ</text>
+                        <polyline points="685,76 685,95 455,95 455,80" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#s-a)"/>
+                        <text x="570" y="115" fill="#4ade80" font-size="13" text-anchor="middle">教示時と<tspan font-weight="bold">同じ制御系・同じだけの遅れ</tspan></text>
+                        <text x="570" y="135" fill="#4ade80" font-size="13" text-anchor="middle">→ 人が遅れを補った動きごと再現できる</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>教示中、人は<strong>フォロワの反応を感じながら</strong>リーダを動かす → リーダの動きがフォロワへの指令</li>
+                        <li>AI は「フォロワの状態 → 次のリーダの動き」を学ぶ。遅れなど<strong>理想的でない部分を人が補ったスキルごと</strong>データに乗る</li>
+                        <li>→ <strong>制御系が理想的でなくても、速い動作</strong>を再現できる（境野先生・筑波大学）</li>
+                        <li>制約：<strong>同じロボット・同じ制御系</strong>を 2 台。教示後に制御系を変えてはいけない</li>
+                    </ul>
+                    <p style="font-size: 0.42em; color: #9ca3af;">出典：境野 翔「バイラテラルに基づく模倣学習による予測と制御」日本ロボット学会誌 40(9), 2022</p>
+                </section>
+            </section>
+
+            <!-- 7. まとめ -->
+            <section>
+                <h2>まとめ</h2>
+                <ul style="font-size: 0.7em;">
+                    <li>遠隔操作は「遠くで作業する」だけでなく<strong>学習データを集める手段</strong>になった</li>
+                    <li>ロボット型の操作装置（リーダ）ほど直感的。<strong>力も返すのがバイラテラル制御</strong></li>
+                    <li>種類：位置対称型・力逆送型・力帰還型・<strong>4ch 型</strong>（ABC はその実現方法）</li>
+                    <li>同じロボット 2 台のバイラテ × 模倣学習は、<strong>ロボットの不完全さごと学べる</strong></li>
+                </ul>
+                <br>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+        </div>
+    </div>
+
+    <script src="../../assets/vendor/reveal.js/dist/reveal.js"></script>
+    <script src="../../assets/chapter-numbers.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/notes/notes.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/zoom/zoom.js"></script>
+    <script src="../../assets/vendor/reveal.js-menu/menu.js"></script>
+    <script src="../../assets/vendor/reveal.js-plugins/chalkboard/plugin.js"></script>
+    <script>
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: chapterSlideNumber, // 章-連番 (assets/chapter-numbers.js)
+
+            // プラグインの有効化
+            plugins: [
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+            }
+        });
+    </script>
+</body>
+
+</html>

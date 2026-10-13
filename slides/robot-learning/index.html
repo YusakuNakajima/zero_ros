@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>学習ベースのロボット制御</title>
+
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/theme/black.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js-plugins/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+    <style>
+        .reveal a.vid { color: #f87171; text-decoration: underline; }
+        .reveal a.pg { color: #3b82f6; text-decoration: underline; }
+        .reveal .src { font-size: 0.42em; color: #9ca3af; }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- タイトル -->
+            <section>
+                <h1>学習ベースの<br>ロボット制御</h1>
+                <h2 style="font-size: 1.4em;">模倣学習・強化学習・基盤モデル</h2>
+                <p>大阪大学 中島優作</p>
+                <p style="font-size: 0.6em; color: #fbbf24;">※ 作成途中です</p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- 1. 古典制御と学習制御 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">古典的な制御でどこまでできた？</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80; font-size: 1.2em;">得意（もう実用）</strong></div>
+                            <ul>
+                                <li><strong>決まった動きの繰り返し</strong>（位置制御：溶接・搬送・組立）</li>
+                                <li><strong>一定の力で押す・ならう</strong>（力制御：研磨・はめ合い）</li>
+                                <li><strong>測って直す</strong>（ビジョン・力センサのフィードバック）</li>
+                                <li>精度・速さ・再現性・安全の<strong>保証</strong>がしやすい</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #f472b6; font-size: 1.2em;">苦手（学習に期待）</strong></div>
+                            <ul>
+                                <li><strong>毎回違う物・置き方</strong>（家庭、物流のばら積み）</li>
+                                <li><strong>柔らかい物</strong>（布・食品・ケーブル）はモデル化が難しい</li>
+                                <li>人が言葉にできない<strong>コツ（暗黙知）</strong></li>
+                                <li><strong>長い手順</strong>を状況に合わせて組み立てる</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.55em; margin-top: 15px;">数式で書けるところは古典制御、<strong>書きにくいところをデータで埋める</strong>のが学習制御</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">学習制御の 2 本柱</h2>
+                    <svg viewBox="0 0 760 200" style="width: 92%; max-height: 32vh;">
+                        <defs>
+                            <marker id="p-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <rect x="10" y="10" width="360" height="180" rx="12" fill="none" stroke="#fbbf24" stroke-width="2"/>
+                        <text x="190" y="40" fill="#fbbf24" font-size="20" text-anchor="middle" font-weight="bold">模倣学習</text>
+                        <text x="190" y="64" fill="#cbd5e1" font-size="14" text-anchor="middle">人のお手本（デモ）をまねる</text>
+                        <rect x="35" y="90" width="110" height="44" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                        <text x="90" y="117" fill="#fde68a" font-size="14" text-anchor="middle">人の操作データ</text>
+                        <line x1="145" y1="112" x2="225" y2="112" stroke="#cbd5e1" stroke-width="2" marker-end="url(#p-a)"/>
+                        <rect x="230" y="90" width="110" height="44" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                        <text x="285" y="117" fill="#f9a8d4" font-size="14" text-anchor="middle">方策（AI）</text>
+                        <text x="190" y="165" fill="#cbd5e1" font-size="13" text-anchor="middle">◎ 少ないデータで実機で動く　△ お手本以上にはなりにくい</text>
+                        <rect x="390" y="10" width="360" height="180" rx="12" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+                        <text x="570" y="40" fill="#7dd3fc" font-size="20" text-anchor="middle" font-weight="bold">強化学習</text>
+                        <text x="570" y="64" fill="#cbd5e1" font-size="14" text-anchor="middle">試行錯誤して報酬が増える動きを探す</text>
+                        <rect x="415" y="90" width="110" height="44" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                        <text x="470" y="117" fill="#f9a8d4" font-size="14" text-anchor="middle">方策（AI）</text>
+                        <rect x="615" y="90" width="110" height="44" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="670" y="112" fill="#bae6fd" font-size="14" text-anchor="middle">環境</text>
+                        <text x="670" y="128" fill="#bae6fd" font-size="11" text-anchor="middle">（多くはシミュレータ）</text>
+                        <line x1="525" y1="102" x2="610" y2="102" stroke="#cbd5e1" stroke-width="2" marker-end="url(#p-a)"/>
+                        <text x="568" y="96" fill="#cbd5e1" font-size="11" text-anchor="middle">行動</text>
+                        <line x1="615" y1="124" x2="530" y2="124" stroke="#cbd5e1" stroke-width="2" marker-end="url(#p-a)"/>
+                        <text x="572" y="142" fill="#cbd5e1" font-size="11" text-anchor="middle">状態・報酬</text>
+                        <text x="570" y="165" fill="#cbd5e1" font-size="13" text-anchor="middle">◎ 人を超えられる　△ 試行回数が膨大・報酬設計が難しい</text>
+                    </svg>
+                    <p style="font-size: 0.55em;">最近は両方を組み合わせることも多い（模倣で初期化 → 強化学習で仕上げ）</p>
+                </section>
+            </section>
+
+            <!-- 2. 模倣学習 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">模倣学習の種類</h2>
+                    <table style="font-size: 0.48em; width: 96%;">
+                        <thead>
+                            <tr><th>手法</th><th>考え方</th><th>長所</th><th>短所</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap; color: #fbbf24;"><strong>行動クローニング（BC）</strong></td><td>「この状態ならこの行動」を<strong>教師あり学習</strong></td><td>いちばん簡単。最近の主流（ACT、Diffusion Policy、VLA）</td><td>少しずれると<strong>誤差が積み重なる</strong>（共変量シフト）</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>DAgger</strong></td><td>AI に動かせ、ずれた場面で<strong>人が正解を付け足す</strong></td><td>ずれからの立て直しを学べる</td><td>人がずっと付き添う必要</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>逆強化学習（IRL）</strong></td><td>デモから<strong>報酬（何を目指しているか）</strong>を推定し、強化学習</td><td>状況が変わっても目的に沿って動ける</td><td>計算が重い</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>GAIL</strong></td><td>「人のデモと見分けがつかない動き」を<strong>敵対的に</strong>学ぶ</td><td>報酬を明示しなくてよい</td><td>試行が多く、学習が不安定</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="src">DAgger: Ross et al. 2011 / IRL: Ng &amp; Russell 2000, Abbeel &amp; Ng 2004 / GAIL: Ho &amp; Ermon 2016</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">行動クローニングの 2 つの壁</h2>
+                    <svg viewBox="0 0 760 190" style="width: 90%; max-height: 30vh;">
+                        <text x="185" y="20" fill="#fbbf24" font-size="15" text-anchor="middle" font-weight="bold">① 誤差が積み重なる</text>
+                        <path d="M 30 160 C 120 150, 220 110, 340 50" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="300" y="40" fill="#4ade80" font-size="12">お手本</text>
+                        <path d="M 30 160 C 120 158, 220 150, 340 150" fill="none" stroke="#f87171" stroke-width="3" stroke-dasharray="7 5"/>
+                        <text x="185" y="178" fill="#f87171" font-size="12" text-anchor="middle">少しずれる → 見たことのない状態 → さらにずれる</text>
+                        <text x="575" y="20" fill="#fbbf24" font-size="15" text-anchor="middle" font-weight="bold">② お手本が何通りもある（多峰性）</text>
+                        <rect x="545" y="80" width="60" height="50" fill="#78716c"/>
+                        <text x="575" y="110" fill="#e7e5e4" font-size="12" text-anchor="middle">障害物</text>
+                        <path d="M 430 105 C 500 105, 520 50, 575 50 C 630 50, 650 105, 720 105" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <path d="M 430 105 C 500 105, 520 160, 575 160 C 630 160, 650 105, 720 105" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <line x1="430" y1="105" x2="545" y2="105" stroke="#f87171" stroke-width="3" stroke-dasharray="7 5"/>
+                        <text x="575" y="185" fill="#f87171" font-size="12" text-anchor="middle">上と下を平均すると、真ん中でぶつかる</text>
+                    </svg>
+                    <ul style="font-size: 0.58em;">
+                        <li>① の対策：<strong>行動をまとめて予測</strong>（Action Chunking：ACT）、DAgger でずれを補う</li>
+                        <li>② の対策：「平均」ではなく<strong>分布ごと表す</strong>生成モデル（Diffusion Policy）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">ACT（ALOHA）</h2>
+                    <ul style="font-size: 0.62em;">
+                        <li>安価な双腕リーダ・フォロワ <strong>ALOHA</strong> でデモを集める（2 万ドル以下）</li>
+                        <li>Transformer で<strong>数十ステップ先までの行動をまとめて</strong>予測（Action Chunking）</li>
+                        <li>約 <strong>10 分のデモ</strong>で、6 つの細かい作業を 80〜90% 成功</li>
+                        <li>移動台車に載せた <strong>Mobile ALOHA</strong>（2024）で料理・片付けまで</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">▶ <a class="pg" href="https://tonyzhaozh.github.io/aloha/" target="_blank">ALOHA / ACT プロジェクトページ（動画あり）</a><br>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=HaaZ8ss-HP4" target="_blank">Mobile ALOHA: Your Housekeeping Robot</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=mnLVbwxSdNM" target="_blank">遠隔操作で 3 品の料理</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=xGNNW6smDPQ" target="_blank">失敗集</a></p>
+                    <p class="src">Zhao et al., Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware, RSS 2023 / Fu et al., Mobile ALOHA, 2024</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">Diffusion Policy</h2>
+                    <svg viewBox="0 0 760 110" style="width: 88%; max-height: 17vh;">
+                        <defs>
+                            <marker id="df-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="90" y="18" fill="#94a3b8" font-size="13" text-anchor="middle">ノイズ</text>
+                        <polyline points="20,70 40,40 60,85 80,35 100,75 120,50 140,80 160,45" fill="none" stroke="#94a3b8" stroke-width="2.5"/>
+                        <line x1="185" y1="60" x2="275" y2="60" stroke="#cbd5e1" stroke-width="2" marker-end="url(#df-a)"/>
+                        <text x="230" y="50" fill="#cbd5e1" font-size="12" text-anchor="middle">少しずつ</text>
+                        <polyline points="290,70 310,52 330,72 350,48 370,64 390,50 410,66 430,52" fill="none" stroke="#c4b5fd" stroke-width="2.5"/>
+                        <line x1="455" y1="60" x2="545" y2="60" stroke="#cbd5e1" stroke-width="2" marker-end="url(#df-a)"/>
+                        <text x="500" y="50" fill="#cbd5e1" font-size="12" text-anchor="middle">ノイズ除去</text>
+                        <path d="M 560 85 C 620 85, 650 35, 740 35" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="650" y="18" fill="#4ade80" font-size="13" text-anchor="middle">なめらかな行動列</text>
+                        <text x="380" y="104" fill="#94a3b8" font-size="12" text-anchor="middle">カメラ画像などを条件にして、画像生成 AI と同じしくみで「行動」を生成する</text>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li>お手本が何通りあっても、<strong>どれか 1 つを選んで</strong>きれいに出せる（多峰性に強い）</li>
+                        <li>4 つのベンチマーク・15 タスクで、従来法より平均 <strong>46.9%</strong> 向上</li>
+                        <li>π0 などの基盤モデルも、行動の出力に似た考え方（フローマッチング）を使う</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">▶ <a class="pg" href="https://diffusion-policy.cs.columbia.edu/" target="_blank">プロジェクトページ（動画あり）</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=CmZ8aepZO1g" target="_blank">日本語の論文解説（松尾・岩澤研 DL 輪読会）</a></p>
+                    <p class="src">Chi et al., Diffusion Policy: Visuomotor Policy Learning via Action Diffusion, RSS 2023</p>
+                </section>
+            </section>
+
+            <!-- 3. 強化学習 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">強化学習の種類</h2>
+                    <table style="font-size: 0.48em; width: 96%;">
+                        <thead>
+                            <tr><th>分類</th><th>代表例</th><th>考え方</th><th>ロボットでは</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap; color: #7dd3fc;"><strong>モデルフリー（オンポリシー）</strong></td><td><strong>PPO</strong></td><td>今の方策で集めたデータだけで少しずつ更新。安定</td><td>シミュレータで<strong>何千台も並列</strong>に動かして学ぶ（歩行・手の器用さ）</td></tr>
+                            <tr><td style="white-space: nowrap; color: #7dd3fc;"><strong>モデルフリー（オフポリシー）</strong></td><td><strong>SAC</strong></td><td>過去のデータも使い回す。少ない試行で学べる</td><td>実機で直接学ぶときに向く</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>モデルベース</strong></td><td>Dreamer</td><td>環境のモデル（世界モデル）を学び、その中で計画・練習</td><td>試行回数を減らせる</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>オフライン強化学習</strong></td><td>CQL など</td><td>集めたデータだけで学ぶ（新たに試行しない）</td><td>デモ・ログを活用。模倣学習との中間</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.5em;">ロボットの実用では「<strong>シミュレータ × PPO</strong> で学び、実機へ移す」が主流</p>
+                    <p class="src">PPO: Schulman et al. 2017 / SAC: Haarnoja et al. 2018 / Dreamer: Hafner et al. 2020 / CQL: Kumar et al. 2020</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">Sim-to-Real</h2>
+                    <p style="font-size: 0.65em; margin-top: 0;">シミュレータで学んで実機へ</p>
+                    <ul style="font-size: 0.6em;">
+                        <li>実機で何百万回も試せない → <strong>シミュレータで大量に</strong>試行錯誤</li>
+                        <li>そのままだと実機とのずれ（Sim-to-Real ギャップ）で失敗 → 摩擦・質量・見た目などを<strong>わざとばらつかせて</strong>学ぶ（ドメインランダム化）</li>
+                        <li>得意：<strong>歩行</strong>、<strong>手の中で物を回す</strong>など、人がお手本を見せにくい動き</li>
+                        <li>苦手：<strong>接触・柔らかい物</strong>はシミュレーションがずれやすい、報酬の設計が難しい</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">▶ <a class="vid" href="https://www.youtube.com/watch?v=jwSbzNHGflM" target="_blank">OpenAI: Learning Dexterity（2018）</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=x4O8pojMF0w" target="_blank">ロボットハンドでルービックキューブ（2019）</a>
+                        ▶ <a class="pg" href="https://dextreme.org/" target="_blank">NVIDIA DeXtreme（2022）</a></p>
+                    <p style="font-size: 0.5em;">シミュレータの前提は<a class="pg" href="../ros-simulator-connection/index_ros2.html" target="_blank">シミュレータとの接続</a>のスライドも参照</p>
+                </section>
+            </section>
+
+            <!-- 4. 時系列 -->
+            <section>
+                <h2 style="font-size: 1.3em;">最近の流れ（時系列）</h2>
+                <svg viewBox="0 0 760 270" style="width: 95%; max-height: 46vh;">
+                    <line x1="20" y1="135" x2="745" y2="135" stroke="#94a3b8" stroke-width="2"/>
+                    <!-- years -->
+                    <g font-size="13" fill="#94a3b8" text-anchor="middle">
+                        <text x="40" y="155">2016</text><text x="130" y="155">2018</text><text x="300" y="155">2022</text>
+                        <text x="410" y="155">2023</text><text x="530" y="155">2024</text><text x="640" y="155">2025</text><text x="725" y="155">2026</text>
+                    </g>
+                    <g fill="#e2e8f0">
+                        <circle cx="40" cy="135" r="5"/><circle cx="130" cy="135" r="5"/><circle cx="300" cy="135" r="5"/>
+                        <circle cx="410" cy="135" r="5"/><circle cx="530" cy="135" r="5"/><circle cx="640" cy="135" r="5"/><circle cx="725" cy="135" r="5"/>
+                    </g>
+                    <!-- 上：強化学習・模倣学習 -->
+                    <text x="20" y="22" fill="#7dd3fc" font-size="13" font-weight="bold">強化学習・Sim-to-Real</text>
+                    <text x="40" y="45" fill="#bae6fd" font-size="12" text-anchor="middle">画像から</text>
+                    <text x="40" y="60" fill="#bae6fd" font-size="12" text-anchor="middle">直接制御</text>
+                    <text x="130" y="45" fill="#bae6fd" font-size="12" text-anchor="middle">Dactyl</text>
+                    <text x="130" y="60" fill="#bae6fd" font-size="12" text-anchor="middle">QT-Opt</text>
+                    <text x="220" y="45" fill="#bae6fd" font-size="12" text-anchor="middle">四足歩行の</text>
+                    <text x="220" y="60" fill="#bae6fd" font-size="12" text-anchor="middle">RL（2019〜）</text>
+                    <text x="300" y="100" fill="#fde68a" font-size="12" text-anchor="middle">RT-1</text>
+                    <text x="300" y="116" fill="#fde68a" font-size="11" text-anchor="middle">大規模 BC</text>
+                    <text x="410" y="100" fill="#fde68a" font-size="12" text-anchor="middle">ACT / ALOHA</text>
+                    <text x="410" y="116" fill="#fde68a" font-size="12" text-anchor="middle">Diffusion Policy</text>
+                    <text x="530" y="100" fill="#fde68a" font-size="12" text-anchor="middle">Mobile ALOHA</text>
+                    <text x="530" y="116" fill="#fde68a" font-size="12" text-anchor="middle">UMI</text>
+                    <text x="20" y="80" fill="#fbbf24" font-size="13" font-weight="bold">模倣学習</text>
+                    <!-- 下：基盤モデル -->
+                    <text x="20" y="200" fill="#f472b6" font-size="13" font-weight="bold">基盤モデル（VLA）・データセット</text>
+                    <text x="410" y="230" fill="#f9a8d4" font-size="12" text-anchor="middle">RT-2（VLA）</text>
+                    <text x="410" y="246" fill="#f9a8d4" font-size="12" text-anchor="middle">Open X-Embodiment</text>
+                    <text x="530" y="230" fill="#f9a8d4" font-size="12" text-anchor="middle">Octo / OpenVLA</text>
+                    <text x="530" y="246" fill="#f9a8d4" font-size="12" text-anchor="middle">π0</text>
+                    <text x="640" y="230" fill="#f9a8d4" font-size="12" text-anchor="middle">π0.5 / GR00T N1</text>
+                    <text x="640" y="246" fill="#f9a8d4" font-size="12" text-anchor="middle">Gemini Robotics</text>
+                    <text x="725" y="230" fill="#f9a8d4" font-size="12" text-anchor="middle">Gemini</text>
+                    <text x="725" y="246" fill="#f9a8d4" font-size="12" text-anchor="middle">Robotics 2</text>
+                </svg>
+                <p style="font-size: 0.55em;">強化学習（シミュレータ）→ 模倣学習（安い遠隔操作でデータ集め）→ <strong>大量のデータで基盤モデル</strong>へ</p>
+            </section>
+
+            <!-- 5. データ収集 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">データをどう集めるか</h2>
+                    <table style="font-size: 0.48em; width: 96%;">
+                        <thead>
+                            <tr><th>方法</th><th>例</th><th>特徴</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap;"><strong>遠隔操作</strong></td><td>ALOHA、GELLO、バイラテラル</td><td>ロボットで実際にできる動きが集まる。力も取るならバイラテラル（<a class="pg" href="../robot-teleoperation/index.html" target="_blank">前のスライド</a>）</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>手持ちの道具</strong></td><td>UMI</td><td>カメラ付きグリッパを人が持って作業 → <strong>ロボットなしで</strong>どこでも集められる</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>シミュレーション</strong></td><td>Isaac Sim / MuJoCo など</td><td>いくらでも作れるが、実機とのずれがある</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>人の動画</strong></td><td>一人称視点の動画など</td><td>量は膨大。ただし行動（関節角・力）は入っていない</td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="font-size: 0.5em;">
+                        <li>みんなのデータを集める：<strong>Open X-Embodiment</strong>（22 種類のロボット、100 万以上の軌道）</li>
+                        <li>すぐ試せる：Hugging Face <strong>LeRobot</strong>（データ形式・学習コード・安価なアーム）</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">▶ <a class="vid" href="https://www.youtube.com/watch?v=l1y20nulhNY" target="_blank">UMI 論文紹介</a>
+                        ▶ <a class="pg" href="https://umi-gripper.github.io/" target="_blank">UMI</a>
+                        ▶ <a class="pg" href="https://wuphilipp.github.io/gello_site/" target="_blank">GELLO</a>
+                        ▶ <a class="pg" href="https://robotics-transformer-x.github.io/" target="_blank">Open X-Embodiment</a>
+                        ▶ <a class="pg" href="https://github.com/huggingface/lerobot" target="_blank">LeRobot</a></p>
+                </section>
+            </section>
+
+            <!-- 6. 基盤モデル -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">基盤モデル：VLA</h2>
+                    <p style="font-size: 0.6em; margin-top: 0;">Vision-Language-Action（画像と言葉から行動を出す）</p>
+                    <svg viewBox="0 0 760 140" style="width: 90%; max-height: 22vh;">
+                        <defs>
+                            <marker id="v-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <rect x="10" y="15" width="170" height="45" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="95" y="43" fill="#bae6fd" font-size="14" text-anchor="middle">カメラ画像（Vision）</text>
+                        <rect x="10" y="80" width="170" height="45" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                        <text x="95" y="102" fill="#fde68a" font-size="13" text-anchor="middle">「コップを棚に」</text>
+                        <text x="95" y="118" fill="#fde68a" font-size="11" text-anchor="middle">言語の指示（Language）</text>
+                        <line x1="180" y1="38" x2="265" y2="62" stroke="#cbd5e1" stroke-width="2" marker-end="url(#v-a)"/>
+                        <line x1="180" y1="102" x2="265" y2="80" stroke="#cbd5e1" stroke-width="2" marker-end="url(#v-a)"/>
+                        <rect x="270" y="30" width="230" height="80" rx="10" fill="#3b1e3f" stroke="#f472b6" stroke-width="2"/>
+                        <text x="385" y="62" fill="#f9a8d4" font-size="17" text-anchor="middle" font-weight="bold">VLA</text>
+                        <text x="385" y="84" fill="#f9a8d4" font-size="12" text-anchor="middle">Web で学んだ言語・画像モデル</text>
+                        <text x="385" y="100" fill="#f9a8d4" font-size="12" text-anchor="middle">＋ ロボットのデータで追加学習</text>
+                        <line x1="500" y1="70" x2="585" y2="70" stroke="#cbd5e1" stroke-width="2" marker-end="url(#v-a)"/>
+                        <rect x="590" y="45" width="160" height="50" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="670" y="68" fill="#bbf7d0" font-size="14" text-anchor="middle">行動（Action）</text>
+                        <text x="670" y="85" fill="#bbf7d0" font-size="11" text-anchor="middle">手先・関節の指令</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li><strong>RT-2</strong>（2023）：言語・画像モデルに行動を「単語」として出させる → 見たことのない指示にもある程度対応</li>
+                        <li><strong>OpenVLA</strong>（2024）：公開された 7B パラメータの VLA。Open X-Embodiment で学習</li>
+                        <li><strong>π0 / π0.5</strong>（2024〜25）：洗濯物たたみなど長い作業。行動はフローマッチングでなめらかに出力</li>
+                        <li><strong>Gemini Robotics</strong>（2025〜）、<strong>GR00T N1</strong>（NVIDIA、人型向け）</li>
+                    </ul>
+                    <p style="font-size: 0.5em;">▶ <a class="pg" href="https://robotics-transformer2.github.io/" target="_blank">RT-2</a>
+                        ▶ <a class="pg" href="https://openvla.github.io/" target="_blank">OpenVLA</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=Zn8yMaepzVk" target="_blank">π0.5（Physical Intelligence 公式）</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=-rYFDefcq3k" target="_blank">Introducing Gemini Robotics 2</a>
+                        ▶ <a class="vid" href="https://www.youtube.com/watch?v=99667VDGWMg" target="_blank">Octo</a></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>実験の自動化から見た VLA</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #f472b6;">VLA が目指すもの</strong></div>
+                            <ul>
+                                <li>言葉で指示すれば、<strong>何でもそれなりに</strong>やってくれる</li>
+                                <li>家庭・物流など、<strong>毎回違う</strong>環境に強い</li>
+                                <li>動きは毎回少しずつ違う。成功率は 100% ではない</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80;">実験の自動化で大事なもの</strong></div>
+                            <ul>
+                                <li><strong>毎回同じ動き</strong>（繰り返し再現性）＝ 実験条件をそろえる</li>
+                                <li>失敗したとき<strong>なぜ失敗したか</strong>を説明できる</li>
+                                <li>決まった手順を<strong>正確に何百回も</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.55em; margin-top: 12px;">
+                        <li>筆者の考え：実験では<strong>決まった動きは古典的な制御（位置・力制御）</strong>で再現性を確保したい</li>
+                        <li>学習は「毎回違う」部分（置き方のばらつき、柔らかい試料など）に<strong>絞って使う</strong>方が実験向き</li>
+                        <li>とはいえ VLA は今いちばん勢いのある流れ。<strong>動向は追っておく価値がある</strong></li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- 7. 展望 -->
+            <section>
+                <h2 style="font-size: 1.3em;">展望：何が見えてきたか</h2>
+                <table style="font-size: 0.5em; width: 96%;">
+                    <thead>
+                        <tr><th></th><th style="color: #4ade80;">古典制御</th><th style="color: #f472b6;">学習制御</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="white-space: nowrap;"><strong>できること</strong></td><td>決まった動きを高精度・高速に繰り返す。力の制御、安全の保証</td><td>毎回違う物、柔らかい物、長い手順、言葉の指示</td></tr>
+                        <tr><td style="white-space: nowrap;"><strong>まだ難しい</strong></td><td>モデル化しにくい対象・環境</td><td>成功率・再現性、細かい力のやりとり、大量のデータ、失敗の説明</td></tr>
+                        <tr><td style="white-space: nowrap;"><strong>役割分担</strong></td><td>下の層：位置・力・インピーダンス制御で<strong>速く確実に</strong>追従</td><td>上の層：何をどう動かすかを<strong>状況に合わせて</strong>決める</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.55em;">学習が古典制御を置き換えるというより、<strong>上に学習・下に古典制御</strong>の組み合わせが現実的</p>
+            </section>
+
+            <!-- 8. 動画リンク集 -->
+            <section>
+                <h2 style="font-size: 1.3em;">動画・プロジェクトページ集</h2>
+                <div style="display: flex; gap: 20px; font-size: 0.48em; text-align: left;">
+                    <ul style="flex: 1;">
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=jwSbzNHGflM" target="_blank">Learning Dexterity</a>（OpenAI, 2018）</li>
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=x4O8pojMF0w" target="_blank">Solving Rubik's Cube with a Robot Hand</a>（OpenAI, 2019）</li>
+                        <li><a class="pg" href="https://dextreme.org/" target="_blank">DeXtreme</a>（NVIDIA, 2022）</li>
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=UuKAp9a6wMs" target="_blank">RT-1</a>（Google, 2022）</li>
+                        <li><a class="pg" href="https://tonyzhaozh.github.io/aloha/" target="_blank">ALOHA / ACT</a>（2023）</li>
+                        <li><a class="pg" href="https://diffusion-policy.cs.columbia.edu/" target="_blank">Diffusion Policy</a>（2023）・<a class="vid" href="https://www.youtube.com/watch?v=CmZ8aepZO1g" target="_blank">日本語解説</a></li>
+                        <li><a class="pg" href="https://robotics-transformer2.github.io/" target="_blank">RT-2</a>（Google DeepMind, 2023）</li>
+                    </ul>
+                    <ul style="flex: 1;">
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=HaaZ8ss-HP4" target="_blank">Mobile ALOHA</a>・<a class="vid" href="https://www.youtube.com/watch?v=xGNNW6smDPQ" target="_blank">失敗集</a>（2024）</li>
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=l1y20nulhNY" target="_blank">UMI</a>（2024）</li>
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=99667VDGWMg" target="_blank">Octo</a>（2024）</li>
+                        <li><a class="pg" href="https://openvla.github.io/" target="_blank">OpenVLA</a>（2024）</li>
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=Zn8yMaepzVk" target="_blank">π0.5</a>（Physical Intelligence, 2025）</li>
+                        <li><a class="pg" href="https://research.nvidia.com/labs/gear/gr00t-n1_5/" target="_blank">GR00T N1.5</a>（NVIDIA, 2025）</li>
+                        <li><a class="vid" href="https://www.youtube.com/watch?v=-rYFDefcq3k" target="_blank">Gemini Robotics 2</a>（Google, 2026）</li>
+                    </ul>
+                </div>
+                <p style="font-size: 0.45em; color: #9ca3af;"><span style="color: #f87171;">赤</span>＝YouTube 動画、<span style="color: #3b82f6;">青</span>＝プロジェクトページ（多くは動画あり）</p>
+            </section>
+
+            <!-- まとめ -->
+            <section>
+                <h2>まとめ</h2>
+                <ul style="font-size: 0.68em;">
+                    <li>学習制御の 2 本柱：<strong>模倣学習</strong>（お手本をまねる）と<strong>強化学習</strong>（試行錯誤）</li>
+                    <li>模倣学習は行動クローニングが主流。<strong>ACT・Diffusion Policy</strong> で弱点を克服</li>
+                    <li>強化学習は<strong>シミュレータで学んで実機へ</strong>（歩行・手の器用さ）</li>
+                    <li>今は大量データで<strong>VLA（基盤モデル）</strong>へ。データ集めが鍵</li>
+                    <li>実験の自動化では、<strong>再現性は古典制御、ばらつきは学習</strong>の分担が現実的</li>
+                </ul>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+        </div>
+    </div>
+
+    <script src="../../assets/vendor/reveal.js/dist/reveal.js"></script>
+    <script src="../../assets/chapter-numbers.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/notes/notes.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/zoom/zoom.js"></script>
+    <script src="../../assets/vendor/reveal.js-menu/menu.js"></script>
+    <script src="../../assets/vendor/reveal.js-plugins/chalkboard/plugin.js"></script>
+    <script>
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: chapterSlideNumber, // 章-連番 (assets/chapter-numbers.js)
+
+            // プラグインの有効化
+            plugins: [
+                RevealNotes,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+            }
+        });
+    </script>
+</body>
+
+</html>
