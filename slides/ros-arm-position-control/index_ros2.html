@@ -2145,6 +2145,56 @@ ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
                     </code></pre>
                 </section>
 
+                <section>
+                    <p style="font-size: 0.5em; color: #fbbf24; margin: 0;">コラム</p>
+                    <h2>MoveItの経路計画は実用的？</h2>
+                    <p style="font-size: 0.6em; margin: 0 0 12px;">MoveIt 標準の RRT 系（OMPL）は障害物を避けられるが、現場では困ることも</p>
+                    <div style="display: flex; gap: 12px; font-size: 0.5em; text-align: left;">
+                        <div style="flex: 1; border-radius: 10px; padding: 10px; border: 2px solid #f87171;">
+                            <strong style="color: #f87171;">🎲 結果が乱数しだい</strong><br>同じ条件でも毎回違う経路になる
+                        </div>
+                        <div style="flex: 1; border-radius: 10px; padding: 10px; border: 2px solid #f87171;">
+                            <strong style="color: #f87171;">♾ 解けないことがある</strong><br>「必ず解ける」は計算時間とメモリが無限のときの話。枝が壁の内側で増え続けて止まらない（デッドロック）
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; font-size: 0.5em; text-align: left; margin-top: 12px;">
+                        <div style="flex: 1; border-radius: 10px; padding: 10px; border: 2px solid #f87171;">
+                            <strong style="color: #f87171;">🧹 机の上をなぎ払う</strong><br>関節空間では最短でも、作業空間では大回り → シミュレータに入れていない物にぶつかる
+                        </div>
+                        <div style="flex: 1; border-radius: 10px; padding: 10px; border: 2px solid #f87171;">
+                            <strong style="color: #f87171;">↪ 手先の向きが変わる</strong><br>途中で手先が横を向く → 物を持ったピック＆プレースでは困る
+                        </div>
+                    </div>
+                    <p style="font-size: 0.45em; color: #9ca3af; margin-top: 12px;">参考: <a href="https://qiita.com/sekky0816/items/6bcea810de99449b4cbc" target="_blank" style="color: #3b82f6;">ロボットアームの動作計画（モーションプランニング）(Qiita)</a> / <a href="https://www.jstage.jst.go.jp/article/jrsj/40/2/40_40_154/_article/-char/ja/" target="_blank" style="color: #3b82f6;">元論文（日本ロボット学会誌 40巻2号）</a></p>
+                </section>
+
+                <section>
+                    <p style="font-size: 0.5em; color: #fbbf24; margin: 0;">コラム</p>
+                    <h2>現場の答え：トレース動作</h2>
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <div style="flex: 1; font-size: 0.6em; text-align: left;">
+                            <p style="border-left: 5px solid #4ade80; padding-left: 12px;">
+                                始点と終点の<strong>ロボット自身の体</strong>を、手先が<strong>なぞる</strong>ように動く
+                            </p>
+                            <ul>
+                                <li>ロボットの体があった場所には<strong>障害物がないことが確定</strong>している</li>
+                                <li>アームは直鎖状なので、始点と終点の形をつなげば<strong>必ず1本の道</strong>ができる</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; font-size: 0.55em; text-align: left;">
+                            <ul>
+                                <li>IK を数回解いてつなぐだけ → <strong>計算が軽い</strong></li>
+                                <li><strong>乱数に依存しない</strong>・原理が単純</li>
+                                <li>途中の<strong>手先の向きを指定</strong>できる</li>
+                                <li><strong>小さな穴の通り抜け</strong>も解ける</li>
+                                <li>認識していない障害物にも<strong>当たりにくい</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.6em;">証明や最適化より、まず<strong>現実的に意味のある解</strong>を出せることが大事</p>
+                    <p style="font-size: 0.45em; color: #9ca3af; margin-top: 12px;">参考: <a href="https://qiita.com/sekky0816/items/6bcea810de99449b4cbc" target="_blank" style="color: #3b82f6;">ロボットアームの動作計画（モーションプランニング）(Qiita)</a> / <a href="https://www.jstage.jst.go.jp/article/jrsj/40/2/40_40_154/_article/-char/ja/" target="_blank" style="color: #3b82f6;">元論文（日本ロボット学会誌 40巻2号）</a></p>
+                </section>
+
             </section>
 
 
