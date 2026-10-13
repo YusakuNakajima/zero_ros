@@ -335,6 +335,128 @@
             </section>
 
             <section>
+                <section>
+                    <h2 style="font-size: 1.3em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">前提知識</span>リアルタイムカーネル</h2>
+                    <svg viewBox="0 0 760 175" style="width: 92%; max-height: 26vh;">
+                    <line x1="150" y1="18" x2="150" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="210" y1="18" x2="210" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="270" y1="18" x2="270" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="330" y1="18" x2="330" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="390" y1="18" x2="390" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="450" y1="18" x2="450" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="510" y1="18" x2="510" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="570" y1="18" x2="570" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="630" y1="18" x2="630" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="690" y1="18" x2="690" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <line x1="750" y1="18" x2="750" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
+                    <text x="150" y="12" fill="#94a3b8" font-size="12" text-anchor="middle">0</text>
+                    <text x="210" y="12" fill="#94a3b8" font-size="12" text-anchor="middle">2 ms</text>
+                    <text x="270" y="12" fill="#94a3b8" font-size="12" text-anchor="middle">4 ms</text>
+                    <text x="750" y="12" fill="#94a3b8" font-size="12" text-anchor="middle">…</text>
+                    <text x="10" y="58" fill="#f87171" font-size="15" font-weight="bold">普通の</text>
+                    <text x="10" y="76" fill="#f87171" font-size="15" font-weight="bold">カーネル</text>
+                    <text x="10" y="122" fill="#4ade80" font-size="15" font-weight="bold">リアルタイム</text>
+                    <text x="10" y="140" fill="#4ade80" font-size="15" font-weight="bold">カーネル</text>
+                    <rect x="152" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="152" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="212" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="216" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="272" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="272" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="332" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="332" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="392" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="392" y="48" width="56" height="30" rx="3" fill="#475569"/>
+                    <text x="420" y="68" fill="#e2e8f0" font-size="11" text-anchor="middle">他の処理</text>
+                    <rect x="452" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="452" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="512" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="520" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="572" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="572" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="632" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="632" y="48" width="22" height="30" rx="3" fill="#f87171"/>
+                    <rect x="692" y="110" width="22" height="30" rx="3" fill="#4ade80"/>
+                    <rect x="692" y="48" width="56" height="30" rx="3" fill="#475569"/>
+                    <text x="720" y="68" fill="#e2e8f0" font-size="11" text-anchor="middle">他の処理</text>
+                    <text x="420" y="96" fill="#f87171" font-size="12" text-anchor="middle">× 間に合わない</text>
+                    <text x="720" y="96" fill="#f87171" font-size="12" text-anchor="middle">× 間に合わない</text>
+                    <text x="450" y="168" fill="#94a3b8" font-size="12" text-anchor="middle">■ = 制御の処理（2 ms ごと = 500 Hz で実行したい）</text>
+                    </svg>
+                    <table style="font-size: 0.5em; width: 92%;">
+                        <thead>
+                            <tr><th></th><th style="color: #f87171;">普通のカーネル</th><th style="color: #4ade80;">リアルタイムカーネル</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap;">重視</td><td>全体の処理量（平均で速い）</td><td><strong>決まった時刻に必ず動く</strong>（締め切りを守る）</td></tr>
+                            <tr><td style="white-space: nowrap;">周期</td><td>割り込まれて<strong>ぶれる</strong></td><td>制御の処理を最優先で動かすので<strong>ほぼ一定</strong></td></tr>
+                            <tr><td style="white-space: nowrap;">用途</td><td>デスクトップ・サーバ</td><td>ロボット・機械の制御（Linux では PREEMPT_RT）</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">リアルタイムカーネルにしないと？</h2>
+                    <p style="font-size: 0.6em;">例：UR（e-Series）は PC と <strong>500 Hz（2 ms ごと）</strong>で指令をやりとりしている</p>
+                    <svg viewBox="0 0 760 260" style="width: 88%; max-height: 38vh;">
+                    <text x="180.0" y="20" fill="#4ade80" font-size="16" font-weight="bold" text-anchor="middle">リアルタイムカーネル</text>
+                    <rect x="20" y="40" width="320" height="120" fill="none" stroke="#334155"/>
+                    <text x="26" y="56" fill="#94a3b8" font-size="12">関節角度</text>
+                    <path d="M 30.0 150.0 L 51.4 148.9 L 72.9 145.5 L 94.3 140.2 L 115.7 133.1 L 137.1 124.5 L 158.6 115.0 L 180.0 105.0 L 201.4 95.0 L 222.9 85.5 L 244.3 76.9 L 265.7 69.8 L 287.1 64.5 L 308.6 61.1 L 330.0 60.0" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+                    <circle cx="30.0" cy="150.0" r="4" fill="#e2e8f0"/>
+                    <circle cx="51.4" cy="148.9" r="4" fill="#e2e8f0"/>
+                    <circle cx="72.9" cy="145.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="94.3" cy="140.2" r="4" fill="#e2e8f0"/>
+                    <circle cx="115.7" cy="133.1" r="4" fill="#e2e8f0"/>
+                    <circle cx="137.1" cy="124.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="158.6" cy="115.0" r="4" fill="#e2e8f0"/>
+                    <circle cx="180.0" cy="105.0" r="4" fill="#e2e8f0"/>
+                    <circle cx="201.4" cy="95.0" r="4" fill="#e2e8f0"/>
+                    <circle cx="222.9" cy="85.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="244.3" cy="76.9" r="4" fill="#e2e8f0"/>
+                    <circle cx="265.7" cy="69.8" r="4" fill="#e2e8f0"/>
+                    <circle cx="287.1" cy="64.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="308.6" cy="61.1" r="4" fill="#e2e8f0"/>
+                    <circle cx="330.0" cy="60.0" r="4" fill="#e2e8f0"/>
+                    <rect x="20" y="180" width="320" height="70" fill="none" stroke="#334155"/>
+                    <text x="26" y="196" fill="#94a3b8" font-size="12">速度</text>
+                    <path d="M 30.0 242.0 L 35.0 240.0 L 40.0 238.0 L 45.0 236.1 L 50.0 234.1 L 55.0 232.2 L 60.0 230.3 L 65.0 228.4 L 70.0 226.5 L 75.0 224.7 L 80.0 223.0 L 85.0 221.3 L 90.0 219.7 L 95.0 218.1 L 100.0 216.6 L 105.0 215.1 L 110.0 213.8 L 115.0 212.5 L 120.0 211.3 L 125.0 210.1 L 130.0 209.1 L 135.0 208.1 L 140.0 207.3 L 145.0 206.5 L 150.0 205.9 L 155.0 205.3 L 160.0 204.8 L 165.0 204.5 L 170.0 204.2 L 175.0 204.1 L 180.0 204.0 L 185.0 204.1 L 190.0 204.2 L 195.0 204.5 L 200.0 204.8 L 205.0 205.3 L 210.0 205.9 L 215.0 206.5 L 220.0 207.3 L 225.0 208.1 L 230.0 209.1 L 235.0 210.1 L 240.0 211.3 L 245.0 212.5 L 250.0 213.8 L 255.0 215.1 L 260.0 216.6 L 265.0 218.1 L 270.0 219.7 L 275.0 221.3 L 280.0 223.0 L 285.0 224.7 L 290.0 226.5 L 295.0 228.4 L 300.0 230.3 L 305.0 232.2 L 310.0 234.1 L 315.0 236.1 L 320.0 238.0 L 325.0 240.0 L 330.0 242.0" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+                    <text x="580.0" y="20" fill="#f87171" font-size="16" font-weight="bold" text-anchor="middle">普通のカーネル</text>
+                    <rect x="420" y="40" width="320" height="120" fill="none" stroke="#334155"/>
+                    <text x="426" y="56" fill="#94a3b8" font-size="12">関節角度</text>
+                    <path d="M 430.0 150.0 L 451.4 148.9 L 472.9 145.5 L 494.3 140.2 L 515.7 133.1 L 537.1 124.5 L 622.9 124.5 L 622.9 85.5 L 644.3 76.9 L 665.7 69.8 L 687.1 64.5 L 708.6 61.1 L 730.0 60.0" fill="none" stroke="#f87171" stroke-width="2.5"/>
+                    <circle cx="430.0" cy="150.0" r="4" fill="#e2e8f0"/>
+                    <circle cx="451.4" cy="148.9" r="4" fill="#e2e8f0"/>
+                    <circle cx="472.9" cy="145.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="494.3" cy="140.2" r="4" fill="#e2e8f0"/>
+                    <circle cx="515.7" cy="133.1" r="4" fill="#e2e8f0"/>
+                    <circle cx="537.1" cy="124.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="558.6" cy="115.0" r="5" fill="none" stroke="#94a3b8" stroke-dasharray="2 2"/>
+                    <circle cx="580.0" cy="105.0" r="5" fill="none" stroke="#94a3b8" stroke-dasharray="2 2"/>
+                    <circle cx="601.4" cy="95.0" r="5" fill="none" stroke="#94a3b8" stroke-dasharray="2 2"/>
+                    <circle cx="622.9" cy="85.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="644.3" cy="76.9" r="4" fill="#e2e8f0"/>
+                    <circle cx="665.7" cy="69.8" r="4" fill="#e2e8f0"/>
+                    <circle cx="687.1" cy="64.5" r="4" fill="#e2e8f0"/>
+                    <circle cx="708.6" cy="61.1" r="4" fill="#e2e8f0"/>
+                    <circle cx="730.0" cy="60.0" r="4" fill="#e2e8f0"/>
+                    <rect x="420" y="180" width="320" height="70" fill="none" stroke="#334155"/>
+                    <text x="426" y="196" fill="#94a3b8" font-size="12">速度</text>
+                    <path d="M 430.0 242.0 L 435.0 240.0 L 440.0 238.0 L 445.0 236.1 L 450.0 234.1 L 455.0 232.2 L 460.0 230.3 L 465.0 228.4 L 470.0 226.5 L 475.0 224.7 L 480.0 223.0 L 485.0 221.3 L 490.0 219.7 L 495.0 218.1 L 500.0 216.6 L 505.0 215.1 L 510.0 213.8 L 515.0 212.5 L 520.0 211.3 L 525.0 210.1 L 530.0 209.1 L 535.0 208.1 L 540.0 242.0 L 545.0 242.0 L 550.0 242.0 L 555.0 242.0 L 560.0 242.0 L 565.0 242.0 L 570.0 242.0 L 575.0 242.0 L 580.0 242.0 L 585.0 242.0 L 590.0 242.0 L 595.0 242.0 L 600.0 242.0 L 605.0 242.0 L 610.0 242.0 L 615.0 242.0 L 620.0 207.3 L 625.0 208.1 L 630.0 209.1 L 635.0 210.1 L 640.0 211.3 L 645.0 212.5 L 650.0 213.8 L 655.0 215.1 L 660.0 216.6 L 665.0 218.1 L 670.0 219.7 L 675.0 221.3 L 680.0 223.0 L 685.0 224.7 L 690.0 226.5 L 695.0 228.4 L 700.0 230.3 L 705.0 232.2 L 710.0 234.1 L 715.0 236.1 L 720.0 238.0 L 725.0 240.0 L 730.0 242.0" fill="none" stroke="#f87171" stroke-width="2.5"/>
+                    <line x1="618.9" y1="242" x2="620.9" y2="184" stroke="#f87171" stroke-width="2.5"/>
+                    <line x1="620.9" y1="184" x2="624.9" y2="208.1" stroke="#f87171" stroke-width="2.5"/>
+                    <text x="580.0" y="66" fill="#fbbf24" font-size="12" text-anchor="middle">指令が飛ぶ</text>
+                    <text x="630.9" y="198" fill="#fbbf24" font-size="12">急にカクッ</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>普通のカーネルだと、いくつかの指令が間に合わずに<strong>飛ぶ</strong></li>
+                        <li>届いた指令に合わせて動くので、<strong>waypoint が飛んだように急にカクッと動く</strong></li>
+                    </ul>
+                    <p style="font-size: 0.45em;">参考：<a href="https://docs.universal-robots.com/Universal_Robots_ROS2_Documentation/doc/ur_client_library/doc/real_time.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">UR ROS 2 Driver「Setup for real-time scheduling」</a></p>
+                </section>
+            </section>
+
+            <section>
 
                 <section>
                     <p>本スライドでは軌道制御の実装を扱います</p>
