@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>オイラー角 vs クォータニオン：姿勢補間の比較</title>
+    <title>線形補間 vs 球面線形補間：姿勢補間の比較</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -37,10 +37,10 @@
         <div id="canvas-container" class="flex-grow h-1/2 md:h-full relative">
             <canvas id="main-canvas"></canvas>
             <div class="absolute top-4 left-4 text-white p-2 rounded-lg bg-black bg-opacity-50">
-                <h2 class="text-lg font-bold">オイラー角</h2>
+                <h2 class="text-base font-bold leading-tight">線形補間<br><span class="text-xs font-normal">オイラー角</span></h2>
             </div>
             <div class="absolute top-4 right-4 text-white p-2 rounded-lg bg-black bg-opacity-50">
-                <h2 class="text-lg font-bold">クォータニオン</h2>
+                <h2 class="text-base font-bold leading-tight text-right">球面線形補間<br><span class="text-xs font-normal">SLERP / クォータニオン</span></h2>
             </div>
         </div>
 
@@ -78,10 +78,10 @@
             <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded-lg flex-grow">
                 <h3 class="font-bold">解説</h3>
                 <p class="text-sm mt-1">
-                    <strong>オイラー角:</strong> X, Y, Z軸周りの回転を個別に指定する方法。直感的ですが、特定の角度（例: X軸を±90°回転）でY軸とZ軸の回転が同じ効果になり、自由な回転ができなくなる「ジンバルロック」問題が発生します。左のオブジェクトはこの現象により不自然な動きをすることがあります。
+                    <strong>線形補間（左）:</strong> オイラー角の X, Y, Z をそれぞれ別々に直線で補間します。各軸の回転がバラバラに進むため、遠回りしたり、途中でふらつくような不自然な回転になります。
                 </p>
                 <p class="text-sm mt-2">
-                    <strong>クォータニオン:</strong> 4つの数値で3次元空間の回転を表現する方法。ジンバルロックを回避でき、常に2つの姿勢間の最短かつ滑らかな補間（SLERP）を実現します。右のオブジェクトが示すように、自然な回転アニメーションに不可欠です。
+                    <strong>球面線形補間 SLERP（右）:</strong> クォータニオンを球面に沿って補間します。2つの姿勢を結ぶ最短の回転を、一定の角速度でなめらかに回ります。
                 </p>
             </div>
         </div>

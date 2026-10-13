@@ -165,16 +165,24 @@
             // 目標の点のゴースト
             points.forEach((p, k) => {
                 const c = fk(p.q).map(to);
-                ctx.strokeStyle = 'rgba(251,191,36,0.55)';
+                ctx.strokeStyle = 'rgba(251,191,36,0.8)';
                 ctx.setLineDash([5, 5]);
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 c.forEach((pt, i) => i ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1]));
                 ctx.stroke();
                 ctx.setLineDash([]);
+                // 目標の点 (手先) を白縁の大きな丸で強調
+                ctx.beginPath();
+                ctx.arc(c[3][0], c[3][1], 9, 0, 2 * Math.PI);
                 ctx.fillStyle = '#fbbf24';
-                ctx.font = '12px sans-serif';
-                ctx.fillText(`点${k + 1} (${p.t}s)`, c[3][0] + 6, c[3][1] - 6);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+                ctx.fillStyle = '#fde68a';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText(`点${k + 1} (${p.t}s)`, c[3][0] + 12, c[3][1] - 10);
             });
 
             // 編集中の目標 (スライダ)
@@ -251,9 +259,12 @@
                 // 送った点
                 tr.forEach(p => {
                     ctx.beginPath();
-                    ctx.arc(X(p.t), Y(p.q[j]), 4, 0, 2 * Math.PI);
+                    ctx.arc(X(p.t), Y(p.q[j]), 7, 0, 2 * Math.PI);
                     ctx.fillStyle = COLORS[j];
                     ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
                 });
             }
 

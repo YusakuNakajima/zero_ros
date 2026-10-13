@@ -312,6 +312,9 @@
                                 target="_blank" style="color: #4CAF50; text-decoration: underline;">
                                 joint_trajectory_controller.md</a>
                         </p>
+                        <p style="font-size: 0.8em; color: #4CAF50; margin-bottom: 0.5em;">
+                            ✅ ROS標準 (<code>ros2_controllers</code> に同梱)
+                        </p>
                         <ul style="font-size: 0.9em;">
                             <li><strong>position_controllers/JointTrajectoryController</strong></li>
                             <li><strong>velocity_controllers/JointTrajectoryController</strong></li>
@@ -331,8 +334,6 @@
                         </p>
                         <ul style="font-size: 0.9em;">
                             <li><strong>position_controllers/CartesianMotionController</strong></li>
-                            <li><strong>position_controllers/CartesianForceController</strong></li>
-                            <li><strong>position_controllers/CartesianComplianceController</strong></li>
                         </ul>
                     </div>
                 </section>
@@ -382,7 +383,7 @@
 
                         <div
                             style="flex: 1; width: 50%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; box-sizing: border-box;">
-                            <h4 style="margin:0 0 10px 0; font-size: 0.65em;"><span style="color: #9ca3af;">（なし）</span>JointTrajectoryController</h4>
+                            <h4 style="margin:0 0 10px 0; font-size: 0.65em;">JointTrajectoryController</h4>
                             <ul style="font-size: 0.8em;">
                                 <li>ROSを使ったロボットアーム制御で一般に使われるコントローラです</li>
                             </ul>
@@ -818,7 +819,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                                         <li>滑らかな軌道生成</li>
                                     </ul>
                                 </li>
-                                <li><strong>オイラー角補間との比較</strong>
+                                <li><strong>オイラー角の線形補間との比較</strong>
                                     <ul>
                                         <li>より自然な回転軌道</li>
                                         <li>ジンバルロック回避</li>
@@ -1011,7 +1012,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <h2>補足：2種類のヤコビ行列</h2>
                     <table style="font-size: 0.55em; width: 95%;">
                         <thead>
-                            <tr><th></th><th style="color: #a3e635;">解析ヤコビ行列</th><th style="color: #fb923c;">幾何ヤコビ行列</th></tr>
+                            <tr><th></th><th style="color: #a3e635;">ヤコビ行列</th><th style="color: #fb923c;">基礎ヤコビ行列</th></tr>
                         </thead>
                         <tbody>
                             <tr><td>作り方</td><td>手先姿勢（位置＋オイラー角）の式を q で偏微分</td><td>根元のリンクから手先へ<strong>漸化的に外積</strong>で計算</td></tr>
@@ -1020,10 +1021,10 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                             <tr><td>特異姿勢</td><td>式から<strong>事前に求められる</strong></td><td>事前には求めにくい</td></tr>
                         </tbody>
                     </table>
-                    <p style="font-size: 0.65em;">今は計算が速いので、数値解をたくさん求めれば十分実用的<br>→ <strong>幾何ヤコビ行列を使うことが多い</strong></p>
+                    <p style="font-size: 0.65em;">今は計算が速いので、数値解をたくさん求めれば十分実用的<br>→ <strong>基礎ヤコビ行列を使うことが多い</strong></p>
                 </section>
                 <section>
-                    <h2>補足：幾何ヤコビ行列の作り方</h2>
+                    <h2>補足：基礎ヤコビ行列の作り方</h2>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 0.9;">
                             <svg viewBox="0 0 320 240" style="width: 100%; max-height: 50vh;">
@@ -1054,10 +1055,10 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                         <div style="flex: 1.1; font-size: 0.6em; text-align: left;">
                             <ul>
                                 <li>根元のリンクから順に、各関節の軸 zᵢ と位置 pᵢ を求める（順運動学のついで）</li>
-                                <li><strong>手先速度ベクトル V = (v, ω)</strong>（並進速度＋角速度）を定義し<br><strong>幾何ヤコビ行列</strong> J<sub>G</sub>：V = J<sub>G</sub> q′ を使う</li>
+                                <li><strong>手先速度ベクトル V = (v, ω)</strong>（並進速度＋角速度）を定義し<br><strong>基礎ヤコビ行列</strong> J<sub>B</sub>：V = J<sub>B</sub> q′ を使う</li>
                                 <li>関節 i の列 = [ zᵢ × (p − pᵢ) ; zᵢ ] → <strong>外積だけ</strong>で計算できる</li>
                             </ul>
-                            <p style="font-size: 0.85em; color: #aaa;">姿勢誤差は回転ベクトルで表して J<sub>G</sub> に掛ける（KDL などもこの方式）</p>
+                            <p style="font-size: 0.85em; color: #aaa;">姿勢誤差は回転ベクトルで表して J<sub>B</sub> に掛ける（KDL などもこの方式）</p>
                         </div>
                     </div>
                 </section>
