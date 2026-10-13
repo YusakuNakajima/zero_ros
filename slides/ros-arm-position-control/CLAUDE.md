@@ -80,11 +80,11 @@
 - **縦スライド8-9**: JointTrajectoryControllerにvelocityとaccelerationを追加
 - **縦スライド8-10**: JointTrajectoryControllerでの設定例（ur_joint_trajectory_controller.yamlから読み込み）
 
-### 5.5 動きを作るのは軌道計画か、制御か（index_ros2.html のみ・縦スライド6枚）
+### 5.5 コラム：軌道計画か、制御か（index_ros2.html のみ・縦スライド6枚）
 『実践ロボット制御』第3章コラム「ロボットの動きを作るのは軌道計画か，制御か」を引用して構成した最小限の章。
 - 静止点での振動がサイクルタイムを伸ばす → 対策は ①軌道計画で出さない ②制御（振動抑制制御・ダンパ）で抑える
-- G（経路の形）と C（時間の関数）はどちらも軌道計画側。制御は計画どおり動かし残った振動を抑える側
-- 台形速度 vs Sカーブ（jerk_vibration.html）、ROS での対応（G: OMPL など / C: TOTG・Ruckig、JTC補間 / 制御: サーボ）、まとめ
+- 経路の形と時間のつなぎ方はどちらも軌道計画側（G/C 記法は使わない）。制御は計画どおり動かし残った振動を抑える側
+- 台形速度 vs Sカーブ（jerk_vibration.html）、ROS での対応（形: OMPL など / 時間: TOTG・Ruckig、JTC補間 / 制御: サーボ）、まとめ
 - 旧版（ブレンド半径からROS実装まで、17枚）は削除。accel_geometry_timing.html はスライドから外れた
 
 ### 6. waypointsの表示編（水平スライド9 + 縦スライド）

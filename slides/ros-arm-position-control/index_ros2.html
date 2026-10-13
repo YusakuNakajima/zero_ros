@@ -792,6 +792,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                             <ul>
                                 <li>qで回すとベクトルの長さは<strong style="white-space: nowrap;">|q|²倍</strong></li>
                                 <li>|q| ≠ 1 だと回転に<strong>伸び縮み</strong>が混ざる</li>
+                                <li>実装（回転行列に変換）では<strong>姿勢もずれる</strong>（60°→69°）</li>
                                 <li>計算を重ねると<strong>誤差が積み重なって</strong>|q|が1からずれる</li>
                                 <li>→ q / |q| で長さ1に戻す</li>
                             </ul>
@@ -1599,7 +1600,7 @@ ros2 run ros_study jtc_with_ik_demo
                                 <li>2点であれば「速度 and/or 加速度を0」</li>
                                 <li>3点以上であっても十分細かいwaypointsをとれば「速度 and/or 加速度を0」でも割となめらか</li>
                             </ul>
-                            <p style="font-size: 0.5em; color: #aaa;">※ ただし全点で速度0 ＝ 全点で一度止まる動き。詳しくは次章「動きを作るのは軌道計画か、制御か」</p>
+                            <p style="font-size: 0.5em; color: #aaa;">※ ただし全点で速度0 ＝ 全点で一度止まる動き。詳しくは次章のコラム「軌道計画か、制御か」</p>
                         </div>
                     </div>
                 </section>
@@ -1658,7 +1659,7 @@ ros2 run ros_study jtc_with_ik_demo
 
             <section>
                 <section>
-                    <h2>動きを作るのは軌道計画か、制御か</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>軌道計画か、制御か</h2>
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.55em; margin-top: 10px;">
                         <div style="border-radius: 10px; padding: 10px; text-align: center; border: 2px solid #4fc3f7;">部品を<br>取りに動く</div><div>→</div>
                         <div style="border-radius: 10px; padding: 10px; text-align: center; border: 2px solid #fbbf24;"><strong>静止</strong><br>つかむ</div><div>→</div>
@@ -1673,7 +1674,7 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2>振動への2つの対策</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>振動への2つの対策</h2>
                     <div style="display: flex; gap: 20px; font-size: 0.6em;">
                         <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 12px;">
                             <h3 style="font-size: 1.2em; color: #4fc3f7;">① 軌道計画で「出さない」</h3>
@@ -1693,13 +1694,13 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2>G と C はどちらも軌道計画</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>形も時間も軌道計画で決まる</h2>
                     <div style="display: flex; align-items: stretch; gap: 10px; font-size: 0.55em;">
                         <div style="flex: 2.2; border: 2px solid #4fc3f7; border-radius: 10px; padding: 10px;">
                             <h3 style="font-size: 1.2em; color: #4fc3f7; margin: 0 0 8px;">① 軌道計画（出さない）</h3>
                             <div style="display: flex; gap: 10px;">
-                                <div style="flex: 1; border: 2px solid #fb923c; border-radius: 8px; padding: 8px;"><strong style="color: #fb923c;">G：経路の形</strong><br>角を丸める<br>（ブレンド半径）</div>
-                                <div style="flex: 1; border: 2px solid #a3e635; border-radius: 8px; padding: 8px;"><strong style="color: #a3e635;">C：時間の関数</strong><br>速度・加速度の<br>つなぎ方（Sカーブ）</div>
+                                <div style="flex: 1; border: 2px solid #fb923c; border-radius: 8px; padding: 8px;"><strong style="color: #fb923c;">経路の形</strong><br>角を丸める<br>（ブレンド半径）</div>
+                                <div style="flex: 1; border: 2px solid #a3e635; border-radius: 8px; padding: 8px;"><strong style="color: #a3e635;">時間のつなぎ方</strong><br>速度・加速度を<br>なめらかに（Sカーブ）</div>
                             </div>
                         </div>
                         <div style="align-self: center; font-size: 1.6em;">→</div>
@@ -1709,14 +1710,14 @@ ros2 run ros_study jtc_with_ik_demo
                         </div>
                     </div>
                     <ul style="font-size: 0.6em; margin-top: 20px;">
-                        <li>形に角（G⁰）があると、どんな時間則でも<strong>止まるしかない</strong></li>
-                        <li>加速度が段差で変わると（C¹ 止まり）トルクが急変 → <strong>振動の原因</strong></li>
-                        <li>振動させないには<strong>形（G²）と時間則（C²）の両方</strong>を滑らかにする</li>
+                        <li>経路に角があると、そこでは<strong>止まるしかない</strong></li>
+                        <li>加速度が段差で変わるとトルクが急変 → <strong>振動の原因</strong></li>
+                        <li>振動させないには<strong>形と時間の両方</strong>をなめらかにする</li>
                     </ul>
                 </section>
 
                 <section>
-                    <h2>台形速度 vs Sカーブ</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>台形速度 vs Sカーブ</h2>
                     <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
                         <a href="interactive_app/jerk_vibration.html" target="_blank"
                             style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
@@ -1727,18 +1728,18 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2>ROS ではどこで決まる？</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>ROS ではどこで決まる？</h2>
                     <div style="display: flex; align-items: stretch; gap: 8px; font-size: 0.5em;">
                         <div style="flex: 1; border: 2px solid #fb923c; border-radius: 10px; padding: 10px;">
-                            <strong style="color: #fb923c;">G</strong> 経路の形<br>OMPL など
+                            <strong style="color: #fb923c;">経路の形</strong><br>OMPL など
                         </div>
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #a3e635; border-radius: 10px; padding: 10px;">
-                            <strong style="color: #a3e635;">C</strong> 時間付け<br>TOTG / Ruckig
+                            <strong style="color: #a3e635;">時間付け</strong><br>TOTG / Ruckig
                         </div>
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #a3e635; border-radius: 10px; padding: 10px;">
-                            <strong style="color: #a3e635;">C</strong> 補間<br>JTC
+                            <strong style="color: #a3e635;">補間</strong><br>JTC
                         </div>
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 10px;">
@@ -1753,13 +1754,13 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2>まとめ</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>まとめ</h2>
                     <ul style="font-size: 0.7em;">
                         <li>静止点での振動はサイクルタイムを伸ばす</li>
                         <li>対策は <strong style="color: #4fc3f7;">軌道計画で出さない</strong> ＋ <strong style="color: #f472b6;">制御で抑える</strong> の両方</li>
-                        <li>形（G）も時間（C）も<strong>軌道計画の段階で</strong>滑らかにできる</li>
+                        <li>経路の形も時間のつなぎ方も<strong>軌道計画の段階で</strong>なめらかにできる</li>
                     </ul>
-                    <p class="fragment" style="font-size: 0.65em;">「制御で全部抑える」の前に、<strong>振動の出にくい軌道</strong>を作ろう</p>
+                    <p style="font-size: 0.65em;">「制御で全部抑える」の前に、<strong>振動の出にくい軌道</strong>を作ろう</p>
                 </section>
             </section>
 
@@ -2146,8 +2147,7 @@ ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
                 </section>
 
                 <section>
-                    <p style="font-size: 0.5em; color: #fbbf24; margin: 0;">コラム</p>
-                    <h2>MoveItの経路計画は実用的？</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>MoveItの経路計画は実用的？</h2>
                     <p style="font-size: 0.6em; margin: 0 0 12px;">MoveIt 標準の RRT 系（OMPL）は障害物を避けられるが、現場では困ることも</p>
                     <div style="display: flex; gap: 12px; font-size: 0.5em; text-align: left;">
                         <div style="flex: 1; border-radius: 10px; padding: 10px; border: 2px solid #f87171;">
@@ -2169,8 +2169,7 @@ ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
                 </section>
 
                 <section>
-                    <p style="font-size: 0.5em; color: #fbbf24; margin: 0;">コラム</p>
-                    <h2>現場の答え：トレース動作</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>現場の答え：トレース動作</h2>
                     <div style="display: flex; gap: 20px; align-items: center;">
                         <div style="flex: 1; font-size: 0.6em; text-align: left;">
                             <p style="border-left: 5px solid #4ade80; padding-left: 12px;">

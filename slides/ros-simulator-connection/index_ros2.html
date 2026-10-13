@@ -977,27 +977,16 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>【重要】シミュレーション時間の同期</h2>
-                    <div style="display: flex; gap: 30px; align-items: stretch; height: 100%;">
-                        <div style="flex: 1; text-align: left;">
-                            <p>物理シミュレーションでは、計算負荷によって<strong>「時間の進む速さ」</strong>が現実と異なります。</p>
-                        </div>
-
-                        <div class="comparison-box"
-                            style="flex: 1; margin-top: 0; border: 2px solid #facc15; background: rgba(250, 204, 21, 0.1); padding: 20px;">
-                            <h4 style="color: #facc15; font-size: 1.0em; margin-bottom: 10px;">/clock トピックの役割</h4>
-                            <p style="font-size: 0.8em; text-align: left;">
-                                Gazeboが進めている「シミュレーション内の現在時刻」をROS 2側に配信します。
-                            </p>
-                            <hr style="border-color: #facc15; margin: 10px 0;">
-                            <p style="font-size: 0.8em; text-align: left;">
-                                ROS
-                                2ノードはこれを受け取り、<strong>「今は現実時間の何時か？」ではなく「シミュレーション世界の何秒目か？」</strong>を基準に動くようになります。<br>
-                                <span style="font-size: 0.8em; color: #aaa;">(パラメータ <code>use_sim_time:=True</code>
-                                    が必要な理由です)</span>
-                            </p>
-                        </div>
+                    <h2>【重要】シミュレーション時間</h2>
+                    <p style="font-size: 0.7em;">計算負荷しだいで、<strong>時間の進む速さが現実と違う</strong></p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 25px 0;">
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #f97316;"><strong>Gazebo</strong><br>シミュレーション内の時刻</div>
+                        <span>→</span>
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #facc15; background: rgba(250,204,21,0.1);"><strong><code>/clock</code></strong><br>トピックで配信</div>
+                        <span>→</span>
+                        <div style="padding: 10px 14px; border-radius: 8px; font-size: 0.6em; text-align: center; border: 2px solid #3b82f6;"><strong>ROS 2 ノード</strong><br><code>use_sim_time:=True</code></div>
                     </div>
+                    <p style="font-size: 0.65em;">ノードは「現実の何時か」ではなく<br><strong>「シミュレーション世界の何秒目か」</strong>を基準に動く</p>
                 </section>
 
             </section>
