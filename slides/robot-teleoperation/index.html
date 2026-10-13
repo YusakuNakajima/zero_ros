@@ -75,18 +75,29 @@
 
                 <section>
                     <h2 style="font-size: 1.3em;">ロボットを操作する方法</h2>
-                    <table style="font-size: 0.5em; width: 95%;">
-                        <thead>
-                            <tr><th>方法</th><th>何を送る？</th><th>直感的？</th><th>力が返る？</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><strong>ゲームパッド・キーボード</strong><br>（3D マウスも）</td><td>手先の速度（ボタン・スティック）</td><td>△ 慣れが必要</td><td>×</td></tr>
-                            <tr><td><strong>VR コントローラ</strong></td><td>手先の位置・姿勢</td><td>○ 手を動かせば手先が動く</td><td>×（振動くらい）</td></tr>
-                            <tr><td><strong>リーダ・フォロワ</strong><br>（ALOHA、GELLO など）</td><td>リーダの関節角をそのままコピー</td><td>◎ ロボットの形のまま動かせる</td><td>×（ユニラテラル）</td></tr>
-                            <tr><td style="color: #fbbf24;"><strong>バイラテラル制御</strong></td><td>位置と<strong>力</strong>を双方向に</td><td>◎</td><td><strong style="color: #fbbf24;">○ 触った感触・重さが返る</strong></td></tr>
-                        </tbody>
-                    </table>
-                    <p style="font-size: 0.55em;">ロボットの形をした操作装置（リーダ）で動かすほど直感的。さらに<strong>力も返す</strong>のがバイラテラル</p>
+                    <div style="display: flex; gap: 10px; font-size: 0.42em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #94a3b8; border-radius: 10px; padding: 6px;">
+                            <div style="text-align: center;"><strong style="color: #94a3b8;">ゲームコントローラ</strong></div>
+                            <svg viewBox="0 0 200 130" style="width: 100%; max-height: 17vh;"><path d="M42,48 Q42,32 62,32 L138,32 Q158,32 158,48 L168,96 Q170,112 156,112 Q146,112 138,98 L128,82 L72,82 L62,98 Q54,112 44,112 Q30,112 32,96 Z" fill="#334155" stroke="#94a3b8" stroke-width="2"/><circle cx="74" cy="60" r="10" fill="#1e293b" stroke="#cbd5e1" stroke-width="2"/><circle cx="112" cy="70" r="8" fill="#1e293b" stroke="#cbd5e1" stroke-width="2"/><circle cx="136" cy="48" r="5" fill="#4ade80"/><circle cx="146" cy="58" r="5" fill="#f87171"/><circle cx="126" cy="58" r="5" fill="#7dd3fc"/><circle cx="136" cy="68" r="5" fill="#fbbf24"/><text x="100" y="126" fill="#cbd5e1" font-size="12" text-anchor="middle">スティック → 手先の速度</text></svg>
+                            <ul style="margin: 0 0 0 1em;"><li>送る：手先の<strong>速度</strong></li><li>直感的：△ 慣れが必要</li><li>力：×（3D マウス・キーボードも同類）</li></ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #7dd3fc; border-radius: 10px; padding: 6px;">
+                            <div style="text-align: center;"><strong style="color: #7dd3fc;">VR コントローラ</strong></div>
+                            <svg viewBox="0 0 200 130" style="width: 100%; max-height: 17vh;"><rect x="14" y="34" width="96" height="44" rx="14" fill="#334155" stroke="#94a3b8" stroke-width="2"/><circle cx="42" cy="56" r="11" fill="#0f172a" stroke="#7dd3fc" stroke-width="2"/><circle cx="82" cy="56" r="11" fill="#0f172a" stroke="#7dd3fc" stroke-width="2"/><path d="M14,50 Q4,50 4,62" fill="none" stroke="#94a3b8" stroke-width="3"/><path d="M110,50 Q120,50 120,62" fill="none" stroke="#94a3b8" stroke-width="3"/><circle cx="160" cy="40" r="18" fill="none" stroke="#7dd3fc" stroke-width="4"/><rect x="150" y="54" width="20" height="50" rx="8" fill="#334155" stroke="#94a3b8" stroke-width="2" transform="rotate(-12 160 79)"/><circle cx="158" cy="66" r="4" fill="#cbd5e1"/><text x="100" y="126" fill="#cbd5e1" font-size="12" text-anchor="middle">手の位置・向き → 手先</text></svg>
+                            <ul style="margin: 0 0 0 1em;"><li>送る：手先の<strong>位置・向き</strong></li><li>直感的：○ 手を動かせば手先が動く</li><li>力：×（振動くらい）</li></ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 6px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80;">ロボットでロボットを操作</strong></div>
+                            <svg viewBox="0 0 200 130" style="width: 100%; max-height: 17vh;"><defs><marker id="op-y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker></defs><rect x="14" y="98" width="34" height="10" fill="#9ca3af"/><polyline points="31,98 31,72 62,62 72,80" fill="none" stroke="#7dd3fc" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="76" cy="84" r="8" fill="none" stroke="#e2e8f0" stroke-width="2"/><text x="40" y="50" fill="#7dd3fc" font-size="12" text-anchor="middle">リーダ</text><line x1="90" y1="78" x2="118" y2="78" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#op-y)"/><rect x="128" y="96" width="48" height="12" fill="#9ca3af"/><polyline points="152,96 152,58 186,44 196,74" fill="none" stroke="#4ade80" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><text x="160" y="30" fill="#4ade80" font-size="12" text-anchor="middle">フォロワ</text><text x="100" y="126" fill="#cbd5e1" font-size="12" text-anchor="middle">関節角をそのままコピー</text></svg>
+                            <ul style="margin: 0 0 0 1em;"><li>送る：<strong>関節角</strong>（ALOHA、GELLO）</li><li>直感的：◎ ロボットの形のまま</li><li>力：×（ユニラテラル）</li></ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #fbbf24; border-radius: 10px; padding: 6px;">
+                            <div style="text-align: center;"><strong style="color: #fbbf24;">バイラテラル</strong></div>
+                            <svg viewBox="0 0 200 130" style="width: 100%; max-height: 17vh;"><defs><marker id="op-y2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker></defs><defs><marker id="op-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker></defs><rect x="10" y="98" width="44" height="12" rx="3" fill="#9ca3af"/><polyline points="32,98 32,72 62,58" fill="none" stroke="#7dd3fc" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/><line x1="62" y1="58" x2="78" y2="36" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/><circle cx="78" cy="40" r="8" fill="none" stroke="#e2e8f0" stroke-width="2"/><text x="34" y="30" fill="#7dd3fc" font-size="11" text-anchor="middle">力覚デバイス</text><line x1="88" y1="66" x2="120" y2="66" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#op-y2)"/><line x1="120" y1="84" x2="88" y2="84" stroke="#f87171" stroke-width="2.5" marker-end="url(#op-r)"/><text x="104" y="60" fill="#fbbf24" font-size="10" text-anchor="middle">位置</text><text x="104" y="98" fill="#f87171" font-size="10" text-anchor="middle">力</text><rect x="130" y="96" width="44" height="12" fill="#9ca3af"/><polyline points="152,96 152,58 184,46 192,78" fill="none" stroke="#4ade80" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><rect x="176" y="86" width="22" height="10" fill="#78716c"/><text x="100" y="126" fill="#cbd5e1" font-size="12" text-anchor="middle">ロボット型のリーダでも可</text></svg>
+                            <ul style="margin: 0 0 0 1em;"><li>送る：位置、返す：<strong>力</strong></li><li>直感的：◎</li><li>力：<strong style="color: #fbbf24;">○ 触った感触・重さ</strong></li></ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.55em;">ロボット型の操作装置ほど直感的。さらに<strong>力も返す</strong>のがバイラテラル</p>
                 </section>
             </section>
 
@@ -144,10 +155,12 @@
                             </ul>
                         </div>
                         <div style="flex: 1; border: 2px solid #f59e0b; border-radius: 10px; padding: 10px;">
-                            <div style="text-align: center;"><strong style="color: #f59e0b; font-size: 1.3em;">異種</strong><br>形や大きさが違う（小型リーダ、力覚デバイス）</div>
+                            <div style="text-align: center;"><strong style="color: #f59e0b; font-size: 1.3em;">異種</strong><br>形や大きさが違うもの同士</div>
                             <svg viewBox="0 0 300 100" style="width: 100%; max-height: 14vh;">
-                                <rect x="40" y="82" width="26" height="10" fill="#9ca3af"/>
-                                <polyline points="53,82 53,60 85,52 98,70" fill="none" stroke="#7dd3fc" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+                                <rect x="34" y="80" width="40" height="12" rx="3" fill="#9ca3af"/>
+                                <polyline points="54,80 54,58 84,46" fill="none" stroke="#7dd3fc" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+                                <line x1="84" y1="46" x2="100" y2="24" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+                                <text x="54" y="16" fill="#7dd3fc" font-size="13" text-anchor="middle">力覚デバイス</text>
                                 <text x="150" y="55" fill="#cbd5e1" font-size="20" text-anchor="middle">⇄</text>
                                 <rect x="190" y="78" width="40" height="14" fill="#9ca3af"/>
                                 <polyline points="210,78 210,40 260,26 285,56" fill="none" stroke="#4ade80" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
@@ -155,7 +168,7 @@
                             <ul>
                                 <li><strong>手先の位置・力</strong>でつなぐ（作業空間）→ 逆運動学・スケーリングが必要</li>
                                 <li>重さ・摩擦が違う → 操作が<strong>重く</strong>なり、力と位置の制御が<strong>干渉</strong>しやすい</li>
-                                <li>例：ALOHA はリーダが小型（異スケール）</li>
+                                <li>例：力覚デバイスで操作、ALOHA はリーダが小型（異スケール）</li>
                             </ul>
                         </div>
                     </div>
