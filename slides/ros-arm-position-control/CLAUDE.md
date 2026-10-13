@@ -77,18 +77,15 @@
 - **縦スライド8-4**: 3次スプライン補間
 - **縦スライド8-5**: 5次スプライン補間
 - **縦スライド8-6**: 補間方法の比較まとめ
-- **縦スライド8-7**: 関節速度の計算方法
-- **縦スライド8-8**: 逆ヤコビアンによる手先速度の計算
 - **縦スライド8-9**: JointTrajectoryControllerにvelocityとaccelerationを追加
 - **縦スライド8-10**: JointTrajectoryControllerでの設定例（ur_joint_trajectory_controller.yamlから読み込み）
 
-### 5.5 軌道の滑らかさ：ブレンド半径からROS実装まで（index_ros2.html のみ・水平スライド + 縦スライド18枚）
-ロボットアーム入門（robot-arm-basic-control）第9章のブレンド半径の話を、ROSの軌道生成につなげる章。
-- 復習（blend_physics.html を相互参照で埋め込み）→ G（幾何）と C（時間）の区別 → 連続性の階層表 → なぜ G¹ では C² にできないか
-- 加速度 = 時間則 + 幾何（accel_geometry_timing.html）、ジャークと残留振動（jerk_vibration.html）
-- ROS の3段構造（幾何パス → 時間パラメータ化 → JTC補間）とチェック①〜⑤（密度と幾何精度、JTCの補間次数＝jtc_spline_order.html、TOTG vs Ruckig、密にしすぎ、角は消えない）、特異点、実務上の判断、まとめ
-
-※ 重複整理（ROS2版）：C⁰/C¹/C² の説明は速度・加速度制御の章に集約（interpolation_motion.html・比較表・JTCの補間次数の決まり方・jtc_spline_order.html）。ブレンド半径の章は「G と C の対応」とROS実装チェックに絞り、チェック②は12章を参照
+### 5.5 動きを作るのは軌道計画か、制御か（index_ros2.html のみ・縦スライド6枚）
+『実践ロボット制御』第3章コラム「ロボットの動きを作るのは軌道計画か，制御か」を引用して構成した最小限の章。
+- 静止点での振動がサイクルタイムを伸ばす → 対策は ①軌道計画で出さない ②制御（振動抑制制御・ダンパ）で抑える
+- G（経路の形）と C（時間の関数）はどちらも軌道計画側。制御は計画どおり動かし残った振動を抑える側
+- 台形速度 vs Sカーブ（jerk_vibration.html）、ROS での対応（G: OMPL など / C: TOTG・Ruckig、JTC補間 / 制御: サーボ）、まとめ
+- 旧版（ブレンド半径からROS実装まで、17枚）は削除。accel_geometry_timing.html はスライドから外れた
 
 ### 6. waypointsの表示編（水平スライド9 + 縦スライド）
 **スライド9: waypointsの表示**（メインスライド）
