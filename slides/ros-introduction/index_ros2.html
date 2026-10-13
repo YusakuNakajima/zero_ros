@@ -319,7 +319,7 @@
                     <h2>アイコンの説明</h2>
                     <img src="media/create_rosject_6.png" alt="アイコンバー"
                         style="width: 100%; max-height: 100px; object-fit: contain; margin-bottom: 20px;">
-                    <ol style="font-size: 0.7em; text-align: left; max-width: 80%; margin: 0 auto;">
+                    <ol style="font-size: 0.6em; text-align: left; max-width: 80%; margin: 0 auto;">
                         <li>ROSject利用可能時間</li>
                         <li>ターミナルを開く</li>
                         <li>エディタ(VSCode)を開く</li>
@@ -332,8 +332,8 @@
                         <li>Homeに戻る、終了時に</li>
                         <li>ヘルプ</li>
                     </ol>
-                    <p style="font-size: 0.7em; margin-top: 10px;">
-                        ※画像に直接番号を振ることはできませんが、上記のリストの番号とアイコンの並び順（左から）が対応しています。
+                    <p style="font-size: 0.55em; margin-top: 10px;">
+                        ※リストの番号はアイコンの並び順（左から）に対応しています
                     </p>
                 </section>
                 <section>
@@ -372,7 +372,7 @@
 
                     <section>
                         <h2>WSLを使いたい方への注意</h2>
-                        <ul>
+                        <ul style="font-size: 0.85em;">
                             <li>Windows上のWSLでの構築も可能ですがメモリ消費が多くトラブルが多いので推奨しません</li>
                             <li>どうしても使う場合はwin11以降,デスクトップPC,CPUはi7相当,メモリは32GBを推奨します</li>
                             <li>それ未満の性能だとビルド中にフリーズするなどのトラブルがある可能性があります</li>
@@ -505,15 +505,15 @@
                 <section>
                     <h2>公開パッケージのソースビルド</h2>
                     <p><strong>例: Intel RealSense</strong></p>
-                    <ol>
+                    <ol style="font-size: 0.7em;">
                         <li><strong>Clone:</strong><br>
-                            <code>root@powder_grinding_ros:~/catkin_ws# git clone https://github.com/IntelRealSense/realsense-ros.git</code>
+                            <code>~/ros2_ws/src$ git clone https://github.com/IntelRealSense/realsense-ros.git</code>
                         </li>
                         <li><strong>依存関係:</strong><br>
-                            <code>root@powder_grinding_ros:~/catkin_ws# rosdep install -i --from-paths src</code>
+                            <code>~/ros2_ws$ rosdep install -i --from-paths src</code>
                         </li>
                         <li><strong>ビルド:</strong><br>
-                            <code>root@powder_grinding_ros:~/catkin_ws# catkin build; source devel/setup.bash</code>
+                            <code>~/ros2_ws$ colcon build; source install/setup.bash</code>
                         </li>
                     </ol>
                 </section>
@@ -528,7 +528,7 @@
                     <div class="image-section">
                         <img src="media/ros_nodes.svg" alt="ROSノード">
                     </div>
-                    <div class="text-section">
+                    <div class="text-section" style="font-size: 0.8em;">
                         <ul>
                             <li>1ノード=1プロセス</li>
                             <li>ノードの設計はユーザー依存、プログラミングのクラス設計と同じ</li>
@@ -536,7 +536,7 @@
                         </ul>
                     </div>
                 </div>
-                <p>うまい設計をいきなり真似するのは無理なので最初はツギハギで良いと思います</p>
+                <p style="font-size: 0.7em;">うまい設計をいきなり真似するのは無理なので最初はツギハギで良いと思います</p>
             </section>
 
             <!-- スライド8: ノード間の通信：トピック、サービス、アクション -->
@@ -547,7 +547,7 @@
                     <strong>→ <a href="interactive_app/ros_communications.html" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                 </p>
-                <iframe data-src="interactive_app/ros_communications.html" width="100%" height="500px"
+                <iframe data-src="interactive_app/ros_communications.html" width="100%" height="420px"
                     frameborder="0"></iframe>
             </section>
 

@@ -161,7 +161,7 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                             <pre><code class="language-python external-code" data-src="../../ros2_ws/src/ros_study/setup.py" data-trim></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.75em;">
                                 <li><code>setup.py</code> で launch / urdf / mesh / config / rviz の install 先を定義します</li>
                                 <li>Mock Components で使う <code>config/ur_joint_trajectory_controller.yaml</code> もここで入るようにします</li>
                                 <li>ビルドと実行↓</li>
@@ -172,7 +172,7 @@ ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
                 <section>
                     <h2>ファイルの配置の確認</h2>
                     <img src="media/ros_study_file_structure.png" alt="ros_study ファイル配置例"
-                        style="display: block; max-width: 90%;">
+                        style="display: block; max-width: 90%; max-height: 430px; margin: 0 auto;">
 
                     <p><code>ros2_ws/src/ros_study</code> に同等の配置になっていればOKです</p>
                 </section>
@@ -245,7 +245,7 @@ ros2 launch ros_study view_ur.launch.py
                             <pre><code class="language-yaml external-code" data-src="../../ros2_ws/src/ros_study/rviz/ur5e.rviz" data-trim></code></pre>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.75em;">
                                 <li><code>ros_study/rviz/ur5e.rviz</code> をそのまま使えます</li>
                                 <li>launchディレクトリ内にur5e.rvizという名前で左のコードを保存、もしはRvizのGUIから保存</li>
                                 <li>launchファイルのRvizノードにur5e.rvizの引数を追加して読み込むようになっています</li>
@@ -308,7 +308,7 @@ ros2 launch ros_study view_ur.launch.py
                 </section>
 
                 <section>
-                    <h2>URDF（Unified Robot Description Format）</h2>
+                    <h2>URDF <span style="font-size: 0.5em;">（Unified Robot Description Format）</span></h2>
                     <p>Ur5eの例</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
@@ -324,11 +324,11 @@ ros2 launch ros_study view_ur.launch.py
                 </section>
 
                 <section>
-                    <h2>URDF（Unified Robot Description Format）</h2>
+                    <h2>URDF <span style="font-size: 0.5em;">（Unified Robot Description Format）</span></h2>
                     <p>Ur5eのVS Codeで折りたたんだ表示</p>
                     <div class="slide-layout-image">
                         <div class="image-section">
-                            <img src="media/urdf_folding.png" alt="URDF folding">
+                            <img src="media/urdf_folding.png" alt="URDF folding" style="max-height: 460px;">
                         </div>
                         <div class="text-section">
                             <p>linkとjointが並んでいる様子が分かる</p>
@@ -428,8 +428,8 @@ ros2 launch ros_study view_ur_with_ee.launch.py
                     <h2>UR5eの例</h2>
                     <div style="display: flex; justify-content: space-around; width: 100%;">
                         <div style="flex-basis: 48%;">
-                            <h3>リンク名</h3>
-                            <table style="width: 100%; font-size: 0.5em;">
+                            <h3 style="font-size: 0.8em; margin: 0 0 10px;">リンク名</h3>
+                            <table style="width: 100%; font-size: 0.42em;">
                                 <thead>
                                     <tr>
                                         <th style="text-align: left;">名前</th>
@@ -485,8 +485,8 @@ ros2 launch ros_study view_ur_with_ee.launch.py
                             </table>
                         </div>
                         <div style="flex-basis: 48%;">
-                            <h3>ジョイント名</h3>
-                            <table style="width: 100%; font-size: 0.5em;">
+                            <h3 style="font-size: 0.8em; margin: 0 0 10px;">ジョイント名</h3>
+                            <table style="width: 100%; font-size: 0.42em;">
                                 <thead>
                                     <tr>
                                         <th style="text-align: left;">名前</th>
@@ -907,13 +907,13 @@ ros2 topic echo /joint_states
                     </ul>
                 </section>
                 <section>
-                    <h2>TFの役割1：座標変換 (ツリー構造)</h2>
+                    <h2>TFの役割1：座標変換</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <img src="media/tf_viewer.png" alt="座標変換の例">
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.75em;">
                                 <li>TF (Transform) は、ロボットの各パーツ（Link）の相対的な位置関係を<strong>ツリー構造</strong>で管理します。</li>
                                 <li>
                                     そして、<strong><code>robot_state_publisher</code>ノードが、URDFを読み込み、このTFツリーを計算して配信する張本人です。</strong>
@@ -929,7 +929,7 @@ ros2 topic echo /joint_states
                             <img src="media/joint_states_workflow.png" alt="データフロー">
                         </div>
                         <div class="text-section">
-                            <ol>
+                            <ol style="font-size: 0.65em;">
                                 <li><strong><code>joint_state_publisher_gui</code></strong>: スライダーを動かすと、各関節の角度
                                     (<code>/joint_states</code>) を配信。</li>
                                 <li><strong><code>robot_state_publisher</code></strong>: <code>/joint_states</code> と
@@ -943,8 +943,8 @@ ros2 topic echo /joint_states
                 </section>
 
                 <section>
-                    <h2>ノードの接続関係を見る (rqt_graph)</h2>
-                    <p>設計図通りに通信がつながっているか確認できます</p>
+                    <h2>rqt_graphで接続を見る</h2>
+                    <p style="font-size: 0.75em;">設計図通りに通信がつながっているか確認できます</p>
                     <pre><code class="bash" data-trim>
 # ノードグラフを表示するコマンド
 rqt_graph
@@ -963,7 +963,7 @@ rqt_graph
                             </div>
                         </div>
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.7em;">
                                 <li>丸＝ノード（プログラム）</li>
                                 <li>四角＝トピック（データ）</li>
                                 <li>矢印＝データの流れる向き</li>
