@@ -168,29 +168,29 @@
                 <div style="margin-bottom: 30px;">
                     <h2>前章との違い</h2>
 
-                    <p style="font-size: 1.2em;">前章と本章の決定的な違いは<br>
+                    <p style="font-size: 0.85em;">前章と本章の決定的な違いは<br>
                         <strong style="color: #e55; font-size: 1.3em;">「制御」しているかどうか</strong> です。
                     </p>
                 </div>
-                <div class="comparison-container" style="min-height: auto; margin-bottom: 40px;">
+                <div class="comparison-container" style="min-height: auto; margin-bottom: 20px;">
                     <div class="comparison-box" style="border: 2px solid #555;">
-                        <h3 style="font-size: 1em; color: #999;">前回（モデル表示）</h3>
-                        <hr style="border-color: #555; margin: 15px 0;">
-                        <p style="font-size: 0.9em; text-align: left; line-height: 1.6;">
+                        <h3 style="font-size: 0.8em; color: #999;">前回（モデル表示）</h3>
+                        <hr style="border-color: #555; margin: 8px 0;">
+                        <p style="font-size: 0.7em; text-align: left; line-height: 1.5;">
                             GUIでパラメーターを変えて、<br>単に<strong>「表示」を動かしていただけ</strong>。
                         </p>
                     </div>
                     <div class="comparison-box"
                         style="border: 2px solid #3b82f6; background: rgba(59, 130, 246, 0.15);">
-                        <h3 style="font-size: 1em; color: #3b82f6;">今回（シミュレータ）</h3>
-                        <hr style="border-color: #3b82f6; margin: 15px 0;">
-                        <p style="font-size: 0.9em; text-align: left; line-height: 1.6;">
+                        <h3 style="font-size: 0.8em; color: #3b82f6;">今回（シミュレータ）</h3>
+                        <hr style="border-color: #3b82f6; margin: 8px 0;">
+                        <p style="font-size: 0.7em; text-align: left; line-height: 1.5;">
                             コントローラ（制御プログラム）が<br>計算して<strong>「ロボット」を制御します</strong>。
                         </p>
                     </div>
                 </div>
-                <div style="background: linear-gradient(90deg, #1e3a8a, #3b82f6); padding: 20px; border-radius: 8px;">
-                    <p style="margin: 0; font-weight: bold; font-size: 1.0em; color: white;">
+                <div style="background: linear-gradient(90deg, #1e3a8a, #3b82f6); padding: 12px; border-radius: 8px;">
+                    <p style="margin: 0; font-weight: bold; font-size: 0.65em; color: white;">
                         💡 ここでのコードは、設定を切り替えるだけで「実機」でもそのまま動きます。
                     </p>
                 </div>
@@ -236,12 +236,12 @@
             </section>
 
             <section>
-                <h2>Mock Components vs Gazebo</h2>
-                <p style="text-align: center; margin-bottom: 10px;">
+                <h2>Mock vs Gazebo</h2>
+                <p style="text-align: center; margin-bottom: 10px; font-size: 0.6em;">
                     <strong>→ <a href="interactive_app/ros2_mock_components_vs_Gazebo.html" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
                 </p>
-                <iframe data-src="interactive_app/ros2_mock_components_vs_Gazebo.html" width="100%" height="500px"
+                <iframe data-src="interactive_app/ros2_mock_components_vs_Gazebo.html" width="100%" height="520px"
                     frameborder="0" style="overflow: hidden; border-radius: 8px;"></iframe>
             </section>
 
@@ -340,7 +340,7 @@ sudo apt install --reinstall \
                 </section>
                 <section>
                     <h2>xacroを作成</h2>
-                    <p style="font-size: 0.8em; color: #ffb700; margin-top: 15px;">⚠️ このxacroはシミュレータ (mock_components)
+                    <p style="font-size: 0.6em; color: #ffb700; margin-top: 10px;">⚠️ このxacroはシミュレータ (mock_components)
                         専用であり、実機では使用できません。</p>
                     <div class="slide-layout-code-text">
                         <div class="code-section">
@@ -348,7 +348,7 @@ sudo apt install --reinstall \
                         </div>
 
                         <div class="text-section">
-                            <ul>
+                            <ul style="font-size: 0.65em;">
                                 <li><code>ros_study/urdf/ur5e_with_ee_mock_components.xacro</code> が mock
                                     components 用の canonical source です</li>
                                 <li>これにより、mock_components(仮想ハードウェア)が読み込まれ、ロボットを制御できるようになります。</li>
@@ -518,7 +518,7 @@ rviz_node = Node(
                             <img src="media/gazebo.png" alt="Gazebo" style="background: rgba(255,255,255,0.1);">
                         </div>
                         <div class="slide-content">
-                            <ul>
+                            <ul style="font-size: 0.7em;">
                                 <li>Gazeboは、ROSで最も広く使われている<strong>3D物理シミュレータ</strong>です。</li>
                                 <li>Mock
                                     Componentsとは異なり、<strong>重力、摩擦、衝突、センサデータ（カメラ・LiDAR）</strong>などを物理エンジンを用いて計算します。
@@ -562,9 +562,7 @@ rviz_node = Node(
 
                 <section>
                     <h2>Gazebo環境のセットアップ</h2>
-                    <ul>
-                        <li>ROS 2とGazeboを通信させるためのパッケージをインストールします</li>
-                    </ul>
+                    <p style="font-size: 0.7em;">ROS 2とGazeboを通信させるためのパッケージをインストールします</p>
                     <div style="margin-top: 20px; text-align: left;">
                         <p style="font-size: 0.9em; margin-bottom: 10px;">
                             <strong>1. モダンなGazebo (推奨) の場合</strong><br>
@@ -643,7 +641,7 @@ export IGN_GAZEBO_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH
 
                 <section>
                     <h2>ros2_controlとの連携</h2>
-                    <div style="text-align: left;">
+                    <div style="text-align: left; font-size: 0.8em;">
                         <p>どちらのGazeboを使う場合でも、<strong>ros2_control経由で動かす</strong>という基本構成は変わりません。</p>
                         <div
                             style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
@@ -854,12 +852,12 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>言葉の壁（ミドルウェアの違い）</h2>
+                    <h2>言葉の壁</h2>
                     <div style="text-align: left;">
-                        <p>ROS 2とGazeboは、裏側で使っている<strong>通信の仕組み（言語）</strong>が異なります。</p>
+                        <p style="font-size: 0.75em;">ROS 2とGazeboは、裏側で使っている<strong>通信の仕組み（ミドルウェア）</strong>が異なります。</p>
 
                         <div
-                            style="display: flex; justify-content: center; gap: 40px; margin: 30px 0; align-items: center;">
+                            style="display: flex; justify-content: center; gap: 40px; margin: 15px 0; align-items: center;">
                             <div
                                 style="flex: 1; padding: 20px; background: rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; border-radius: 15px; text-align: center;">
                                 <h4 style="color: #3b82f6; margin: 0;">ROS 2</h4>
@@ -887,7 +885,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                             </div>
                         </div>
 
-                        <p style="text-align: center; font-size: 0.9em;">
+                        <p style="text-align: center; font-size: 0.75em;">
                             直接は会話できないため、<strong>翻訳機（ros_gz_bridge）</strong>が必要です。
                         </p>
                     </div>
@@ -943,8 +941,8 @@ ros2 action list | grep scaled_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
-                    <h2>Launchファイルの引数の書き方</h2>
-                    <div style="text-align: left; font-size: 0.9em; width: 100%;">
+                    <h2>ブリッジ引数の書き方</h2>
+                    <div style="text-align: left; font-size: 0.7em; width: 100%;">
 
                         <div
                             style="background: #222; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.9em; margin: 20px 0; border: 1px solid #555;">
@@ -952,7 +950,7 @@ ros2 action list | grep scaled_joint_trajectory_controller
                                 style="color: #facc15;">[</span>gz_type
                         </div>
 
-                        <ul style="line-height: 1.8;">
+                        <ul style="line-height: 1.5;">
                             <li><span style="color: #4ade80; font-weight: bold;">/topic_name</span> : 通信したいトピック名
                             </li>
                             <li><span style="color: #facc15; font-weight: bold;">@</span> : <strong>ROS 2の型</strong>
@@ -1026,8 +1024,8 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 </section>
 
                 <section>
-                    <h2>A. GUIでの配置 (Gazebo Fuel)</h2>
-                    <div style="text-align: left;">
+                    <h2>A. GUIで配置（Fuel）</h2>
+                    <div style="text-align: left; font-size: 0.75em;">
                         <p>Gazebo (New) には<strong>「Resource
                                 Browser」</strong>があり、<br>オンライン上のモデルライブラリ（Fuel）から物体を呼び出せます。
                         </p>
@@ -1051,10 +1049,10 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 <section class="small-code">
                     <h2>B. Worldファイルの作成 (SDF)</h2>
                     <div style="text-align: left;">
-                        <p>Launchファイルで <code>empty.sdf</code> の代わりに読み込ませる<br>オリジナルの世界ファイル（例:
+                        <p style="font-size: 0.65em;">Launchファイルで <code>empty.sdf</code> の代わりに読み込ませる<br>オリジナルの世界ファイル（例:
                             <code>my_world.sdf</code>）を作ります。
                         </p>
-                        <pre><code class="xml" data-trim>
+                        <pre style="font-size: 0.45em;"><code class="xml" data-trim style="max-height: 420px;">
 &lt;sdf version="1.6"&gt;
   &lt;world name="my_custom_world"&gt;
     &lt;physics name="1ms" type="ignored"&gt;
@@ -1092,8 +1090,8 @@ ros2 action list | grep scaled_joint_trajectory_controller
                 <section>
                     <h2>Launchファイルの変更</h2>
                     <div style="text-align: left;">
-                        <p>作ったWorldファイルを読み込むように変更します。</p>
-                        <pre><code class="python" data-trim>
+                        <p style="font-size: 0.7em;">作ったWorldファイルを読み込むように変更します。</p>
+                        <pre style="font-size: 0.5em;"><code class="python" data-trim>
 # launch/gazebo_sim.launch.py
 
 gazebo = IncludeLaunchDescription(
