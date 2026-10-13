@@ -95,6 +95,62 @@
             <!-- 2. 模倣学習 -->
             <section>
                 <section>
+                    <h2 style="font-size: 1.3em;">模倣学習のデータと動かし方</h2>
+                    <svg viewBox="0 0 760 300" style="width: 95%; max-height: 50vh;">
+                    <defs><marker id="im-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker><marker id="im-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f472b6"/></marker></defs>
+                    <text x="10" y="18" fill="#fbbf24" font-size="15" font-weight="bold">① 人が操作したデータ（時刻ごとの組）</text>
+                    <rect x="20" y="28" width="118" height="118" rx="8" fill="none" stroke="#475569"/>
+                    <text x="79" y="44" fill="#94a3b8" font-size="12" text-anchor="middle">時刻 t = 1</text>
+                    <rect x="34" y="50" width="90" height="44" rx="4" fill="#0f172a" stroke="#7dd3fc"/>
+                    <line x1="34" y1="84" x2="124" y2="84" stroke="#475569"/>
+                    <rect x="98" y="70" width="12" height="14" fill="#fbbf24"/>
+                    <path d="M44,60 L44,74 M54,60 L54,74 M44,60 L54,60 M49,52 L49,60" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+                    <text x="79" y="110" fill="#bae6fd" font-size="12" text-anchor="middle">画像＋関節角 q<tspan baseline-shift="sub" font-size="9">1</tspan></text>
+                    <text x="79" y="134" fill="#fde68a" font-size="12" text-anchor="middle">行動：次の関節角 q<tspan baseline-shift="sub" font-size="9">2</tspan></text>
+                    <rect x="150" y="28" width="118" height="118" rx="8" fill="none" stroke="#475569"/>
+                    <text x="209" y="44" fill="#94a3b8" font-size="12" text-anchor="middle">時刻 t = 2</text>
+                    <rect x="164" y="50" width="90" height="44" rx="4" fill="#0f172a" stroke="#7dd3fc"/>
+                    <line x1="164" y1="84" x2="254" y2="84" stroke="#475569"/>
+                    <rect x="228" y="70" width="12" height="14" fill="#fbbf24"/>
+                    <path d="M192,60 L192,74 M202,60 L202,74 M192,60 L202,60 M197,52 L197,60" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+                    <text x="209" y="110" fill="#bae6fd" font-size="12" text-anchor="middle">画像＋関節角 q<tspan baseline-shift="sub" font-size="9">2</tspan></text>
+                    <text x="209" y="134" fill="#fde68a" font-size="12" text-anchor="middle">行動：次の関節角 q<tspan baseline-shift="sub" font-size="9">3</tspan></text>
+                    <rect x="280" y="28" width="118" height="118" rx="8" fill="none" stroke="#475569"/>
+                    <text x="339" y="44" fill="#94a3b8" font-size="12" text-anchor="middle">時刻 t = 3</text>
+                    <rect x="294" y="50" width="90" height="44" rx="4" fill="#0f172a" stroke="#7dd3fc"/>
+                    <line x1="294" y1="84" x2="384" y2="84" stroke="#475569"/>
+                    <rect x="358" y="70" width="12" height="14" fill="#fbbf24"/>
+                    <path d="M340,60 L340,74 M350,60 L350,74 M340,60 L350,60 M345,52 L345,60" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+                    <text x="339" y="110" fill="#bae6fd" font-size="12" text-anchor="middle">画像＋関節角 q<tspan baseline-shift="sub" font-size="9">3</tspan></text>
+                    <text x="339" y="134" fill="#fde68a" font-size="12" text-anchor="middle">行動：次の関節角 q<tspan baseline-shift="sub" font-size="9">4</tspan></text>
+                    <text x="415" y="92" fill="#94a3b8" font-size="20">…</text>
+                    <text x="230" y="166" fill="#94a3b8" font-size="12" text-anchor="middle">観測（入力）と、そのとき人が出した行動（正解）のペアを何十〜何百回分</text>
+                    <line x1="450" y1="87" x2="530" y2="87" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#im-a)"/>
+                    <text x="490" y="78" fill="#fbbf24" font-size="13" text-anchor="middle" font-weight="bold">② 学習</text>
+                    <rect x="540" y="55" width="200" height="64" rx="10" fill="#3b1e3f" stroke="#f472b6" stroke-width="2"/>
+                    <text x="640" y="82" fill="#f9a8d4" font-size="15" text-anchor="middle" font-weight="bold">方策（ニューラルネット）</text>
+                    <text x="640" y="104" fill="#f9a8d4" font-size="12" text-anchor="middle">観測 → 行動 を当てるように学ぶ</text>
+                    <text x="10" y="200" fill="#fbbf24" font-size="15" font-weight="bold">③ 実行（ずっと繰り返す）</text>
+                    <rect x="20" y="215" width="170" height="40" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                    <text x="105.0" y="240" fill="#7dd3fc" font-size="14" text-anchor="middle">カメラ・関節角</text>
+                    <rect x="200" y="215" width="170" height="40" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                    <text x="285.0" y="240" fill="#f472b6" font-size="14" text-anchor="middle">方策</text>
+                    <rect x="380" y="215" width="170" height="40" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                    <text x="465.0" y="240" fill="#fbbf24" font-size="14" text-anchor="middle">位置制御（JTC など）</text>
+                    <rect x="570" y="215" width="170" height="40" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                    <text x="655.0" y="240" fill="#4ade80" font-size="14" text-anchor="middle">ロボットが動く</text>
+                    <line x1="190" y1="235" x2="198" y2="235" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#im-a)"/>
+                    <line x1="370" y1="235" x2="378" y2="235" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#im-a)"/>
+                    <line x1="560" y1="235" x2="568" y2="235" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#im-a)"/>
+                    
+                    <polyline points="655,256 655,285 105,285 105,260" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#im-a)"/>
+                    <text x="380" y="280" fill="#94a3b8" font-size="12" text-anchor="middle">動いた結果をまた見る（数十 Hz で繰り返す）</text>
+                    <line x1="640" y1="120" x2="285" y2="212" stroke="#f472b6" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#im-p)"/>
+                    </svg>
+                    <p style="font-size: 0.55em;">「画像を見て次の関節角を答える」教師あり学習。答えは<strong>いつもの位置制御</strong>へ</p>
+                </section>
+
+                <section>
                     <h2 style="font-size: 1.3em;">模倣学習の種類</h2>
                     <table style="font-size: 0.48em; width: 96%;">
                         <thead>
@@ -177,6 +233,63 @@
 
             <!-- 3. 強化学習 -->
             <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">強化学習のデータと動かし方</h2>
+                    <svg viewBox="0 0 760 300" style="width: 95%; max-height: 50vh;">
+                    <defs><marker id="rl-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker></defs>
+                    <text x="10" y="18" fill="#7dd3fc" font-size="15" font-weight="bold">① シミュレータで何千台も同時に試す</text>
+                    <rect x="20" y="35" width="70" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                    <rect x="28" y="81" width="18" height="6" fill="#9ca3af"/>
+                    <polyline points="37,81 37,63 58,53 70,67" fill="none" stroke="#4ade80" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="68" y="79" width="10" height="8" fill="#fbbf24"/>
+                    <rect x="100" y="35" width="70" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                    <rect x="108" y="81" width="18" height="6" fill="#9ca3af"/>
+                    <polyline points="117,81 117,63 138,60 150,74" fill="none" stroke="#4ade80" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="148" y="79" width="10" height="8" fill="#fbbf24"/>
+                    <rect x="180" y="35" width="70" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                    <rect x="188" y="81" width="18" height="6" fill="#9ca3af"/>
+                    <polyline points="197,81 197,63 218,55 230,72" fill="none" stroke="#4ade80" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="228" y="79" width="10" height="8" fill="#fbbf24"/>
+                    <rect x="20" y="105" width="70" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                    <rect x="28" y="151" width="18" height="6" fill="#9ca3af"/>
+                    <polyline points="37,151 37,133 58,132 70,140" fill="none" stroke="#4ade80" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="68" y="149" width="10" height="8" fill="#fbbf24"/>
+                    <rect x="100" y="105" width="70" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                    <rect x="108" y="151" width="18" height="6" fill="#9ca3af"/>
+                    <polyline points="117,151 117,133 138,127 150,138" fill="none" stroke="#4ade80" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="148" y="149" width="10" height="8" fill="#fbbf24"/>
+                    <rect x="180" y="105" width="70" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                    <rect x="188" y="151" width="18" height="6" fill="#9ca3af"/>
+                    <polyline points="197,151 197,133 218,134 230,145" fill="none" stroke="#4ade80" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="228" y="149" width="10" height="8" fill="#fbbf24"/>
+                    <text x="130" y="194" fill="#94a3b8" font-size="12" text-anchor="middle">最初はでたらめに動く → だんだん上手に</text>
+                    <text x="300" y="18" fill="#7dd3fc" font-size="15" font-weight="bold">② 1 台ごとのやりとり（1 ステップ）</text>
+                    <rect x="300" y="40" width="160" height="56" rx="10" fill="#3b1e3f" stroke="#f472b6" stroke-width="2"/>
+                    <text x="380" y="64" fill="#f9a8d4" font-size="15" text-anchor="middle" font-weight="bold">方策</text>
+                    <text x="380" y="84" fill="#f9a8d4" font-size="11" text-anchor="middle">ニューラルネット</text>
+                    <rect x="580" y="40" width="160" height="56" rx="10" fill="#1e3a5f" stroke="#7dd3fc" stroke-width="2"/>
+                    <text x="660" y="64" fill="#bae6fd" font-size="15" text-anchor="middle" font-weight="bold">シミュレータ</text>
+                    <text x="660" y="84" fill="#bae6fd" font-size="11" text-anchor="middle">物理で 1 ステップ進める</text>
+                    <line x1="460" y1="56" x2="575" y2="56" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#rl-a)"/>
+                    <text x="518" y="48" fill="#cbd5e1" font-size="12" text-anchor="middle">行動 a：関節の目標角</text>
+                    <line x1="580" y1="84" x2="465" y2="84" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#rl-a)"/>
+                    <text x="522" y="112" fill="#cbd5e1" font-size="12" text-anchor="middle">状態 s：関節角・速度・物体の位置</text>
+                    <text x="522" y="130" fill="#fbbf24" font-size="12" text-anchor="middle">報酬 r：その行動がどれだけ良かったか</text>
+                    <rect x="300" y="142" width="440" height="62" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                    <text x="315" y="162" fill="#fde68a" font-size="12">報酬の例（物をつかむ）：手先が物に近づく ＋1、つかめた ＋10、</text>
+                    <text x="315" y="180" fill="#fde68a" font-size="12">机にぶつかる −5、関節を速く動かしすぎ −0.1</text>
+                    <text x="315" y="197" fill="#94a3b8" font-size="11">→ 合計の報酬が増えるように方策を少しずつ直す（データは自分で作る）</text>
+                    <text x="10" y="232" fill="#7dd3fc" font-size="15" font-weight="bold">③ 学習後：方策を固定して実機へ</text>
+                    <rect x="20" y="245" width="170" height="40" rx="8" fill="#3b1e3f" stroke="#f472b6"/><text x="105" y="270" fill="#f9a8d4" font-size="14" text-anchor="middle">方策（固定）</text>
+                    <line x1="190" y1="265" x2="240" y2="265" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#rl-a)"/>
+                    <rect x="245" y="245" width="200" height="40" rx="8" fill="#3b2f1e" stroke="#fbbf24"/><text x="345" y="270" fill="#fde68a" font-size="14" text-anchor="middle">関節の位置制御（PD）</text>
+                    <line x1="445" y1="265" x2="495" y2="265" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#rl-a)"/>
+                    <rect x="500" y="245" width="140" height="40" rx="8" fill="#1e3f2a" stroke="#4ade80"/><text x="570" y="270" fill="#bbf7d0" font-size="14" text-anchor="middle">実機</text>
+                    <text x="700" y="270" fill="#94a3b8" font-size="12" text-anchor="middle">Sim-to-Real</text>
+                    </svg>
+                    <p style="font-size: 0.55em;">お手本の代わりに<strong>報酬の決め方</strong>がすべて。データは自分で試して集める</p>
+                </section>
+
                 <section>
                     <h2 style="font-size: 1.3em;">強化学習の種類</h2>
                     <table style="font-size: 0.48em; width: 96%;">
