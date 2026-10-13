@@ -99,9 +99,9 @@
 ## インタラクティブアプリ（ROS2版で追加）
 - `joint_vs_cartesian.html`：関節空間と直交空間の指令の比較
 - `jtc_basics.html`：JTCに「関節目標＋到着時刻」の点を送ると時刻どおりに動く様子（縦長）
-- `ik_solvers.html`：タブで ①ニュートン法 ②解析解(IKFast) ③数値解(KDL) ④TRAC-IK（#newton 等のハッシュで初期タブ指定）
+- `ik_solvers.html`：タブ newton / analytic / kdl / trac。`?tabs=analytic,kdl` で表示するタブを絞り（番号は振り直し）、`#kdl` 等のハッシュで初期タブ指定。「IKの解き方は2種類」は解析解・数値解の2タブ、「KDL と TRAC-IK の違い」は同じ目標・初期値で KDL（制限で停止）と TRAC-IK（やり直して成功）を左右に並べて比較。ニュートン法の単独スライドは削除
 - `interpolation_motion.html`：線形/台形/3次/5次で実際のアームの動き・手先の揺れ・関節の位置/速度/加速度を比較（速度・加速度制御の章）
-- `singularity_types.html`：肩/肘/手首の特異点の3タブ（#shoulder/#elbow/#wrist）。特異姿勢からの近さスライダーと関節速度グラフ
+- `singularity_types.html`：肩/肘/手首の特異点の3タブ（#shoulder/#elbow/#wrist）。特異姿勢からの距離スライダー（0 まで）、縦軸が自動で伸びる関節速度グラフ、「最大関節速度 vs 距離」グラフ（d→0 で ∞ に発散）、「特異点へ近づける」ボタン
 - `tf_time.html`：手先カメラ画像の処理遅れを例に、TFが撮影時刻の姿勢を引く意義とバッファ
 
 ## 実装デモファイル

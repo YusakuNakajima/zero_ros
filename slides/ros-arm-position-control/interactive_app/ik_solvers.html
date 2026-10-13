@@ -83,9 +83,9 @@
             const s12 = Math.sin(q[0] + q[1]), c12 = Math.cos(q[0] + q[1]);
             return [[-L[0] * s1 - L[1] * s12, -L[1] * s12], [L[0] * c1 + L[1] * c12, L[1] * c12]];
         }
-        function armView(w, h) {
+        function armView(w, h, x0 = 0) {
             const scale = Math.min(w / 4.4, h / 2.2);
-            const ox = w / 2, oy = h * 0.82;
+            const ox = x0 + w / 2, oy = h * 0.82;
             return {
                 to: p => [ox + p[0] * scale, oy - p[1] * scale],
                 from: (x, y) => [(x - ox) / scale, (oy - y) / scale],
@@ -269,7 +269,7 @@
             ctx.beginPath(); ctx.moveTo(pts[2][0], pts[2][1]); ctx.lineTo(tp[0], tp[1]); ctx.stroke(); ctx.setLineDash([]);
             const s = newtonStep(q, st.target, true);
             info.innerHTML =
-                `① と同じ考え方：<b>誤差 e</b>（赤い点線）を<b>ヤコビアン J</b> で関節の動きに直して少しずつ近づける<br>` +
+                `ニュートン法：<b>誤差 e</b>（赤い点線）を<b>ヤコビアン J</b> で関節の動きに直して少しずつ近づける<br>` +
                 `<span class="mono">Δq = J⁻¹ e　→　q ← q + Δq</span>　　ステップ ${st.path.length - 1}：誤差 ${(s.err * 1000).toFixed(1)} mm` +
                 (s.err < 1e-3 ? '　<b style="color:#4ade80">収束！</b>' : '') + `<br>` +
                 `<span class="hint">初期値（スタートの姿勢）に近い解が1つだけ見つかる。目標をドラッグ → 「1ステップ」</span>`;
@@ -280,17 +280,22 @@
         // ================= ④ TRAC-IK =================
         // KDL (初期値固定) が関節制限で行き詰まる目標を探しておく
         const TRAC_SEED = [60 * DEG, 40 * DEG];
+        // 違いが見やすいよう、KDL の止まった手先が目標から一番遠くなる目標を選ぶ
         function findStuckTarget() {
             const seed = TRAC_SEED;
+            let best = null, bestErr = 0;
             for (let a = 165; a >= 95; a -= 5) {
                 for (let r = 1.0; r <= 1.7; r += 0.1) {
                     const p = [r * Math.cos(a * DEG), r * Math.sin(a * DEG)];
                     const sols = analytic(p).filter(q => q[1] >= LIM[1][0] && q[1] <= LIM[1][1] && wrapIn(q[0], LIM[0]));
                     if (!sols.length) continue;
-                    if (!solveNewton(seed, p, true).ok) return p;
+                    const res = solveNewton(seed, p, true);
+                    if (res.ok) continue;
+                    const tip = fk(res.q)[2], err = Math.hypot(p[0] - tip[0], p[1] - tip[1]);
+                    if (err > bestErr) { bestErr = err; best = p; }
                 }
             }
-            return [-1.1, -0.3];
+            return best || [-1.1, -0.3];
         }
         function wrapIn(a, lim) {
             for (let k = -1; k <= 1; k++) { const b = a + 2 * Math.PI * k; if (b >= lim[0] && b <= lim[1]) return true; }
@@ -301,6 +306,7 @@
         function rand() { seedRng = (seedRng * 16807) % 2147483647; return (seedRng - 1) / 2147483646; }
         function runTrac() {
             const st = S.trac;
+            st.kdl = solveNewton([...TRAC_SEED], st.target, true);
             st.attempts = [];
             st.result = null;
             seedRng = 7;
@@ -313,32 +319,53 @@
                 q0 = LIM.map(l => l[0] + rand() * (l[1] - l[0]));
             }
         }
-        function drawTrac() {
-            const { ctx, w, h } = setup();
-            const v = armView(w, h);
-            ctx.clearRect(0, 0, w, h);
-            drawBase(ctx, v, true);
-            // 関節1の可動範囲の切れ目 (真上)
+        function drawLimitLine(ctx, v) {
             const o = v.to([0, 0]);
             ctx.strokeStyle = '#f87171'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]);
             ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(o[0], o[1] - 1.9 * v.scale); ctx.stroke(); ctx.setLineDash([]);
-            ctx.fillStyle = '#fca5a5'; ctx.font = '12px sans-serif';
-            ctx.fillText('関節1はここを越えられない', o[0] + 6, o[1] - 1.75 * v.scale);
+            ctx.fillStyle = '#fca5a5'; ctx.font = '11px sans-serif';
+            ctx.fillText('関節1の制限', o[0] + 5, o[1] - 1.8 * v.scale);
+        }
+        function panelTitle(ctx, x, text, sub, color) {
+            ctx.fillStyle = color; ctx.font = 'bold 15px sans-serif'; ctx.fillText(text, x + 10, 20);
+            ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif'; ctx.fillText(sub, x + 10, 36);
+        }
+        function drawTrac() {
+            const { ctx, w, h } = setup();
+            ctx.clearRect(0, 0, w, h);
+            const half = w / 2;
+            const vK = armView(half, h, 0), vT = armView(half, h, half);
             const st = S.trac;
-            st.attempts.forEach((res, i) => {
-                const good = res.ok;
-                drawArm(ctx, v, res.q, { color: good ? '#4ade80' : '#f87171', width: good ? 9 : 5, alpha: good ? 1 : 0.45, ghost: !good });
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(half, 8); ctx.lineTo(half, h - 8); ctx.stroke();
+
+            // 左: KDL（初期値は1つだけ。制限にぶつかって止まる）
+            drawBase(ctx, vK, true); drawLimitLine(ctx, vK);
+            st.kdl.path.forEach((pq, i) => drawArm(ctx, vK, pq, { ghost: true, color: '#7dd3fc', width: 3, alpha: 0.12 + 0.4 * i / Math.max(1, st.kdl.path.length) }));
+            const kp = drawArm(ctx, vK, st.kdl.q, { color: st.kdl.ok ? '#4ade80' : '#f87171', width: 9 });
+            drawTarget(ctx, vK, st.target);
+            const kt = vK.to(st.target), kErr = Math.hypot(st.target[0] - fk(st.kdl.q)[2][0], st.target[1] - fk(st.kdl.q)[2][1]);
+            if (!st.kdl.ok) {
+                ctx.strokeStyle = '#f87171'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+                ctx.beginPath(); ctx.moveTo(kp[2][0], kp[2][1]); ctx.lineTo(kt[0], kt[1]); ctx.stroke(); ctx.setLineDash([]);
+            }
+            panelTitle(ctx, 0, st.kdl.ok ? 'KDL ✓ 成功' : 'KDL ✕ 失敗', st.kdl.ok ? '初期値から収束' : `制限で止まる（あと ${(kErr * 1000).toFixed(0)} mm）`, st.kdl.ok ? '#4ade80' : '#f87171');
+
+            // 右: TRAC-IK（行き詰まったら別の初期値からやり直す）
+            drawBase(ctx, vT, true); drawLimitLine(ctx, vT);
+            st.attempts.forEach(res => {
+                if (!res.ok) drawArm(ctx, vT, res.q, { color: '#94a3b8', width: 4, alpha: 0.35, ghost: true });
             });
-            drawTarget(ctx, v, st.target);
+            if (st.result) drawArm(ctx, vT, st.result.q, { color: '#4ade80', width: 9 });
+            drawTarget(ctx, vT, st.target);
             const n = st.attempts.length;
-            const firstFail = n && !st.attempts[0].ok;
+            panelTitle(ctx, half, st.result ? 'TRAC-IK ✓ 成功' : 'TRAC-IK ✕ 失敗', st.result ? `${n} 個目の初期値で解けた` : `${n} 回試して解なし`, st.result ? '#4ade80' : '#f87171');
+
             info.innerHTML =
-                `KDL（③）は関節制限にぶつかると<b>行き詰まる</b>ことがある（<span style="color:#f87171">赤</span>）<br>` +
-                `TRAC-IK は<b>行き詰まったら別の初期値からやり直す</b>（＋SQP という別の解き方も同時に走らせる）→ 成功率が高い<br>` +
-                (st.result
-                    ? `<span class="hint">初回 ${firstFail ? '失敗' : '成功'} → ${n} 回目で<span style="color:#4ade80">成功</span>（目標をドラッグして試せる）</span>`
-                    : `<span class="hint">${n} 回試して解なし（届かない／関節制限の外）</span>`);
-            return v;
+                `同じ目標・同じ初期値から解く。<b>KDL</b> は初期値から関節1を回そうとして<b>制限にぶつかり止まる</b>（<span style="color:#f87171">赤</span>）<br>` +
+                `<b>TRAC-IK</b> は行き詰まったら<b>別の初期値からやり直し</b>（<span style="color:#94a3b8">灰</span>＝失敗した試行）、反対回りの解を見つける（<span style="color:#4ade80">緑</span>）<br>` +
+                `<span class="hint">目標をドラッグして試せる（どちらの図をドラッグしてもよい）</span>`;
+            return vT;
         }
 
         // ---------- タブとコントロール ----------
@@ -405,7 +432,8 @@
                 if (Math.abs(df(xv)) > 0.3) { S.newton.x0 = xv; S.newton.iters = []; render(); }
                 return;
             }
-            const p = view.from(x, y);
+            const v = tab === 'trac' ? armView(r.width / 2, r.height, x < r.width / 2 ? 0 : r.width / 2) : view;
+            const p = v.from(x, y);
             if (tab === 'analytic') S.analytic.target = p;
             if (tab === 'kdl') { S.kdl.target = p; kdlReset(); stopTimer(); }
             if (tab === 'trac') { S.trac.target = p; runTrac(); }
@@ -419,8 +447,17 @@
         kdlReset();
         S.trac.target = findStuckTarget();
         runTrac();
+        // ?tabs=analytic,kdl のように指定すると、そのタブだけを ①② と番号を振り直して表示する
+        const ALL_TABS = ['newton', 'analytic', 'kdl', 'trac'];
+        const shown = (new URLSearchParams(location.search).get('tabs') || '').split(',').filter(t => ALL_TABS.includes(t));
+        const visible = shown.length ? shown : ALL_TABS;
+        document.querySelectorAll('#tabs button').forEach(b => {
+            const i = visible.indexOf(b.dataset.tab);
+            b.style.display = i < 0 ? 'none' : '';
+            if (i >= 0) b.textContent = '①②③④'[i] + ' ' + b.textContent.replace(/^[①②③④]\s*/, '');
+        });
         const initial = (location.hash || '').replace('#', '');
-        selectTab(['newton', 'analytic', 'kdl', 'trac'].includes(initial) ? initial : 'newton');
+        selectTab(visible.includes(initial) ? initial : visible[0]);
     </script>
 </body>
 </html>

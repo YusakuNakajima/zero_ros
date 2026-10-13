@@ -953,7 +953,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <h2>IKの解き方は2種類</h2>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 1.15;">
-                            <iframe data-src="interactive_app/ik_solvers.html#analytic" width="100%" height="480"
+                            <iframe data-src="interactive_app/ik_solvers.html?tabs=analytic,kdl#analytic" width="100%" height="480"
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1; font-size: 0.62em; text-align: left;">
@@ -964,7 +964,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                                     <ul><li>どのロボットでも使える／初期値しだいで失敗も</li></ul></li>
                             </ul>
                             <p>今は汎用性が高く、速度・精度も十分な<strong>数値解</strong>が主流</p>
-                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html#analytic" target="_blank"
+                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html?tabs=analytic,kdl#analytic" target="_blank"
                                 style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
                         </div>
                     </div>
@@ -1100,7 +1100,7 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     <h2>特異姿勢は3種類</h2>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 1.3;">
-                            <iframe data-src="interactive_app/singularity_types.html#shoulder" width="100%" height="480"
+                            <iframe data-src="interactive_app/singularity_types.html#shoulder" width="100%" height="510"
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1; font-size: 0.6em; text-align: left;">
@@ -1116,30 +1116,10 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
-                    <h2>数値解のしくみ：ニュートン法</h2>
-                    <div style="display: flex; align-items: center; gap: 20px;">
-                        <div style="flex: 1.15;">
-                            <iframe data-src="interactive_app/ik_solvers.html#newton" width="100%" height="480"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1; font-size: 0.62em; text-align: left;">
-                            <ul>
-                                <li>f(x) = 0 の x を、<strong>接線をたどって</strong>探す方法</li>
-                                <li>数ステップで答えにぐっと近づく</li>
-                                <li>IKでは
-                                    <ul><li>x → 関節角 q</li><li>f → 目標と手先の誤差 e</li><li>傾き → ヤコビアン J</li></ul></li>
-                            </ul>
-                            <p>タブ③で実際のアームに当てはめた様子が見られる</p>
-                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html#newton" target="_blank"
-                                style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
-                        </div>
-                    </div>
-                </section>
-                <section>
                     <h2>KDL と TRAC-IK の違い</h2>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 1.15;">
-                            <iframe data-src="interactive_app/ik_solvers.html#trac" width="100%" height="480"
+                            <iframe data-src="interactive_app/ik_solvers.html?tabs=kdl,trac#trac" width="100%" height="480"
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1; font-size: 0.62em; text-align: left;">
@@ -1148,9 +1128,9 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                                     <ul><li>関節制限にぶつかると行き詰まることがある</li></ul></li>
                                 <li><strong>TRAC-IK</strong>：KDL＋SQP を同時に走らせ、行き詰まったら別の初期値からやり直す
                                     <ul><li>成功率が高い → UR の MoveIt でもデフォルト</li></ul></li>
-                                <li><strong>IKFast</strong>：解析解を自動生成（タブ②）</li>
+                                <li><strong>IKFast</strong>：解析解を自動生成（「IKの解き方は2種類」のアプリ）</li>
                             </ul>
-                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html#trac" target="_blank"
+                            <p style="font-size: 0.8em;"><a href="interactive_app/ik_solvers.html?tabs=kdl,trac#trac" target="_blank"
                                 style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a></p>
                         </div>
                     </div>

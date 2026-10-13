@@ -30,10 +30,10 @@
         button:hover { background: #1e293b; }
         button.on { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
         .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
-        canvas { width: 100%; height: 300px; display: block; background: #0b1220; border-radius: 6px; }
+        canvas { width: 100%; height: 290px; display: block; background: #0b1220; border-radius: 6px; }
         .ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
         .ctrl input[type=range] { flex: 1 1 140px; }
-        .info { margin-top: 6px; font-size: 13px; line-height: 1.55; min-height: 3.2em; }
+        .info { margin-top: 4px; font-size: 12px; line-height: 1.5; }
         .info b { color: #fbbf24; }
         .hint { color: var(--muted); font-size: 12px; }
     </style>
@@ -48,6 +48,7 @@
         <canvas id="cv"></canvas>
         <div class="ctrl">
             <button id="play">⏸ 停止</button>
+            <button id="approach">▼ 特異点へ近づける</button>
             <span id="sliderLabel" class="hint"></span>
             <input type="range" id="slider">
             <span id="sliderVal" class="hint" style="min-width: 4.5em;"></span>
@@ -62,7 +63,9 @@
         const info = document.getElementById('info');
         const DEG = Math.PI / 180;
         const LIMIT = 180; // UR5e の関節速度上限 [deg/s]
-        const YMAX = 540;  // グラフの縦軸上限 [deg/s]
+        const YDIV = 1800; // 「距離と最大速度」グラフの縦軸上限 [deg/s]（上限の10倍）
+        let D = 0;         // 特異点までの距離（スライダの値）。0 で特異点を通過
+        let approach = null; // 「特異点へ近づける」アニメーション
 
         // 手先を一定速度で動かしたときの関節角を返す。各シナリオは
         //   duration: 1周期の秒数, angles(t): {関節名: 角度[rad]}, draw(t): 図の描画
@@ -70,12 +73,14 @@
         const scenarios = {
             shoulder: {
                 label: '手首中心と J1 軸の距離 d',
-                min: 0.01, max: 0.3, step: 0.01, value: 0.06,
-                fmt: v => (v * 100).toFixed(0) + ' cm',
+                min: 0, max: 0.3, step: 0.001, value: 0.06,
+                fmt: v => (v * 100).toFixed(1) + ' cm',
                 v: 0.25, half: 0.5,
                 get duration() { return 2 * this.half / this.v; },
-                pos(t) { return { x: -this.half + this.v * t, y: slider.valueAsNumber }; },
+                pos(t) { return { x: -this.half + this.v * t, y: D }; },
                 angles(t) { const p = this.pos(t); return { J1: Math.atan2(p.y, p.x) }; },
+                // 最大の関節速度（真上を通る瞬間）: v / d [rad/s]
+                peak(d) { return d > 0 ? this.v / d / DEG : Infinity; },
                 info: '上から見た図。手首中心が <b>J1（根元の旋回軸）の真上</b>を通ると、J1 をどちらに回せばよいか決まらない。' +
                     '近くを通るだけでも <b>J1 が一気に半回転</b>する（手先は 250 mm/s 一定）。',
                 draw(t, s) {
@@ -94,10 +99,16 @@
             },
             elbow: {
                 label: '伸びきりまでの残り d',
-                min: 0.002, max: 0.06, step: 0.002, value: 0.006,
+                min: 0, max: 0.06, step: 0.001, value: 0.006,
                 fmt: v => (v * 1000).toFixed(0) + ' mm',
                 v: 0.25, r0: 0.45, phi: 15 * DEG,
-                get reach() { return (R - slider.valueAsNumber - this.r0) / this.v; },
+                get reach() { return (R - D - this.r0) / this.v; },
+                // 最大の関節速度（端に着く瞬間の J3）: v·r / (L1·L2·sin q3)
+                peak(d) {
+                    const r = R - d, c = (r * r - L1 * L1 - L2 * L2) / (2 * L1 * L2);
+                    const sn = Math.sqrt(Math.max(0, 1 - c * c));
+                    return sn > 1e-9 ? this.v * r / (L1 * L2 * sn) / DEG : Infinity;
+                },
                 get duration() { return this.reach + 0.6; },
                 r(t) { return this.r0 + this.v * Math.min(t, this.reach); },
                 angles(t) {
@@ -131,11 +142,13 @@
             },
             wrist: {
                 label: 'J5 の最小角 δ',
-                min: 1, max: 30, step: 1, value: 6,
-                fmt: v => v + '°',
+                min: 0, max: 30, step: 0.5, value: 6,
+                fmt: v => v.toFixed(1) + '°',
                 w: 30 * DEG, half: 40 * DEG,
                 get duration() { return 2 * this.half / this.w; },
-                pos(t) { return { x: -this.half + this.w * t, y: slider.valueAsNumber * DEG }; },
+                pos(t) { return { x: -this.half + this.w * t, y: D * DEG }; },
+                // 最大の関節速度（中心の真横を通る瞬間）: ω / δ [rad/s]
+                peak(d) { return d > 0 ? this.w / (d * DEG) / DEG : Infinity; },
                 angles(t) {
                     const p = this.pos(t);
                     const q4 = Math.atan2(p.y, p.x);
@@ -185,33 +198,69 @@
             return out;
         }
 
-        function drawPlot(sc, t, s) {
-            const px = v => s.x + 36 + v / sc.duration * (s.w - 44);
-            const py = v => s.y + s.h - 24 - Math.min(v, YMAX) / YMAX * (s.h - 44);
-            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
-            line(px(0), py(0), px(sc.duration), py(0)); line(px(0), py(0), px(0), py(YMAX));
-            for (const v of [0, 180, 360, 540]) text(String(v), s.x + 2, py(v) + 4, '#64748b', 10);
-            ctx.strokeStyle = '#ef4444'; ctx.setLineDash([4, 4]); line(px(0), py(LIMIT), px(sc.duration), py(LIMIT)); ctx.setLineDash([]);
-            text('UR5e 上限 180°/s', px(sc.duration) - 100, py(LIMIT) - 5, '#ef4444', 10);
-            text('関節速度 [°/s]', s.x + 36, s.y + 14, '#94a3b8');
-            text('時間', px(sc.duration) - 24, py(0) + 16, '#64748b', 10);
+        function axisTicks(ymax) { return [0, 1, 2, 3].map(i => Math.round(ymax * i / 3)); }
+        function fmtSpeed(v) { return isFinite(v) ? v.toFixed(0) + '°/s' : '∞'; }
 
-            const N = 300, curves = {};
-            let peak = 0;
+        function drawPlot(sc, t, s) {
+            const peak = sc.peak(D);
+            // 縦軸は最大速度に合わせて伸ばす（上限 180°/s の線がどんどん低く見える）
+            const ymax = isFinite(peak) ? Math.min(5400, Math.max(540, Math.ceil(peak * 1.15 / 180) * 180)) : 5400;
+            const px = v => s.x + 40 + v / sc.duration * (s.w - 48);
+            const py = v => s.y + s.h - 18 - Math.min(v, ymax) / ymax * (s.h - 36);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+            line(px(0), py(0), px(sc.duration), py(0)); line(px(0), py(0), px(0), py(ymax));
+            for (const v of axisTicks(ymax)) text(String(v), s.x + 2, py(v) + 4, '#64748b', 10);
+            ctx.strokeStyle = '#ef4444'; ctx.setLineDash([4, 4]); line(px(0), py(LIMIT), px(sc.duration), py(LIMIT)); ctx.setLineDash([]);
+            text('上限 180°/s', px(sc.duration) - 66, py(LIMIT) - 4, '#ef4444', 10);
+            text('関節速度 [°/s]', s.x + 40, s.y + 12, '#94a3b8');
+
+            const N = 1200, curves = {};
             for (let i = 0; i <= N; i++) {
                 const sp = speeds(sc, sc.duration * i / N);
-                for (const j in sp) { (curves[j] = curves[j] || []).push(sp[j]); peak = Math.max(peak, sp[j]); }
+                for (const j in sp) (curves[j] = curves[j] || []).push(sp[j]);
             }
-            let lx = s.x + 120;
+            let lx = s.x + s.w - 26 * Object.keys(curves).length;
             for (const j in curves) {
                 ctx.strokeStyle = COLORS[j]; ctx.lineWidth = 2; ctx.setLineDash(j === 'J6' ? [6, 5] : []); ctx.beginPath();
                 curves[j].forEach((v, i) => { const X = px(sc.duration * i / N), Y = py(v); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); });
                 ctx.stroke(); ctx.setLineDash([]);
-                text(j, lx, s.y + 14, COLORS[j]); lx += 28;
+                text(j, lx, s.y + 12, COLORS[j]); lx += 26;
             }
-            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1; line(px(t), py(0), px(t), py(YMAX));
-            const peakText = peak > YMAX ? `最大 ${peak.toFixed(0)}°/s（グラフ外）` : `最大 ${peak.toFixed(0)}°/s`;
-            text(peakText, px(0) + 6, py(YMAX) + 14, peak > LIMIT ? '#ef4444' : '#a3e635', 12);
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1; line(px(t), py(0), px(t), py(ymax));
+            const peakText = isFinite(peak)
+                ? `最大 ${fmtSpeed(peak)}（上限の ${(peak / LIMIT).toFixed(1)} 倍）`
+                : '最大 ∞ ← 速度が発散（特異点を通過）';
+            text(peakText, px(0) + 6, py(ymax) + 16, peak > LIMIT ? '#ef4444' : '#a3e635', 12);
+        }
+
+        // 特異点までの距離 d と最大関節速度の関係。d → 0 で ∞ に発散する
+        function drawDiverge(sc, s) {
+            const px = d => s.x + 40 + d / sc.max * (s.w - 48);
+            const py = v => s.y + s.h - 18 - Math.min(v, YDIV) / YDIV * (s.h - 34);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+            line(px(0), py(0), px(sc.max), py(0)); line(px(0), py(0), px(0), py(YDIV));
+            for (const v of [0, 900, 1800]) text(String(v), s.x + 2, py(v) + 4, '#64748b', 10);
+            ctx.strokeStyle = '#ef4444'; ctx.setLineDash([4, 4]); line(px(0), py(LIMIT), px(sc.max), py(LIMIT)); ctx.setLineDash([]);
+            text('最大関節速度 vs 特異点までの距離 d', s.x + 40, s.y + 12, '#94a3b8');
+            text('0（特異点）', px(0) - 4, py(0) + 14, '#64748b', 10);
+            text(sc.fmt(sc.max), px(sc.max) - 36, py(0) + 14, '#64748b', 10);
+
+            ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 2; ctx.beginPath();
+            const M = 300;
+            for (let i = 0; i <= M; i++) {
+                const d = sc.max * Math.pow(i / M, 2) + 1e-6;
+                const X = px(d), Y = py(sc.peak(d));
+                i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
+            }
+            ctx.stroke();
+            text('∞', px(0) + 4, py(YDIV) + 10, '#ef4444', 14);
+
+            const pk = sc.peak(D), X = px(D), Y = py(pk);
+            ctx.fillStyle = '#fbbf24';
+            if (pk > YDIV) {
+                ctx.beginPath(); ctx.moveTo(X, Y - 2); ctx.lineTo(X - 6, Y + 8); ctx.lineTo(X + 6, Y + 8); ctx.fill();
+                text('グラフ外', X + 8, Y + 10, '#fbbf24', 11);
+            } else circle(X, Y, 5);
         }
 
         function frame(now) {
@@ -221,11 +270,18 @@
             if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, W, H);
+            if (approach) {
+                const p = Math.min(1, (now - approach.t0) / 7000);
+                setD(approach.d0 * Math.pow(1 - p, 2));
+                if (p >= 1) approach = null;
+            }
             const el = playing ? (now - t0) / 1000 : pauseT;
             const t = el % sc.duration;
             const split = W * 0.5;
             sc.draw(t, { x: 4, y: 4, w: split - 8, h: H - 8 });
-            drawPlot(sc, t, { x: split + 4, y: 4, w: W - split - 8, h: H - 8 });
+            const top = (H - 8) * 0.56;
+            drawPlot(sc, t, { x: split + 4, y: 4, w: W - split - 8, h: top });
+            drawDiverge(sc, { x: split + 4, y: 8 + top, w: W - split - 8, h: H - 12 - top });
             requestAnimationFrame(frame);
         }
 
@@ -233,15 +289,26 @@
             tab = name;
             const sc = scenarios[name];
             document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-            slider.min = sc.min; slider.max = sc.max; slider.step = sc.step; slider.value = sc.value;
+            slider.min = sc.min; slider.max = sc.max; slider.step = sc.step;
+            approach = null;
+            setD(sc.value);
             document.getElementById('sliderLabel').textContent = sc.label;
-            document.getElementById('sliderVal').textContent = sc.fmt(sc.value);
             info.innerHTML = sc.info;
             t0 = performance.now(); pauseT = 0;
         }
 
+        function setD(d) {
+            D = d;
+            slider.value = d;
+            document.getElementById('sliderVal').textContent = scenarios[tab].fmt(d) + (d === 0 ? '（特異点）' : '');
+        }
+
         document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
-        slider.oninput = () => document.getElementById('sliderVal').textContent = scenarios[tab].fmt(slider.valueAsNumber);
+        slider.oninput = () => { approach = null; setD(slider.valueAsNumber); };
+        document.getElementById('approach').onclick = () => {
+            const sc = scenarios[tab];
+            approach = { t0: performance.now(), d0: D > sc.max * 0.2 ? D : sc.max * 0.5 };
+        };
         document.getElementById('play').onclick = e => {
             if (playing) { pauseT = (performance.now() - t0) / 1000; }
             else { t0 = performance.now() - pauseT * 1000; }
