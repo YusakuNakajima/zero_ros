@@ -29,12 +29,21 @@
 #
 # Author: Denis Stogl
 
+import yaml
+
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile, ParameterValue
-from launch_ros.substitutions import FindPackageShare
+from launch_ros.substitutions import FindPackagePrefix, FindPackageShare
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    OpaqueFunction,
+    ExecuteProcess,
+)
+from launch.launch_description_sources import AnyLaunchDescriptionSource
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import (
     AndSubstitution,
@@ -82,6 +91,7 @@ def launch_setup(context, *args, **kwargs):
     reverse_port = LaunchConfiguration("reverse_port")
     script_sender_port = LaunchConfiguration("script_sender_port")
     trajectory_port = LaunchConfiguration("trajectory_port")
+    verify_robot_model = LaunchConfiguration("verify_robot_model")
 
     joint_limit_params = PathJoinSubstitution(
         [FindPackageShare(description_package), "config", ur_type, "joint_limits.yaml"]
@@ -106,7 +116,7 @@ def launch_setup(context, *args, **kwargs):
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare(description_package), "urdf",description_file]),
+            PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
             " ",
             "robot_ip:=",
             robot_ip,
@@ -198,6 +208,11 @@ def launch_setup(context, *args, **kwargs):
             "trajectory_port:=",
             trajectory_port,
             " ",
+            "ur_type:=",
+            ur_type,
+            " ",
+            "verify_robot_model:=",
+            verify_robot_model,
         ]
     )
     robot_description = {
@@ -209,7 +224,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare(description_package), "rviz", "ur5e.rviz"]
+        [FindPackageShare(description_package), "rviz", "view_robot.rviz"]
     )
 
     # define update rate
@@ -221,6 +236,13 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    # Expose the controller_manager update_rate as a launch configuration so
+    # that '$(var update_rate)' substitutions inside controller config yaml
+    # resolve to the correct rate for this ur_type.
+    with open(update_rate_config_file.perform(context)) as f:
+        update_rate = yaml.safe_load(f)["controller_manager"]["ros__parameters"]["update_rate"]
+    context.launch_configurations["update_rate"] = str(update_rate)
+
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -228,6 +250,7 @@ def launch_setup(context, *args, **kwargs):
             robot_description,
             update_rate_config_file,
             ParameterFile(initial_joint_controllers, allow_substs=True),
+            {"verify_payload_on_set": NotSubstitution(use_fake_hardware)},
         ],
         output="screen",
         condition=IfCondition(use_fake_hardware),
@@ -240,21 +263,24 @@ def launch_setup(context, *args, **kwargs):
             robot_description,
             update_rate_config_file,
             ParameterFile(initial_joint_controllers, allow_substs=True),
+            {"verify_payload_on_set": NotSubstitution(use_fake_hardware)},
         ],
         output="screen",
         condition=UnlessCondition(use_fake_hardware),
     )
 
-    dashboard_client_node = Node(
-        package="ur_robot_driver",
+    dashboard_client_node = IncludeLaunchDescription(
         condition=IfCondition(
             AndSubstitution(launch_dashboard_client, NotSubstitution(use_fake_hardware))
         ),
-        executable="dashboard_client",
-        name="dashboard_client",
-        output="screen",
-        emulate_tty=True,
-        parameters=[{"robot_ip": robot_ip}],
+        launch_description_source=AnyLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [FindPackageShare("ur_robot_driver"), "launch", "ur_dashboard_client.launch.py"]
+            )
+        ),
+        launch_arguments={
+            "robot_ip": robot_ip,
+        }.items(),
     )
 
     robot_state_helper_node = Node(
@@ -269,25 +295,34 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    tool_communication_node = Node(
-        package="ur_robot_driver",
-        condition=IfCondition(use_tool_communication),
-        executable="tool_communication.py",
+    tool_comm_path = PathJoinSubstitution(
+        [
+            FindPackagePrefix("ur_client_library"),
+            "lib",
+            "ur_client_library",
+            "tool_communication.py",
+        ]
+    )
+
+    tool_communication_script = ExecuteProcess(
         name="ur_tool_comm",
-        output="screen",
-        parameters=[
-            {
-                "robot_ip": robot_ip,
-                "tcp_port": tool_tcp_port,
-                "device_name": tool_device_name,
-            }
+        condition=IfCondition(use_tool_communication),
+        cmd=[
+            tool_comm_path,
+            robot_ip,
+            "--tcp-port",
+            tool_tcp_port,
+            "--device-name",
+            tool_device_name,
         ],
+        output="screen",
     )
 
     urscript_interface = Node(
         package="ur_robot_driver",
         executable="urscript_interface",
         parameters=[{"robot_ip": robot_ip}],
+        condition=UnlessCondition(use_fake_hardware),
         output="screen",
     )
 
@@ -330,6 +365,19 @@ def launch_setup(context, *args, **kwargs):
         arguments=["-d", rviz_config_file],
     )
 
+    trajectory_until_node = Node(
+        package="ur_robot_driver",
+        executable="trajectory_until_node",
+        name="trajectory_until_node",
+        output="screen",
+        parameters=[
+            {
+                "motion_controller_uri": f"/{initial_joint_controller.perform(context)}/follow_joint_trajectory",
+                "until_action_uri": "tool_contact_controller/detect_tool_contact",
+            },
+        ],
+    )
+
     # Spawn controllers
     def controller_spawner(controllers, active=True):
         inactive_flags = ["--inactive"] if not active else []
@@ -353,15 +401,18 @@ def launch_setup(context, *args, **kwargs):
         "force_torque_sensor_broadcaster",
         "tcp_pose_broadcaster",
         "ur_configuration_controller",
+        "friction_model_controller",
     ]
     controllers_inactive = [
         "scaled_joint_trajectory_controller",
         "joint_trajectory_controller",
         "forward_velocity_controller",
         "forward_position_controller",
+        "forward_effort_controller",
         "force_mode_controller",
         "passthrough_trajectory_controller",
         "freedrive_mode_controller",
+        "tool_contact_controller",
     ]
     if activate_joint_controller.perform(context) == "true":
         controllers_active.append(initial_joint_controller.perform(context))
@@ -380,11 +431,12 @@ def launch_setup(context, *args, **kwargs):
         ur_control_node,
         dashboard_client_node,
         robot_state_helper_node,
-        tool_communication_node,
+        tool_communication_script,
         controller_stopper_node,
         urscript_interface,
         robot_state_publisher_node,
         rviz_node,
+        trajectory_until_node,
     ] + controller_spawners
 
     return nodes_to_start
@@ -396,17 +448,20 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "ur_type",
-            description="Type/series of used UR robot.",
+            description="Robot model of the used UR robot.",
             choices=[
                 "ur3",
-                "ur3e",
                 "ur5",
+                "ur10",
+                "ur3e",
                 "ur5e",
                 "ur7e",
-                "ur10",
                 "ur10e",
                 "ur12e",
                 "ur16e",
+                "ur8long",
+                "ur15",
+                "ur18",
                 "ur20",
                 "ur30",
             ],
@@ -457,7 +512,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_package",
-            default_value="ros_study",
+            default_value="ur_description",
             description="Description package with robot URDF/XACRO files. Usually the argument "
             "is not set, it enables use of a custom description.",
         )
@@ -465,7 +520,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="ur5e_with_ee_for_real_robot.xacro",
+            default_value="ur.urdf.xacro",
             description="URDF/XACRO description file with the robot.",
         )
     )
@@ -657,4 +712,13 @@ def generate_launch_description():
             description="Port that will be opened for trajectory control.",
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "verify_robot_model",
+            default_value="false",
+            description="Whether the robot model should be verified against the actual robot. "
+            "This is recommended to be true, but can be set to false for faster startup.",
+        )
+    )
+
     return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])

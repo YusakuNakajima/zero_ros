@@ -637,6 +637,7 @@
                             href="https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/tree/humble"
                             target="_blank"
                             style="color: #007bff; text-decoration: underline;">Universal_Robots_ROS2_Driver</a></li>
+                    <li>動作確認バージョン：<code>ros-humble-ur 2.15.0</code>（2026-10 時点）</li>
                     <li><span style="color: rgb(255, 104, 104); font-weight: bold;">※The Constructを使っている人は環境立ち上げの度にインストールが必要なので注意</span></li>
                 </ul>
                 <pre><code data-trim class="bash">
@@ -700,6 +701,7 @@ sudo apt install --reinstall \
                                 <li>起動用 launch は
                                     <code>ros_study/launch/ur5e_bringup_for_real_robot.launch.py</code>です
                                 </li>
+                                <li><code>ros-humble-ur 2.15.0</code> で動作確認しています</li>
                             </ul>
                         </div>
                     </div>
@@ -2292,7 +2294,7 @@ source install/setup.bash
 # 3. 実機用 launch（Planning Scene も自動で読み込まれる）
 ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
   robot_ip:=192.168.58.42 \
-  use_mock_hardware:=false \
+  use_fake_hardware:=false \
   use_moveit:=true
                     </code></pre>
                 </section>
