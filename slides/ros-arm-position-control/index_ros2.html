@@ -2283,7 +2283,7 @@ ros2 run ros_study_cpp ur_moveit_demo_cpp
                     <p style="font-size: 0.6em;">乳鉢の mesh を <a
                             href="https://raw.githubusercontent.com/quantumbeam/powder_grinding_ros2/main/grinding_scene_description/meshes/asone_agate_mortar_80x100x36.stl"
                             target="_blank">ダウンロード</a>して <code>ros_study/meshes/</code> に置き、ビルドして起動します</p>
-                    <pre><code data-trim class="bash" style="font-size: 0.75em;">
+                    <pre><code data-trim class="bash" style="font-size: 0.65em;">
 # 1. mesh を配置
 cd ~/zero_ros/ros2_ws/src/ros_study/meshes
 cp ~/Downloads/asone_agate_mortar_80x100x36.stl .
@@ -2291,11 +2291,13 @@ cp ~/Downloads/asone_agate_mortar_80x100x36.stl .
 cd ~/zero_ros/ros2_ws
 colcon build --packages-select ros_study_cpp ros_study
 source install/setup.bash
-# 3. 実機用 launch（Planning Scene も自動で読み込まれる）
+# 3. 実機用 launch
 ros2 launch ros_study ur5e_bringup_for_real_robot.launch.py \
   robot_ip:=192.168.58.42 \
   use_fake_hardware:=false \
   use_moveit:=true
+# 4. 別のターミナルで Planning Scene を読み込む
+ros2 launch ros_study load_planning_scene.launch.py
                     </code></pre>
                 </section>
 
