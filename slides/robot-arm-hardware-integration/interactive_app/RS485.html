@@ -14,9 +14,18 @@
             background-color: #4f46e5 !important;
             color: white !important;
         }
-        /* スライド埋め込み時：見出しを省いて1画面に収める */
-        .embed header { display: none; }
-        .embed body > .container { padding: 12px; max-width: none; }
+        #visualizer-canvas { display: block; width: 100%; }
+        /* スライド埋め込み時：見出しと解説を省いて1画面に収める */
+        .embed header, .embed #explanation { display: none; }
+        .embed body > .container { padding: 8px; max-width: none; }
+        .embed main { padding: 12px; }
+        .embed main > div { margin-bottom: 10px; }
+        .embed #sent-binary, .embed #received-wrap { height: 2.5rem; }
+        .embed #received-text { font-size: 1.25rem; }
+        .embed .data-box { padding: 8px 12px; }
+        .embed #rs232-btn, .embed #rs485-btn { padding: 6px 4px; font-size: 13px; white-space: nowrap; }
+        .embed label[for="noise-toggle"] + p { display: none; }
+        .embed main > .grid:first-child { gap: 12px; }
     </style>
     <script>if (window.self !== window.top) document.documentElement.classList.add('embed');</script>
 </head>
@@ -74,13 +83,13 @@
 
             <!-- Data Display -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div class="bg-gray-700 p-4 rounded-lg">
+                <div class="data-box bg-gray-700 p-4 rounded-lg">
                     <h3 class="font-semibold text-indigo-400 mb-2">送信データ (バイナリ)</h3>
                     <p id="sent-binary" class="font-mono break-all text-gray-300 h-16 overflow-y-auto"></p>
                 </div>
-                <div class="bg-gray-700 p-4 rounded-lg">
+                <div class="data-box bg-gray-700 p-4 rounded-lg">
                     <h3 class="font-semibold text-indigo-400 mb-2">受信データ (デコード結果)</h3>
-                    <div class="flex items-center h-16">
+                    <div id="received-wrap" class="flex items-center h-16">
                         <p id="received-text" class="font-mono break-all text-2xl"></p>
                     </div>
                 </div>
@@ -168,8 +177,12 @@
         const resizeCanvas = () => {
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
+            // 埋め込み時は高さを抑えて、操作と結果が1画面に収まるようにする
+            const embedded = document.documentElement.classList.contains('embed');
+            const cssHeight = embedded ? Math.max(120, Math.min(200, window.innerHeight * 0.32)) : rect.width * 0.4;
+            canvas.style.height = cssHeight + 'px';
             canvas.width = rect.width * dpr;
-            canvas.height = (rect.width * 0.4) * dpr; // Maintain aspect ratio
+            canvas.height = cssHeight * dpr;
             ctx.scale(dpr, dpr);
         };
 
@@ -207,6 +220,20 @@
                 ctx.lineTo(w - 90, h / 2);
                 ctx.stroke();
                 ctx.fillText('TxD', 100, h/2 - 10);
+                // 受信側は線の電圧がこの線より上か下かで 0/1 を判定する
+                ctx.save();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = '#f6e05e'; // yellow-300
+                ctx.beginPath();
+                ctx.moveTo(90, h / 2);
+                ctx.lineTo(w - 90, h / 2);
+                ctx.stroke();
+                ctx.restore();
+                ctx.fillStyle = '#f6e05e';
+                ctx.textAlign = 'right';
+                ctx.fillText('しきい値', w - 95, h / 2 - 10);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#a0aec0';
                 
                 const gndY = h * 0.95;
                 ctx.beginPath();
@@ -244,6 +271,8 @@
             
             const receptionResults = new Array(totalBits);
             const noiseAmplitude = h * 0.25; 
+            // ビットごとのノイズ。波形の描画と受信判定の両方に同じ値を使う
+            const noises = Array.from({ length: totalBits }, () => noiseToggle.checked ? (Math.random() - 0.5) * noiseAmplitude : 0);
 
             const animate = (timestamp) => {
                 if (!startTime) startTime = timestamp;
@@ -285,14 +314,15 @@
                     const x2 = (i === currentBitIndex) ? startX + ((i + (elapsedTime % bitDuration) / bitDuration) / totalBits) * signalPathLength : nextX;
 
                     if (mode === 'rs232') {
-                        const targetY = bit === '0' ? highLevel : lowLevel;
+                        const targetY = (bit === '0' ? highLevel : lowLevel) + noises[i];
                         pathA.lineTo(x1, lastY_A);
                         pathA.lineTo(x1, targetY);
                         pathA.lineTo(x2, targetY);
                         lastY_A = targetY;
                     } else { // rs485
-                        const targetY_A = bit === '1' ? h * 0.3 : h * 0.5;
-                        const targetY_B = bit === '1' ? h * 0.7 : h * 0.5;
+                        // ノイズは A と B に同じだけ乗る（差は変わらない）
+                        const targetY_A = (bit === '1' ? h * 0.3 : h * 0.5) + noises[i];
+                        const targetY_B = (bit === '1' ? h * 0.7 : h * 0.5) + noises[i];
                         pathA.lineTo(x1, lastY_A);
                         pathA.lineTo(x1, targetY_A);
                         pathA.lineTo(x2, targetY_A);
@@ -327,10 +357,7 @@
                     if (receptionResults[i] === undefined) {
                         const originalBit = binaryStr[i];
                         let receivedBit = originalBit;
-                        let noise = 0;
-                        if (noiseToggle.checked) {
-                            noise = (Math.random() - 0.5) * noiseAmplitude;
-                        }
+                        const noise = noises[i];
 
                         if (mode === 'rs232') {
                             const bitCenterY = originalBit === '0' ? highLevel : lowLevel;
