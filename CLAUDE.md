@@ -151,7 +151,7 @@ Reveal.initialize({
 3. **[ゼロからのROS入門](slides/ros-introduction/)** - ROS学習戦略と効果的な学習リソースの選択方法
 4. **[ゼロからのROS入門 - ロボットモデルの表示](slides/ros-model-display/)** - URDF/XACROによるロボットモデリング、TFシステム、RVizでの可視化
 5. **[ゼロからのROS入門 - ROSにおけるシミュレータ](slides/ros-simulator-connection/)** - fake_jointとGazeboシミュレータの使い方、軽量動作確認と物理シミュレーション
-6. **[ゼロからのROS入門 ~アーム位置制御とモーションプランニング~](slides/ros-arm-position-control/)** - MoveItフレームワーク、IKソルバー、JointTrajectoryController実装
+6. **[ゼロからのROS入門 ~位置制御とモーションプランニング~](slides/ros-arm-position-control/)** - MoveItフレームワーク、IKソルバー、JointTrajectoryController実装
 
 ## 学習順序
 
