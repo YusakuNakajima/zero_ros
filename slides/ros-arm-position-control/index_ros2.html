@@ -337,6 +337,7 @@
             <section>
                 <section>
                     <h2 style="font-size: 1.3em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">前提知識</span>リアルタイムカーネル</h2>
+                    <p style="font-size: 0.6em; margin: 0 0 6px;">ROS 2 でロボットを制御するときは<strong style="color: #4ade80;">リアルタイムカーネルが推奨</strong>されています（ros2_control・UR ドライバの公式ドキュメント）</p>
                     <svg viewBox="0 0 760 175" style="width: 92%; max-height: 26vh;">
                     <line x1="150" y1="18" x2="150" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
                     <line x1="210" y1="18" x2="210" y2="150" stroke="#475569" stroke-width="1" stroke-dasharray="3 4"/>
@@ -1886,13 +1887,13 @@ ros2 run ros_study jtc_with_ik_demo
                 </section>
 
                 <section>
-                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>台形速度 vs Sカーブ</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>直角の角：経路か制御か</h2>
                     <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
-                        <a href="interactive_app/jerk_vibration.html" target="_blank"
+                        <a href="interactive_app/corner_path_vs_control.html" target="_blank"
                             style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                        　加速度の段差をなくす（Sカーブ）だけで、静止点の残留振動が小さくなる
+                        　直角は制御を頑張っても行き過ぎる → <strong>経路を直角以外にする</strong>しかない
                     </p>
-                    <iframe data-src="interactive_app/jerk_vibration.html" width="100%" height="470"
+                    <iframe data-src="interactive_app/corner_path_vs_control.html" width="100%" height="470"
                         frameborder="0"></iframe>
                 </section>
 
@@ -1904,11 +1905,7 @@ ros2 run ros_study jtc_with_ik_demo
                         </div>
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #a3e635; border-radius: 10px; padding: 10px;">
-                            <strong style="color: #a3e635;">時間付け</strong><br>TOTG / Ruckig
-                        </div>
-                        <div style="align-self: center;">→</div>
-                        <div style="flex: 1; border: 2px solid #a3e635; border-radius: 10px; padding: 10px;">
-                            <strong style="color: #a3e635;">補間</strong><br>JTC
+                            <strong style="color: #a3e635;">時間付け・補間</strong><br>JTC
                         </div>
                         <div style="align-self: center;">→</div>
                         <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 10px;">
@@ -1917,7 +1914,6 @@ ros2 run ros_study jtc_with_ik_demo
                     </div>
                     <ul style="font-size: 0.6em; margin-top: 20px;">
                         <li>MoveIt の経路は角が残りやすい → 角では<strong>自動で止まる手前まで減速</strong></li>
-                        <li>既定の TOTG は加速度が段差状 → 振動が気になるなら <strong>Ruckig</strong></li>
                         <li>JTC は速度・加速度まで入れないと次数が落ちる（前章）</li>
                     </ul>
                 </section>
@@ -2442,9 +2438,9 @@ ros2 launch ros_study load_planning_scene.launch.py
                         </div>
                         <div style="flex: 1; font-size: 0.6em; text-align: left;">
                             <ul>
-                                <li>座標を<strong>時刻つきで保存</strong>している</li>
+                                <li>関節角（<code>/joint_states</code>）から作った座標を<strong>時刻つきで保存</strong>している</li>
                                 <li>「いつの座標か」を指定して引ける</li>
-                                <li>処理が遅れても<strong>撮影時刻の姿勢</strong>で変換できる</li>
+                                <li>センサの値が遅れて届いても<strong>測った時刻の姿勢</strong>で変換できる</li>
                                 <li>古いデータはバッファから消える</li>
                             </ul>
                             <p style="font-size: 0.8em;">仕組みの詳細は<a href="https://www.slideshare.net/slideshow/tftf2/46875007"

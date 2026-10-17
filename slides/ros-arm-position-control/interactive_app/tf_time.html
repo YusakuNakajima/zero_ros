@@ -32,15 +32,15 @@
 </head>
 <body>
     <div class="panel">
-        <h3>手先カメラで撮影 → 画像処理の間もアームは動く</h3>
+        <h3>力センサでタッチして物の高さを測る（触れたらすぐ引き上げる）</h3>
         <canvas id="cvArm"></canvas>
         <div class="legend">
-            <span class="y">ボール</span>
-            <span class="r">最新の姿勢で変換</span>
-            <span class="g">撮影時刻の姿勢で変換（TF）</span>
+            <span class="y">触れた点（本当の高さ）</span>
+            <span class="r">届いた時の最新の姿勢で記録</span>
+            <span class="g">センサの時刻の姿勢で記録（TF）</span>
         </div>
         <div class="ctrl">
-            処理の遅れ <input type="range" id="delay" min="0" max="1.2" step="0.1" value="0.6"> <span id="delayV"></span>
+            力センサの値が届くまでの遅れ <input type="range" id="delay" min="0" max="0.3" step="0.01" value="0.12"> <span id="delayV"></span>
             <button id="pause">一時停止</button>
         </div>
         <div class="msg" id="msg"></div>
@@ -51,45 +51,53 @@
     </div>
 
     <script>
-        const L = [1.0, 0.8];
-        const BALL = [-0.9, 1.35];
-        const PERIOD = 2.5;        // 撮影間隔 [s]
-        const BUFFER = 3.0;        // TFバッファに残す長さ [s] (表示用)
-        const RATES = [{ name: '関節1 の TF', dt: 0.1, color: '#f472b6' }, { name: '関節2 の TF', dt: 0.25, color: '#4ade80' }];
+        // 単位は m。2 リンクのアームを横から見た図。手先を下ろして物に触れたら、すぐ引き上げる
+        const LINK = [0.45, 0.40];
+                const Z_TOP = 0.42, VZ = 0.25;  // 下ろし始める高さと、上下の速さ [m/s]
+        const VX = 0.06;                // 測りながら横にも動く [m/s]
+        const OBJ = [                   // 机の上の物（x の範囲と高さ）
+            { x0: 0.30, x1: 0.40, h: 0.16 },
+            { x0: 0.45, x1: 0.55, h: 0.08 },
+            { x0: 0.58, x1: 0.66, h: 0.22 },
+        ];
+        const BUFFER = 3.0;             // 表示するバッファの長さ [s]（ROS の既定は 10 s）
+        const JS_DT = 0.05;             // 表示上の /joint_states の間隔（実機の UR は 2 ms = 500 Hz）
 
-        // アームの関節角 (時間の関数)
+        // 1 回の測定 = 下ろす → 触れたら引き上げる → 次の物の上へ移動（TRANSIT 秒）
+        const TRANSIT = 0.6, START = [0];
+        const down = (k) => (Z_TOP - objOf(k).h) / VZ;
+        for (let k = 0; k < 500; k++) START.push(START[k] + 2 * down(k) + TRANSIT);
+        function objOf(k) { return OBJ[((k % OBJ.length) + OBJ.length) % OBJ.length]; }
+        function cycleOf(t) { let k = 0; while (START[k + 1] <= t) k++; return k; }
+        function contactTime(k) { return START[Math.max(0, k)] + down(k); }
+        const xAt = (k, ts) => (objOf(k).x0 + objOf(k).x1) / 2 + VX * (ts - down(k));
+
+        // 手先の位置（時間の関数）
+        function tip(t) {
+            const k = cycleOf(t), o = objOf(k), td = down(k), ts = t - START[k];
+            if (ts < td) return [xAt(k, ts), Z_TOP - VZ * ts];
+            if (ts < 2 * td) return [xAt(k, ts), o.h + VZ * (ts - td)];
+            const w = (ts - 2 * td) / TRANSIT, x0 = xAt(k, 2 * td), x1 = xAt(k + 1, 0);
+            return [x0 + (x1 - x0) * w, Z_TOP];
+        }
+        // 逆運動学（肘を上に）。実機では関節角が /joint_states で届き、それが TF になる
         function q(t) {
-            return [1.25 + 0.55 * Math.sin(0.9 * t), -0.6 + 0.45 * Math.sin(1.3 * t + 1)];
+            const [x, z] = tip(t);
+            const c2 = (x * x + z * z - LINK[0] ** 2 - LINK[1] ** 2) / (2 * LINK[0] * LINK[1]);
+            const q2 = -Math.acos(Math.max(-1, Math.min(1, c2)));
+            const q1 = Math.atan2(z, x) - Math.atan2(LINK[1] * Math.sin(q2), LINK[0] + LINK[1] * Math.cos(q2));
+            return [q1, q2];
         }
-        // カメラ (手先) の位置と向き
-        function cam(qq) {
-            const e = [L[0] * Math.cos(qq[0]), L[0] * Math.sin(qq[0])];
+        function fk(qq) {
+            const e = [LINK[0] * Math.cos(qq[0]), LINK[0] * Math.sin(qq[0])];
             const a = qq[0] + qq[1];
-            return { elbow: e, p: [e[0] + L[1] * Math.cos(a), e[1] + L[1] * Math.sin(a)], a };
+            return { elbow: e, p: [e[0] + LINK[1] * Math.cos(a), e[1] + LINK[1] * Math.sin(a)] };
         }
-        // ワールド → カメラ座標
-        function toCam(c, w) {
-            const dx = w[0] - c.p[0], dy = w[1] - c.p[1];
-            return [Math.cos(c.a) * dx + Math.sin(c.a) * dy, -Math.sin(c.a) * dx + Math.cos(c.a) * dy];
-        }
-        // カメラ座標 → ワールド
-        function toWorld(c, m) {
-            return [c.p[0] + Math.cos(c.a) * m[0] - Math.sin(c.a) * m[1], c.p[1] + Math.sin(c.a) * m[0] + Math.cos(c.a) * m[1]];
-        }
-
-        // TF が保存しているのは飛び飛びの時刻のデータ。lookup は前後のデータを補間する
-        function stampsBefore(dt, now) {
-            const out = [];
-            for (let s = Math.floor(now / dt) * dt; s > now - BUFFER - dt; s -= dt) out.push(s);
-            return out;
-        }
+        // TF の lookup：前後の /joint_states を補間して、その時刻の姿勢を返す
         function tfLookup(t) {
-            // 関節ごとに前後のスタンプで線形補間
-            return RATES.map((r, j) => {
-                const s0 = Math.floor(t / r.dt) * r.dt, s1 = s0 + r.dt;
-                const w = (t - s0) / r.dt;
-                return q(s0)[j] * (1 - w) + q(s1)[j] * w;
-            });
+            const s0 = Math.floor(t / JS_DT) * JS_DT, w = (t - s0) / JS_DT;
+            const a = q(s0), b = q(s0 + JS_DT);
+            return [a[0] * (1 - w) + b[0] * w, a[1] * (1 - w) + b[1] * w];
         }
 
         function setup(cv) {
@@ -104,114 +112,109 @@
         let simT = 0, last = performance.now(), paused = false;
         const delayEl = document.getElementById('delay');
 
-        function marker(ctx, x, y, color, r, cross) {
-            ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
-            if (cross) {
-                ctx.beginPath(); ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r); ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r); ctx.stroke();
-            } else {
-                ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.stroke();
-            }
-        }
-
         function draw() {
             const delay = +delayEl.value;
-            document.getElementById('delayV').textContent = delay.toFixed(1) + ' s';
-            // 直近の撮影とその処理完了時刻
-            const capT = Math.floor(simT / PERIOD) * PERIOD;
-            const doneT = capT + delay;
-            const processed = simT >= doneT;
+            document.getElementById('delayV').textContent = (delay * 1000).toFixed(0) + ' ms';
+            // 直近の接触と、その値が届く時刻
+            let k = cycleOf(simT);
+            if (simT < contactTime(k)) k -= 1;
+            const tc = contactTime(k), arrive = tc + delay, arrived = simT >= arrive;
+            const o = objOf(k);
 
             // ---------- アーム ----------
             {
                 const { ctx, w, h } = setup(document.getElementById('cvArm'));
-                const scale = Math.min(w / 4.2, h / 2.25);
-                const ox = w * 0.55, oy = h * 0.9;
+                const scale = Math.min(w / 1.05, h / 0.58);
+                const ox = w * 0.5 - 0.38 * scale, oy = h - 14;
                 const to = p => [ox + p[0] * scale, oy - p[1] * scale];
                 ctx.clearRect(0, 0, w, h);
+                // 机と物
+                ctx.fillStyle = '#334155';
+                const [tx0, ty] = to([-0.1, 0]), [tx1] = to([0.75, 0]);
+                ctx.fillRect(tx0, ty, tx1 - tx0, 6);
+                OBJ.forEach(ob => {
+                    const [a, b] = to([ob.x0, ob.h]), [c, d] = to([ob.x1, 0]);
+                    ctx.fillStyle = ob === o ? '#64748b' : '#475569';
+                    ctx.fillRect(a, b, c - a, d - b);
+                });
+                // アーム（いま）
+                const now = fk(q(simT));
+                ctx.fillStyle = '#475569'; const b = to([0, 0]); ctx.fillRect(b[0] - 16, b[1] - 8, 32, 8);
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(...to([0, 0])); ctx.lineTo(...to(now.elbow)); ctx.lineTo(...to(now.p)); ctx.stroke();
+                const cp = to(now.p);
+                ctx.fillStyle = '#7dd3fc'; ctx.fillRect(cp[0] - 6, cp[1] - 4, 12, 8);
 
-                // 撮影時の姿勢 (半透明)
-                const cCap = cam(q(capT));
-                ctx.globalAlpha = 0.25; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 6; ctx.lineCap = 'round';
-                ctx.beginPath(); ctx.moveTo(...to([0, 0])); ctx.lineTo(...to(cCap.elbow)); ctx.lineTo(...to(cCap.p)); ctx.stroke();
-                ctx.globalAlpha = 1;
-
-                // 現在の姿勢
-                const cNow = cam(q(simT));
-                ctx.fillStyle = '#475569'; const b = to([0, 0]); ctx.fillRect(b[0] - 18, b[1], 36, 9);
-                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 10;
-                ctx.beginPath(); ctx.moveTo(...to([0, 0])); ctx.lineTo(...to(cNow.elbow)); ctx.lineTo(...to(cNow.p)); ctx.stroke();
-                // 撮影時の視線
-                const cc = to(cCap.p), bb = to(BALL);
-                ctx.strokeStyle = 'rgba(251,191,36,0.45)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 4]);
-                ctx.beginPath(); ctx.moveTo(cc[0], cc[1]); ctx.lineTo(bb[0], bb[1]); ctx.stroke(); ctx.setLineDash([]);
-                const cp = to(cNow.p);
-                ctx.fillStyle = '#7dd3fc'; ctx.fillRect(cp[0] - 7, cp[1] - 7, 14, 14);
-
-                // ボール
-                const bp = to(BALL);
-                ctx.beginPath(); ctx.arc(bp[0], bp[1], 12, 0, 2 * Math.PI); ctx.fillStyle = '#fbbf24'; ctx.fill();
-
-                // 撮影フラッシュ
-                if (simT - capT < 0.15) {
-                    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(0, 0, w, h);
+                const msg = document.getElementById('msg');
+                if (simT - tc < 0.5) {
+                    // 触れた点
+                    const pc = to(tip(tc));
+                    ctx.beginPath(); ctx.arc(pc[0], pc[1], 6, 0, 2 * Math.PI); ctx.fillStyle = '#fbbf24'; ctx.fill();
                 }
-
-                if (processed) {
-                    const m = toCam(cCap, BALL);              // 撮影時に測ったボールの位置 (カメラ座標)
-                    const wrong = toWorld(cam(q(doneT)), m);  // 処理完了時の最新姿勢で変換
-                    const right = toWorld(cam(tfLookup(capT)), m); // 撮影時刻の姿勢で変換
-                    const wp = to(wrong), rp = to(right);
-                    marker(ctx, wp[0], wp[1], '#f87171', 10, true);
-                    marker(ctx, rp[0], rp[1], '#4ade80', 17, false);
-                    ctx.strokeStyle = '#f87171'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
-                    ctx.beginPath(); ctx.moveTo(bp[0], bp[1]); ctx.lineTo(wp[0], wp[1]); ctx.stroke(); ctx.setLineDash([]);
-                    const err = Math.hypot(wrong[0] - BALL[0], wrong[1] - BALL[1]);
-                    document.getElementById('msg').innerHTML =
-                        `撮影 t=${capT.toFixed(1)}s → 処理完了 t=${doneT.toFixed(1)}s。最新の姿勢を使うと <b style="color:#f87171">${(err * 100).toFixed(0)} cm ずれる</b>。` +
-                        `TFは<b>撮影時刻 ${capT.toFixed(1)}s の姿勢</b>を引いて変換するので正しい位置になる`;
+                if (arrived) {
+                    const wrong = fk(q(arrive)).p;          // 値が届いた時の最新の姿勢
+                    const right = fk(tfLookup(tc)).p;      // センサの時刻の姿勢（TF）
+                    const wp = to(wrong), rp = to(right), pc = to(tip(tc));
+                    ctx.beginPath(); ctx.arc(pc[0], pc[1], 6, 0, 2 * Math.PI); ctx.fillStyle = '#fbbf24'; ctx.fill();
+                    ctx.strokeStyle = '#f87171'; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.moveTo(wp[0] - 7, wp[1] - 7); ctx.lineTo(wp[0] + 7, wp[1] + 7);
+                    ctx.moveTo(wp[0] + 7, wp[1] - 7); ctx.lineTo(wp[0] - 7, wp[1] + 7); ctx.stroke();
+                    ctx.strokeStyle = '#4ade80';
+                    ctx.beginPath(); ctx.arc(rp[0], rp[1], 12, 0, 2 * Math.PI); ctx.stroke();
+                    const errMm = (wrong[1] - o.h) * 1000;
+                    msg.innerHTML =
+                        `t=${tc.toFixed(2)}s に接触 → 値が届いたのは t=${arrive.toFixed(2)}s。最新の姿勢で記録すると高さが <b style="color:#f87171">${errMm.toFixed(0)} mm 高く</b>なる。` +
+                        `TFで<b>センサの時刻 ${tc.toFixed(2)}s の姿勢</b>を引けば ${(o.h * 1000).toFixed(0)} mm と正しく測れる`;
                 } else {
-                    document.getElementById('msg').innerHTML = `t=${capT.toFixed(1)}s に撮影 → 画像処理中…（その間もアームは動いている）`;
+                    msg.innerHTML = `t=${tc.toFixed(2)}s に接触 → 力センサの値はまだ届いていない（その間もアームは引き上げている）`;
                 }
                 ctx.fillStyle = '#94a3b8'; ctx.font = '12px sans-serif';
-                ctx.fillText(`いま t = ${simT.toFixed(1)} s`, 10, 18);
+                ctx.fillText(`いま t = ${simT.toFixed(2)} s`, 10, 18);
             }
 
             // ---------- タイムライン ----------
             {
                 const { ctx, w, h } = setup(document.getElementById('cvTl'));
                 ctx.clearRect(0, 0, w, h);
-                const left = 92, right = w - 10;
+                const left = 120, right = w - 10;
                 const X = t => left + (t - (simT - BUFFER - 0.6)) / (BUFFER + 0.6) * (right - left);
-                const rows = [...RATES, { name: 'カメラ画像', dt: PERIOD, color: '#fbbf24' }];
-                const rowY = i => 22 + i * 30;
-                // バッファから消えた領域
+                const rowY = i => 20 + i * 30;
                 ctx.fillStyle = 'rgba(148,163,184,0.12)';
                 ctx.fillRect(left, 6, X(simT - BUFFER) - left, h - 30);
                 ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
                 ctx.fillText('古いデータは削除', left + 4, h - 10);
-                rows.forEach((r, i) => {
-                    ctx.fillStyle = '#cbd5e1'; ctx.font = '12px sans-serif';
-                    ctx.fillText(r.name, 6, rowY(i) + 4);
-                    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.moveTo(left, rowY(i)); ctx.lineTo(right, rowY(i)); ctx.stroke();
-                    stampsBefore(r.dt, simT).forEach(s => {
-                        if (s < simT - BUFFER - 0.6) return;
-                        const old = s < simT - BUFFER;
-                        ctx.fillStyle = old ? '#334155' : r.color;
-                        ctx.fillRect(X(s) - 2, rowY(i) - 7, 4, 14);
-                    });
-                });
+                // /joint_states → TF
+                ctx.fillStyle = '#cbd5e1'; ctx.font = '12px sans-serif';
+                ctx.fillText('関節角 → TF', 6, rowY(0) + 4);
+                ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif';
+                ctx.fillText('（実機は 500 Hz）', 6, rowY(0) + 16);
+                for (let s = Math.floor(simT / JS_DT) * JS_DT; s > simT - BUFFER - 0.6; s -= JS_DT) {
+                    ctx.fillStyle = s < simT - BUFFER ? '#334155' : '#4ade80';
+                    ctx.fillRect(X(s) - 1, rowY(0) - 7, 2, 14);
+                }
+                // 力センサの接触イベント
+                ctx.fillStyle = '#cbd5e1'; ctx.font = '12px sans-serif';
+                ctx.fillText('力センサ（接触）', 6, rowY(1) + 4);
+                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(left, rowY(1)); ctx.lineTo(right, rowY(1)); ctx.stroke();
+                for (let j = k; j > k - 3; j--) {
+                    const s = contactTime(j);
+                    if (s < simT - BUFFER - 0.6) continue;
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.fillRect(X(s) - 2, rowY(1) - 7, 4, 14);
+                }
                 // 「いま」
                 ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.moveTo(X(simT), 6); ctx.lineTo(X(simT), h - 24); ctx.stroke();
-                ctx.fillStyle = '#e2e8f0'; ctx.fillText('いま', X(simT) - 26, h - 10);
-                // 撮影時刻で lookup
-                if (capT > simT - BUFFER) {
+                ctx.fillStyle = '#e2e8f0'; ctx.font = '11px sans-serif'; ctx.fillText('いま', X(simT) - 26, h - 10);
+                // 値が届いたら、接触の時刻（センサのスタンプ）で lookup
+                if (arrived) {
+                    ctx.strokeStyle = '#f87171'; ctx.lineWidth = 1.5; ctx.setLineDash([2, 3]);
+                    ctx.beginPath(); ctx.moveTo(X(arrive), 6); ctx.lineTo(X(arrive), h - 24); ctx.stroke();
                     ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
-                    ctx.beginPath(); ctx.moveTo(X(capT), 6); ctx.lineTo(X(capT), h - 24); ctx.stroke(); ctx.setLineDash([]);
-                    ctx.fillStyle = '#4ade80';
-                    ctx.textAlign = 'right';
-                    ctx.fillText('撮影時刻で lookup →', X(capT) - 4, h - 10);
+                    ctx.beginPath(); ctx.moveTo(X(tc), 6); ctx.lineTo(X(tc), h - 24); ctx.stroke(); ctx.setLineDash([]);
+                    ctx.fillStyle = '#4ade80'; ctx.textAlign = 'right';
+                    ctx.fillText('センサの時刻で lookup →', X(tc) - 4, rowY(1) + 20);
                     ctx.textAlign = 'left';
                 }
             }
@@ -220,7 +223,7 @@
         function loop(now) {
             const dt = Math.min(0.05, (now - last) / 1000);
             last = now;
-            if (!paused) simT += dt;
+            if (!paused) simT += dt * 0.5;   // 見やすいよう 0.5 倍速
             draw();
             requestAnimationFrame(loop);
         }
@@ -230,7 +233,7 @@
         };
         delayEl.addEventListener('input', draw);
         window.addEventListener('resize', draw);
-        simT = 3.4;
+        simT = START[3] + 0.3;
         draw();
         requestAnimationFrame(loop);
     </script>
