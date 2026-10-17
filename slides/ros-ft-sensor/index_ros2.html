@@ -85,12 +85,15 @@
                             <p style="margin: 0; color: #9ca3af;">例：Franka, KUKA LBR iiwa</p>
                         </div>
                     </div>
-                    <p style="font-size: 0.6em;">→ 本スライドでは <strong>① 6軸FTセンサ</strong> を扱います（センサなしの方法も ↓）</p>
+                    <p style="font-size: 0.6em;">→ 本スライドでは <strong>① 6軸FTセンサ</strong> を扱います（センサなしの方法は次の章のコラムで →）</p>
                 </section>
 
-                <!-- モータ電流からのトルク推定 -->
+            </section>
+
+            <!-- コラム：センサなしで力を測る（モータ電流） -->
+            <section>
                 <section>
-                    <h2>③ モータ電流から推定</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>③ モータ電流から推定</h2>
                     <svg viewBox="0 0 760 230" style="width: 86%; max-height: 34vh;">
                         <defs>
                             <marker id="ah-c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker>
@@ -126,7 +129,7 @@
                 </section>
 
                 <section>
-                    <h2>高減速ギアだと誤差が大きい</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>高減速ギアだと誤差が大きい</h2>
                     <svg viewBox="0 0 760 250" style="width: 86%; max-height: 38vh;">
                         <defs>
                             <marker id="ah-f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
@@ -169,7 +172,42 @@
                 </section>
 
                 <section>
-                    <h2>DD・QDD なら実用的</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>ギアの後ろで測るという手も</h2>
+                    <svg viewBox="0 0 760 200" style="width: 82%; max-height: 32vh;">
+                        <defs>
+                            <marker id="ah-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                        </defs>
+                        <rect x="40" y="70" width="80" height="64" rx="8" fill="#4b5563"/>
+                        <text x="80" y="160" fill="#9ca3af" font-size="16" text-anchor="middle">モータ</text>
+                        <rect x="120" y="88" width="30" height="28" fill="#6b7280"/>
+                        <rect x="150" y="60" width="110" height="84" rx="10" fill="#7c2d12"/>
+                        <g stroke="#fca5a5" stroke-width="2" opacity="0.7">
+                            <line x1="160" y1="70" x2="250" y2="134"/><line x1="160" y1="94" x2="230" y2="134"/><line x1="180" y1="70" x2="250" y2="112"/>
+                        </g>
+                        <text x="205" y="166" fill="#fca5a5" font-size="16" text-anchor="middle">ハーモニックドライブ</text>
+                        <text x="205" y="186" fill="#fca5a5" font-size="16" text-anchor="middle">摩擦はここで発生</text>
+                        <rect x="270" y="56" width="70" height="92" rx="10" fill="#1e3a8a" stroke="#60a5fa" stroke-width="3"/>
+                        <text x="305" y="98" fill="#bfdbfe" font-size="16" text-anchor="middle">トルク</text>
+                        <text x="305" y="118" fill="#bfdbfe" font-size="16" text-anchor="middle">センサ</text>
+                        <text x="305" y="44" fill="#60a5fa" font-size="16" text-anchor="middle">ギアの出力側</text>
+                        <line x1="340" y1="102" x2="560" y2="102" stroke="#9ca3af" stroke-width="14" stroke-linecap="round"/>
+                        <line x1="560" y1="40" x2="560" y2="88" stroke="#f87171" stroke-width="5" marker-end="url(#ah-g)"/>
+                        <text x="572" y="52" fill="#f87171" font-size="18">外力</text>
+                        <path d="M540,120 Q450,160 350,128" fill="none" stroke="#f87171" stroke-width="4" marker-end="url(#ah-g)"/>
+                        <text x="450" y="176" fill="#4ade80" font-size="18" text-anchor="middle" font-weight="bold">摩擦の手前で届く ✓</text>
+                        <text x="640" y="100" fill="#e5e7eb" font-size="18">Franka</text>
+                        <text x="640" y="126" fill="#e5e7eb" font-size="18">KUKA iiwa</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>高減速ギアは<strong>そのまま</strong>、ギアの<strong>出力側に関節トルクセンサ</strong>を入れる</li>
+                        <li>摩擦・ヒステリシスはセンサの手前で起きる → <strong>外力だけ</strong>を測れる</li>
+                        <li>Franka・KUKA LBR iiwa（DLR の軽量アームの系譜）が代表例 ＝ ② 関節トルクセンサ</li>
+                        <li>対策は2通り：<strong>ギアの後ろで測る</strong>（協働ロボット）か <strong>減速比を下げる</strong>（QDD）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>DD・QDD なら実用的</h2>
                     <svg viewBox="0 0 760 170" style="width: 86%; max-height: 26vh;">
                         <defs>
                             <linearGradient id="gr-qdd" x1="0" x2="1" y1="0" y2="0">
@@ -201,7 +239,7 @@
                 </section>
 
                 <section>
-                    <h2>四足・ヒューマノイドの主流</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>四足・ヒューマノイドの主流</h2>
                     <div style="display: flex; align-items: center; gap: 24px;">
                         <div style="display: flex; gap: 10px; align-items: flex-end;">
                             <figure style="margin: 0;"><img src="media/unitree_go2.jpg" alt="Unitree Go2（四足）" style="height: 26vh; margin: 0; border-radius: 8px;"><figcaption style="font-size: 0.4em;">Unitree Go2（四足）</figcaption></figure>
@@ -218,7 +256,7 @@
                 </section>
 
                 <section>
-                    <h2>力の測り方 まとめ</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>力の測り方 まとめ</h2>
                     <table class="custom-table" style="font-size: 0.5em;">
                         <tr><th></th><th>精度</th><th>コスト</th><th>測れる場所</th><th>主な使い道</th></tr>
                         <tr><td><strong>① 6軸FTセンサ</strong></td><td>◎</td><td>高い</td><td>付けた所だけ</td><td>研磨・組立・力制御</td></tr>
@@ -376,6 +414,7 @@ wrench:
                         <li>対策②：ツールの質量・重心を登録して重力分を差し引く（<strong>重力補償</strong>）</li>
                     </ul>
                 </section>
+
             </section>
 
             <!-- スライド4: フォーストルクセンサの読み出し -->
