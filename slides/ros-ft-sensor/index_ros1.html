@@ -32,6 +32,61 @@
                 <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
             </section>
 
+            <!-- 力を測るセンサの種類 -->
+            <section>
+                <h2>力を測るセンサは2種類</h2>
+                <svg viewBox="0 0 760 300" style="width: 82%; max-height: 42vh;">
+                    <!-- 左：6軸FTセンサ（手先・ベース） -->
+                    <text x="190" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">① 6軸FTセンサ（手先・ベース）</text>
+                    <line x1="20" y1="285" x2="360" y2="285" stroke="#6b7280" stroke-width="3"/>
+                    <rect x="75" y="268" width="90" height="17" fill="#f59e0b"/>
+                    <rect x="85" y="228" width="70" height="40" fill="#9ca3af"/>
+                    <polyline points="120,228 120,130 240,85 300,130" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="280" y="130" width="40" height="12" fill="#6b7280"/>
+                    <rect x="276" y="142" width="48" height="20" fill="#f59e0b"/>
+                    <rect x="286" y="162" width="28" height="22" fill="#4b5563"/>
+                    <line x1="291" y1="184" x2="291" y2="215" stroke="#4b5563" stroke-width="7"/>
+                    <line x1="309" y1="184" x2="309" y2="215" stroke="#4b5563" stroke-width="7"/>
+                    <text x="332" y="160" fill="#f59e0b" font-size="20">FT</text>
+                    <text x="175" y="282" fill="#f59e0b" font-size="20">FT</text>
+                    <!-- 右：関節トルクセンサ -->
+                    <text x="575" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">② 関節トルクセンサ</text>
+                    <line x1="400" y1="285" x2="740" y2="285" stroke="#6b7280" stroke-width="3"/>
+                    <rect x="465" y="245" width="70" height="40" fill="#9ca3af"/>
+                    <polyline points="500,245 500,140 620,95 680,140" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                    <rect x="660" y="140" width="40" height="12" fill="#6b7280"/>
+                    <rect x="666" y="152" width="28" height="22" fill="#4b5563"/>
+                    <line x1="671" y1="174" x2="671" y2="205" stroke="#4b5563" stroke-width="7"/>
+                    <line x1="689" y1="174" x2="689" y2="205" stroke="#4b5563" stroke-width="7"/>
+                    <g fill="#1f2937" stroke="#f59e0b" stroke-width="5">
+                        <circle cx="500" cy="235" r="13"/>
+                        <circle cx="500" cy="140" r="13"/>
+                        <circle cx="620" cy="95" r="13"/>
+                        <circle cx="680" cy="140" r="13"/>
+                    </g>
+                    <g fill="#f59e0b" font-size="20" font-style="italic">
+                        <text x="520" y="242">τ₁</text>
+                        <text x="462" y="124">τ₂</text>
+                        <text x="610" y="72">τ₃</text>
+                        <text x="704" y="134">τ₄</text>
+                    </g>
+                </svg>
+                <div style="display: flex; gap: 24px; font-size: 0.55em; text-align: left;">
+                    <div style="flex: 1;">
+                        <p style="margin: 0;">1か所で力3＋トルク3を測る</p>
+                        <p style="margin: 0;">手先：ツールにかかる力を直接測る</p>
+                        <p style="margin: 0;">ベース：ロボット全体にかかる力を測る</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="margin: 0;">各関節に内蔵、1軸ずつトルクを測る</p>
+                        <p style="margin: 0;">ヤコビ行列で手先の力を推定</p>
+                        <p style="margin: 0;">アームのどこが触れても気づける</p>
+                        <p style="margin: 0; color: #9ca3af;">例：Franka, KUKA LBR iiwa</p>
+                    </div>
+                </div>
+                <p style="font-size: 0.6em;">→ 本スライドでは <strong>① 6軸FTセンサ</strong> を扱います</p>
+            </section>
+
             <!-- スライド2: 初めにフォーストルクセンサ -->
             <section>
                 <h2>本スライドの担当範囲</h2>
