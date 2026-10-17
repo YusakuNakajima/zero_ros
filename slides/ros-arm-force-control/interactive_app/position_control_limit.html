@@ -44,6 +44,12 @@
         }
         button:hover { background: #4b5563; }
         button.primary { background: #2563eb; border-color: #2563eb; }
+        .modebar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+        .seg button { border: none; border-radius: 0; background: transparent; color: var(--muted); padding: 5px 14px; font-weight: bold; font-size: 13px; }
+        .seg button.on.pos-btn { background: var(--pos); color: #111827; }
+        .seg button.on.frc-btn { background: var(--frc); color: #111827; }
+        .hint { color: var(--muted); }
         canvas { width: 100%; display: block; margin-top: 6px; background: var(--panel); border-radius: 6px; }
         .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; color: var(--muted); }
         .legend span::before { content: ""; display: inline-block; width: 16px; height: 3px; margin-right: 4px; vertical-align: middle; background: currentColor; }
@@ -53,6 +59,13 @@
     </style>
 </head>
 <body>
+    <div class="modebar">
+        <div class="seg">
+            <button id="modePos" class="pos-btn on">位置制御</button>
+            <button id="modeFrc" class="frc-btn">力制御</button>
+        </div>
+        <span class="hint" id="hint">← 動かしたまま切り替えて比べる</span>
+    </div>
     <div class="controls">
         <div>
             <label>ワークの位置ずれ <b id="errVal"></b></label>
@@ -71,7 +84,7 @@
             <button id="reset">⟲</button>
         </div>
     </div>
-    <canvas id="scene" height="150"></canvas>
+    <canvas id="scene" height="120"></canvas>
     <canvas id="plot" height="105"></canvas>
     <div class="legend">
         <span class="pos">位置制御</span>
@@ -93,6 +106,8 @@
 
         const $ = id => document.getElementById(id);
         let params, t, xFeed, zFrc, history, running = true;
+        let force = 0;
+        let mode = 'pos';            // 'pos' = 位置制御, 'frc' = 力制御
 
         function readParams() {
             params = {
@@ -123,20 +138,32 @@
             readParams();
             t = 0;
             xFeed = 0;
-            zFrc = surface(0);
+            zFrc = surface(0) - F_DES / params.ke;
+            force = 0;
             history = [];
         }
 
-        let fPos = 0, fFrc = 0;
         function step() {
             xFeed += FEED * DT;
             const h = surface(xFeed);
-            fPos = forcePos(h);
-            // 力制御: 測った力が狙いより大きければ逃げ、小さければ押し込む
-            fFrc = Math.max(0, params.ke * (h - zFrc));
-            const vz = Math.max(-V_MAX, Math.min(V_MAX, ADM_BW / params.ke * (fFrc - F_DES)));
-            zFrc += vz * DT;
+            if (mode === 'pos') {
+                force = forcePos(h);
+            } else {
+                // 力制御: 測った力が狙いより大きければ逃げ、小さければ押し込む
+                force = Math.max(0, params.ke * (h - zFrc));
+                const vz = Math.max(-V_MAX, Math.min(V_MAX, ADM_BW / params.ke * (force - F_DES)));
+                zFrc += vz * DT;
+            }
             t += DT;
+        }
+
+        function setMode(m) {
+            if (m === mode) return;
+            // 力制御へ切り替えるときは、今の押し付け力のまま始める (工具の位置が飛ばない)
+            if (m === 'frc') zFrc = surface(xFeed) - force / params.ke;
+            mode = m;
+            $('modePos').classList.toggle('on', m === 'pos');
+            $('modeFrc').classList.toggle('on', m === 'frc');
         }
 
         // ---- 描画 ----
@@ -215,10 +242,8 @@
         function drawScene() {
             const { ctx, w, h } = fitCanvas($('scene'));
             ctx.clearRect(0, 0, w, h);
-            drawLane(ctx, w, 0, h / 2, '位置制御', css('--pos'), params.zCmd, fPos);
-            ctx.fillStyle = css('--bg');
-            ctx.fillRect(0, h / 2 - 1, w, 3);
-            drawLane(ctx, w, h / 2, h / 2, '力制御', css('--frc'), zFrc, fFrc);
+            if (mode === 'pos') drawLane(ctx, w, 0, h, '位置制御：高さを守る', css('--pos'), params.zCmd, force);
+            else drawLane(ctx, w, 0, h, '力制御：押す力（10 N）を守る', css('--frc'), zFrc, force);
         }
 
         function drawPlot() {
@@ -248,14 +273,17 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
             }
-            for (const [key, col] of [['p', css('--pos')], ['f', css('--frc')]]) {
-                ctx.strokeStyle = col;
-                ctx.lineWidth = 2;
+            // 線の色はその時刻の制御方式 (切り替えた所で色が変わる)
+            ctx.lineWidth = 2;
+            for (let i = 1; i < history.length; i++) {
+                const a = history[i - 1], b = history[i];
+                ctx.strokeStyle = b.m === 'pos' ? css('--pos') : css('--frc');
                 ctx.beginPath();
-                history.forEach((s, i) => i ? ctx.lineTo(X(s.t), Y(s[key])) : ctx.moveTo(X(s.t), Y(s[key])));
+                ctx.moveTo(X(a.t), Y(a.f));
+                ctx.lineTo(X(b.t), Y(b.f));
                 ctx.stroke();
-                ctx.lineWidth = 1;
             }
+            ctx.lineWidth = 1;
         }
 
         let last = null, sampleAcc = 0;
@@ -267,7 +295,7 @@
                 const n = Math.round(elapsed / DT);
                 for (let i = 0; i < n; i++) {
                     step();
-                    if (++sampleAcc % 100 === 0) history.push({ t, p: fPos, f: fFrc });
+                    if (++sampleAcc % 100 === 0) history.push({ t, f: force, m: mode });
                 }
                 while (history.length && history[0].t < t - WINDOW) history.shift();
             }
@@ -283,6 +311,8 @@
             $('playPause').textContent = running ? '⏸' : '▶';
         });
         $('reset').addEventListener('click', reset);
+        $('modePos').addEventListener('click', () => setMode('pos'));
+        $('modeFrc').addEventListener('click', () => setMode('frc'));
 
         reset();
         requestAnimationFrame(loop);
