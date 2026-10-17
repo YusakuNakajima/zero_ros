@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 330" font-family="'Noto Sans JP', sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker>
+  </defs>
+  <!-- インピーダンス（前章・薄く） -->
+  <g opacity="0.45">
+    <text x="0" y="22" fill="#e5e7eb" font-size="19" font-weight="bold">インピーダンス制御（前章）</text>
+    <rect x="0" y="36" width="130" height="80" rx="10" fill="none" stroke="#a78bfa" stroke-width="3"/>
+    <text x="65" y="66" fill="#a78bfa" font-size="14" text-anchor="middle">測る（関節角）</text>
+    <text x="65" y="94" fill="#a78bfa" font-size="20" text-anchor="middle" font-weight="bold">位置 x</text>
+    <line x1="132" y1="76" x2="158" y2="76" stroke="#9ca3af" stroke-width="3" marker-end="url(#ar)"/>
+    <rect x="160" y="36" width="130" height="80" rx="10" fill="#4b5563" stroke="#fbbf24" stroke-width="3"/>
+    <text x="225" y="66" fill="#fbbf24" font-size="20" text-anchor="middle" font-weight="bold">M・D・K</text>
+    <text x="225" y="94" fill="#d1d5db" font-size="15" text-anchor="middle">仮想ばね・ダンパ</text>
+    <line x1="292" y1="76" x2="318" y2="76" stroke="#9ca3af" stroke-width="3" marker-end="url(#ar)"/>
+    <rect x="320" y="36" width="130" height="80" rx="10" fill="none" stroke="#f87171" stroke-width="3"/>
+    <text x="385" y="66" fill="#f87171" font-size="16" text-anchor="middle">出す</text>
+    <text x="385" y="94" fill="#f87171" font-size="20" text-anchor="middle" font-weight="bold">力 F</text>
+    <line x1="452" y1="76" x2="478" y2="76" stroke="#9ca3af" stroke-width="3" marker-end="url(#ar)"/>
+    <text x="550" y="70" fill="#e5e7eb" font-size="16" text-anchor="middle">トルク指令</text>
+    <text x="550" y="94" fill="#e5e7eb" font-size="16" text-anchor="middle">τ = J<tspan baseline-shift="super" font-size="0.7em">T</tspan> F</text>
+  </g>
+  <!-- 入出力が逆 -->
+  <text x="310" y="160" fill="#e5e7eb" font-size="18" text-anchor="middle">⇅ 入力と出力が逆</text>
+  <!-- アドミッタンス -->
+  <rect x="-4" y="178" width="628" height="150" rx="12" fill="#ffffff" fill-opacity="0.04" stroke="#4ade80" stroke-width="2"/>
+  <text x="8" y="204" fill="#4ade80" font-size="19" font-weight="bold">アドミッタンス制御</text>
+  <rect x="8" y="220" width="126" height="80" rx="10" fill="none" stroke="#f87171" stroke-width="3"/>
+  <text x="71" y="250" fill="#f87171" font-size="14" text-anchor="middle">測る（FTセンサ）</text>
+  <text x="71" y="278" fill="#f87171" font-size="20" text-anchor="middle" font-weight="bold">力 F</text>
+  <line x1="136" y1="260" x2="158" y2="260" stroke="#9ca3af" stroke-width="3" marker-end="url(#ar)"/>
+  <rect x="160" y="220" width="130" height="80" rx="10" fill="#4b5563" stroke="#fbbf24" stroke-width="3"/>
+  <text x="225" y="250" fill="#fbbf24" font-size="20" text-anchor="middle" font-weight="bold">M・D・K</text>
+  <text x="225" y="278" fill="#d1d5db" font-size="15" text-anchor="middle">仮想ばね・ダンパ</text>
+  <line x1="292" y1="260" x2="318" y2="260" stroke="#9ca3af" stroke-width="3" marker-end="url(#ar)"/>
+  <rect x="320" y="220" width="130" height="80" rx="10" fill="none" stroke="#a78bfa" stroke-width="3"/>
+  <text x="385" y="250" fill="#a78bfa" font-size="16" text-anchor="middle">出す</text>
+  <text x="385" y="278" fill="#a78bfa" font-size="20" text-anchor="middle" font-weight="bold">位置 x<tspan baseline-shift="sub" font-size="0.7em">c</tspan></text>
+  <line x1="452" y1="260" x2="478" y2="260" stroke="#9ca3af" stroke-width="3" marker-end="url(#ar)"/>
+  <text x="550" y="254" fill="#e5e7eb" font-size="16" text-anchor="middle">位置指令</text>
+  <text x="550" y="278" fill="#e5e7eb" font-size="16" text-anchor="middle">（ふつうのロボット）</text>
+</svg>

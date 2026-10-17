@@ -119,22 +119,31 @@
                         <div style="display: inline-block; border: 2px solid #e5e7eb; border-radius: 8px; padding: 4px 10px;"><strong>コンプライアンス</strong>＝押されたときの逃げやすさ（柔らかさ）</div>
                         <div style="display: flex; gap: 16px; margin-top: 12px; align-items: flex-start;">
                             <div style="flex: 1; border: 2px solid #9ca3af; border-radius: 8px; padding: 6px;">
-                                <strong>受動コンプライアンス</strong><br>ばね・ゲルなどの部品で柔らかくする<br>（例: RCC）
+                                <strong style="white-space: nowrap;">受動コンプライアンス</strong><br>ばね・ゲルなどの部品で柔らかくする<br>（例: RCC）
                             </div>
                             <div style="flex: 3.8; border: 2px solid #60a5fa; border-radius: 8px; padding: 6px;">
                                 <strong>能動コンプライアンス（＝力制御）</strong>：センサ＋制御で柔らかくする
                                 <div style="display: flex; gap: 8px; margin-top: 6px;">
-                                    <div style="flex: 1; border: 2px solid #f472b6; border-radius: 6px; padding: 4px; font-size: 0.9em;"><strong>インピーダンス制御</strong><br>位置のずれ → <strong>力</strong>を出す</div>
-                                    <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 6px; padding: 4px; font-size: 0.9em;"><strong>アドミッタンス制御</strong><br>測った力 → <strong>位置</strong>を出す</div>
-                                    <div style="flex: 1; border: 2px solid #fbbf24; border-radius: 6px; padding: 4px; font-size: 0.9em;"><strong>ハイブリッド制御</strong><br>（位置/力）<br>方向ごとに位置か力かを選ぶ</div>
+                                    <div style="flex: 2; border: 2px dashed #6b7280; border-radius: 6px; padding: 4px;">
+                                        <strong>間接的力制御</strong>：力と動きの関係（柔らかさ）を作る
+                                        <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                            <div style="flex: 1; border: 2px solid #f472b6; border-radius: 6px; padding: 4px; font-size: 0.9em;"><strong>インピーダンス制御</strong><br>（トルク制御ベース）<br>位置のずれ → <strong>力</strong>を出す</div>
+                                            <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 6px; padding: 4px; font-size: 0.9em;"><strong>アドミッタンス制御</strong><br>（位置制御ベース）<br>測った力 → <strong>位置</strong>を出す</div>
+                                        </div>
+                                    </div>
+                                    <div style="flex: 1; border: 2px dashed #6b7280; border-radius: 6px; padding: 4px;">
+                                        <strong>直接的力制御</strong>：力そのものを目標値に
+                                        <div style="border: 2px solid #fbbf24; border-radius: 6px; padding: 4px; font-size: 0.9em; margin-top: 4px;"><strong>ハイブリッド制御</strong><br>（位置/力）<br>方向ごとに位置か力かを選ぶ</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <ul style="font-size: 0.5em; margin-top: 16px;">
-                        <li>インピーダンスとアドミッタンスは<strong>同じ式で入出力が逆</strong>（柔らかさを作る）</li>
-                        <li>ハイブリッドは「Z は 10 N で押す、XY は軌道どおり」のように<strong>力そのものを目標</strong>にする</li>
+                        <li>間接：インピーダンスとアドミッタンスは<strong>同じ式で入出力が逆</strong>（柔らかさを作る）</li>
+                        <li>直接：ハイブリッドは「Z は 10 N で押す、XY は軌道どおり」のように<strong>力そのものを目標</strong>にする</li>
                     </ul>
+                    <p style="font-size: 0.35em; color: #aaa;">分類：山野辺 夏樹「マニピュレーションにおける力制御の研究動向」計測と制御, 56(10), 2017 の図1にそって作成</p>
                 </section>
 
                 <!-- 用語の整理：ロボットの例 -->
@@ -150,9 +159,13 @@
                             <div style="flex: 3.8; border: 2px solid #60a5fa; border-radius: 8px; padding: 6px;">
                                 <strong>能動コンプライアンス（＝力制御）</strong>
                                 <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <div style="flex: 2; border: 2px dashed #6b7280; border-radius: 6px; padding: 4px;"><strong>間接的力制御</strong>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px;">
                                     <div style="flex: 1; border: 2px solid #f472b6; border-radius: 6px; padding: 4px;"><strong>インピーダンス制御</strong><br><img src="media/franka_robot.png" alt="Franka" style="height: 24vh; margin: 4px 0; background: #fff; border-radius: 6px; padding: 3px;"><br>Franka</div>
                                     <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 6px; padding: 4px;"><strong>アドミッタンス制御</strong><br><img src="media/ur_robot.png" alt="UR" style="height: 24vh; margin: 4px 0; background: #fff; border-radius: 6px; padding: 3px;"><br>UR</div>
-                                    <div style="flex: 1.3; border: 2px solid #fbbf24; border-radius: 6px; padding: 4px;"><strong>ハイブリッド制御</strong><div style="display: flex; gap: 4px; margin: 4px 0;"><img src="media/franka_robot.png" alt="Franka" style="height: 24vh; min-width: 0; flex: 1; object-fit: contain; background: #fff; border-radius: 6px; padding: 3px;"><img src="media/ur_robot.png" alt="UR" style="height: 24vh; min-width: 0; flex: 1; object-fit: contain; background: #fff; border-radius: 6px; padding: 3px;"></div>Franka・UR</div>
+                                    </div></div>
+                                    <div style="flex: 1.3; border: 2px dashed #6b7280; border-radius: 6px; padding: 4px;"><strong>直接的力制御</strong>
+                                    <div style="border: 2px solid #fbbf24; border-radius: 6px; padding: 4px; margin-top: 4px;"><strong>ハイブリッド制御</strong><div style="display: flex; gap: 4px; margin: 4px 0;"><img src="media/franka_robot.png" alt="Franka" style="height: 24vh; min-width: 0; flex: 1; object-fit: contain; background: #fff; border-radius: 6px; padding: 3px;"><img src="media/ur_robot.png" alt="UR" style="height: 24vh; min-width: 0; flex: 1; object-fit: contain; background: #fff; border-radius: 6px; padding: 3px;"></div>Franka・UR</div></div>
                                 </div>
                             </div>
                         </div>
@@ -589,6 +602,17 @@
                     </div>
                 </section>
 
+                <!-- 間接的力制御の比較 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">間接的力制御の比較</h2>
+                    <p style="text-align: center; margin-bottom: 10px; font-size: 0.6em;">
+                        <a href="interactive_app/force_control_demo.html" target="_blank"
+                            style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
+                    </p>
+                    <iframe data-src="interactive_app/force_control_demo.html" width="100%" height="440"
+                        frameborder="0"></iframe>
+                </section>
+
                 <!-- インピーダンス制御の基本方程式 -->
                 <section>
                     <h2>インピーダンス制御の数式</h2>
@@ -661,26 +685,46 @@
                 <section>
                     <h2>アドミッタンス制御とは</h2>
                     <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1.8;">
+                            <img src="media/impedance_vs_admittance_flow.svg" alt="インピーダンスは位置を測って力を出す、アドミッタンスは力を測って位置指令を出す" style="width: 100%; margin: 0;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.55em;">
+                                <li>同じ仮想ばね・ダンパで、<strong>入力と出力が逆</strong></li>
+                                <li>力を測って → 位置指令を出す</li>
+                                <li>位置制御のロボット（UR など）＋ FTセンサで使える</li>
+                                <li>人の手での誘導（フリードライブ）に向く</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- インピーダンス vs アドミッタンス比較 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">インピーダンス vs アドミッタンス</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
                         <div style="flex: 1;">
                             <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/force_control_demo.html" target="_blank"
+                                <a href="interactive_app/impedance_vs_admittance.html" target="_blank"
                                     style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
                             </p>
-                            <iframe src="interactive_app/force_control_demo.html" width="100%" height="400"
+                            <iframe src="interactive_app/impedance_vs_admittance.html" width="100%" height="400"
                                 frameborder="0"></iframe>
                         </div>
                         <div style="flex: 1;">
-                            <ul style="font-size: 0.9em;">
-                                <li><strong>インピーダンス制御の逆</strong>
+                            <ul style="font-size: 0.6em;">
+                                <li><strong>インピーダンス制御</strong>
                                     <ul>
-                                        <li>力入力 → 位置出力</li>
-                                        <li>人間の手動誘導に適している</li>
+                                        <li>位置誤差から力（トルク）を計算</li>
+                                        <li>硬い環境との接触に強い</li>
+                                        <li>摩擦やモデル誤差で位置がずれやすい</li>
                                     </ul>
                                 </li>
-                                <li><strong>メリット</strong>
+                                <li><strong>アドミッタンス制御</strong>
                                     <ul>
-                                        <li>直感的な操作が可能</li>
-                                        <li>安全性が高い</li>
+                                        <li>力から位置指令を計算</li>
+                                        <li>位置制御ベースで正確・産業用ロボット向き</li>
+                                        <li>硬い環境 × 遅い制御周期で振動しやすい</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -714,6 +758,38 @@
                 </section>
 
 
+
+                <!-- インピーダンスとアドミッタンスの数式の比較 -->
+                <section>
+                    <h2>数式の比較</h2>
+                    <p style="font-size: 0.55em; margin: 0 0 8px;"><span style="color: #4ade80; font-weight: bold;">■ 測る（入力）</span>　<span style="color: #fb923c; font-weight: bold;">■ 計算して出す（出力）</span>　白：自分で決める値（M, D, K, 目標）</p>
+                    <table class="custom-table" style="font-size: 0.48em; white-space: nowrap;">
+                        <tr>
+                            <th></th>
+                            <th>数式</th>
+                            <th>測るもの</th>
+                            <th>出すもの → 行き先</th>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #f472b6;">インピーダンス</strong></td>
+                            <td style="font-size: 1.15em; white-space: nowrap;"><strong>M <span style="color: #4ade80;">a</span> + D (<span style="color: #4ade80;">v</span> − v<sub>d</sub>) + K (<span style="color: #4ade80;">x</span> − x<sub>d</sub>) = <span style="color: #fb923c;">F</span></strong></td>
+                            <td><span style="color: #4ade80;">手先の動き</span><br><span style="color: #4ade80;">x, v, a</span>（関節角から）</td>
+                            <td><span style="color: #fb923c;">力 F</span> → τ = J<sup>T</sup> F<br>（トルク指令）</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #4fc3f7;">アドミッタンス</strong></td>
+                            <td style="font-size: 1.15em; white-space: nowrap;"><strong>M <span style="color: #fb923c;">a<sub>c</sub></span> + D (<span style="color: #fb923c;">v<sub>c</sub></span> − v<sub>d</sub>) + K (<span style="color: #fb923c;">x<sub>c</sub></span> − x<sub>d</sub>) = <span style="color: #4ade80;">F</span></strong></td>
+                            <td><span style="color: #4ade80;">外力 F</span><br>（FTセンサ）</td>
+                            <td><span style="color: #fb923c;">位置 x<sub>c</sub></span><br>（a<sub>c</sub> を積分）→ 位置指令</td>
+                        </tr>
+                    </table>
+                    <ul style="font-size: 0.55em; margin-top: 12px;">
+                        <li>式の形も M, D, K の意味も<strong>同じ</strong>。違うのは<strong>どちら側を測り、どちら側を計算するか</strong>だけ</li>
+                        <li>インピーダンス：<span style="color: #4ade80;">動き</span>を測って<span style="color: #fb923c;">力</span>を出す → トルクを直接出せるロボット向き（Franka）</li>
+                        <li>アドミッタンス：<span style="color: #4ade80;">力</span>を測って<span style="color: #fb923c;">動き</span>を出す → 位置制御のロボット＋FTセンサ向き（UR）</li>
+                        <li>添字 c は command（指令）。x<sub>c</sub> は「こう動いてほしい」という計算上の位置</li>
+                    </ul>
+                </section>
 
                 <!-- ROS2でのアドミッタンス制御実装 -->
                 <section>
@@ -856,6 +932,50 @@ admittance_controller:
             <section>
                 <section data-background-image="media/hand_guiding.webp" data-background-opacity="0.5">
                     <h2>ハイブリッド位置/力制御</h2>
+                </section>
+
+                <!-- ハイブリッド位置/力制御とは -->
+                <section>
+                    <h2 style="font-size: 1.3em;">ハイブリッド位置/力制御とは</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1.4;">
+                            <img src="media/hybrid_overview.svg" alt="研磨ツールを Z 方向は 10 N の力制御、X・Y 方向は軌道どおりの位置制御で動かす図" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.7em;">
+                                <li>方向ごとに<strong>位置制御か力制御か</strong>を選ぶ</li>
+                                <li>力そのものを目標値に制御（<strong>直接的力制御</strong>）</li>
+                                <li>研磨・嵌合など押し付け力を守りたい作業に</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ハイブリッド位置/力制御の数式 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">ハイブリッド位置/力制御の数式</h2>
+                    <p style="font-size: 0.9em; margin: 0.3em 0;"><strong>u = <span style="color: #4ade80;">(I − S) K<sub>p</sub> (x<sub>d</sub> − x)</span> + <span style="color: #f87171;">S K<sub>f</sub> (F<sub>d</sub> − F)</span></strong></p>
+                    <div style="display: flex; gap: 2em; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>x, F</strong>：測った<strong>手先の位置</strong>（関節角から）と<strong>力</strong>（FTセンサ）（入力）</li>
+                                <li><strong>u</strong>：計算した<strong>指令</strong>（出力）</li>
+                                <li><strong>x<sub>d</sub>, F<sub>d</sub></strong>：目標の位置と<strong>目標の力</strong></li>
+                                <li><strong>S</strong>：選択行列（方向ごとに 0 = <span style="color: #4ade80;">位置</span>、1 = <span style="color: #f87171;">力</span>）</li>
+                                <li><strong>K<sub>p</sub>, K<sub>f</sub></strong>：位置・力のゲイン（自分で決める）</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <ol>
+                                <li>x, F を測る</li>
+                                <li><span style="color: #4ade80;">位置のずれ x<sub>d</sub> − x</span> と <span style="color: #f87171;">力のずれ F<sub>d</sub> − F</span> を出す</li>
+                                <li>S で方向ごとに振り分けて足す → u</li>
+                                <li>u をロボットへ（トルク制御：τ = J<sup>T</sup> u ／ 位置制御：速度として積分）</li>
+                            </ol>
+                            <p style="margin: 0;">インピーダンス・アドミッタンスと違い<strong>目標の力 F<sub>d</sub></strong> がある</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.4em; color: #aaa;">※ 制御則は比例のみの最も簡単な形（実際は PI・PD などを使う）。Raibert &amp; Craig, 1981</p>
                 </section>
 
                 <!-- 仮想仕事の原理 -->
@@ -1067,38 +1187,6 @@ admittance_controller:
                     </div>
                 </section>
 
-                <!-- インピーダンス vs アドミッタンス比較 -->
-                <section>
-                    <h2 style="font-size: 1.3em;">インピーダンス vs アドミッタンス</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <a href="interactive_app/impedance_vs_admittance.html" target="_blank"
-                                    style="color: #4CAF50; text-decoration: underline;">アプリ全画面</a>
-                            </p>
-                            <iframe src="interactive_app/impedance_vs_admittance.html" width="100%" height="400"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.6em;">
-                                <li><strong>インピーダンス制御</strong>
-                                    <ul>
-                                        <li>位置誤差から力（トルク）を計算</li>
-                                        <li>硬い環境との接触に強い</li>
-                                        <li>摩擦やモデル誤差で位置がずれやすい</li>
-                                    </ul>
-                                </li>
-                                <li><strong>アドミッタンス制御</strong>
-                                    <ul>
-                                        <li>力から位置指令を計算</li>
-                                        <li>位置制御ベースで正確・産業用ロボット向き</li>
-                                        <li>硬い環境 × 遅い制御周期で振動しやすい</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
             </section>
 
             <!-- 活用事例：フリードライブ -->

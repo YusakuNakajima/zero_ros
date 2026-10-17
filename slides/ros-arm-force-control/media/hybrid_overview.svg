@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 300" font-family="'Noto Sans JP', sans-serif">
+  <defs>
+    <marker id="hr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+    <marker id="hg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
+  </defs>
+  <!-- ワーク（少し凹凸のある面） -->
+  <path d="M20,210 C120,200 200,222 300,212 S470,200 540,212 L540,270 L20,270 Z" fill="#6b7280"/>
+  <text x="80" y="255" fill="#e5e7eb" font-size="16" text-anchor="middle">ワーク</text>
+  <!-- 通った軌跡（面に倣う） -->
+  <path d="M60,206 C120,197 170,212 210,209" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="6 5"/>
+  <!-- 工具 -->
+  <rect x="226" y="80" width="34" height="96" fill="#4b5563" stroke="#9ca3af" stroke-width="2"/>
+  <rect x="212" y="176" width="62" height="30" rx="5" fill="#d1d5db"/>
+  <text x="243" y="70" fill="#e5e7eb" font-size="16" text-anchor="middle">研磨ツール</text>
+  <!-- Z：力 -->
+  <line x1="320" y1="96" x2="320" y2="190" stroke="#f87171" stroke-width="6" marker-end="url(#hr)"/>
+  <text x="334" y="122" fill="#f87171" font-size="20" font-weight="bold">Z：力制御</text>
+  <text x="334" y="150" fill="#f87171" font-size="17">10 N で押し続ける</text>
+  <!-- X：位置 -->
+  <line x1="290" y1="232" x2="440" y2="232" stroke="#4ade80" stroke-width="6" marker-end="url(#hg)"/>
+  <text x="60" y="160" fill="#4ade80" font-size="20" font-weight="bold">X・Y：位置制御</text>
+  <text x="60" y="186" fill="#4ade80" font-size="17">軌道どおり動く</text>
+  <text x="280" y="292" fill="#e5e7eb" font-size="17" text-anchor="middle">方向ごとに「位置」か「力」かを選ぶ</text>
+</svg>
