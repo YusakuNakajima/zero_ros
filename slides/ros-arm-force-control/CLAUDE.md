@@ -12,7 +12,7 @@
 
 ### 1. 導入部（水平スライド1-4）
 1. **タイトル・導入**
-   - 背景画像：力制御ロボット
+   - 背景動画：media/hand_guiding.mp4（手で押すと戻る UR。章タイトルは同じ場面の静止画 media/hand_guiding.webp）
 2. **力制御参考資料**
    - 縦配列：上「イラストで学ぶロボット工学」/ 下「実践ロボット制御」
 3. **なぜ力制御が必要なのか？**
@@ -52,7 +52,7 @@
 - **縦スライド（ROS2版）章末コラム3枚**: コラム「アドミッタンス制御も色々」（ros2_controllers の admittance_controller と FZI の cartesian_compliance_controller を比較。どちらも K=500 N/m。①比較表：減衰 200 vs 約20 N·s/m、力入力の遅れ 約0.4 s vs 20 Hz フィルタ ②制御則の中身（M·a+D·v+K·x=F の実時間積分 / 軽い仮想ロボットの順動力学） ③10 N で押して離したときの応答グラフ（admittance は式どおり、FZI は手先1 kg・並進の概算。実機測定ではない）と、admittance を軽くする設定 damping_ratio 0.7〜1・filter_coefficient 0.05）
 
 ### 3.7 ハイブリッド位置/力制御（ROS2版のみ、水平スライド8。アドミッタンス章の後）
-- 章タイトル（背景 moveit.png）
+- 章タイトル（背景 media/hand_guiding.webp）
 - 仮想仕事の原理（τᵀδq = Fᵀδx から τ = JᵀF、外力の打ち消し、F = J⁻ᵀτ）
 - 位置も力も「手先の力」で書く（位置制御則 Kp(xd − x) − Kd v → F_pos、力制御則 Fd + Kf(Fd − F) → F_frc、τ = JᵀF）
 - 選択行列 S：方向ごとに位置か力か（0=位置・1=力、(I−S)位置＋S力、直交で非干渉、Raibert & Craig 1981）
