@@ -45,7 +45,7 @@
                         <img src="media/実践ロボット制御.jpg" style="width: 12%; margin: 0 20px 0 0;">
                         <p>力制御、インピーダンス制御の理論と実装の詳細解説<br>実際の接触タスクに必要な制御理論が充実</p>
                     </div>
-                    <p style="font-size: 0.7em;">山野辺 夏樹: <a href="http://jstage.jst.go.jp/article/sicejl/56/10/56_741/_pdf/-char/en" target="_blank">マニピュレーションにおける力制御の研究動向</a>, 計測と制御, 56(10), pp.741-746, 2017</p>
+                    <p style="font-size: 0.7em;">山野辺 夏樹: <a href="https://www.jstage.jst.go.jp/article/sicejl/56/10/56_741/_pdf/-char/en" target="_blank">マニピュレーションにおける力制御の研究動向</a>, 計測と制御, 56(10), pp.741-746, 2017</p>
                 </ol>
             </section>
 
@@ -108,7 +108,7 @@
                             <td class="col-action">ハイブリッド / インピーダンス制御</td>
                         </tr>
                     </table>
-                    <p style="font-size: 0.5em; text-align: center; margin-bottom: 0;">出典: 山野辺 夏樹, <a href="http://jstage.jst.go.jp/article/sicejl/56/10/56_741/_pdf/-char/en" target="_blank">「マニピュレーションにおける力制御の研究動向」</a>,<br>計測と制御, 56(10), pp.741-746 (2017) の分類をもとに作成</p>
+                    <p style="font-size: 0.5em; text-align: center; margin-bottom: 0;">出典: 山野辺 夏樹, <a href="https://www.jstage.jst.go.jp/article/sicejl/56/10/56_741/_pdf/-char/en" target="_blank">「マニピュレーションにおける力制御の研究動向」</a>,<br>計測と制御, 56(10), pp.741-746 (2017) の分類をもとに作成</p>
                     <p class="caption" style="text-align: center;">↓ で各方式を説明</p>
                 </section>
 
@@ -386,12 +386,10 @@
                         </div>
                     </div>
                 </section>
-            </section>
 
-            <!-- 本当に力制御が必要か？ -->
-            <section>
+                <!-- コラム：本当に力制御が必要か？ -->
                 <section>
-                    <h2>本当に力“制御”が必要か？</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>本当に力“制御”が必要か？</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <img src="media/compliance_response.svg" alt="接触時の力の応答: 受動は即時、能動は制御周期ぶん遅れる">
@@ -408,7 +406,7 @@
                 </section>
 
                 <section>
-                    <h2>事例: 受動で力を制御</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>受動で力を制御した事例</h2>
                     <div class="slide-layout-image">
                         <div class="image-section">
                             <img src="media/mechanochemistry_passive.svg" alt="ロボットが受動コンプライアンスを介して乳鉢で粉砕する様子">
@@ -595,7 +593,7 @@
 
                 <!-- コラム：アドミッタンス制御の実装による違い -->
                 <section>
-                    <h2 style="font-size: 1.1em;">コラム：アドミッタンス制御は1種類ではない</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>アドミッタンス制御も色々</h2>
                     <p style="font-size: 0.55em;">インピーダンス／アドミッタンス制御は<strong>考え方の名前</strong>で、実装の方式は色々研究されている<br>方式やパラメータで手応えが<strong>かなり変わる</strong> → 2つのコントローラで比べる</p>
                     <table class="custom-table" style="font-size: 0.45em;">
                         <tr>
@@ -605,15 +603,15 @@
                         </tr>
                         <tr><td>剛性 K</td><td colspan="2" style="text-align: center;">どちらも 500 N/m（10 N 押すと 2 cm ずれる）</td></tr>
                         <tr><td>計算の仕方</td><td>M·a + D·v + K·x = F を実時間で積分</td><td>軽い仮想ロボットの順動力学</td></tr>
-                        <tr><td>減衰 D</td><td><strong>200 N·s/m</strong></td><td>約 20 N·s/m（約 1/10）</td></tr>
-                        <tr><td>力の入力の遅れ</td><td><strong>約 0.4 s</strong></td><td>20 Hz フィルタ（一桁以上小さい）</td></tr>
+                        <tr><td>減衰 D</td><td><strong>200 N·s/m</strong><br><span style="font-size: 0.85em; color: #9ca3af;">下げると軽くなるが、硬い物で振動・不安定に</span></td><td>約 20 N·s/m（約 1/10）<br><span style="font-size: 0.85em; color: #9ca3af;">仮想ロボットの順動力学で実効的に小さい</span></td></tr>
+                        <tr><td>力の入力の遅れ</td><td><strong>約 0.4 s</strong><br><span style="font-size: 0.85em; color: #9ca3af;">力を強く平滑化（filter_coefficient 0.005）</span></td><td>数 ms<br><span style="font-size: 0.85em; color: #9ca3af;">20 Hz ローパスだけ（制御周期はどちらも 2 ms）</span></td></tr>
                         <tr><td>手応え</td><td style="color: #f472b6;">重くて粘い</td><td style="color: #4ade80;">軽くて速い</td></tr>
                     </table>
                     <p style="font-size: 0.55em;">止まったときのバネは同じ。差は<strong>動き出すまでの重さ（質量・減衰）</strong>と<strong>力の入力の遅れ</strong></p>
                 </section>
 
                 <section>
-                    <h2 style="font-size: 1.1em;">コラム：2つの制御則の中身</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>2つの制御則の中身</h2>
                     <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: left;">
                         <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
                             <div style="text-align: center;"><strong style="color: #f472b6;">admittance_controller</strong><br>（ros2_controllers）</div>
@@ -629,13 +627,14 @@
                                 <li>正味の力 ＝ K·(目標 − 現在) ＋ 計測力</li>
                                 <li><strong>ほぼ質量の無い仮想ロボット</strong>に加え、<br>順動力学で関節の動きを求める</li>
                                 <li>仮想時間は実時間の約10倍速<br>→ 概算 <strong>D ≈ 20 N·s/m</strong>、立ち上がり約 20 ms</li>
+                                <li>力は 20 Hz ローパスだけ → 遅れは数 ms</li>
                             </ul>
                         </div>
                     </div>
                 </section>
 
                 <section>
-                    <h2 style="font-size: 1.1em;">コラム：10 N で押して離したときの動き</h2>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>押して離したときの動き</h2>
                     <svg viewBox="0 0 720 300" style="width: 78%; max-height: 42vh;">
                         <rect x="70" y="30" width="620" height="200" fill="none" stroke="#4b5563"/>
                         <rect x="70" y="30" width="310" height="200" fill="#f59e0b" opacity="0.08"/>
@@ -656,7 +655,7 @@
                         <text x="386" y="291" fill="#f472b6" font-size="17">admittance：じわっと動き、離しても遅れる</text>
                     </svg>
                     <ul style="font-size: 0.55em;">
-                        <li>admittance を軽くするなら：<code>damping_ratio</code> を 0.7〜1 に（D = 70〜100 N·s/m）、<code>filter_coefficient</code> を 0.05 程度に（時定数 約 40 ms）</li>
+                        <li>admittance を軽くするなら：<code>damping_ratio</code> を 0.7〜1 に（D = 70〜100 N·s/m）、<code>filter_coefficient</code> を 0.05 程度に（時定数 約 40 ms）<br>ただし D を下げすぎると、硬い物に触れたとき振動・不安定になりやすい</li>
                     </ul>
                     <p style="font-size: 0.4em; color: #aaa;">※ admittance は設定値どおりの式で計算。FZI は手先質量 1 kg・並進だけの概算（関節空間の慣性・d ゲインは未考慮）。どちらも実機の測定値ではない</p>
                 </section>
@@ -1125,7 +1124,6 @@ admittance_controller:
                     </ul>
                 </section>
 
-            </section>
             </section>
 
          
