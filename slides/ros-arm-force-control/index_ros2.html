@@ -602,14 +602,14 @@
                     </div>
                 </section>
 
-                <!-- 間接的力制御の比較 -->
+                <!-- インピーダンス制御を動かしてみる -->
                 <section>
-                    <h2 style="font-size: 1.3em;">間接的力制御の比較</h2>
+                    <h2 style="font-size: 1.3em;">インピーダンス制御を動かしてみる</h2>
                     <p style="text-align: center; margin-bottom: 10px; font-size: 0.6em;">
-                        <a href="interactive_app/force_control_demo.html" target="_blank"
+                        <a href="interactive_app/force_control_demo.html?mode=impedance" target="_blank"
                             style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
                     </p>
-                    <iframe data-src="interactive_app/force_control_demo.html" width="100%" height="440"
+                    <iframe data-src="interactive_app/force_control_demo.html?mode=impedance" width="100%" height="440"
                         frameborder="0"></iframe>
                 </section>
 
@@ -875,6 +875,7 @@ saturateTorqueRate(tau_d, &tau_c, delta_tau_max);
                     <h2 style="font-size: 1.3em;">ROS2でのアドミッタンス制御実装</h2>
                     <img src="media/ros2_force_control_arch.drawio.svg" alt="ROS2 アドミッタンス制御の構成: hardware_interface・admittance_controller・トピック" style="width: 78%; max-height: 62vh; margin: 0;">
                     <p style="font-size: 0.5em; margin: 6px 0 0;">admittance_controller は力を <strong>State Interface から直接</strong>読む ／ <code>~/wrench</code> トピックは監視・安全停止用の出口</p>
+                    <p style="font-size: 0.35em; color: #aaa; margin: 4px 0 0;">ROS2 標準：<a href="https://control.ros.org/rolling/doc/ros2_controllers/admittance_controller/doc/userdoc.html" target="_blank" style="color: #4CAF50;">ros2_controllers / admittance_controller</a>（ros-controls 公式、Humble から同梱）</p>
                 </section>
 
                 <!-- アドミッタンスコントローラの設定 -->
@@ -956,29 +957,6 @@ admittance_controller:
                     <p style="font-size: 0.55em;">止まったときのバネは同じ。差は<strong>動き出すまでの重さ（質量・減衰）</strong>と<strong>力の入力の遅れ</strong></p>
                 </section>
 
-                <section>
-                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>2つの制御則の中身</h2>
-                    <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: left;">
-                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
-                            <div style="text-align: center;"><strong style="color: #f472b6;">admittance_controller</strong><br>（ros2_controllers）</div>
-                            <ul>
-                                <li>M·a + D·v + K·x = F を<strong>実時間のまま</strong>積分</li>
-                                <li>D = 2ζ(MK)<sup>1/2</sup> = <strong>200 N·s/m</strong><br>（M = 5 kg, K = 500 N/m, ζ = 2）<br>→ 0.1 m/s で動かすだけで約 20 N</li>
-                                <li>力は強い平滑化（係数 0.005）<br>→ 遅れ <strong>約 0.4 s</strong>、離しても押され続ける</li>
-                            </ul>
-                        </div>
-                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 8px;">
-                            <div style="text-align: center;"><strong style="color: #4ade80;">cartesian_compliance_controller</strong><br>（FZI）</div>
-                            <ul>
-                                <li>正味の力 ＝ K·(目標 − 現在) ＋ 計測力</li>
-                                <li><strong>ほぼ質量の無い仮想ロボット</strong>に加え、<br>順動力学で関節の動きを求める</li>
-                                <li>仮想時間は実時間の約10倍速<br>→ 概算 <strong>D ≈ 20 N·s/m</strong>、立ち上がり約 20 ms</li>
-                                <li>力は 20 Hz ローパスだけ → 遅れは数 ms</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- コラム：実装の比較（普通のアドミッタンス vs FDCC） -->
                 <section>
                     <h2 style="font-size: 1.2em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>実装の比較：仮想の重さをどこに置くか</h2>
@@ -990,6 +968,7 @@ admittance_controller:
                             <ul>
                                 <li>手先に<strong>6自由度の仮想質点</strong>を置いて動かす</li>
                                 <li>その位置を IK で関節角に直す</li>
+                                <li style="color: #9ca3af;">D = 2ζ(MK)<sup>1/2</sup> = 200 N·s/m（M = 5 kg, K = 500 N/m, ζ = 2）、力は強く平滑化 → 遅れ約 0.4 s</li>
                             </ul>
                         </div>
                         <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 8px;">
@@ -998,6 +977,7 @@ admittance_controller:
                             <ul>
                                 <li><strong>リンクがごく軽い仮想ロボット全体</strong>を関節空間で動かす</li>
                                 <li>求めた q をそのまま位置指令に。<strong>IK 不要</strong></li>
+                                <li style="color: #9ca3af;">仮想時間は実時間の約10倍速 → 実効 D ≈ 20 N·s/m、力は 20 Hz ローパスだけ</li>
                             </ul>
                         </div>
                     </div>

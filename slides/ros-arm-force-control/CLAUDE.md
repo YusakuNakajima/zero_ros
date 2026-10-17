@@ -39,7 +39,7 @@
 
 ### 3. インピーダンス制御編（ROS2版: 水平スライド6）
 - **縦スライド6-1**: インピーダンス制御とは（図 media/impedance_msd.svg：目標 x_d と手先 M を K・D でつないだモデル）
-- **縦スライド6-1b**: 間接的力制御の比較（アプリ interactive_app/force_control_demo.html：アームの先端をドラッグ、アドミッタンス/インピーダンス切替。旧アドミッタンス制御とはから移動）
+- **縦スライド6-1b**: インピーダンス制御を動かしてみる（アプリ interactive_app/force_control_demo.html：アームの先端をドラッグ、アドミッタンス/インピーダンス切替。?mode=impedance で初期モードをインピーダンスに（6-3 で使用）。iframe 内ではキャンバスと M・D・K スライダーを横並びのコンパクト表示。旧アドミッタンス制御とはから移動）
 - **縦スライド6-2**: インピーダンス制御の数式（M a + D(v − v_d) + K(x − x_d) = F。アドミッタンスと同じ式・同じレイアウトで、x=手先位置（入力）、F=出す力（出力）、計算の4ステップ τ = JᵀF まで）
 - **縦スライド6-2b**: 手先の力 ⇔ 関節トルク：ヤコビアン（τ = Jᵀ F、F = J⁻ᵀ τ。アプリ interactive_app/jacobian_force.html：2リンクの手先に力をかけて必要な関節トルクを表示、特異姿勢の注意）
 - **縦スライド6-3**: インピーダンスパラメータの調整（図 media/impedance_params.svg：K・D・M を変えたときの押して離した応答）
@@ -53,10 +53,10 @@
 - **縦スライド7-1b**: インピーダンス vs アドミッタンス（アプリ impedance_vs_admittance.html。方式の比較の章から移動）
 - **縦スライド7-2**: アドミッタンス制御の数式（M a_c + D(v_c − v_d) + K(x_c − x_d) = F。インピーダンスと同じ式で入出力が逆。F=測った外力、x_c=位置指令、x_d=目標、M/D/K=仮想パラメータ、計算の4ステップ）
 - **縦スライド7-2b**: 数式の比較：インピーダンス vs アドミッタンス（同じ式で 測る＝緑／計算して出す＝橙 に色分け。測るもの・出すもの→行き先の表）
-- **縦スライド7-5**: ROS2でのアドミッタンス制御実装（構成図 media/ros2_force_control_arch.drawio.svg: hardware_interface・State/Command Interface・admittance_controller・FTブロードキャスタ・トピック。draw.io で編集可）
+- **縦スライド7-5**: ROS2でのアドミッタンス制御実装（構成図 media/ros2_force_control_arch.drawio.svg: hardware_interface・State/Command Interface・admittance_controller・FTブロードキャスタ・トピック。draw.io で編集可。出典に ros2_controllers / admittance_controller の公式ドキュメントのリンク）
 - **縦スライド7-6**: アドミッタンス制御の設定
 - **縦スライド7-7**: アドミッタンスコントローラの実装（コード表示）
-- **縦スライド（ROS2版）章末コラム5枚**: コラム「アドミッタンス制御も色々」（ros2_controllers の admittance_controller と FZI の cartesian_compliance_controller を比較。どちらも K=500 N/m。①比較表：減衰 200 vs 約20 N·s/m、力入力の遅れ 約0.4 s vs 20 Hz フィルタ ②制御則の中身（M·a+D·v+K·x=F の実時間積分 / 軽い仮想ロボットの順動力学） ②b 実装の比較：仮想の重さをどこに置くか（普通のアドミッタンス＝手先の6自由度仮想質点→IK / FDCC＝ごく軽い仮想ロボット全体を関節空間で τ=JᵀF→順動力学→積分、IK不要。軽くする理由） ②c 違いのまとめ（表：重さの場所・関節角の求め方・特異点・冗長性・見かけの重さ ＋ 直感イメージ。Scherzinger et al. IROS 2017） ③10 N で押して離したときの応答グラフ（admittance は式どおり、FZI は手先1 kg・並進の概算。実機測定ではない）と、admittance を軽くする設定 damping_ratio 0.7〜1・filter_coefficient 0.05）
+- **縦スライド（ROS2版）章末コラム4枚**: コラム「アドミッタンス制御も色々」（ros2_controllers の admittance_controller と FZI の cartesian_compliance_controller を比較。どちらも K=500 N/m。①比較表：減衰 200 vs 約20 N·s/m、力入力の遅れ 約0.4 s vs 20 Hz フィルタ ②実装の比較（旧「2つの制御則の中身」を統合。D=2ζ√(MK)=200・平滑化で遅れ0.4 s / 仮想時間10倍速で実効D≈20・20 Hz ローパスも記載）：仮想の重さをどこに置くか（普通のアドミッタンス＝手先の6自由度仮想質点→IK / FDCC＝ごく軽い仮想ロボット全体を関節空間で τ=JᵀF→順動力学→積分、IK不要。軽くする理由） ③違いのまとめ（表：重さの場所・関節角の求め方・特異点・冗長性・見かけの重さ ＋ 直感イメージ。Scherzinger et al. IROS 2017） ④10 N で押して離したときの応答グラフ（admittance は式どおり、FZI は手先1 kg・並進の概算。実機測定ではない）と、admittance を軽くする設定 damping_ratio 0.7〜1・filter_coefficient 0.05）
 
 ### 3.7 ハイブリッド位置/力制御（ROS2版のみ、水平スライド8。アドミッタンス章の後）
 - 章タイトル（背景 media/hand_guiding.webp）

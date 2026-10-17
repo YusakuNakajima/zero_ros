@@ -55,6 +55,15 @@
             border-radius: 50%;
             border: 2px solid #1a202c; /* bg-gray-900 */
         }
+        /* スライド埋め込み時：キャンバスとパラメータを横に並べて1画面に収める */
+        .embed .container { max-width: none; padding: 8px; }
+        .embed header, .embed #panelTitle, .embed #explanationBox { display: none; }
+        .embed main { grid-template-columns: 2fr 1fr; gap: 12px; }
+        .embed #canvasArea { grid-column: auto; padding: 8px; }
+        .embed #controlPanel { padding: 12px; }
+        .embed #controlPanel > * + * { margin-top: 12px; }
+        .embed #controlPanel .pt-4 { padding-top: 0; }
+        .embed #resetBtn { padding-top: 8px; padding-bottom: 8px; }
     </style>
 </head>
 <body class="bg-gray-900 text-white antialiased">
@@ -72,13 +81,13 @@
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- シミュレーション表示エリア -->
-            <div class="lg:col-span-2 bg-gray-800 rounded-2xl p-4 shadow-2xl">
-                <canvas id="forceCanvas" class="w-full h-full rounded-lg"></canvas>
+            <div id="canvasArea" class="lg:col-span-2 bg-gray-800 rounded-2xl p-4 shadow-2xl">
+                <canvas id="forceCanvas" class="w-full rounded-lg"></canvas>
             </div>
 
             <!-- コントロールパネル -->
-            <div class="glassmorphism rounded-2xl p-6 flex flex-col space-y-6 shadow-lg">
-                <div>
+            <div id="controlPanel" class="glassmorphism rounded-2xl p-6 flex flex-col space-y-6 shadow-lg">
+                <div id="panelTitle">
                     <h2 class="text-2xl font-bold text-white mb-4">コントロールパネル</h2>
                 </div>
 
@@ -165,18 +174,26 @@
         const admittanceExplain = document.getElementById('admittanceExplain');
         const impedanceExplain = document.getElementById('impedanceExplain');
 
+        // --- URLパラメータ・埋め込み判定 ---
+        // ?mode=impedance で初期モードを指定。iframe 内ではコンパクト表示
+        const query = new URLSearchParams(location.search);
+        const embedded = window.self !== window.top || query.has('embed');
+        if (embedded) document.body.classList.add('embed');
+
         // --- シミュレーション変数 ---
-        let mode = 'admittance';
+        let mode = query.get('mode') === 'impedance' ? 'impedance' : 'admittance';
         let arm, mouse, params;
 
         // --- 初期化関数 ---
         function init() {
-            const parent = canvas.parentElement;
-            canvas.width = parent.clientWidth;
-            canvas.height = parent.clientHeight > 400 ? parent.clientHeight : 500;
+            const height = embedded ? Math.max(window.innerHeight - 32, 200) : 500;
+            canvas.style.height = height + 'px';
+            canvas.width = canvas.clientWidth;
+            canvas.height = height;
 
+            const linkLength = Math.min(canvas.width / 7, canvas.height / 6);
             arm = {
-                links: [canvas.width / 7, canvas.width / 7, canvas.width / 7],
+                links: [linkLength, linkLength, linkLength],
                 angles: [-Math.PI / 2, Math.PI / 4, Math.PI / 4],
                 joints: Array(4).fill(0).map(() => ({x:0, y:0})),
                 base: { x: canvas.width / 2, y: canvas.height / 2 },
@@ -368,7 +385,10 @@
         // --- イベントリスナー ---
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            return {
+                x: (e.clientX - rect.left) * canvas.width / rect.width,
+                y: (e.clientY - rect.top) * canvas.height / rect.height
+            };
         }
 
         canvas.addEventListener('mousedown', (e) => {
