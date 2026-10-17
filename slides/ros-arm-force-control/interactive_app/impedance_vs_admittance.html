@@ -58,24 +58,47 @@
         .notes strong.imp, .notes strong.adm { font-weight: 700; }
         .stats { display: grid; grid-template-columns: auto auto auto; gap: 2px 10px; margin-top: 10px; font-size: 12px; white-space: nowrap; }
         .stats div:nth-child(-n+3) { color: var(--muted); }
+        #scene { height: 170px; }
+        #plotX, #plotF { height: 150px; }
+        /* スライドの iframe（低い画面）では全体を1画面に収める */
+        @media (max-height: 600px) {
+            html, body { height: 100%; }
+            body { display: flex; flex-direction: column; overflow: hidden; padding: 6px; font-size: 12px; }
+            h1 { display: none; }
+            .layout { flex: 1; min-height: 0; grid-template-columns: 1fr; grid-template-rows: 1fr auto; gap: 6px; }
+            .panel { padding: 6px; }
+            .plots { display: flex; flex-direction: column; min-height: 0; }
+            #scene { flex: 5 1 0; height: auto; min-height: 40px; }
+            #plotX, #plotF { flex: 4 1 0; height: auto; min-height: 40px; }
+            .legend { font-size: 11px; margin-top: 2px; }
+            .side { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: flex-end; }
+            .ctl { flex: 1 1 120px; }
+            label { margin: 0; white-space: nowrap; }
+            .buttons { flex: 1 1 180px; margin-top: 0; }
+            button { padding: 3px 6px; }
+            .stats, .notes { display: none; }
+        }
     </style>
 </head>
 <body>
     <h1>インピーダンス制御 vs アドミッタンス制御（1自由度・壁への押し付け）</h1>
     <div class="layout">
-        <div class="panel">
-            <canvas id="scene" height="170"></canvas>
-            <canvas id="plotX" height="150"></canvas>
-            <canvas id="plotF" height="150"></canvas>
+        <div class="panel plots">
+            <canvas id="scene"></canvas>
+            <canvas id="plotX"></canvas>
+            <canvas id="plotF"></canvas>
             <div class="legend">
                 <span class="imp">インピーダンス制御</span>
                 <span class="adm">アドミッタンス制御</span>
                 <span class="refc">目標位置</span>
             </div>
         </div>
-        <div class="panel">
+        <div class="panel side">
+            <div class="ctl">
             <label>環境の硬さ k<sub>e</sub> <b id="keVal"></b></label>
             <input type="range" id="ke" min="2" max="5.5" step="0.1" value="4.5">
+            </div>
+            <div class="ctl">
             <label>制御周期 <b id="TVal"></b></label>
             <select id="T">
                 <option value="0.001">1 ms (1 kHz)</option>
@@ -83,8 +106,11 @@
                 <option value="0.004" selected>4 ms (250 Hz)</option>
                 <option value="0.008">8 ms (125 Hz)</option>
             </select>
+            </div>
+            <div class="ctl">
             <label>関節摩擦 <b id="fcVal"></b></label>
             <input type="range" id="fc" min="0" max="10" step="0.5" value="5">
+            </div>
             <div class="buttons">
                 <button id="presetSoft">スポンジ</button>
                 <button id="presetHard">金属</button>
@@ -219,12 +245,11 @@
 
         function fitCanvas(c) {
             const ratio = window.devicePixelRatio || 1;
-            // 元の高さを覚えておく（height 属性は ratio 倍に書き換わるため）
-            const w = c.clientWidth, h = +(c.dataset.h ||= c.getAttribute('height'));
-            if (c.width !== Math.round(w * ratio)) {
+            // 表示サイズは CSS で決める（iframe の高さに合わせて伸び縮みする）
+            const w = c.clientWidth, h = c.clientHeight;
+            if (c.width !== Math.round(w * ratio) || c.height !== Math.round(h * ratio)) {
                 c.width = Math.round(w * ratio);
                 c.height = Math.round(h * ratio);
-                c.style.height = h + 'px';
             }
             const ctx = c.getContext('2d');
             ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -242,51 +267,52 @@
             const hardness = (parseFloat(ui.ke.value) - 2) / 3.5;
             const ref = reference(t);
 
-            const lanes = [{ r: robots[0], y: 45, color: col.imp, name: 'インピーダンス' },
-                           { r: robots[1], y: 120, color: col.adm, name: 'アドミッタンス' }];
+            const k = Math.min(1, h / 170);   // iframe で低くなったら縦方向だけ縮める
+            const lanes = [{ r: robots[0], y: 45 * k, color: col.imp, name: 'インピーダンス' },
+                           { r: robots[1], y: 120 * k, color: col.adm, name: 'アドミッタンス' }];
             for (const lane of lanes) {
                 ctx.fillStyle = col.muted;
                 ctx.font = '12px "Noto Sans JP", sans-serif';
                 ctx.textAlign = 'left';
-                ctx.fillText(lane.name, 4, lane.y - 28);
+                ctx.fillText(lane.name, 4, lane.y - 28 * k);
                 // 壁: 右端が固定され、押されると表面が奥へ縮む (柔らかいほどよく縮む)
                 const facePx = toPx(Math.max(WALL_X, lane.r.x));
                 ctx.fillStyle = `hsl(${45 - hardness * 45}, ${70 - hardness * 60}%, ${45 + hardness * 10}%)`;
-                ctx.fillRect(facePx, lane.y - 30, backPx - facePx, 60);
+                ctx.fillRect(facePx, lane.y - 30 * k, backPx - facePx, 60 * k);
                 // 縮み具合が見えるよう、等間隔の縦線を表面〜固定端に配置
                 ctx.strokeStyle = 'rgba(0,0,0,0.35)';
                 for (let i = 1; i < 6; i++) {
                     const lx = facePx + (backPx - facePx) * i / 6;
                     ctx.beginPath();
-                    ctx.moveTo(lx, lane.y - 30);
-                    ctx.lineTo(lx, lane.y + 30);
+                    ctx.moveTo(lx, lane.y - 30 * k);
+                    ctx.lineTo(lx, lane.y + 30 * k);
                     ctx.stroke();
                 }
                 // 固定端
                 ctx.fillStyle = col.line;
-                ctx.fillRect(backPx, lane.y - 34, 6, 68);
+                ctx.fillRect(backPx, lane.y - 34 * k, 6, 68 * k);
                 // 壁の元の表面位置
                 ctx.strokeStyle = col.muted;
                 ctx.setLineDash([2, 3]);
                 ctx.beginPath();
-                ctx.moveTo(wallPx, lane.y - 34);
-                ctx.lineTo(wallPx, lane.y + 34);
+                ctx.moveTo(wallPx, lane.y - 34 * k);
+                ctx.lineTo(wallPx, lane.y + 34 * k);
                 ctx.stroke();
                 ctx.setLineDash([]);
                 // 目標位置
                 ctx.strokeStyle = col.ref;
                 ctx.setLineDash([4, 4]);
                 ctx.beginPath();
-                ctx.moveTo(toPx(ref.x), lane.y - 30);
-                ctx.lineTo(toPx(ref.x), lane.y + 30);
+                ctx.moveTo(toPx(ref.x), lane.y - 30 * k);
+                ctx.lineTo(toPx(ref.x), lane.y + 30 * k);
                 ctx.stroke();
                 ctx.setLineDash([]);
                 // ロボット (右端 = 手先位置)
                 const rx = toPx(lane.r.x);
                 ctx.fillStyle = lane.color;
-                ctx.fillRect(rx - 34, lane.y - 16, 34, 32);
+                ctx.fillRect(rx - 34, lane.y - 16 * k, 34, 32 * k);
                 ctx.fillStyle = col.muted;
-                ctx.fillRect(left - 10, lane.y - 2, rx - 34 - left + 10, 4);
+                ctx.fillRect(left - 10, lane.y - 2 * k, rx - 34 - left + 10, 4);
                 // 接触力の矢印
                 const f = lane.r.force;
                 if (f > 0.05) {
@@ -295,24 +321,24 @@
                     ctx.fillStyle = col.force;
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.moveTo(rx - 4, lane.y - 22);
-                    ctx.lineTo(rx - 4 - len, lane.y - 22);
+                    ctx.moveTo(rx - 4, lane.y - 22 * k);
+                    ctx.lineTo(rx - 4 - len, lane.y - 22 * k);
                     ctx.stroke();
                     ctx.beginPath();
-                    ctx.moveTo(rx - 10 - len, lane.y - 22);
-                    ctx.lineTo(rx - 2 - len, lane.y - 27);
-                    ctx.lineTo(rx - 2 - len, lane.y - 17);
+                    ctx.moveTo(rx - 10 - len, lane.y - 22 * k);
+                    ctx.lineTo(rx - 2 - len, lane.y - 27 * k);
+                    ctx.lineTo(rx - 2 - len, lane.y - 17 * k);
                     ctx.fill();
                     ctx.lineWidth = 1;
                     ctx.font = '12px sans-serif';
                     ctx.textAlign = 'right';
-                    ctx.fillText(f.toFixed(1) + ' N', rx - 12 - len, lane.y - 18);
+                    ctx.fillText(f.toFixed(1) + ' N', rx - 12 - len, lane.y - 18 * k);
                 }
             }
             ctx.fillStyle = col.muted;
             ctx.textAlign = 'center';
             ctx.font = '12px "Noto Sans JP", sans-serif';
-            ctx.fillText('壁 (' + formatStiffness(params.ke) + ')', (wallPx + backPx) / 2, h - 6);
+            if (k > 0.9) ctx.fillText('壁 (' + formatStiffness(params.ke) + ')', (wallPx + backPx) / 2, h - 6);  // 低いときは壁に重なるので省略
         }
 
         function drawPlot(canvasId, title, getSeries, yMin, yMax, unit) {
