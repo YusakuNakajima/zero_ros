@@ -891,36 +891,45 @@ admittance_controller:
 
                 <!-- 手先の制御則 -->
                 <section>
-                    <h2 style="font-size: 1.3em;">位置も力も「手先の力」で書く</h2>
-                    <svg viewBox="0 0 760 220" style="width: 90%; max-height: 34vh;">
+                    <h2 style="font-size: 1.3em;">位置と力を同じ単位にそろえる</h2>
+                    <svg viewBox="0 0 760 250" style="width: 92%; max-height: 38vh;">
                         <defs>
                             <marker id="cl-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker>
                         </defs>
-                        <!-- 位置制御則 -->
-                        <text x="20" y="58" fill="#4ade80" font-size="18" font-weight="bold">位置制御則</text>
-                        <text x="20" y="82" fill="#9ca3af" font-size="15">目標 x<tspan font-size="11" dy="4">d</tspan><tspan dy="-4">・今の x, v</tspan></text>
-                        <rect x="150" y="34" width="290" height="60" rx="10" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
-                        <text x="295" y="72" fill="#e5e7eb" font-size="19" text-anchor="middle">K<tspan font-size="13" dy="4">p</tspan><tspan dy="-4">(x</tspan><tspan font-size="13" dy="4">d</tspan><tspan dy="-4"> − x) − K</tspan><tspan font-size="13" dy="4">d</tspan><tspan dy="-4"> v</tspan></text>
-                        <line x1="440" y1="64" x2="490" y2="64" stroke="#e5e7eb" stroke-width="3" marker-end="url(#cl-a)"/>
-                        <text x="500" y="70" fill="#4ade80" font-size="20" font-weight="bold">F<tspan font-size="14" dy="4">pos</tspan></text>
-                        <!-- 力制御則 -->
-                        <text x="20" y="158" fill="#f87171" font-size="18" font-weight="bold">力制御則</text>
-                        <text x="20" y="182" fill="#9ca3af" font-size="15">目標 F<tspan font-size="11" dy="4">d</tspan><tspan dy="-4">・測った F</tspan></text>
-                        <rect x="150" y="134" width="290" height="60" rx="10" fill="#7f1d1d" stroke="#f87171" stroke-width="2"/>
-                        <text x="295" y="172" fill="#e5e7eb" font-size="19" text-anchor="middle">F<tspan font-size="13" dy="4">d</tspan><tspan dy="-4"> + K</tspan><tspan font-size="13" dy="4">f</tspan><tspan dy="-4">(F</tspan><tspan font-size="13" dy="4">d</tspan><tspan dy="-4"> − F)</tspan></text>
-                        <line x1="440" y1="164" x2="490" y2="164" stroke="#e5e7eb" stroke-width="3" marker-end="url(#cl-a)"/>
-                        <text x="500" y="170" fill="#f87171" font-size="20" font-weight="bold">F<tspan font-size="14" dy="4">frc</tspan></text>
-                        <!-- Jᵀ -->
-                        <path d="M560,64 L600,64 L600,164 L560,164" fill="none" stroke="#9ca3af" stroke-width="2"/>
-                        <line x1="600" y1="114" x2="630" y2="114" stroke="#e5e7eb" stroke-width="3" marker-end="url(#cl-a)"/>
-                        <rect x="636" y="90" width="110" height="48" rx="8" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
-                        <text x="691" y="121" fill="#a3e635" font-size="19" text-anchor="middle">τ = J<tspan font-size="13" dy="-8">T</tspan><tspan dy="8">F</tspan></text>
+                        <!-- 上段：トルク制御ロボット -->
+                        <text x="10" y="22" fill="#e5e7eb" font-size="17" font-weight="bold">トルク制御ロボット（Franka など）：<tspan fill="#f472b6">手先の力</tspan>にそろえる</text>
+                        <rect x="10" y="36" width="250" height="34" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+                        <text x="135" y="59" fill="#e5e7eb" font-size="16" text-anchor="middle">位置：K<tspan font-size="11" dy="4">p</tspan><tspan dy="-4">(x</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − x) − K</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> v</tspan></text>
+                        <rect x="10" y="78" width="250" height="34" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="2"/>
+                        <text x="135" y="101" fill="#e5e7eb" font-size="16" text-anchor="middle">力：F<tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> + K</tspan><tspan font-size="11" dy="4">f</tspan><tspan dy="-4">(F</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − F)</tspan></text>
+                        <path d="M260,53 L300,53 L300,95 L260,95" fill="none" stroke="#9ca3af" stroke-width="2"/>
+                        <line x1="300" y1="74" x2="336" y2="74" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
+                        <text x="318" y="66" fill="#e5e7eb" font-size="14" text-anchor="middle">S</text>
+                        <rect x="342" y="56" width="150" height="36" rx="6" fill="#1f2937" stroke="#f472b6" stroke-width="2"/>
+                        <text x="417" y="80" fill="#f472b6" font-size="16" text-anchor="middle">手先の力 F</text>
+                        <line x1="492" y1="74" x2="528" y2="74" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
+                        <rect x="534" y="56" width="216" height="36" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
+                        <text x="642" y="80" fill="#a3e635" font-size="16" text-anchor="middle">τ = J<tspan font-size="11" dy="-7">T</tspan><tspan dy="7">F → 関節トルク</tspan></text>
+                        <!-- 下段：位置制御ロボット -->
+                        <text x="10" y="148" fill="#e5e7eb" font-size="17" font-weight="bold">位置制御ロボット（UR など）：<tspan fill="#4fc3f7">手先の速度</tspan>にそろえる</text>
+                        <rect x="10" y="162" width="250" height="34" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+                        <text x="135" y="185" fill="#e5e7eb" font-size="16" text-anchor="middle">位置：K<tspan font-size="11" dy="4">p</tspan><tspan dy="-4">(x</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − x)</tspan></text>
+                        <rect x="10" y="204" width="250" height="34" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="2"/>
+                        <text x="135" y="227" fill="#e5e7eb" font-size="16" text-anchor="middle">力：K<tspan font-size="11" dy="4">f</tspan><tspan dy="-4">(F</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − F)</tspan></text>
+                        <path d="M260,179 L300,179 L300,221 L260,221" fill="none" stroke="#9ca3af" stroke-width="2"/>
+                        <line x1="300" y1="200" x2="336" y2="200" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
+                        <text x="318" y="192" fill="#e5e7eb" font-size="14" text-anchor="middle">S</text>
+                        <rect x="342" y="182" width="150" height="36" rx="6" fill="#1f2937" stroke="#4fc3f7" stroke-width="2"/>
+                        <text x="417" y="206" fill="#4fc3f7" font-size="16" text-anchor="middle">手先の速度 v</text>
+                        <line x1="492" y1="200" x2="528" y2="200" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
+                        <rect x="534" y="182" width="216" height="36" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
+                        <text x="642" y="206" fill="#a3e635" font-size="16" text-anchor="middle">積分 → 逆運動学 → 関節角</text>
                     </svg>
-                    <ul style="font-size: 0.55em;">
-                        <li>位置制御：目標とのずれを<strong>ばね・ダンパの力</strong>に変える（手先の PD 制御）</li>
-                        <li>力制御：目標の力を出しつつ、FTセンサで測った力との<strong>差を補正</strong></li>
-                        <li>どちらも出力は<strong>手先の力 F</strong> → 仮想仕事の原理 τ = J<sup>T</sup>F で関節へ</li>
-                        <li>同じ「手先の力」だから<strong>方向ごとに選んで足せる</strong> → 選び方が選択行列 S</li>
+                    <ul style="font-size: 0.5em;">
+                        <li>ロボットが受け取れる指令に合わせて、位置ループと力ループの<strong>出力の単位をそろえて</strong>から足す</li>
+                        <li>位置制御ロボットでは力の誤差 → 速度（＝アドミッタンス型）。UR の force_mode もこの考え方</li>
+                        <li>実装例：cambel/ur3 の hybrid_controller.py（位置 PD＋力 PD → 逆運動学 → 関節角）</li>
+                        <li>単位がそろえば<strong>方向ごとに選んで足せる</strong> → 選び方が選択行列 S</li>
                     </ul>
                 </section>
 
@@ -999,11 +1008,11 @@ admittance_controller:
                         <!-- 合成 → Jᵀ → ロボット -->
                         <circle cx="420" cy="135" r="14" fill="none" stroke="#e5e7eb" stroke-width="2"/><text x="420" y="141" fill="#e5e7eb" font-size="18" text-anchor="middle">+</text>
                         <line x1="434" y1="135" x2="470" y2="135" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#hb-a)"/>
-                        <text x="452" y="124" fill="#e5e7eb" font-size="16" text-anchor="middle">F</text>
-                        <rect x="476" y="113" width="80" height="44" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
-                        <text x="516" y="142" fill="#a3e635" font-size="18" text-anchor="middle">J<tspan font-size="12" dy="-8">T</tspan></text>
-                        <line x1="556" y1="135" x2="596" y2="135" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#hb-a)"/>
-                        <text x="576" y="124" fill="#e5e7eb" font-size="16" text-anchor="middle">τ</text>
+                        <text x="452" y="124" fill="#e5e7eb" font-size="16" text-anchor="middle">u</text>
+                        <rect x="476" y="105" width="110" height="60" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
+                        <text x="531" y="130" fill="#a3e635" font-size="14" text-anchor="middle">τ = J<tspan font-size="10" dy="-6">T</tspan><tspan dy="6">u</tspan></text>
+                        <text x="531" y="152" fill="#4fc3f7" font-size="13" text-anchor="middle">or 積分→IK</text>
+                        <line x1="586" y1="135" x2="600" y2="135" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#hb-a)"/>
                         <rect x="602" y="105" width="130" height="60" rx="8" fill="#4b5563"/>
                         <text x="667" y="142" fill="#e5e7eb" font-size="18" text-anchor="middle">ロボット</text>
                         <!-- フィードバック -->
@@ -1014,8 +1023,9 @@ admittance_controller:
                     </svg>
                     <ul style="font-size: 0.55em;">
                         <li>位置ループと力ループを<strong>並べて</strong>、誤差に S をかけて方向を振り分ける</li>
-                        <li>F = (I − S) F<sub>pos</sub> ＋ S F<sub>frc</sub> → τ = J<sup>T</sup>F（S = 0 の方向は位置、1 の方向は力だけが効く）</li>
-                        <li>位置制御ロボットでは力制御則の出力を<strong>位置指令の補正</strong>にする（UR の force_mode）</li>
+                        <li>u = (I − S) u<sub>pos</sub> ＋ S u<sub>frc</sub>（S = 0 の方向は位置、1 の方向は力だけが効く）</li>
+                        <li>トルク制御ロボット：u = 手先の力 → τ = J<sup>T</sup>u</li>
+                        <li>位置制御ロボット（UR）：u = 手先の速度 → 積分 → 逆運動学</li>
                     </ul>
                 </section>
 
