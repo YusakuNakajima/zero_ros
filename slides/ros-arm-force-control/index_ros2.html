@@ -592,18 +592,24 @@
                 <!-- インピーダンス制御の基本方程式 -->
                 <section>
                     <h2>インピーダンス制御の数式</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
+                    <p style="font-size: 0.9em; margin: 0.3em 0;"><strong>M a + D (v − v<sub>d</sub>) + K (x − x<sub>d</sub>) = F</strong></p>
+                    <div style="display: flex; gap: 2em; font-size: 0.55em; text-align: left;">
                         <div style="flex: 1;">
-                            <div style="margin-top: 2em; font-size: 1.2em;">
-                                <p><strong>F = Mẍ + Dẋ + K(x - x_d)</strong></p>
-                                <ul style="font-size: 0.8em; margin-top: 1em;">
-                                    <li><strong>F</strong>: 発生する力</li>
-                                    <li><strong>M</strong>: 仮想慣性</li>
-                                    <li><strong>D</strong>: 仮想粘性</li>
-                                    <li><strong>K</strong>: 仮想弾性</li>
-                                    <li><strong>x - x_d</strong>: 位置誤差</li>
-                                </ul>
-                            </div>
+                            <ul>
+                                <li><strong>x</strong>：関節角から求めた<strong>手先の位置</strong>（入力）。v, a はその速度・加速度（v<sub>d</sub> は目標の速度）</li>
+                                <li><strong>F</strong>：計算した<strong>ロボットが出す力</strong>（出力）</li>
+                                <li><strong>x<sub>d</sub></strong>：本来の目標位置（軌道）</li>
+                                <li><strong>M / D / K</strong>：仮想の重さ / ダンパ / ばね（自分で決める）</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <ol>
+                                <li>x, v, a を測る</li>
+                                <li>F = M a + D (v − v<sub>d</sub>) + K (x − x<sub>d</sub>)</li>
+                                <li>τ = J<sup>T</sup> F で関節トルクにする</li>
+                                <li>τ をモータに渡す（制御周期ごとに繰り返す）</li>
+                            </ol>
+                            <p style="margin: 0;">目標で止まっていれば F = 0（力を出さない）</p>
                         </div>
                     </div>
                 </section>
@@ -698,7 +704,7 @@
                         <div style="flex: 1;">
                             <ol>
                                 <li>F を測る</li>
-                                <li>a<sub>c</sub> = M<sup>−1</sup> [F − D(v<sub>c</sub> − v<sub>d</sub>) − K(x<sub>c</sub> − x<sub>d</sub>)]</li>
+                                <li>a<sub>c</sub> = M<sup>−1</sup> [F − D (v<sub>c</sub> − v<sub>d</sub>) − K (x<sub>c</sub> − x<sub>d</sub>)]</li>
                                 <li>積分して v<sub>c</sub>, x<sub>c</sub> を更新</li>
                                 <li>x<sub>c</sub> を位置制御に渡す（制御周期ごとに繰り返す）</li>
                             </ol>
@@ -1178,7 +1184,7 @@ admittance_controller:
                             <text x="540" y="28" font-weight="bold">接触作業の典型例（K &gt; 0）</text>
                             <line x1="390" y1="150" x2="700" y2="150" stroke="#6b7280" stroke-width="3"/>
                             <line x1="400" y1="85" x2="400" y2="150" stroke="#f472b6" stroke-width="4"/>
-                            <text x="400" y="78" fill="#f472b6" font-size="17">x_d（目標）</text>
+                            <text x="400" y="78" fill="#f472b6" font-size="17">x<tspan baseline-shift="sub" font-size="0.7em">d</tspan>（目標）</text>
                             <path d="M400,122 l10,-12 l15,24 l15,-24 l15,24 l15,-24 l15,24 l15,-24 l15,24 l10,-12" fill="none" stroke="#fbbf24" stroke-width="3"/>
                             <text x="470" y="100" fill="#fbbf24" font-size="17">K</text>
                             <rect x="540" y="95" width="60" height="55" fill="#4b5563"/>

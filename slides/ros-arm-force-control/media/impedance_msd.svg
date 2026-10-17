@@ -5,7 +5,7 @@
   </defs>
   <!-- 目標位置 x_d -->
   <line x1="60" y1="60" x2="60" y2="230" stroke="#f472b6" stroke-width="5"/>
-  <text x="60" y="48" fill="#f472b6" font-size="20" text-anchor="middle" font-weight="bold">目標 x_d</text>
+  <text x="60" y="48" fill="#f472b6" font-size="20" text-anchor="middle" font-weight="bold">目標 x<tspan baseline-shift="sub" font-size="0.7em">d</tspan></text>
   <!-- ばね K -->
   <polyline points="60.0,110.0 72.0,110.0 86.7,122.0 116.1,98.0 145.6,122.0 175.0,98.0 204.4,122.0 233.9,98.0 263.3,122.0 278.0,110.0 290.0,110.0" fill="none" stroke="#fbbf24" stroke-width="3"/>
   <text x="175" y="88" fill="#fbbf24" font-size="22" text-anchor="middle" font-weight="bold">K ばね</text>
@@ -27,5 +27,5 @@
   <line x1="290" y1="262" x2="420" y2="262" stroke="#e5e7eb" stroke-width="2" marker-end="url(#ax)"/>
   <line x1="345" y1="226" x2="345" y2="262" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="4 3"/>
   <text x="430" y="268" fill="#e5e7eb" font-size="18">x</text>
-  <text x="280" y="292" fill="#e5e7eb" font-size="17" text-anchor="middle">M ẍ + D ẋ + K (x − x_d) = F</text>
+  <text x="280" y="292" fill="#e5e7eb" font-size="17" text-anchor="middle">M a + D (v − v<tspan baseline-shift="sub" font-size="0.7em">d</tspan>) + K (x − x<tspan baseline-shift="sub" font-size="0.7em">d</tspan>) = F</text>
 </svg>
