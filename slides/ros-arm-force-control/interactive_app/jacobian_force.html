@@ -56,7 +56,7 @@
             <input type="range" id="mag" min="0" max="30" step="1" value="10">
         </div>
     </div>
-    <canvas id="c" height="230"></canvas>
+    <canvas id="c" data-h="230"></canvas>
     <div class="eq" id="eq"></div>
 
     <script>
@@ -82,8 +82,10 @@
 
         const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
         function fitCanvas(c) {
-            const r = window.devicePixelRatio || 1, w = c.clientWidth, h = +c.getAttribute('height');
-            if (c.width !== Math.round(w * r)) { c.width = Math.round(w * r); c.height = Math.round(h * r); c.style.height = h + 'px'; }
+            // 表示上の高さは data-h で固定（height 属性は devicePixelRatio 倍に書き換わるので読まない）
+            const r = window.devicePixelRatio || 1, w = c.clientWidth, h = +c.dataset.h;
+            c.style.height = h + 'px';
+            if (c.width !== Math.round(w * r) || c.height !== Math.round(h * r)) { c.width = Math.round(w * r); c.height = Math.round(h * r); }
             const ctx = c.getContext('2d');
             ctx.setTransform(r, 0, 0, r, 0, 0);
             return { ctx, w, h };
@@ -183,7 +185,7 @@
         let dragging = false;
         function setForce(ev) {
             const st = state(), c = $('c'), r = c.getBoundingClientRect();
-            const w = c.clientWidth, h = +c.getAttribute('height'), aw = w * 0.62, s = Math.min(aw / 0.9, h / 0.85);
+            const w = c.clientWidth, h = +c.dataset.h, aw = w * 0.62, s = Math.min(aw / 0.9, h / 0.85);
             const tx = aw * 0.32 + st.tip[0] * s, ty = h * 0.72 - st.tip[1] * s;
             const dx = ev.clientX - r.left - tx, dy = -(ev.clientY - r.top - ty);
             $('ang').value = Math.round(Math.atan2(dy, dx) * 180 / Math.PI / 5) * 5;

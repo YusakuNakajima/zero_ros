@@ -285,7 +285,8 @@
         const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
         function fitCanvas(c) {
             const ratio = window.devicePixelRatio || 1;
-            const w = c.clientWidth, h = parseInt(c.getAttribute('height'), 10);
+            // 元の高さを覚えておく（height 属性は ratio 倍に書き換わるため）
+            const w = c.clientWidth, h = +(c.dataset.h ||= c.getAttribute('height'));
             if (c.width !== Math.round(w * ratio)) {
                 c.width = Math.round(w * ratio);
                 c.height = Math.round(h * ratio);

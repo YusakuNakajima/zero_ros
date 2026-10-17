@@ -137,6 +137,33 @@
                     </ul>
                 </section>
 
+                <!-- 用語の整理：ロボットの例 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">用語の整理：ロボットの例</h2>
+                    <div style="font-size: 0.5em;">
+                        <div style="display: flex; gap: 16px; align-items: stretch;">
+                            <div style="flex: 1; border: 2px solid #9ca3af; border-radius: 8px; padding: 6px;">
+                                <strong>受動コンプライアンス</strong><br>
+                                <img src="media/robotic_powder_grinding.png" alt="乳鉢で粉砕するロボット（ソフトジグ）" style="height: 24vh; margin: 4px 0; background: #fff; border-radius: 6px; padding: 3px;"><br>
+                                ソフトジグで乳杵を持って粉砕
+                            </div>
+                            <div style="flex: 3; border: 2px solid #60a5fa; border-radius: 8px; padding: 6px;">
+                                <strong>能動コンプライアンス（＝力制御）</strong>
+                                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <div style="flex: 1; border: 2px solid #f472b6; border-radius: 6px; padding: 4px;"><strong>インピーダンス制御</strong><br><img src="media/franka_robot.png" alt="Franka" style="height: 24vh; margin: 4px 0; background: #fff; border-radius: 6px; padding: 3px;"><br>Franka</div>
+                                    <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 6px; padding: 4px;"><strong>アドミッタンス制御</strong><br><img src="media/ur_robot.png" alt="UR" style="height: 24vh; margin: 4px 0; background: #fff; border-radius: 6px; padding: 3px;"><br>UR</div>
+                                    <div style="flex: 1; border: 2px solid #fbbf24; border-radius: 6px; padding: 4px;"><strong>ハイブリッド制御</strong><br><img src="media/ur_robot.png" alt="UR" style="height: 24vh; margin: 4px 0; background: #fff; border-radius: 6px; padding: 3px;"><br>UR（force_mode）</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.5em; margin-top: 12px;">
+                        <li>Franka：関節トルクセンサで<strong>トルクを直接出せる</strong> → インピーダンス制御</li>
+                        <li>UR：位置制御ロボット＋手先FTセンサ → 力から位置を作る<strong>アドミッタンス・ハイブリッド</strong></li>
+                    </ul>
+                    <p style="font-size: 0.35em; color: #aaa;">受動の例：Y. Nakajima et al., "Force-controlled robotic mechanochemical synthesis", Digital Discovery, 3, 2130-2136 (2024)</p>
+                </section>
+
                 <section>
                     <h2>受動コンプライアンス制御</h2>
                     <div class="slide-layout-image">
