@@ -673,6 +673,74 @@
                         <li>作業に合わせて調整（例：人と協調 → K 小・D 大、位置決め → K 大）</li>
                     </ul>
                 </section>
+
+                <!-- ROS2でのインピーダンス制御実装 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">ROS2でのインピーダンス制御実装</h2>
+                    <img src="media/ros2_impedance_arch.svg" alt="ROS2 インピーダンス制御の構成: hardware_interface・CartesianImpedanceController・トピック" style="width: 78%; max-height: 62vh; margin: 0;">
+                    <p style="font-size: 0.5em; margin: 6px 0 0;">アドミッタンスとの違い：<strong>FTセンサ不要</strong>（関節の位置・速度だけ）、出力が<strong>関節トルク（effort）</strong></p>
+                    <p style="font-size: 0.35em; color: #aaa; margin: 4px 0 0;"><a href="https://github.com/matthias-mayr/Cartesian-Impedance-Controller" target="_blank" style="color: #4CAF50;">matthias-mayr/Cartesian-Impedance-Controller</a>（Mayr &amp; Salt-Ducaju, JOSS 2024）</p>
+                </section>
+
+                <!-- インピーダンスコントローラの設定 -->
+                <section>
+                    <h2>インピーダンス制御の設定</h2>
+                    <div style="display: flex; align-items: center; gap: 2em;">
+                        <div style="flex: 1;">
+                            <pre style="font-size: 0.42em; margin: 0;"><code class="language-yaml" data-trim>
+cartesian_impedance_controller:
+  ros__parameters:
+    type: cartesian_impedance_controller/CartesianImpedanceController
+    joints: [fr3_joint1, fr3_joint2, ...]
+    end_effector: fr3_hand_tcp    # 制御する点（TCP）
+    update_frequency: 500         # Hz（200〜1000）
+    delta_tau_max: 1.0            # トルク変化の上限（急変防止）
+    stiffness:                    # K
+      translation: {x: 200.0, y: 200.0, z: 200.0}   # N/m
+      rotation:    {x: 20.0,  y: 20.0,  z: 20.0}    # Nm/rad
+      nullspace_stiffness: 0.0
+    damping:                      # D = 係数 × 2√K
+      translation: {x: 1.0, y: 1.0, z: 1.0}
+      rotation:    {x: 1.0, y: 1.0, z: 1.0}
+    wrench:                       # 手先で出したい力（任意）
+      apply_wrench: false
+      force_z: 0.0
+                            </code></pre>
+                            <p style="font-size: 0.4em; color: #aaa; margin: 4px 0 0;">リポジトリの README の設定例を抜粋・簡略化（filtering・verbosity などは省略）</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <ul style="font-size: 0.6em;">
+                                <li><strong>K（stiffness）</strong>：並進・回転を軸ごとに</li>
+                                <li><strong>D（damping）</strong>：係数で指定。中で 2√K を掛ける</li>
+                                <li><strong>M は無い</strong>：ロボット自身の重さのまま</li>
+                                <li>実行中もトピックで変更できる（例 <code>~/set_cartesian_stiffness</code>）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- インピーダンスコントローラの中身 -->
+                <section>
+                    <h2 style="font-size: 1.3em;">インピーダンス制御の実装の中身</h2>
+                    <pre style="font-size: 0.42em; width: 95%;"><code class="language-cpp" data-trim>
+// cartesian_impedance_controller.cpp（抜粋・変数名を簡略化）
+// ばね・ダンパ
+tau_task = J.transpose() * (-K * error - D * (J * dq));
+// 余った自由度の姿勢（手先には影響しない）
+tau_nullspace = (I - J.transpose() * J_T_pinv) * (K_ns * (q_d_ns - q) - D_ns * dq);
+// 出したい力
+tau_ext = J.transpose() * cartesian_wrench;
+// 足し合わせて、トルクの急変を抑える
+tau_d = tau_task + tau_nullspace + tau_ext;
+saturateTorqueRate(tau_d, &tau_c, delta_tau_max);
+                    </code></pre>
+                    <ul style="font-size: 0.55em;">
+                        <li><span style="color: #f472b6;">tau_task</span>：数式の <strong>K(x − x<sub>d</sub>) + D v</strong> を、引き戻す向き（−）で τ = J<sup>T</sup> F に（error = x − x<sub>d</sub>、J·dq = v）</li>
+                        <li><span style="color: #4ade80;">tau_nullspace</span>：7軸の余った自由度で肘などの姿勢を保つ（手先には影響しない）</li>
+                        <li><span style="color: #fbbf24;">tau_ext</span>：目標の力を足せる（直接的な力の指令）</li>
+                        <li>重力補償はロボット側（Franka・iiwa）が行う</li>
+                    </ul>
+                </section>
             </section>
 
             <!-- アドミッタンス制御 -->
@@ -911,6 +979,52 @@ admittance_controller:
                     </div>
                 </section>
 
+                <!-- コラム：実装の比較（普通のアドミッタンス vs FDCC） -->
+                <section>
+                    <h2 style="font-size: 1.2em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>実装の比較：仮想の重さをどこに置くか</h2>
+                    <p style="font-size: 0.55em; margin: 0 0 10px;">どちらも「測った力 → 位置」の<strong>アドミッタンス制御の仲間</strong>。違うのは<strong>仮想の重さを置く場所</strong></p>
+                    <div style="display: flex; gap: 20px; font-size: 0.48em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
+                            <div style="text-align: center;"><strong style="color: #f472b6;">普通のアドミッタンス制御</strong><br>（admittance_controller）</div>
+                            <div style="font-family: monospace; background: #1f2937; border-radius: 6px; padding: 6px; text-align: center; line-height: 1.6;">F → <strong>M a + D v + K(x − x<sub>d</sub>) = F</strong><br>→ x（手先位置）→ <strong>IK（J<sup>−1</sup>）</strong> → q</div>
+                            <ul>
+                                <li>手先に<strong>6自由度の仮想質点</strong>を置いて動かす</li>
+                                <li>その位置を IK で関節角に直す</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 8px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80;">軽い仮想ロボットの順動力学</strong><br>（FZI：FDCC）</div>
+                            <div style="font-family: monospace; background: #1f2937; border-radius: 6px; padding: 6px; text-align: center; line-height: 1.6;">F（力＋ばねの力）→ <strong>τ = J<sup>T</sup> F</strong><br>→ 関節加速度 = M<sub>仮想</sub>(q)<sup>−1</sup> τ → 積分 → q</div>
+                            <ul>
+                                <li><strong>リンクがごく軽い仮想ロボット全体</strong>を関節空間で動かす</li>
+                                <li>求めた q をそのまま位置指令に。<strong>IK 不要</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.5em; margin-top: 10px;">
+                        <li>なぜ軽く？ 実機の重さだと鈍い → 軽くすると<strong>ばね・ダンパの設定どおり</strong>に素早く動く</li>
+                        <li>実機の動力学の再現ではなく、<strong>IK の代わりの計算の道具</strong></li>
+                    </ul>
+                </section>
+
+                <!-- コラム：違いのまとめ -->
+                <section>
+                    <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>違いのまとめ</h2>
+                    <table class="custom-table" style="font-size: 0.45em;">
+                        <tr><th></th><th style="color: #f472b6;">普通のアドミッタンス</th><th style="color: #4ade80;">軽い仮想ロボット（FDCC）</th></tr>
+                        <tr><td>仮想の重さを置く場所</td><td>手先空間（6自由度の質点）</td><td>関節空間（ロボット全体）</td></tr>
+                        <tr><td>関節角の求め方</td><td>IK（J<sup>−1</sup>）</td><td>J<sup>T</sup> と順動力学を積分</td></tr>
+                        <tr><td>特異点</td><td>J<sup>−1</sup> が発散し関節が暴れやすい</td><td>J<sup>T</sup> なので発散しない<br>（その方向に動きにくくなるだけ）</td></tr>
+                        <tr><td>冗長性・関節リミット</td><td>IK 側で別に処理</td><td>自然に扱える</td></tr>
+                        <tr><td>手先の見かけの重さ</td><td>姿勢によらず一定（実機とは合わない）</td><td>姿勢で変わるが、ごく軽いので<br>ばね・ダンパの特性が支配的</td></tr>
+                    </table>
+                    <ul style="font-size: 0.5em; margin-top: 10px;">
+                        <li><span style="color: #f472b6;">普通</span>：手先の「玉」を押して動かし、腕を<strong>後から IK で合わせる</strong></li>
+                        <li><span style="color: #4ade80;">FDCC</span>：軽い「張りぼてのロボット」が<strong>腕全体でしなって付いてくる</strong> → その動きを実機がなぞる</li>
+                    </ul>
+                    <p style="font-size: 0.35em; color: #aaa;">S. Scherzinger, A. Roennau, R. Dillmann, "Forward Dynamics Compliance Control (FDCC): A new approach to cartesian compliance for robotic manipulators", IROS 2017 ／ <a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers" target="_blank" style="color: #4CAF50;">fzi-forschungszentrum-informatik/cartesian_controllers</a></p>
+                </section>
+
                 <section>
                     <h2><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>押して離したときの動き</h2>
                     <svg viewBox="0 0 720 300" style="width: 78%; max-height: 42vh;">
@@ -1103,8 +1217,8 @@ admittance_controller:
                         <line x1="434" y1="135" x2="470" y2="135" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#hb-a)"/>
                         <text x="452" y="124" fill="#e5e7eb" font-size="16" text-anchor="middle">u</text>
                         <rect x="476" y="105" width="110" height="60" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
-                        <text x="531" y="130" fill="#a3e635" font-size="14" text-anchor="middle">τ = J<tspan font-size="10" dy="-6">T</tspan><tspan dy="6">u</tspan></text>
-                        <text x="531" y="152" fill="#4fc3f7" font-size="13" text-anchor="middle">or 積分→IK</text>
+                        <text x="531" y="130" fill="#a3e635" font-size="14" text-anchor="middle">指令に変換</text>
+                        <text x="531" y="152" fill="#9ca3af" font-size="13" text-anchor="middle">（次のスライド）</text>
                         <line x1="586" y1="135" x2="600" y2="135" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#hb-a)"/>
                         <rect x="602" y="105" width="130" height="60" rx="8" fill="#4b5563"/>
                         <text x="667" y="142" fill="#e5e7eb" font-size="18" text-anchor="middle">ロボット</text>
@@ -1115,11 +1229,37 @@ admittance_controller:
                         <text x="380" y="268" fill="#f87171" font-size="15" text-anchor="middle">− 測った力 F（FTセンサ）</text>
                     </svg>
                     <ul style="font-size: 0.55em;">
-                        <li>位置ループと力ループを並べ、u = (I − S) u<sub>pos</sub> ＋ S u<sub>frc</sub> で方向ごとに振り分ける</li>
-                        <li>足す前に、ロボットが受け取れる指令に<strong>出力の単位をそろえる</strong></li>
-                        <li>トルク制御（Franka など）：u = <strong>手先の力</strong> → τ = J<sup>T</sup>u</li>
-                        <li>位置制御（UR など）：u = <strong>手先の速度</strong> → 積分 → 逆運動学（アドミッタンス型）</li>
-                        <li>例：UR の force_mode、<a href="https://github.com/cambel/ur3/blob/ros2-jazzy/ur_control/ur_control/hybrid_controller.py" target="_blank" style="color: #4ade80;">cambel/ur3 の hybrid_controller.py</a></li>
+                        <li><span style="color: #4ade80;">位置ループ</span>：位置のずれ x<sub>d</sub> − x → 位置制御則 → u<sub>pos</sub></li>
+                        <li><span style="color: #f87171;">力ループ</span>：力のずれ F<sub>d</sub> − F → 力制御則 → u<sub>frc</sub></li>
+                        <li><strong>u = (I − S) u<sub>pos</sub> ＋ S u<sub>frc</sub></strong>：方向ごとにどちらか一方だけを通して足す</li>
+                        <li>選ばれなかった方向の誤差は使わない → 位置と力が<strong>同じ方向で喧嘩しない</strong></li>
+                    </ul>
+                </section>
+
+                <!-- ハイブリッド制御はどのロボットでも実装できる -->
+                <section>
+                    <h2 style="font-size: 1.1em;">トルク制御でも位置制御でも実装できる</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
+                            <div style="text-align: center;"><strong style="color: #f472b6;">トルク制御ロボット</strong><br>（Franka など）</div>
+                            <ul>
+                                <li>u を<strong>手先の力 [N]</strong> にそろえる</li>
+                                <li>τ = J<sup>T</sup> u → <strong>関節トルク指令</strong>（effort）</li>
+                                <li>力のずれをそのまま力として出せる</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4fc3f7; border-radius: 10px; padding: 8px;">
+                            <div style="text-align: center;"><strong style="color: #4fc3f7;">位置制御ロボット</strong><br>（UR など）</div>
+                            <ul>
+                                <li>u を<strong>手先の速度 [m/s]</strong> にそろえる（アドミッタンス型）</li>
+                                <li>速度指令：関節速度 = J<sup>−1</sup> u → <strong>関節速度指令</strong><br><span style="color: #fbbf24;">← 実際はこちらが多い</span></li>
+                                <li>位置指令：u を積分 → 逆運動学 → 関節位置指令</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.5em; margin-top: 12px;">
+                        <li>位置制御ロボットでも、応答やなめらかさ（<strong>制御性</strong>）を考えて<strong>速度指令</strong>で動かすことが多い</li>
+                        <li>例：UR の force_mode、<a href="https://github.com/cambel/ur3/blob/ros2-jazzy/ur_control/ur_control/hybrid_controller.py" target="_blank" style="color: #4ade80;">cambel/ur3 の hybrid_controller.py</a>（位置の差分を返す版と速度を返す版がある）</li>
                     </ul>
                 </section>
 

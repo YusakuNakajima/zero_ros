@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 712 470" font-family="Helvetica, Arial, 'Noto Sans JP', sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#000"/></marker>
+  </defs>
+  <rect width="712" height="470" fill="#e8e6f8"/>
+  <!-- タイトル -->
+  <text x="16" y="38" fill="#1c6fd1" font-size="26" font-weight="bold">ROS2 インピーダンス制御の構成</text>
+  <text x="18" y="62" fill="#444" font-size="13">Cartesian-Impedance-Controller を使う例</text>
+  <g font-size="11" font-weight="bold" fill="#000">
+    <text x="440" y="24">・FTセンサ不要：関節の位置・速度から</text>
+    <text x="440" y="39">　手先のずれと速度を計算</text>
+    <text x="440" y="54">・出力は関節トルク（effort）指令</text>
+  </g>
+  <!-- ロボット実機 -->
+  <text x="590" y="80" fill="#c45be0" font-size="14" font-weight="bold" text-anchor="middle">ロボット実機</text>
+  <rect x="486" y="86" width="212" height="70" rx="4" fill="#fde8ff" stroke="#c45be0" stroke-width="2.5"/>
+  <rect x="500" y="98" width="184" height="46" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="592" y="117" font-size="12" text-anchor="middle">ドライバ（例: Franka / iiwa）</text>
+  <text x="592" y="134" font-size="12" text-anchor="middle">トルク指令 ＋ 重力補償</text>
+  <!-- hardware_interface -->
+  <rect x="270" y="98" width="160" height="46" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="350" y="117" font-size="12" text-anchor="middle">hardware_interface</text>
+  <text x="350" y="134" font-size="12" text-anchor="middle">:SystemInterface</text>
+  <line x1="430" y1="113" x2="498" y2="113" stroke="#000" marker-end="url(#a)"/>
+  <line x1="500" y1="130" x2="432" y2="130" stroke="#000" marker-end="url(#a)"/>
+  <!-- State / Command Interface -->
+  <rect x="176" y="178" width="160" height="44" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="256" y="196" font-size="12" text-anchor="middle">State Interface</text>
+  <text x="256" y="213" font-size="12" text-anchor="middle">関節の位置・速度・トルク</text>
+  <rect x="374" y="178" width="160" height="44" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="454" y="196" font-size="12" text-anchor="middle">Command Interface</text>
+  <text x="454" y="213" font-size="12" text-anchor="middle" font-weight="bold">関節のトルク指令（effort）</text>
+  <path d="M310,144 L310,160 L256,160 L256,176" fill="none" stroke="#000" marker-end="url(#a)"/>
+  <path d="M454,178 L454,160 L392,160 L392,146" fill="none" stroke="#000" marker-end="url(#a)"/>
+  <!-- Controller manager -->
+  <rect x="130" y="246" width="568" height="96" rx="6" fill="#ccf6ff" stroke="#3cc3e8" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="630" y="290" font-size="14" font-weight="bold" text-anchor="middle">Controller manager</text>
+  <rect x="146" y="262" width="168" height="44" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="230" y="280" font-size="12" text-anchor="middle">joint_state</text>
+  <text x="230" y="297" font-size="12" text-anchor="middle">_broadcaster</text>
+  <rect x="350" y="262" width="210" height="44" rx="6" fill="#e5e5e5" stroke="#1c6fd1" stroke-width="2"/>
+  <text x="455" y="280" font-size="12" text-anchor="middle">cartesian_impedance_controller/</text>
+  <text x="455" y="297" font-size="12" text-anchor="middle">CartesianImpedanceController</text>
+  <line x1="200" y1="222" x2="200" y2="260" stroke="#000" marker-end="url(#a)"/>
+  <path d="M290,222 L290,240 L400,240 L400,260" fill="none" stroke="#000" marker-end="url(#a)"/>
+  <line x1="500" y1="262" x2="500" y2="224" stroke="#000" marker-end="url(#a)"/>
+  <!-- トピック -->
+  <line x1="230" y1="306" x2="230" y2="414" stroke="#000" marker-end="url(#a)"/>
+  <text x="224" y="380" font-size="11" font-weight="bold" text-anchor="end">/joint_states</text>
+  <rect x="146" y="416" width="168" height="44" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="230" y="434" font-size="12" text-anchor="middle">RViz / rqt</text>
+  <text x="230" y="451" font-size="12" text-anchor="middle">（監視・ログ）</text>
+  <line x1="530" y1="414" x2="530" y2="310" stroke="#000" marker-end="url(#a)"/>
+  <g font-size="11" font-weight="bold" text-anchor="end">
+    <text x="522" y="362">~/reference_pose ・ ~/follow_joint_trajectory</text>
+    <text x="522" y="377">~/set_cartesian_stiffness ・ ~/set_damping_factors</text>
+    <text x="522" y="392">~/set_cartesian_wrench</text>
+  </g>
+  <rect x="436" y="416" width="188" height="44" rx="6" fill="#e5e5e5" stroke="#999"/>
+  <text x="530" y="443" font-size="12" text-anchor="middle">MoveIt / 自作ノード</text>
+</svg>
