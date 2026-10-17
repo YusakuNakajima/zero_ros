@@ -34,57 +34,200 @@
 
             <!-- 力を測るセンサの種類 -->
             <section>
-                <h2>力を測るセンサは2種類</h2>
-                <svg viewBox="0 0 760 300" style="width: 82%; max-height: 42vh;">
-                    <!-- 左：6軸FTセンサ（手先・ベース） -->
-                    <text x="190" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">① 6軸FTセンサ（手先・ベース）</text>
-                    <line x1="20" y1="285" x2="360" y2="285" stroke="#6b7280" stroke-width="3"/>
-                    <rect x="75" y="268" width="90" height="17" fill="#f59e0b"/>
-                    <rect x="85" y="228" width="70" height="40" fill="#9ca3af"/>
-                    <polyline points="120,228 120,130 240,85 300,130" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
-                    <rect x="280" y="130" width="40" height="12" fill="#6b7280"/>
-                    <rect x="276" y="142" width="48" height="20" fill="#f59e0b"/>
-                    <rect x="286" y="162" width="28" height="22" fill="#4b5563"/>
-                    <line x1="291" y1="184" x2="291" y2="215" stroke="#4b5563" stroke-width="7"/>
-                    <line x1="309" y1="184" x2="309" y2="215" stroke="#4b5563" stroke-width="7"/>
-                    <text x="332" y="160" fill="#f59e0b" font-size="20">FT</text>
-                    <text x="175" y="282" fill="#f59e0b" font-size="20">FT</text>
-                    <!-- 右：関節トルクセンサ -->
-                    <text x="575" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">② 関節トルクセンサ</text>
-                    <line x1="400" y1="285" x2="740" y2="285" stroke="#6b7280" stroke-width="3"/>
-                    <rect x="465" y="245" width="70" height="40" fill="#9ca3af"/>
-                    <polyline points="500,245 500,140 620,95 680,140" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
-                    <rect x="660" y="140" width="40" height="12" fill="#6b7280"/>
-                    <rect x="666" y="152" width="28" height="22" fill="#4b5563"/>
-                    <line x1="671" y1="174" x2="671" y2="205" stroke="#4b5563" stroke-width="7"/>
-                    <line x1="689" y1="174" x2="689" y2="205" stroke="#4b5563" stroke-width="7"/>
-                    <g fill="#1f2937" stroke="#f59e0b" stroke-width="5">
-                        <circle cx="500" cy="235" r="13"/>
-                        <circle cx="500" cy="140" r="13"/>
-                        <circle cx="620" cy="95" r="13"/>
-                        <circle cx="680" cy="140" r="13"/>
-                    </g>
-                    <g fill="#f59e0b" font-size="20" font-style="italic">
-                        <text x="520" y="242">τ₁</text>
-                        <text x="462" y="124">τ₂</text>
-                        <text x="610" y="72">τ₃</text>
-                        <text x="704" y="134">τ₄</text>
-                    </g>
-                </svg>
-                <div style="display: flex; gap: 24px; font-size: 0.55em; text-align: left;">
-                    <div style="flex: 1;">
-                        <p style="margin: 0;">1か所で力3＋トルク3を測る</p>
-                        <p style="margin: 0;">手先：ツールにかかる力を直接測る</p>
-                        <p style="margin: 0;">ベース：ロボット全体にかかる力を測る</p>
+                <section>
+                    <h2>力を測るセンサは2種類</h2>
+                    <svg viewBox="0 0 760 300" style="width: 82%; max-height: 42vh;">
+                        <!-- 左：6軸FTセンサ（手先・ベース） -->
+                        <text x="190" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">① 6軸FTセンサ（手先・ベース）</text>
+                        <line x1="20" y1="285" x2="360" y2="285" stroke="#6b7280" stroke-width="3"/>
+                        <rect x="75" y="268" width="90" height="17" fill="#f59e0b"/>
+                        <rect x="85" y="228" width="70" height="40" fill="#9ca3af"/>
+                        <polyline points="120,228 120,130 240,85 300,130" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                        <rect x="280" y="130" width="40" height="12" fill="#6b7280"/>
+                        <rect x="276" y="142" width="48" height="20" fill="#f59e0b"/>
+                        <rect x="286" y="162" width="28" height="22" fill="#4b5563"/>
+                        <line x1="291" y1="184" x2="291" y2="215" stroke="#4b5563" stroke-width="7"/>
+                        <line x1="309" y1="184" x2="309" y2="215" stroke="#4b5563" stroke-width="7"/>
+                        <text x="332" y="160" fill="#f59e0b" font-size="20">FT</text>
+                        <text x="175" y="282" fill="#f59e0b" font-size="20">FT</text>
+                        <!-- 右：関節トルクセンサ -->
+                        <text x="575" y="30" fill="#e5e7eb" font-size="24" text-anchor="middle" font-weight="bold">② 関節トルクセンサ</text>
+                        <line x1="400" y1="285" x2="740" y2="285" stroke="#6b7280" stroke-width="3"/>
+                        <rect x="465" y="245" width="70" height="40" fill="#9ca3af"/>
+                        <polyline points="500,245 500,140 620,95 680,140" fill="none" stroke="#9ca3af" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+                        <rect x="660" y="140" width="40" height="12" fill="#6b7280"/>
+                        <rect x="666" y="152" width="28" height="22" fill="#4b5563"/>
+                        <line x1="671" y1="174" x2="671" y2="205" stroke="#4b5563" stroke-width="7"/>
+                        <line x1="689" y1="174" x2="689" y2="205" stroke="#4b5563" stroke-width="7"/>
+                        <g fill="#1f2937" stroke="#f59e0b" stroke-width="5">
+                            <circle cx="500" cy="235" r="13"/>
+                            <circle cx="500" cy="140" r="13"/>
+                            <circle cx="620" cy="95" r="13"/>
+                            <circle cx="680" cy="140" r="13"/>
+                        </g>
+                        <g fill="#f59e0b" font-size="20" font-style="italic">
+                            <text x="520" y="242">τ₁</text>
+                            <text x="462" y="124">τ₂</text>
+                            <text x="610" y="72">τ₃</text>
+                            <text x="704" y="134">τ₄</text>
+                        </g>
+                    </svg>
+                    <div style="display: flex; gap: 24px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1;">
+                            <p style="margin: 0;">1か所で力3＋トルク3を測る</p>
+                            <p style="margin: 0;">手先：ツールにかかる力を直接測る</p>
+                            <p style="margin: 0;">ベース：ロボット全体にかかる力を測る</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <p style="margin: 0;">各関節に内蔵、1軸ずつトルクを測る</p>
+                            <p style="margin: 0;">ヤコビ行列で手先の力を推定</p>
+                            <p style="margin: 0;">アームのどこが触れても気づける</p>
+                            <p style="margin: 0; color: #9ca3af;">例：Franka, KUKA LBR iiwa</p>
+                        </div>
                     </div>
-                    <div style="flex: 1;">
-                        <p style="margin: 0;">各関節に内蔵、1軸ずつトルクを測る</p>
-                        <p style="margin: 0;">ヤコビ行列で手先の力を推定</p>
-                        <p style="margin: 0;">アームのどこが触れても気づける</p>
-                        <p style="margin: 0; color: #9ca3af;">例：Franka, KUKA LBR iiwa</p>
+                    <p style="font-size: 0.6em;">→ 本スライドでは <strong>① 6軸FTセンサ</strong> を扱います（センサなしの方法も ↓）</p>
+                </section>
+
+                <!-- モータ電流からのトルク推定 -->
+                <section>
+                    <h2>③ モータ電流から推定</h2>
+                    <svg viewBox="0 0 760 230" style="width: 86%; max-height: 34vh;">
+                        <defs>
+                            <marker id="ah-c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker>
+                        </defs>
+                        <!-- 電流 -->
+                        <text x="60" y="95" fill="#60a5fa" font-size="24" text-anchor="middle" font-weight="bold">電流 i</text>
+                        <line x1="100" y1="88" x2="150" y2="88" stroke="#e5e7eb" stroke-width="3" marker-end="url(#ah-c)"/>
+                        <!-- モータ -->
+                        <rect x="160" y="40" width="120" height="96" rx="12" fill="#4b5563"/>
+                        <path d="M180,88 q10,-22 20,0 q10,22 20,0 q10,-22 20,0 q10,22 20,0" fill="none" stroke="#f59e0b" stroke-width="4"/>
+                        <text x="220" y="160" fill="#e5e7eb" font-size="20" text-anchor="middle">モータ</text>
+                        <text x="220" y="188" fill="#f59e0b" font-size="20" text-anchor="middle">K<tspan font-size="14" dy="4">t</tspan><tspan dy="-4"> · i</tspan></text>
+                        <line x1="280" y1="88" x2="330" y2="88" stroke="#e5e7eb" stroke-width="3" marker-end="url(#ah-c)"/>
+                        <!-- 減速機 -->
+                        <circle cx="380" cy="88" r="46" fill="none" stroke="#9ca3af" stroke-width="8" stroke-dasharray="10 6"/>
+                        <circle cx="380" cy="88" r="16" fill="#9ca3af"/>
+                        <text x="380" y="160" fill="#e5e7eb" font-size="20" text-anchor="middle">減速機</text>
+                        <text x="380" y="188" fill="#9ca3af" font-size="20" text-anchor="middle">× N − 摩擦</text>
+                        <line x1="430" y1="88" x2="480" y2="88" stroke="#e5e7eb" stroke-width="3" marker-end="url(#ah-c)"/>
+                        <!-- 関節とリンク -->
+                        <circle cx="510" cy="88" r="16" fill="#1f2937" stroke="#4ade80" stroke-width="5"/>
+                        <line x1="526" y1="80" x2="700" y2="40" stroke="#9ca3af" stroke-width="16" stroke-linecap="round"/>
+                        <text x="510" y="160" fill="#e5e7eb" font-size="20" text-anchor="middle">関節トルク τ</text>
+                        <text x="740" y="190" fill="#f87171" font-size="20" text-anchor="end">外力 = τ − モデル</text>
+                        <text x="740" y="214" fill="#9ca3af" font-size="16" text-anchor="end">（重力・慣性を計算で引く）</text>
+                    </svg>
+                    <p style="font-size: 0.6em;">τ ≈ N · K<sub>t</sub> · i − 摩擦　（K<sub>t</sub>：トルク定数、N：減速比）</p>
+                    <ul style="font-size: 0.55em;">
+                        <li>モータのトルクは電流にほぼ比例 → <strong>追加センサ不要</strong>で安い・壊れにくい</li>
+                        <li>外力 ＝ 電流から出したトルク − 動力学モデル（重力・慣性）の分</li>
+                        <li>弱点：<strong>摩擦とモデルの誤差</strong>がそのまま力の誤差になる</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>高減速ギアだと誤差が大きい</h2>
+                    <svg viewBox="0 0 760 250" style="width: 86%; max-height: 38vh;">
+                        <defs>
+                            <marker id="ah-f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                        </defs>
+                        <!-- 左：高減速 -->
+                        <text x="190" y="28" fill="#e5e7eb" font-size="22" text-anchor="middle" font-weight="bold">産業用ロボット（50〜160 : 1）</text>
+                        <rect x="40" y="90" width="60" height="56" rx="8" fill="#4b5563"/>
+                        <text x="70" y="170" fill="#9ca3af" font-size="16" text-anchor="middle">小さいモータ</text>
+                        <rect x="100" y="104" width="30" height="28" fill="#6b7280"/>
+                        <rect x="130" y="76" width="96" height="84" rx="10" fill="#7c2d12"/>
+                        <g stroke="#fca5a5" stroke-width="2" opacity="0.7">
+                            <line x1="140" y1="86" x2="216" y2="150"/><line x1="140" y1="110" x2="200" y2="150"/><line x1="160" y1="86" x2="216" y2="128"/>
+                        </g>
+                        <text x="178" y="186" fill="#fca5a5" font-size="16" text-anchor="middle">ハーモニックドライブ</text>
+                        <text x="178" y="206" fill="#fca5a5" font-size="16" text-anchor="middle">摩擦・ヒステリシス大</text>
+                        <line x1="226" y1="118" x2="330" y2="118" stroke="#9ca3af" stroke-width="14" stroke-linecap="round"/>
+                        <line x1="330" y1="60" x2="330" y2="104" stroke="#f87171" stroke-width="5" marker-end="url(#ah-f)"/>
+                        <text x="340" y="70" fill="#f87171" font-size="18">外力</text>
+                        <path d="M310,132 Q280,160 232,148" fill="none" stroke="#f87171" stroke-width="3" stroke-dasharray="6 6"/>
+                        <text x="262" y="174" fill="#f87171" font-size="22" font-weight="bold">✕</text>
+                        <text x="190" y="240" fill="#e5e7eb" font-size="18" text-anchor="middle">→ 外力が摩擦に埋もれ、電流に出にくい</text>
+                        <!-- 右：QDD -->
+                        <text x="575" y="28" fill="#e5e7eb" font-size="22" text-anchor="middle" font-weight="bold">QDD（〜10 : 1）</text>
+                        <rect x="420" y="66" width="110" height="104" rx="12" fill="#4b5563"/>
+                        <path d="M432,118 q10,-20 20,0 q10,20 20,0 q10,-20 20,0 q10,20 20,0" fill="none" stroke="#f59e0b" stroke-width="4"/>
+                        <text x="475" y="190" fill="#9ca3af" font-size="16" text-anchor="middle">大径モータ</text>
+                        <rect x="530" y="88" width="40" height="60" rx="6" fill="#166534"/>
+                        <text x="550" y="206" fill="#86efac" font-size="16" text-anchor="middle">1段遊星ギア</text>
+                        <line x1="570" y1="118" x2="700" y2="118" stroke="#9ca3af" stroke-width="14" stroke-linecap="round"/>
+                        <line x1="700" y1="60" x2="700" y2="104" stroke="#f87171" stroke-width="5" marker-end="url(#ah-f)"/>
+                        <text x="710" y="70" fill="#f87171" font-size="18">外力</text>
+                        <path d="M680,140 Q600,180 500,150" fill="none" stroke="#f87171" stroke-width="4" marker-end="url(#ah-f)"/>
+                        <text x="575" y="240" fill="#e5e7eb" font-size="18" text-anchor="middle">→ 外力がそのまま電流に出る</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>高減速ギアは<strong>摩擦・バックラッシ・ヒステリシス</strong>が大きく、温度や速度でも変わる</li>
+                        <li>手で押しても関節が回らない（<strong>逆駆動しにくい</strong>）＝外力がモータまで届かない</li>
+                        <li>だから産業用ロボットの電流推定は、衝突検知など<strong>粗い用途</strong>向け</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>DD・QDD なら実用的</h2>
+                    <svg viewBox="0 0 760 170" style="width: 86%; max-height: 26vh;">
+                        <defs>
+                            <linearGradient id="gr-qdd" x1="0" x2="1" y1="0" y2="0">
+                                <stop offset="0" stop-color="#4ade80"/><stop offset="0.5" stop-color="#fbbf24"/><stop offset="1" stop-color="#f87171"/>
+                            </linearGradient>
+                        </defs>
+                        <text x="380" y="24" fill="#e5e7eb" font-size="20" text-anchor="middle">減速比（対数）</text>
+                        <rect x="60" y="50" width="640" height="18" rx="9" fill="url(#gr-qdd)"/>
+                        <g fill="#e5e7eb" font-size="20" text-anchor="middle" font-weight="bold">
+                            <line x1="70" y1="40" x2="70" y2="78" stroke="#e5e7eb" stroke-width="3"/><text x="70" y="104">1 : 1</text>
+                            <line x1="300" y1="40" x2="300" y2="78" stroke="#e5e7eb" stroke-width="3"/><text x="300" y="104">6〜10 : 1</text>
+                            <line x1="600" y1="40" x2="600" y2="78" stroke="#e5e7eb" stroke-width="3"/><text x="600" y="104">50〜160 : 1</text>
+                        </g>
+                        <g font-size="18" text-anchor="middle">
+                            <text x="70" y="130" fill="#4ade80">DD（直結）</text>
+                            <text x="300" y="130" fill="#a3e635">QDD（準ダイレクトドライブ）</text>
+                            <text x="600" y="130" fill="#f87171">ハーモニックドライブ</text>
+                        </g>
+                        <text x="60" y="162" fill="#9ca3af" font-size="16">← 電流 ≈ トルク（推定しやすい）</text>
+                        <text x="700" y="162" fill="#9ca3af" font-size="16" text-anchor="end">小さいモータで大トルク →</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li><strong>DD（ダイレクトドライブ）</strong>：減速機なし。摩擦が小さく、電流がほぼそのままトルク</li>
+                        <li><strong>QDD</strong>：大径モータ＋1段遊星ギア（〜10:1）。トルクを稼ぎつつ<strong>逆駆動できる</strong></li>
+                        <li>低減速なら電流からのトルク推定で<strong>十分な精度</strong>が出る → 電流ベースの力制御が実用的に</li>
+                        <li>MIT Cheetah（7.67:1）・Mini Cheetah（6:1）の設計が公開され、広く普及</li>
+                    </ul>
+                    <p style="font-size: 0.4em; color: #aaa;">P. M. Wensing et al., "Proprioceptive Actuator Design in the MIT Cheetah", IEEE T-RO 33(3), 2017 ／ B. Katz et al., "Mini Cheetah", ICRA 2019</p>
+                </section>
+
+                <section>
+                    <h2>四足・ヒューマノイドの主流</h2>
+                    <div style="display: flex; align-items: center; gap: 24px;">
+                        <div style="display: flex; gap: 10px; align-items: flex-end;">
+                            <figure style="margin: 0;"><img src="media/unitree_go2.jpg" alt="Unitree Go2（四足）" style="height: 26vh; margin: 0; border-radius: 8px;"><figcaption style="font-size: 0.4em;">Unitree Go2（四足）</figcaption></figure>
+                            <figure style="margin: 0;"><img src="media/unitree_g1.jpg" alt="Unitree G1（ヒューマノイド）" style="height: 38vh; margin: 0; border-radius: 8px;"><figcaption style="font-size: 0.4em;">Unitree G1</figcaption></figure>
+                        </div>
+                        <ul style="font-size: 0.55em; text-align: left;">
+                            <li>中国勢（Unitree など）の四足・ヒューマノイドは<strong>低減速の遊星ギア＋大径モータ</strong>が多い</li>
+                            <li>関節トルクセンサを積むより<strong>安く・量産しやすい</strong></li>
+                            <li>SDK は関節ごとに 目標角 q・速度 dq・トルク τ・ゲイン Kp/Kd を送る形<br>→ 中身は<strong>電流ベースのトルク制御</strong>と考えられる</li>
+                            <li>返ってくる関節トルクも<strong>推定値</strong>（専用センサの記載なし）</li>
+                        </ul>
                     </div>
-                </div>
-                <p style="font-size: 0.6em;">→ 本スライドでは <strong>① 6軸FTセンサ</strong> を扱います</p>
+                    <p style="font-size: 0.35em; color: #aaa;">写真：Unitree Go2 — HotNews Romania, CC BY 3.0（Wikimedia Commons）／ Unitree G1 — Sayanesy, CC0（Wikimedia Commons）。内部構成は公開情報・分解記事からの推定</p>
+                </section>
+
+                <section>
+                    <h2>力の測り方 まとめ</h2>
+                    <table class="custom-table" style="font-size: 0.5em;">
+                        <tr><th></th><th>精度</th><th>コスト</th><th>測れる場所</th><th>主な使い道</th></tr>
+                        <tr><td><strong>① 6軸FTセンサ</strong></td><td>◎</td><td>高い</td><td>付けた所だけ</td><td>研磨・組立・力制御</td></tr>
+                        <tr><td><strong>② 関節トルクセンサ</strong></td><td>◎〜○</td><td>高い</td><td>全関節</td><td>協働ロボット（Franka, iiwa）</td></tr>
+                        <tr><td><strong>③ 電流（高減速）</strong></td><td>△</td><td>追加なし</td><td>全関節</td><td>衝突検知</td></tr>
+                        <tr><td><strong>③ 電流（QDD・DD）</strong></td><td>○</td><td>安い</td><td>全関節</td><td>四足・ヒューマノイド</td></tr>
+                    </table>
+                    <p style="font-size: 0.55em;">精密な力が要る作業は FTセンサ、全身で触れて動く・安く作るなら電流ベース</p>
+                </section>
             </section>
 
             <!-- スライド2: 初めにフォーストルクセンサ -->
