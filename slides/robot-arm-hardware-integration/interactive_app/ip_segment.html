@@ -40,7 +40,11 @@
                 display: none;
             }
         }
+        /* スライド埋め込み時：見出しを省いて1画面に収める */
+        .embed header { display: none; }
+        .embed body > .container { padding: 12px; max-width: none; }
     </style>
+    <script>if (window.self !== window.top) document.documentElement.classList.add('embed');</script>
 </head>
 <body class="bg-gray-50 text-gray-800">
 

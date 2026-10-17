@@ -37,6 +37,7 @@
             box-shadow: none;
         }
 
+        /* 左に画像・アプリ、右にテキスト */
         .two-column {
             display: flex;
             align-items: center;
@@ -44,12 +45,164 @@
         }
 
         .two-column .left {
-            flex: 1;
+            flex: 1.15;
+            text-align: center;
         }
 
         .two-column .right {
             flex: 1;
+            text-align: left;
+            font-size: 0.7em;
         }
+
+        .reveal .two-column .right p {
+            margin: 0 0 0.6em;
+        }
+
+        .reveal .two-column .right ul {
+            display: block;
+            margin: 0 0 0.6em 1.2em;
+        }
+
+        .reveal .two-column .right li {
+            margin-bottom: 0.35em;
+        }
+
+        /* 写真：白背景の角丸カードにそろえる */
+        .reveal img.photo {
+            max-height: 52vh;
+            background: #fff;
+            border-radius: 8px;
+            padding: 4px;
+            object-fit: contain;
+            margin: 0;
+        }
+
+        .photo-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .photo-row figure,
+        .device-row figure {
+            margin: 0;
+            flex: 1;
+        }
+
+        .photo-row img.photo {
+            max-height: 40vh;
+            max-width: 100%;
+        }
+
+        .reveal figcaption {
+            font-size: 0.5em;
+            margin-top: 6px;
+        }
+
+        .device-row {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .device-row img.photo {
+            height: 32vh;
+            width: 100%;
+        }
+
+        .device-row figcaption {
+            font-size: 0.6em;
+        }
+
+        /* 要点（1行目に置くキーメッセージ） */
+        .reveal .point {
+            background: #1f2937;
+            border-left: 6px solid #3b82f6;
+            border-radius: 6px;
+            padding: 0.4em 0.7em;
+        }
+
+        .reveal .lead {
+            font-size: 0.65em;
+        }
+
+        .reveal .caption {
+            font-size: 0.45em;
+            color: #9ca3af;
+        }
+
+        .reveal .caption a,
+        .reveal .right a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        .reveal .next-hint {
+            font-size: 0.5em;
+            color: #9ca3af;
+            margin: 0.6em 0 0;
+        }
+
+        .reveal ul.below {
+            font-size: 0.6em;
+            display: block;
+            margin: 0.6em auto 0;
+            max-width: 90%;
+        }
+
+        /* アプリ：スライド幅いっぱいで埋め込む */
+        .reveal iframe.app {
+            width: 100%;
+            height: 50vh;
+            border: 0;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .reveal .app-link {
+            font-size: 0.45em;
+            text-align: right;
+            margin: 0 0 4px;
+        }
+
+        .reveal .app-link a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        .reveal .app-note {
+            font-size: 0.55em;
+            margin: 0.5em 0 0;
+        }
+
+        /* スライドの内容：章の一覧 */
+        .roadmap {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            font-size: 0.6em;
+            margin-top: 0.8em;
+        }
+
+        .roadmap .chip {
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 0.5em;
+            text-align: left;
+        }
+
+        .roadmap .chip span {
+            display: inline-block;
+            width: 1.6em;
+            font-weight: bold;
+        }
+
+        .roadmap .mech { border-color: #fbbf24; }
+        .roadmap .elec { border-color: #f87171; }
+        .roadmap .comm { border-color: #60a5fa; }
+        .roadmap .dev { border-color: #4ade80; }
     </style>
 </head>
 
@@ -69,115 +222,109 @@
             <!-- 1. はじめに -->
             <section>
                 <h2>スライドの内容</h2>
-                <ul>
-                    <li>ロボットってどうやって設置するの？手先はどうやってつけるの？</li>
-                    <li>あまり学ぶ機会がないロボット分野のハードウェアの当たり前をまとめてあります</li>
-                </ul>
+                <p class="lead">ロボットってどうやって設置するの？ 手先はどうやって付けるの？<br>あまり学ぶ機会がない<strong>ハードウェアの当たり前</strong>をまとめました</p>
+                <div class="roadmap">
+                    <div class="chip mech"><span>1</span>ロボットの設置</div>
+                    <div class="chip mech"><span>2</span>エンドエフェクタの取付</div>
+                    <div class="chip comm"><span>3</span>PCとの接続（LAN）</div>
+                    <div class="chip elec"><span>4</span>グリッパの配線・電源</div>
+                    <div class="chip comm"><span>5</span>外部機器との通信（RS485）</div>
+                    <div class="chip elec"><span>6</span>非常停止スイッチ</div>
+                    <div class="chip mech"><span>7</span>治具の作成</div>
+                    <div class="chip comm"><span>8</span>他の機器との接続</div>
+                    <div class="chip dev"><span>9</span>便利なデバイス</div>
+                </div>
+                <p class="caption"><span style="color: #fbbf24;">■</span> 機械　<span style="color: #f87171;">■</span> 電気　<span style="color: #60a5fa;">■</span> 通信　<span style="color: #4ade80;">■</span> デバイス</p>
             </section>
 
+            <!-- 2. ロボットの設置 -->
             <section>
                 <section>
                     <h2>ロボットの設置</h2>
                     <div class="two-column">
                         <div class="left">
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <img src="media/robot_on_bread_bourd.webp" alt="ブレッドボード上のロボット" style="max-width: 45%; border: none; box-shadow: none;">
-                                <img src="media/robot_on_alminum_frame.webp" alt="アルミフレーム上のロボット" style="max-width: 45%; border: none; box-shadow: none;">
+                            <div class="photo-row">
+                                <figure><img class="photo" src="media/robot_on_bread_bourd.webp" alt="定盤上のロボット"><figcaption>定盤</figcaption></figure>
+                                <figure><img class="photo" src="media/robot_on_alminum_frame.webp" alt="アルミフレーム上のロボット"><figcaption>アルミフレーム</figcaption></figure>
                             </div>
                         </div>
                         <div class="right">
-                            <p>ロボットアームはアルミフレームや定盤に設置する場合がほとんど</p>
+                            <p class="point">ロボットアームは<strong>アルミフレーム</strong>か<strong>定盤</strong>に固定するのがほとんど</p>
+                            <ul>
+                                <li>定盤：重くて硬い。ネジ穴が格子状に並び、どこにでも固定できる</li>
+                                <li>アルミフレーム：軽くて組み替えやすい。ただし<strong>たわみ</strong>に注意</li>
+                            </ul>
                         </div>
                     </div>
-                    <p><strong>アルミフレームの強度計算↓</strong></p>
-                </section> 
+                    <p class="next-hint">アルミフレームの強度計算 ↓</p>
+                </section>
                 <section>
                     <h2>アルミフレームの耐荷重</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/aluminum_frame_deflection.png" alt="アルミフレームのたわみ" style="max-width: 100%;">
-                            <p style="text-align: center; margin-top: 10px;">
-                                <strong>参考サイト:</strong><br>
-                                <a href="https://jp.misumi-ec.com/special/alumiframe/tech/capacity_guideline/" target="_blank" style="color: #3b82f6; text-decoration: underline;">MISUMI アルミフレーム強度目安表</a><br>
-                                <a href="https://jp.misumi-ec.com/special/alumiframe/tech/capacity/" target="_blank" style="color: #3b82f6; text-decoration: underline;">MISUMI アルミフレームの種類と強度</a>
-                            </p>
+                            <img class="photo" src="media/aluminum_frame_deflection.png" alt="アルミフレームのたわみ" style="width: 100%;">
+                            <p class="caption">参考：<a href="https://jp.misumi-ec.com/special/alumiframe/tech/capacity_guideline/" target="_blank">MISUMI アルミフレーム強度目安表</a> ／ <a href="https://jp.misumi-ec.com/special/alumiframe/tech/capacity/" target="_blank">アルミフレームの種類と強度</a></p>
                         </div>
                         <div class="right">
+                            <p class="point">フレームが<strong>たわむ</strong>と、ロボットの動作精度が落ちる</p>
                             <ul>
-                                <li>アルミフレームはたわみやすく、ロボットの動作精度に影響する</li>
-                                <li>重たいロボットや力のかかる作業をする際はきちんと計算してからフレーム選定が必要</li>
-                                <li>長期の運用も見据えると剛性は余裕のある設計が安心</li>
+                                <li>重いロボット・力のかかる作業は<strong>計算してから</strong>フレームを選ぶ</li>
+                                <li>長く使うなら、剛性に<strong>余裕のある</strong>設計が安心</li>
                             </ul>
                         </div>
                     </div>
                 </section>
             </section>
+
+            <!-- 3. エンドエフェクタの取付 -->
             <section>
                 <h2>エンドエフェクタの取付</h2>
                 <div class="two-column">
                     <div class="left">
-                        <img src="media/iso_flange.webp" alt="ISOフランジ規格" style="max-width: 100%;">
+                        <img class="photo" src="media/iso_flange.webp" alt="ISOフランジ規格" style="width: 100%;">
                     </div>
                     <div class="right">
-                        <p>手先を取り付けるフランジの規格はISO9409-1及びJISB8436で決まっています</p>
-                        <p>寸法は3kg~5kgのロボットであれば番号4(φ50 mm)が一般的です</p>
-                        <p><a href="https://kikakurui.com/b8/B8436-2005-01.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">規格詳細はこちら</a></p>
+                        <p class="point">手先のフランジは<strong>ISO 9409-1 / JIS B 8436</strong> で寸法が決まっている</p>
+                        <ul>
+                            <li>3〜5 kg 可搬のロボットなら<strong>番号4（φ50 mm）</strong>が一般的</li>
+                            <li>規格に合わせて作れば、ハンドやツールを付け替えられる</li>
+                        </ul>
+                        <p class="caption"><a href="https://kikakurui.com/b8/B8436-2005-01.html" target="_blank">規格の詳細（JIS B 8436）</a></p>
                     </div>
                 </div>
             </section>
 
-            <!-- 2. ロボットアームとPCの接続 -->
+            <!-- 4. ロボットアームとPCの接続 -->
             <section>
                 <section>
                     <h2>ロボットアームとPCの接続</h2>
-                    <div class="two-column">
-                        <div class="left">
-                             <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/robot_LAN_setting.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/robot_LAN_setting.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div class="right">
-                            <p>PCに付属のLANポートかUSB-LAN変換を使用して接続します</p>
-                            <p><strong>IPアドレスの仕組み↓</strong></p>
-                        </div>
-                    </div>
+                    <p class="app-link"><a href="interactive_app/robot_LAN_setting.html" target="_blank">全画面表示</a></p>
+                    <iframe class="app" data-src="interactive_app/robot_LAN_setting.html"></iframe>
+                    <p class="app-note">PCの LAN ポート（または USB-LAN 変換）とロボットを直結し、IP アドレスを設定する</p>
+                    <p class="next-hint">IPアドレスの仕組み ↓</p>
                 </section>
                 <section>
                     <h2>IPアドレスのセグメント</h2>
-                    <div class="two-column">
-                        <div class="left">
-                             <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/ip_segment.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/ip_segment.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div class="right">
-                            <ul>
-                                <li>IPアドレスはネットワーク上の機器を識別するための番号</li>
-                                <li>サブネットマスクはIPアドレスのネットワーク部分とホスト部分を分けるためのもの</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <p class="app-link"><a href="interactive_app/ip_segment.html" target="_blank">全画面表示</a></p>
+                    <iframe class="app" data-src="interactive_app/ip_segment.html"></iframe>
+                    <p class="app-note">IPアドレス＝機器の番号、サブネットマスク＝<strong>ネットワーク部</strong>と<strong>ホスト部</strong>の境目<br>ネットワーク部が同じ機器どうしが直接通信できる</p>
                 </section>
             </section>
 
-
-            <!-- 3. グリッパの接続方法 -->
+            <!-- 5. グリッパの接続方法 -->
             <section>
                 <section>
                     <h2>グリッパの接続方法</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/gripper.webp"
-                                alt="グリッパ" style="max-width: 100%;">
+                            <img class="photo" src="media/gripper.webp" alt="グリッパ" style="width: 100%;">
                         </div>
                         <div class="right">
-                            <p>メーカー対応品以外は、自分で通信などを実装する必要があります</p>
+                            <p class="point">メーカー対応品以外は、<strong>通信などを自分で実装</strong>する必要がある</p>
+                            <ul>
+                                <li>必要なもの：<strong>電源</strong>と<strong>通信</strong></li>
+                                <li>このあと：配線 → 電源の選び方 → 通信（RS485）</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -185,154 +332,183 @@
                     <h2>グリッパの配線</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/robotiq_hande.png" alt="Robotiq Hand-E" style="max-width: 60%;">
-                            <p style="font-size: 0.7em; text-align: center;">Robotiq Hand-E とユニバーサルロボットの接続例、ケーブル1本</p>
+                            <img class="photo" src="media/robotiq_hande.png" alt="Robotiq Hand-E" style="max-height: 50vh;">
+                            <p class="caption">Robotiq Hand-E とユニバーサルロボットの接続例（ケーブル1本）</p>
                         </div>
-                        <div class="right" style="font-size: 0.85em;">
-                            <p>最近は対応メーカ同士だとケーブル1本で接続できることが多いです</p>
-                            <p>対応メーカでない場合は、電源と通信を個別に用意する必要があります</p>
+                        <div class="right">
+                            <ul>
+                                <li><strong>対応メーカー同士</strong>：ケーブル1本で接続できることが多い</li>
+                                <li><strong>非対応</strong>：<span style="color: #f87171;">電源</span>と<span style="color: #60a5fa;">通信</span>を個別に用意する</li>
+                            </ul>
                         </div>
                     </div>
-                    <p><strong>推奨電源↓ 通信方式→</strong></p>
+                    <p class="next-hint">推奨電源 ↓　通信方式 →</p>
                 </section>
                 <section>
                     <h2>電源の選定（誘導性負荷）</h2>
                     <div class="two-column">
                         <div class="left">
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <div style="text-align: center;">
-                                    <img src="media/swichingAC.webp" alt="誘導性負荷対応電源" style="max-width: 100%; border: none; box-shadow: none;">
-                                    <p style="font-size: 0.7em;">誘導性負荷対応</p>
-                                </div>
-                                <div style="text-align: center;">
-                                    <img src="media/AC_adapter.png" alt="誘導性負荷非対応電源" style="max-width: 100%; border: none; box-shadow: none;">
-                                    <p style="font-size: 0.7em;">誘導性負荷非対応</p>
-                                </div>
+                            <div class="photo-row">
+                                <figure><img class="photo" src="media/swichingAC.webp" alt="誘導性負荷対応電源"><figcaption style="color: #4ade80;">○ 誘導性負荷対応<br>（スイッチング電源など）</figcaption></figure>
+                                <figure><img class="photo" src="media/AC_adapter.png" alt="誘導性負荷非対応電源"><figcaption style="color: #f87171;">× 非対応<br>（安価なACアダプタ）</figcaption></figure>
                             </div>
                         </div>
-                        <div class="right" style="font-size: 0.85em;">
-                            <p>モーターのような誘導性負荷を駆動する場合、対応した電源の選定が不可欠です</p>
-                            <p>非対応の電源を使用すると、故障の原因となります</p>
+                        <div class="right">
+                            <p class="point">モーターを動かすなら<strong>誘導性負荷に対応した電源</strong>を選ぶ</p>
+                            <ul>
+                                <li>非対応の電源を使うと<strong>故障の原因</strong>になる</li>
+                            </ul>
                         </div>
                     </div>
-                    <p><strong>↓ACアダプタが故障する理由</strong></p>
+                    <p class="next-hint">ACアダプタが故障する理由 ↓</p>
                 </section>
                 <section>
                     <h2>誘導性負荷と電源</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <p>モーターはコイルでできているため、誘導性負荷となります。</p>
-                            <p>電源をOFFにした際などに逆起電力というエネルギーの逆流が発生します。</p>
-                        </div>
-                        <div class="right">
-                            <p>誘導性負荷に対応していない電源（安価なACアダプタなど）は、この逆起電力に対する保護回路を持たないため、故障の原因となります。</p>
-                        </div>
-                    </div>
+                    <svg viewBox="0 0 900 300" style="width: 88%; max-height: 42vh;">
+                        <defs>
+                            <marker id="ind-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+                        </defs>
+                        <!-- 回路 -->
+                        <rect x="20" y="90" width="120" height="110" rx="10" fill="#374151" stroke="#9ca3af" stroke-width="2"/>
+                        <text x="80" y="140" fill="#e5e7eb" font-size="20" text-anchor="middle">電源</text>
+                        <text x="80" y="168" fill="#9ca3af" font-size="15" text-anchor="middle">（ACアダプタ）</text>
+                        <line x1="140" y1="115" x2="200" y2="115" stroke="#e5e7eb" stroke-width="3"/>
+                        <line x1="200" y1="115" x2="240" y2="95" stroke="#e5e7eb" stroke-width="3"/>
+                        <circle cx="200" cy="115" r="4" fill="#e5e7eb"/><circle cx="245" cy="115" r="4" fill="#e5e7eb"/>
+                        <text x="222" y="80" fill="#fbbf24" font-size="16" text-anchor="middle">OFF</text>
+                        <line x1="245" y1="115" x2="300" y2="115" stroke="#e5e7eb" stroke-width="3"/>
+                        <path d="M300,115 c10,-30 20,-30 30,0 c10,-30 20,-30 30,0 c10,-30 20,-30 30,0 c10,-30 20,-30 30,0" fill="none" stroke="#60a5fa" stroke-width="4"/>
+                        <text x="360" y="70" fill="#60a5fa" font-size="18" text-anchor="middle">モーター＝コイル</text>
+                        <line x1="420" y1="115" x2="440" y2="115" stroke="#e5e7eb" stroke-width="3"/>
+                        <path d="M440,115 L440,175 L140,175" fill="none" stroke="#e5e7eb" stroke-width="3"/>
+                        <path d="M380,215 L170,215" fill="none" stroke="#f87171" stroke-width="5" marker-end="url(#ind-a)"/>
+                        <text x="275" y="245" fill="#f87171" font-size="18" text-anchor="middle" font-weight="bold">逆起電力が電源へ逆流</text>
+                        <!-- 電圧グラフ -->
+                        <line x1="520" y1="250" x2="880" y2="250" stroke="#9ca3af" stroke-width="2"/>
+                        <line x1="520" y1="250" x2="520" y2="40" stroke="#9ca3af" stroke-width="2"/>
+                        <text x="880" y="275" fill="#9ca3af" font-size="15" text-anchor="end">時間</text>
+                        <text x="510" y="50" fill="#9ca3af" font-size="15" text-anchor="end">電圧</text>
+                        <polyline points="520,170 700,170 700,250 704,60 712,200 722,240 740,250 880,250" fill="none" stroke="#fbbf24" stroke-width="4"/>
+                        <line x1="700" y1="40" x2="700" y2="250" stroke="#6b7280" stroke-dasharray="5 5"/>
+                        <text x="700" y="34" fill="#e5e7eb" font-size="15" text-anchor="middle">OFF の瞬間</text>
+                        <text x="725" y="80" fill="#f87171" font-size="16">大きな電圧の跳ね上がり</text>
+                    </svg>
+                    <ul class="below">
+                        <li>モーターは<strong>コイル</strong>なので誘導性負荷。電源を OFF にした瞬間などに<strong>逆起電力</strong>が発生する</li>
+                        <li>安価なACアダプタはこれを逃がす<strong>保護回路がない</strong> → 故障の原因に</li>
+                    </ul>
                 </section>
             </section>
 
-            
-
-            <!-- 4. RS485通信の概要 -->
+            <!-- 6. 外部機器との通信（RS485） -->
             <section>
                 <section>
-                <h2>外部機器との通信</h2>
-                <div class="two-column">
-                    <div class="left">
-                        <img src="media/RS485_connector.png" alt="RS485コネクタ" style="max-width: 100%;">
+                    <h2>外部機器との通信</h2>
+                    <div class="two-column">
+                        <div class="left">
+                            <img class="photo" src="media/RS485_connector.png" alt="RS485コネクタ" style="width: 70%;">
+                        </div>
+                        <div class="right">
+                            <p class="point">グリッパや外部機器との通信では <strong>RS485</strong> がよく使われる</p>
+                            <ul>
+                                <li>多くの産業用ロボット・コンポーネントで採用</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="right">
-                        <p>グリッパや外部機器との通信では、RS485という規格がよく使われます。</p>
-                        <p>特に、多くの産業用ロボットやコンポーネントで採用されています。</p>
-                    </div>
-                </div>
-                <p><strong>RS485の基礎↓</strong></p>
-            </section>
+                    <p class="next-hint">RS485 の基礎 ↓</p>
+                </section>
                 <section>
                     <h2>データ通信の基本</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/digital_signal_illustration.svg" alt="デジタル信号図" style="max-width: 100%;">
+                            <img class="photo" src="media/digital_signal_illustration.svg" alt="デジタル信号図" style="width: 100%;">
                         </div>
                         <div class="right">
-                            <p>電気信号でHigh(1)とLow(0)の2値の情報(ビット)を送ります</p>
-                            <p>文字は<a href="https://www3.nit.ac.jp/~tamura/ex2/ascii.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">ASCIIコード</a>と呼ばれる表でビットを文字に変換します</p>
+                            <ul>
+                                <li>電気信号の <strong>High（1）/ Low（0）</strong>で 1 ビットずつ送る</li>
+                                <li>文字は <a href="https://www3.nit.ac.jp/~tamura/ex2/ascii.html" target="_blank">ASCII コード</a>の表でビット列に変換</li>
+                            </ul>
+                            <p class="point" style="font-family: monospace;">'A' = 65 = 0100 0001</p>
                         </div>
                     </div>
                 </section>
                 <section>
                     <h2>RS485とは</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/RS485.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/RS485.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div class="right">
-                            <p>ビットのシンプルな通信について、基本的なプロトコルやコネクタの種類を決めたものがRS232</p>
-                            <p>現在はノイズ体制などを高めた改良版にあたるRS485が主流</p>
-                        </div>
-                    </div>
-                    <p><strong>USB-RS485変換アダプタの選定↓</strong></p>
+                    <p class="app-link"><a href="interactive_app/RS485.html" target="_blank">全画面表示</a></p>
+                    <iframe class="app" data-src="interactive_app/RS485.html"></iframe>
+                    <p class="app-note"><strong>RS232</strong>：1本の線と GND の電位差で送る → ノイズに弱い<br><strong>RS485</strong>：2本の線の<strong>差</strong>（差動信号）で送る → ノイズに強く、今はこちらが主流</p>
+                    <p class="next-hint">USB-RS485 変換アダプタの選定 ↓</p>
                 </section>
                 <section>
                     <h2>USB-RS485変換アダプタ</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/USB_RS485_converter.webp" alt="USB-RS485変換アダプタ" style="max-width: 100%;">
+                            <img class="photo" src="media/USB_RS485_converter.webp" alt="USB-RS485変換アダプタ" style="max-height: 50vh;">
                         </div>
                         <div class="right">
-                            <p>パソコンとの接続においては、USB-RS485変換アダプタを使用することが多い</p>
-                            <p>←<a href="https://amzn.asia/d/fjOfioS" target="_blank" style="color: #3b82f6; text-decoration: underline;">これ</a>など、FTDI社のチップを使ったものがおススメです</p>
+                            <p class="point">PC とは <strong>USB-RS485 変換アダプタ</strong>でつなぐことが多い</p>
+                            <ul>
+                                <li><strong>FTDI 社のチップ</strong>を使ったものがおすすめ（例：<a href="https://amzn.asia/d/fjOfioS" target="_blank">これ</a>）</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
             </section>
 
-            <!-- 5. 非常停止スイッチの増設 -->
+            <!-- 7. 非常停止スイッチの増設 -->
             <section>
                 <section>
                     <h2>非常停止スイッチの増設</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <p style="text-align: center; margin-bottom: 10px;">
-                                <strong>→ <a href="interactive_app/swich_types.html" target="_blank"
-                                        style="color: #3b82f6; text-decoration: underline;">全画面表示</a></strong>
-                            </p>
-                            <iframe data-src="interactive_app/swich_types.html" width="100%" height="200px"
-                                frameborder="0"></iframe>
-                        </div>
-                        <div class="right">
-                            <p>スイッチの接点構成は大抵のロボットだと2b接点を使用します</p>
-                        </div>
-                    </div>
+                    <p class="app-link"><a href="interactive_app/swich_types.html" target="_blank">全画面表示</a></p>
+                    <iframe class="app" data-src="interactive_app/swich_types.html"></iframe>
+                    <p class="app-note">非常停止は <strong>b接点</strong>（押すと回路が切れる）を2系統持つ <strong>2b接点</strong>が大抵のロボットで使われる</p>
                 </section>
                 <section>
                     <h2>BOX入りスイッチ</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/emargency_swich_box.png" alt="非常停止スイッチBOX" style="max-width: 100%;">
+                            <img class="photo" src="media/emargency_swich_box.png" alt="非常停止スイッチBOX" style="max-height: 50vh;">
                         </div>
                         <div class="right">
-                            <p>スイッチ単体でも売っていますが、BOXいりのスイッチを使用すると便利です</p>
+                            <p class="point">スイッチ単体も売っているが、<strong>BOX入り</strong>が便利</p>
+                            <ul>
+                                <li>そのまま机に置ける・配線しやすい</li>
+                                <li>買うときは<strong>接点構成（2b）</strong>を確認</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
             </section>
 
-            <!-- 6. 治具の作成 -->
+            <!-- 8. 治具の作成 -->
             <section>
                 <section>
                     <h2>治具の作成</h2>
                     <div class="two-column">
                         <div class="left">
-                            <!-- 治具の例 -->
+                            <svg viewBox="0 0 420 300" style="width: 100%; max-height: 50vh;">
+                                <!-- ロボットの手先 -->
+                                <rect x="185" y="10" width="50" height="60" fill="#6b7280"/>
+                                <rect x="165" y="70" width="90" height="16" rx="3" fill="#9ca3af"/>
+                                <rect x="168" y="86" width="14" height="44" fill="#9ca3af"/>
+                                <rect x="238" y="86" width="14" height="44" fill="#9ca3af"/>
+                                <line x1="210" y1="135" x2="210" y2="170" stroke="#60a5fa" stroke-width="3" stroke-dasharray="6 4"/>
+                                <text x="275" y="110" fill="#60a5fa" font-size="16">毎回同じ位置に<tspan x="275" dy="20">取りに行ける</tspan></text>
+                                <!-- 治具とワーク -->
+                                <rect x="40" y="250" width="340" height="24" fill="#4b5563"/>
+                                <path d="M130,250 L130,190 L160,190 L160,230 L260,230 L260,190 L290,190 L290,250 Z" fill="#fbbf24"/>
+                                <rect x="168" y="178" width="84" height="52" rx="4" fill="#e5e7eb"/>
+                                <text x="210" y="210" fill="#111827" font-size="16" text-anchor="middle">ワーク</text>
+                                <text x="320" y="215" fill="#fbbf24" font-size="18" font-weight="bold">治具</text>
+                                <text x="210" y="294" fill="#9ca3af" font-size="15" text-anchor="middle">作業台</text>
+                            </svg>
                         </div>
                         <div class="right">
-                            <p>治具の作成、固定具を治具と言います</p>
+                            <p class="point"><strong>治具</strong>＝ワークを決まった位置・姿勢に固定する道具</p>
+                            <ul>
+                                <li>ロボットは教えた位置にしか行けない → 置き場所を治具で決める</li>
+                                <li>設計（CAD）→ 3Dプリンタで作る、が手軽</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -340,61 +516,91 @@
                     <h2>治具の設計</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/fusion360.webp" alt="Fusion360" style="max-width: 100%;">
+                            <img class="photo" src="media/fusion360.webp" alt="Fusion360" style="width: 100%;">
                         </div>
                         <div class="right">
-                            <p>fusion360がCAD初心者に使いやすいです</p>
+                            <p class="point"><strong>Fusion 360</strong> は CAD 初心者にも使いやすい</p>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>治具の作成</h2>
+                    <h2>治具の製作</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/creality_k1c.webp" alt="Creality K1C" style="max-width: 100%;">
+                            <img class="photo" src="media/creality_k1c.webp" alt="Creality K1C" style="max-height: 50vh;">
                         </div>
                         <div class="right">
-                            <p>3Dプリンタで作成できます。何度も作り直すので印刷速度は重要です、2025年現時点だとcrealityK1cはおススメ</p>
+                            <p class="point"><strong>3Dプリンタ</strong>で作れる</p>
+                            <ul>
+                                <li>何度も作り直すので<strong>印刷速度</strong>が重要</li>
+                                <li>2025年時点では <strong>Creality K1C</strong> がおすすめ</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
             </section>
 
-
-            <!-- 7. ロボットと他の機器の接続 -->
+            <!-- 9. ロボットと他の機器の接続 -->
             <section>
                 <section>
                     <h2>ロボットと他の機器の接続方法</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/robot_integration.png" alt="ロボット統合システム" style="max-width: 100%;">
+                            <img class="photo" src="media/robot_integration.png" alt="ロボット統合システム" style="width: 100%;">
                         </div>
                         <div class="right">
-                            <p>ロボット単体ではなく色々な装置をつなげる方法はいくつかあります</p>
+                            <p class="point">ロボット単体ではなく、色々な装置をつないで使う</p>
+                            <ul>
+                                <li>ロボットコントローラの <strong>IO</strong></li>
+                                <li><strong>パソコン</strong>（USB など）</li>
+                                <li><strong>PLC</strong>（産業用の通信）</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
                 <section>
                     <h2>ロボットコントローラのIO</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <img src="media/ur_io.png" alt="URロボットIO" style="max-width: 100%;">
-                        </div>
-                        <div class="right">
-                            <p>ロボットには基本的にIO(インプット/アウトプット)がついてきます</p>
-                            <p>ON or OFFの信号で外部のモータを制御したり、センサからアナログ電圧を受け取ります</p>
-                        </div>
-                    </div>
+                    <img class="photo" src="media/ur_io.png" alt="URロボットIO" style="width: 75%;">
+                    <ul class="below">
+                        <li>ロボットには基本的に <strong>IO（入力/出力）</strong>が付いている</li>
+                        <li><strong>ON/OFF の信号</strong>で外部のモーターなどを動かす・センサから<strong>アナログ電圧</strong>を受け取る</li>
+                    </ul>
                 </section>
                 <section>
-                    <h2>パソコン接続（USB等）</h2>
+                    <h2>パソコン接続（USBなど）</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-4.0.3&w=500"
-                                alt="USB接続" style="max-width: 100%;">
+                            <svg viewBox="0 0 420 300" style="width: 100%; max-height: 50vh;" font-size="16">
+                                <rect x="150" y="115" width="120" height="70" rx="10" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+                                <text x="210" y="157" fill="#e5e7eb" font-size="20" text-anchor="middle" font-weight="bold">PC</text>
+                                <g stroke="#9ca3af" stroke-width="3">
+                                    <line x1="150" y1="135" x2="95" y2="70"/>
+                                    <line x1="270" y1="135" x2="325" y2="70"/>
+                                    <line x1="150" y1="165" x2="95" y2="230"/>
+                                    <line x1="270" y1="165" x2="325" y2="230"/>
+                                </g>
+                                <g fill="#374151" stroke="#9ca3af" stroke-width="2">
+                                    <rect x="20" y="30" width="150" height="44" rx="8"/>
+                                    <rect x="250" y="30" width="150" height="44" rx="8"/>
+                                    <rect x="20" y="226" width="150" height="44" rx="8"/>
+                                    <rect x="250" y="226" width="150" height="44" rx="8"/>
+                                </g>
+                                <text x="95" y="58" fill="#e5e7eb" text-anchor="middle">ロボット</text>
+                                <text x="325" y="58" fill="#e5e7eb" text-anchor="middle">カメラ</text>
+                                <text x="95" y="254" fill="#e5e7eb" text-anchor="middle">グリッパ</text>
+                                <text x="325" y="254" fill="#e5e7eb" text-anchor="middle">マイコン</text>
+                                <text x="105" y="105" fill="#60a5fa" font-size="14" text-anchor="end">LAN</text>
+                                <text x="315" y="105" fill="#4ade80" font-size="14">USB</text>
+                                <text x="105" y="205" fill="#4ade80" font-size="14" text-anchor="end">USB-RS485</text>
+                                <text x="315" y="205" fill="#4ade80" font-size="14">USB</text>
+                            </svg>
                         </div>
                         <div class="right">
-                            <p>パソコンからロボットを制御する場合は、USBで他のセンサなどを接続して使うことも多いです</p>
+                            <p class="point">PC からロボットを動かすなら、<strong>PC にまとめてつなぐ</strong>のが手軽</p>
+                            <ul>
+                                <li>センサやグリッパを <strong>USB</strong> で追加</li>
+                                <li>プログラムも PC 上でまとめて書ける</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -402,46 +608,75 @@
                     <h2>PLC接続</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&w=500"
-                                alt="PLC接続" style="max-width: 100%;">
+                            <svg viewBox="0 0 420 300" style="width: 100%; max-height: 50vh;" font-size="16">
+                                <rect x="150" y="115" width="120" height="70" rx="10" fill="#3f2a12" stroke="#fbbf24" stroke-width="2"/>
+                                <text x="210" y="157" fill="#e5e7eb" font-size="20" text-anchor="middle" font-weight="bold">PLC</text>
+                                <g stroke="#fbbf24" stroke-width="3">
+                                    <line x1="150" y1="135" x2="95" y2="70"/>
+                                    <line x1="270" y1="135" x2="325" y2="70"/>
+                                    <line x1="150" y1="165" x2="95" y2="230"/>
+                                    <line x1="270" y1="165" x2="325" y2="230"/>
+                                </g>
+                                <g fill="#374151" stroke="#9ca3af" stroke-width="2">
+                                    <rect x="20" y="30" width="150" height="44" rx="8"/>
+                                    <rect x="250" y="30" width="150" height="44" rx="8"/>
+                                    <rect x="20" y="226" width="150" height="44" rx="8"/>
+                                    <rect x="250" y="226" width="150" height="44" rx="8"/>
+                                </g>
+                                <text x="95" y="58" fill="#e5e7eb" text-anchor="middle">ロボット</text>
+                                <text x="325" y="58" fill="#e5e7eb" text-anchor="middle">コンベア</text>
+                                <text x="95" y="254" fill="#e5e7eb" text-anchor="middle">センサ</text>
+                                <text x="325" y="254" fill="#e5e7eb" text-anchor="middle">他の装置</text>
+                                <text x="210" y="215" fill="#fbbf24" font-size="15" text-anchor="middle">FA用の通信</text>
+                            </svg>
                         </div>
                         <div class="right">
-                            <p>高信頼性などの産業用途ではPLCを使用し、FA用の通信を使うことが多いですが作るのは大変です</p>
-                            <p>研究などのプロトタイピングの場合はUSBでも十分なことが多いです</p>
+                            <p class="point">高い信頼性が要る<strong>産業用途</strong>では PLC ＋ FA 用の通信</p>
+                            <ul>
+                                <li>止まらない・壊れにくいが、<strong>作るのは大変</strong></li>
+                                <li>研究などのプロトタイピングは <strong>USB（PC）で十分</strong>なことが多い</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
             </section>
 
-            <!-- 8. 便利なデバイスの紹介 -->
+            <!-- 10. 便利なデバイスの紹介 -->
             <section>
                 <section>
-                    <h2>便利なプロトタイピング用デバイスの紹介</h2>
+                    <h2>便利なデバイス</h2>
+                    <div class="device-row">
+                        <figure><img class="photo" src="media/M5stack.png" alt="M5Stack"><figcaption><strong>M5Stack</strong><br>センサを足せるマイコン</figcaption></figure>
+                        <figure><img class="photo" src="media/Realsense.webp" alt="Intel RealSense"><figcaption><strong>RealSense</strong><br>3Dカメラ</figcaption></figure>
+                        <figure><img class="photo" src="media/Dynamixel.png" alt="Dynamixel"><figcaption><strong>Dynamixel</strong><br>研究用のモーター</figcaption></figure>
+                    </div>
+                    <p class="next-hint">それぞれ ↓</p>
+                </section>
+                <section>
+                    <h2>M5Stack</h2>
                     <div class="two-column">
                         <div class="left">
-                            <!-- デバイス紹介 -->
+                            <img class="photo" src="media/M5stack.png" alt="M5Stack" style="max-height: 50vh;">
+                        </div>
+                        <div class="right">
+                            <p class="point"><strong>Arduino</strong> のプログラムを書けるマイコン</p>
+                            <ul>
+                                <li><strong>はんだ付け不要</strong>で色々なセンサを追加できる</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
                 <section>
-                    <h2>M5stack</h2>
+                    <h2>RealSense</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/M5stack.png" alt="M5Stack" style="max-width: 100%;">
+                            <img class="photo" src="media/Realsense.webp" alt="Intel RealSense" style="max-height: 50vh;">
                         </div>
                         <div class="right">
-                            <p>Arduinoのプログラムを書けるマイコンです、はんだ付け不要で様々なセンサを簡単に追加できます</p>
-                        </div>
-                    </div>
-                </section>
-                <section>
-                    <h2>Realsense</h2>
-                    <div class="two-column">
-                        <div class="left">
-                            <img src="media/Realsense.webp" alt="Intel Realsense" style="max-width: 100%;">
-                        </div>
-                        <div class="right">
-                            <p>安価ですが高性能なIntel製の3Dカメラです、ロボットの周囲の環境を認識するために使用できます</p>
+                            <p class="point">安価で高性能な Intel 製の <strong>3Dカメラ</strong></p>
+                            <ul>
+                                <li>ロボットの周りの環境を認識するのに使える</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -449,10 +684,13 @@
                     <h2>Dynamixel</h2>
                     <div class="two-column">
                         <div class="left">
-                            <img src="media/Dynamixel.png" alt="Dynamixelモータ" style="max-width: 100%;">
+                            <img class="photo" src="media/Dynamixel.png" alt="Dynamixelモータ" style="max-height: 50vh;">
                         </div>
                         <div class="right">
-                            <p>ロボットアームの関節等に使われるモータです、位置制御だけでなく電流制御(トルク制御)可能なため研究で重宝します</p>
+                            <p class="point">ロボットアームの関節などに使われる<strong>モーター</strong></p>
+                            <ul>
+                                <li>位置制御だけでなく<strong>電流制御（トルク制御）</strong>もできる → 研究で重宝</li>
+                            </ul>
                         </div>
                     </div>
                 </section>

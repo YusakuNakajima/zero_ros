@@ -39,7 +39,12 @@
             color: #0284c7; /* sky-600 */
             font-weight: 500;
         }
+        /* スライド埋め込み時：見出しを省いて1画面に収める */
+        .embed body { min-height: 0; padding: 8px; }
+        .embed body > div { max-width: none; padding: 16px; box-shadow: none; }
+        .embed body > div > h1 { display: none; }
     </style>
+    <script>if (window.self !== window.top) document.documentElement.classList.add('embed');</script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
