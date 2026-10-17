@@ -25,10 +25,18 @@
             color: var(--text);
             font-family: 'Noto Sans JP', sans-serif;
             font-size: 12px;
+            /* iframe の高さに収める: グラフが残りの高さを分け合う */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        .controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 4px 12px; align-items: end; }
+        .controls { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: end; }
+        .controls > div { flex: 1 1 140px; }
+        .controls > .buttons { flex: 0 0 auto; }
         label { display: block; color: var(--muted); }
-        label b { color: var(--text); float: right; }
+        label { white-space: nowrap; }
+        label b { color: var(--text); margin-left: 6px; }
         input[type="range"] { width: 100%; margin: 2px 0 0; }
         .buttons { display: flex; gap: 4px; }
         button {
@@ -45,7 +53,7 @@
         button.primary { background: #2563eb; border-color: #2563eb; }
         button.on { background: #b45309; border-color: #b45309; }
         #filterBtn.on { background: #15803d; border-color: #15803d; }
-        canvas { width: 100%; display: block; margin-top: 6px; background: var(--panel); border-radius: 6px; }
+        canvas { width: 100%; flex: 1 1 0; min-height: 60px; display: block; margin-top: 6px; background: var(--panel); border-radius: 6px; }
         .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; color: var(--muted); }
         .legend span::before { content: ""; display: inline-block; width: 16px; height: 3px; margin-right: 4px; vertical-align: middle; background: currentColor; }
         .raw { color: var(--raw); }
@@ -71,8 +79,8 @@
             <button id="reset">⟲</button>
         </div>
     </div>
-    <canvas id="wave" height="135"></canvas>
-    <canvas id="spec" height="135"></canvas>
+    <canvas id="wave"></canvas>
+    <canvas id="spec"></canvas>
     <div class="legend">
         <span class="raw">生データ</span>
         <span class="flt">出力</span>
@@ -188,11 +196,10 @@
         const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
         function fitCanvas(c) {
             const ratio = window.devicePixelRatio || 1;
-            const w = c.clientWidth, h = parseInt(c.getAttribute('height'), 10);
-            if (c.width !== Math.round(w * ratio)) {
+            const w = c.clientWidth, h = c.clientHeight;
+            if (c.width !== Math.round(w * ratio) || c.height !== Math.round(h * ratio)) {
                 c.width = Math.round(w * ratio);
                 c.height = Math.round(h * ratio);
-                c.style.height = h + 'px';
             }
             const ctx = c.getContext('2d');
             ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
