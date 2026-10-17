@@ -709,51 +709,11 @@
 
 
 
-                <!-- ROS2での力制御実装 -->
+                <!-- ROS2でのアドミッタンス制御実装 -->
                 <section>
-                    <h2 style="font-size: 1.3em;">ROS2での力制御実装</h2>
-                    <img src="media/ros2_force_control_arch.drawio.svg" alt="ROS2 力制御の構成: hardware_interface・admittance_controller・トピック" style="width: 78%; max-height: 62vh; margin: 0;">
+                    <h2 style="font-size: 1.3em;">ROS2でのアドミッタンス制御実装</h2>
+                    <img src="media/ros2_force_control_arch.drawio.svg" alt="ROS2 アドミッタンス制御の構成: hardware_interface・admittance_controller・トピック" style="width: 78%; max-height: 62vh; margin: 0;">
                     <p style="font-size: 0.5em; margin: 6px 0 0;">admittance_controller は力を <strong>State Interface から直接</strong>読む ／ <code>~/wrench</code> トピックは監視・安全停止用の出口</p>
-                </section>
-
-                <!-- 力/トルクセンサーのセットアップ -->
-                <section>
-                    <h2>FTセンサのセットアップ</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <svg viewBox="0 0 520 330" style="width: 100%; max-height: 50vh;">
-                                <defs><marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker></defs>
-                                <g font-size="17" text-anchor="middle" fill="#e5e7eb">
-                                    <rect x="170" y="5" width="180" height="40" rx="8" fill="#b45309"/>
-                                    <text x="260" y="31">FTセンサ（実機）</text>
-                                    <line x1="260" y1="45" x2="260" y2="70" stroke="#9ca3af" stroke-width="3" marker-end="url(#fa)"/>
-                                    <rect x="110" y="75" width="300" height="58" rx="8" fill="#1e3a5f"/>
-                                    <text x="260" y="99">ハードウェア層（ros2_control）</text>
-                                    <text x="260" y="122" font-size="14" fill="#93c5fd">&lt;sensor&gt; force.x … torque.z</text>
-                                    <line x1="200" y1="133" x2="120" y2="175" stroke="#9ca3af" stroke-width="3" marker-end="url(#fa)"/>
-                                    <line x1="320" y1="133" x2="400" y2="175" stroke="#9ca3af" stroke-width="3" marker-end="url(#fa)"/>
-                                    <rect x="5" y="180" width="230" height="58" rx="8" fill="#14532d"/>
-                                    <text x="120" y="204">admittance_controller</text>
-                                    <text x="120" y="226" font-size="14" fill="#86efac">状態インタフェースを直接読む</text>
-                                    <rect x="265" y="180" width="250" height="58" rx="8" fill="#374151"/>
-                                    <text x="390" y="204" font-size="15">force_torque_sensor_broadcaster</text>
-                                    <text x="390" y="226" font-size="14" fill="#d1d5db">トピックに配信</text>
-                                    <line x1="390" y1="238" x2="390" y2="263" stroke="#9ca3af" stroke-width="3" marker-end="url(#fa)"/>
-                                    <text x="390" y="290" font-size="16" fill="#fbbf24">~/wrench（WrenchStamped）</text>
-                                    <text x="390" y="318" font-size="14" fill="#d1d5db">rqt / RViz / 自作ノード</text>
-                                </g>
-                            </svg>
-                        </div>
-                        <div style="flex: 1;">
-                            <p style="font-size: 0.7em;">力センサーの取り付けとキャリブレーション</p>
-                            <ul style="font-size: 0.6em;">
-                                <li>センサーの物理的取り付け</li>
-                                <li>オフセットキャリブレーション</li>
-                                <li>ROS2でのトピック配信確認</li>
-                                <li>トピックだけ出すドライバは admittance_controller に直接は入らない</li>
-                            </ul>
-                        </div>
-                    </div>
                 </section>
 
                 <!-- アドミッタンスコントローラの設定 -->
@@ -924,53 +884,9 @@ admittance_controller:
                                 <li>外力 F<sub>ext</sub> がわかれば <strong>−J<sup>T</sup> F<sub>ext</sub></strong> を足して打ち消せる</li>
                                 <li>逆に関節トルクから手先の力：F = J<sup>−T</sup> τ（特異姿勢でなければ）</li>
                             </ul>
-                            <p>力を<strong>手先の方向（x, y, z）ごと</strong>に扱える → 次は制御則へ</p>
+                            <p>力を<strong>手先の方向（x, y, z）ごと</strong>に扱える → 次は方向ごとに位置か力かを選ぶ</p>
                         </div>
                     </div>
-                </section>
-
-                <!-- 手先の制御則 -->
-                <section>
-                    <h2 style="font-size: 1.3em;">位置と力を同じ単位にそろえる</h2>
-                    <svg viewBox="0 0 760 250" style="width: 92%; max-height: 38vh;">
-                        <defs>
-                            <marker id="cl-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker>
-                        </defs>
-                        <!-- 上段：トルク制御ロボット -->
-                        <text x="10" y="22" fill="#e5e7eb" font-size="17" font-weight="bold">トルク制御ロボット（Franka など）：<tspan fill="#f472b6">手先の力</tspan>にそろえる</text>
-                        <rect x="10" y="36" width="250" height="34" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
-                        <text x="135" y="59" fill="#e5e7eb" font-size="16" text-anchor="middle">位置：K<tspan font-size="11" dy="4">p</tspan><tspan dy="-4">(x</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − x) − K</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> v</tspan></text>
-                        <rect x="10" y="78" width="250" height="34" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="2"/>
-                        <text x="135" y="101" fill="#e5e7eb" font-size="16" text-anchor="middle">力：F<tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> + K</tspan><tspan font-size="11" dy="4">f</tspan><tspan dy="-4">(F</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − F)</tspan></text>
-                        <path d="M260,53 L300,53 L300,95 L260,95" fill="none" stroke="#9ca3af" stroke-width="2"/>
-                        <line x1="300" y1="74" x2="336" y2="74" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
-                        <text x="318" y="66" fill="#e5e7eb" font-size="14" text-anchor="middle">S</text>
-                        <rect x="342" y="56" width="150" height="36" rx="6" fill="#1f2937" stroke="#f472b6" stroke-width="2"/>
-                        <text x="417" y="80" fill="#f472b6" font-size="16" text-anchor="middle">手先の力 F</text>
-                        <line x1="492" y1="74" x2="528" y2="74" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
-                        <rect x="534" y="56" width="216" height="36" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
-                        <text x="642" y="80" fill="#a3e635" font-size="16" text-anchor="middle">τ = J<tspan font-size="11" dy="-7">T</tspan><tspan dy="7">F → 関節トルク</tspan></text>
-                        <!-- 下段：位置制御ロボット -->
-                        <text x="10" y="148" fill="#e5e7eb" font-size="17" font-weight="bold">位置制御ロボット（UR など）：<tspan fill="#4fc3f7">手先の速度</tspan>にそろえる</text>
-                        <rect x="10" y="162" width="250" height="34" rx="6" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
-                        <text x="135" y="185" fill="#e5e7eb" font-size="16" text-anchor="middle">位置：K<tspan font-size="11" dy="4">p</tspan><tspan dy="-4">(x</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − x)</tspan></text>
-                        <rect x="10" y="204" width="250" height="34" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="2"/>
-                        <text x="135" y="227" fill="#e5e7eb" font-size="16" text-anchor="middle">力：K<tspan font-size="11" dy="4">f</tspan><tspan dy="-4">(F</tspan><tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> − F)</tspan></text>
-                        <path d="M260,179 L300,179 L300,221 L260,221" fill="none" stroke="#9ca3af" stroke-width="2"/>
-                        <line x1="300" y1="200" x2="336" y2="200" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
-                        <text x="318" y="192" fill="#e5e7eb" font-size="14" text-anchor="middle">S</text>
-                        <rect x="342" y="182" width="150" height="36" rx="6" fill="#1f2937" stroke="#4fc3f7" stroke-width="2"/>
-                        <text x="417" y="206" fill="#4fc3f7" font-size="16" text-anchor="middle">手先の速度 v</text>
-                        <line x1="492" y1="200" x2="528" y2="200" stroke="#e5e7eb" stroke-width="2.5" marker-end="url(#cl-a)"/>
-                        <rect x="534" y="182" width="216" height="36" rx="6" fill="#1f2937" stroke="#a3e635" stroke-width="2"/>
-                        <text x="642" y="206" fill="#a3e635" font-size="16" text-anchor="middle">積分 → 逆運動学 → 関節角</text>
-                    </svg>
-                    <ul style="font-size: 0.5em;">
-                        <li>ロボットが受け取れる指令に合わせて、位置ループと力ループの<strong>出力の単位をそろえて</strong>から足す</li>
-                        <li>位置制御ロボットでは力の誤差 → 速度（＝アドミッタンス型）。UR の force_mode もこの考え方</li>
-                        <li>実装例：cambel/ur3 の hybrid_controller.py（位置 PD＋力 PD → 逆運動学 → 関節角）</li>
-                        <li>単位がそろえば<strong>方向ごとに選んで足せる</strong> → 選び方が選択行列 S</li>
-                    </ul>
                 </section>
 
                 <!-- 選択行列 -->
@@ -1062,48 +978,14 @@ admittance_controller:
                         <text x="380" y="268" fill="#f87171" font-size="15" text-anchor="middle">− 測った力 F（FTセンサ）</text>
                     </svg>
                     <ul style="font-size: 0.55em;">
-                        <li>位置ループと力ループを<strong>並べて</strong>、誤差に S をかけて方向を振り分ける</li>
-                        <li>u = (I − S) u<sub>pos</sub> ＋ S u<sub>frc</sub>（S = 0 の方向は位置、1 の方向は力だけが効く）</li>
-                        <li>トルク制御ロボット：u = 手先の力 → τ = J<sup>T</sup>u</li>
-                        <li>位置制御ロボット（UR）：u = 手先の速度 → 積分 → 逆運動学</li>
+                        <li>位置ループと力ループを並べ、u = (I − S) u<sub>pos</sub> ＋ S u<sub>frc</sub> で方向ごとに振り分ける</li>
+                        <li>足す前に、ロボットが受け取れる指令に<strong>出力の単位をそろえる</strong></li>
+                        <li>トルク制御（Franka など）：u = <strong>手先の力</strong> → τ = J<sup>T</sup>u</li>
+                        <li>位置制御（UR など）：u = <strong>手先の速度</strong> → 積分 → 逆運動学（アドミッタンス型）</li>
+                        <li>例：UR の force_mode、cambel/ur3 の hybrid_controller.py</li>
                     </ul>
                 </section>
 
-                <!-- ハイブリッド位置/力制御 -->
-                <section>
-                    <h2 style="font-size: 1.3em;">ハイブリッド位置/力制御の使われ方</h2>
-                    <div style="display: flex; align-items: center; gap: 2em;">
-                        <div style="flex: 1;">
-                            <svg viewBox="0 0 500 300" style="width: 100%; max-height: 50vh;">
-                                <defs>
-                                    <marker id="hz" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
-                                    <marker id="hx" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
-                                </defs>
-                                <rect x="20" y="220" width="420" height="40" fill="#6b7280"/>
-                                <text x="230" y="247" fill="#e5e7eb" font-size="16" text-anchor="middle">ワーク表面</text>
-                                <rect x="200" y="20" width="60" height="14" fill="#9ca3af"/>
-                                <rect x="200" y="34" width="60" height="18" fill="#f59e0b"/>
-                                <rect x="218" y="52" width="24" height="140" fill="#4b5563"/>
-                                <rect x="190" y="192" width="80" height="28" rx="4" fill="#d1d5db"/>
-                                <line x1="300" y1="60" x2="300" y2="180" stroke="#f87171" stroke-width="6" marker-end="url(#hz)"/>
-                                <text x="312" y="105" fill="#f87171" font-size="18" font-weight="bold">Z：力制御</text>
-                                <text x="312" y="130" fill="#f87171" font-size="15">例：10 N で押し続ける</text>
-                                <line x1="40" y1="280" x2="420" y2="280" stroke="#4ade80" stroke-width="6" stroke-dasharray="14 8" marker-end="url(#hx)"/>
-                                <text x="40" y="200" fill="#4ade80" font-size="18" font-weight="bold">X/Y：位置制御</text>
-                                <text x="40" y="168" fill="#4ade80" font-size="15">軌道どおりに動かす</text>
-                            </svg>
-                        </div>
-                        <div style="flex: 1;">
-                            <ul style="font-size: 0.55em;">
-                                <li>研磨：Z は力、XY は位置</li>
-                                <li><strong>位置制御ロボット＋FTセンサ</strong>でできる</li>
-                                <li>産業用で<strong>よく使う</strong>：研削・研磨・嵌合</li>
-                                <li>UR：<code>force_mode()</code> で力の軸と目標を指定</li>
-                                <li>ROS2：FZI の compliance controller で近い動き</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
             </section>
 
             <!-- 方式の比較 -->

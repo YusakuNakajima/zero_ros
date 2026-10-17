@@ -40,20 +40,20 @@
         <mxCell id="planner" value="MoveIt / 自作ノード" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;strokeWidth=1;fontSize=13;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="575" y="410" width="155" height="46" as="geometry"/>
         </mxCell>
-        <mxCell id="title" value="ROS2 力制御の構成" style="text;html=1;align=left;verticalAlign=middle;fontSize=28;fontColor=#0066CC;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="18" y="14" width="320" height="34" as="geometry"/>
+        <mxCell id="title" value="ROS2 アドミッタンス制御の構成" style="text;html=1;align=left;verticalAlign=middle;fontSize=28;fontColor=#0066CC;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="18" y="14" width="420" height="34" as="geometry"/>
         </mxCell>
         <mxCell id="sub" value="admittance_controller を使う例" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontColor=#333333;fontStyle=0;" vertex="1" parent="1">
           <mxGeometry x="20" y="52" width="320" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="note1" value="・admittance_controller は FT センサの値を" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="330" y="16" width="320" height="18" as="geometry"/>
+          <mxGeometry x="450" y="16" width="320" height="18" as="geometry"/>
         </mxCell>
         <mxCell id="note2" value="  State Interface から直接読む（トピック不要）" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="330" y="33" width="320" height="18" as="geometry"/>
+          <mxGeometry x="450" y="33" width="320" height="18" as="geometry"/>
         </mxCell>
         <mxCell id="note3" value="・トピックは人や他のノードが見るための出口" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="330" y="50" width="320" height="18" as="geometry"/>
+          <mxGeometry x="450" y="50" width="320" height="18" as="geometry"/>
         </mxCell>
         <mxCell id="robotLbl" value="ロボット実機" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontColor=#CC66FF;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="472.0" y="71" width="320" height="21" as="geometry"/>

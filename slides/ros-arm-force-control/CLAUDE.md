@@ -46,19 +46,16 @@
 ### 3.5 アドミッタンス制御編（ROS2版: 水平スライド7）
 - **縦スライド7-1**: アドミッタンス制御とは
 - **縦スライド7-2**: アドミッタンス制御の数式（M a_c + D(v_c − v_d) + K(x_c − x_d) = F。F=測った外力、x_c=位置指令、x_d=目標、M/D/K=仮想パラメータ、計算の4ステップ）
-- **縦スライド7-5**: ROS2での力制御実装（構成図 media/ros2_force_control_arch.drawio.svg: hardware_interface・State/Command Interface・admittance_controller・FTブロードキャスタ・トピック。draw.io で編集可）
-- **縦スライド7-6**: FTセンサのセットアップ
-- **縦スライド7-7**: アドミッタンス制御の設定
-- **縦スライド7-8**: アドミッタンスコントローラの実装（コード表示）
+- **縦スライド7-5**: ROS2でのアドミッタンス制御実装（構成図 media/ros2_force_control_arch.drawio.svg: hardware_interface・State/Command Interface・admittance_controller・FTブロードキャスタ・トピック。draw.io で編集可）
+- **縦スライド7-6**: アドミッタンス制御の設定
+- **縦スライド7-7**: アドミッタンスコントローラの実装（コード表示）
 - **縦スライド（ROS2版）章末コラム3枚**: コラム「アドミッタンス制御も色々」（ros2_controllers の admittance_controller と FZI の cartesian_compliance_controller を比較。どちらも K=500 N/m。①比較表：減衰 200 vs 約20 N·s/m、力入力の遅れ 約0.4 s vs 20 Hz フィルタ ②制御則の中身（M·a+D·v+K·x=F の実時間積分 / 軽い仮想ロボットの順動力学） ③10 N で押して離したときの応答グラフ（admittance は式どおり、FZI は手先1 kg・並進の概算。実機測定ではない）と、admittance を軽くする設定 damping_ratio 0.7〜1・filter_coefficient 0.05）
 
 ### 3.7 ハイブリッド位置/力制御（ROS2版のみ、水平スライド8。アドミッタンス章の後）
 - 章タイトル（背景 media/hand_guiding.webp）
 - 仮想仕事の原理（τᵀδq = Fᵀδx から τ = JᵀF、外力の打ち消し、F = J⁻ᵀτ）
-- 位置と力を同じ単位にそろえる（2段の図。トルク制御ロボット＝手先の力にそろえて τ = JᵀF、位置制御ロボット（UR）＝手先の速度にそろえて 積分→逆運動学→関節角。力の誤差→速度はアドミッタンス型、UR force_mode も同じ考え方。実装例 cambel/ur3 hybrid_controller.py）
 - 選択行列 S：方向ごとに位置か力か（0=位置・1=力、(I−S)位置＋S力、直交で非干渉、Raibert & Craig 1981）
-- 位置と力をどう合成するか（ブロック図：xd/Fd → 誤差 → (I−S)/S → 位置/力制御則 → 和 u → 「τ = Jᵀu or 積分→IK」 → ロボット、順運動学と FTセンサのフィードバック。u はトルク制御なら手先の力、位置制御なら手先の速度）
-- ハイブリッド位置/力制御の使われ方（研磨 Z 力・XY 位置、位置制御ロボット＋FTセンサ、UR force_mode、FZI compliance controller）
+- 位置と力をどう合成するか（ブロック図：xd/Fd → 誤差 → (I−S)/S → 位置/力制御則 → 和 u → 「τ = Jᵀu or 積分→IK」 → ロボット、順運動学と FTセンサのフィードバック。u は単位をそろえてから足す：トルク制御（Franka）なら手先の力、位置制御（UR）なら手先の速度＝アドミッタンス型で UR force_mode も同じ考え方。実装例 cambel/ur3 hybrid_controller.py）
 
 ### 3.75 方式の比較（ROS2版のみ、水平スライド9。ハイブリッド章の後。旧3章から移動）
 - 章タイトル（背景 hand_guiding.webp）
