@@ -29,6 +29,7 @@
 - **縦スライド5-2**: ROS2の力制御コントローラ（admittance_controller は Humble（Ubuntu 22）から標準）
 - **縦スライド5-3**: コンプライアンス制御用のOSSコントローラ（FZI cartesian_controllers。compliance はハイブリッド的にも使える）
 - **縦スライド5-3b**: インピーダンス制御用のOSSコントローラ（matthias-mayr/Cartesian-Impedance-Controller。トルク指令ロボット向け）
+- **縦スライド（ROS2版）コラム3枚**: アドミッタンス制御は1種類ではない（ros2_controllers の admittance_controller と FZI の cartesian_compliance_controller を比較。どちらも K=500 N/m。①比較表：減衰 200 vs 約20 N·s/m、力入力の遅れ 約0.4 s vs 20 Hz フィルタ ②制御則の中身（M·a+D·v+K·x=F の実時間積分 / 軽い仮想ロボットの順動力学） ③10 N で押して離したときの応答グラフ（admittance は式どおり、FZI は手先1 kg・並進の概算。実機測定ではない）と、admittance を軽くする設定 damping_ratio 0.7〜1・filter_coefficient 0.05）
 - **縦スライド5-4**: 力制御に必要なハードウェア（UR / Franka の小さな写真付き。A: 位置制御ロボット＋手先FTセンサ→アドミッタンスのみ / B: トルク制御ロボット→インピーダンスもアドミッタンスも。直交空間では F = J^-T τ で変換）
 - **縦スライド（ROS2版）**: 力制御は制御周波数が効く（硬い物に当てたときの力：125 Hz は行き過ぎて跳ね、1 kHz はすっと落ち着くイメージ図。周期の間は前の指令のまま／安定に出せる硬さは周期におおよそ反比例 K < 2b/T, Colgate & Schenkel 1997）
 - **縦スライド（ROS2版）**: 何 Hz あればいい？（目安）：対数軸に人（手の動き〜10 Hz、感じる力・振動〜1 kHz、パチニ小体 200〜300 Hz）・作業・ロボット（UR CB3 125 Hz / e-Series 500 Hz / Franka 1 kHz）を並べた図と表（位置 100〜125 Hz、やわらかい接触 125〜500 Hz、硬い物・研磨 500 Hz〜1 kHz、力触覚伝送 最低 1 kHz）

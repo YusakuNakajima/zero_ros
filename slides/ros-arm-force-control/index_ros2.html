@@ -593,6 +593,74 @@
                     <p style="font-size: 0.45em; color: #aaa;">Mayr &amp; Salt-Ducaju, "A C++ Implementation of a Cartesian Impedance Controller for Robotic Manipulators", JOSS 9(93), 5194 (2024)</p>
                 </section>
 
+                <!-- コラム：アドミッタンス制御の実装による違い -->
+                <section>
+                    <h2 style="font-size: 1.1em;">コラム：アドミッタンス制御は1種類ではない</h2>
+                    <p style="font-size: 0.55em;">インピーダンス／アドミッタンス制御は<strong>考え方の名前</strong>で、実装の方式は色々研究されている<br>方式やパラメータで手応えが<strong>かなり変わる</strong> → 2つのコントローラで比べる</p>
+                    <table class="custom-table" style="font-size: 0.45em;">
+                        <tr>
+                            <th></th>
+                            <th><a href="https://control.ros.org/rolling/doc/ros2_controllers/admittance_controller/doc/userdoc.html" target="_blank" style="color: #f472b6;">admittance_controller</a><br>（ros2_controllers）</th>
+                            <th><a href="https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers" target="_blank" style="color: #4ade80;">cartesian_compliance_controller</a><br>（FZI）</th>
+                        </tr>
+                        <tr><td>剛性 K</td><td colspan="2" style="text-align: center;">どちらも 500 N/m（10 N 押すと 2 cm ずれる）</td></tr>
+                        <tr><td>計算の仕方</td><td>M·a + D·v + K·x = F を実時間で積分</td><td>軽い仮想ロボットの順動力学</td></tr>
+                        <tr><td>減衰 D</td><td><strong>200 N·s/m</strong></td><td>約 20 N·s/m（約 1/10）</td></tr>
+                        <tr><td>力の入力の遅れ</td><td><strong>約 0.4 s</strong></td><td>20 Hz フィルタ（一桁以上小さい）</td></tr>
+                        <tr><td>手応え</td><td style="color: #f472b6;">重くて粘い</td><td style="color: #4ade80;">軽くて速い</td></tr>
+                    </table>
+                    <p style="font-size: 0.55em;">止まったときのバネは同じ。差は<strong>動き出すまでの重さ（質量・減衰）</strong>と<strong>力の入力の遅れ</strong></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.1em;">コラム：2つの制御則の中身</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.5em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #f472b6; border-radius: 10px; padding: 8px;">
+                            <div style="text-align: center;"><strong style="color: #f472b6;">admittance_controller</strong><br>（ros2_controllers）</div>
+                            <ul>
+                                <li>M·a + D·v + K·x = F を<strong>実時間のまま</strong>積分</li>
+                                <li>D = 2ζ(MK)<sup>1/2</sup> = <strong>200 N·s/m</strong><br>（M = 5 kg, K = 500 N/m, ζ = 2）<br>→ 0.1 m/s で動かすだけで約 20 N</li>
+                                <li>力は強い平滑化（係数 0.005）<br>→ 遅れ <strong>約 0.4 s</strong>、離しても押され続ける</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 8px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80;">cartesian_compliance_controller</strong><br>（FZI）</div>
+                            <ul>
+                                <li>正味の力 ＝ K·(目標 − 現在) ＋ 計測力</li>
+                                <li><strong>ほぼ質量の無い仮想ロボット</strong>に加え、<br>順動力学で関節の動きを求める</li>
+                                <li>仮想時間は実時間の約10倍速<br>→ 概算 <strong>D ≈ 20 N·s/m</strong>、立ち上がり約 20 ms</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.1em;">コラム：10 N で押して離したときの動き</h2>
+                    <svg viewBox="0 0 720 300" style="width: 78%; max-height: 42vh;">
+                        <rect x="70" y="30" width="620" height="200" fill="none" stroke="#4b5563"/>
+                        <rect x="70" y="30" width="310" height="200" fill="#f59e0b" opacity="0.08"/>
+                        <text x="225" y="50" fill="#f59e0b" font-size="16" text-anchor="middle">10 N で押す</text>
+                        <text x="535" y="50" fill="#9ca3af" font-size="16" text-anchor="middle">離す</text>
+                        <line x1="70" y1="70" x2="690" y2="70" stroke="#9ca3af" stroke-dasharray="5 5"/>
+                        <text x="62" y="75" fill="#9ca3af" font-size="16" text-anchor="end">2 cm</text>
+                        <text x="62" y="235" fill="#9ca3af" font-size="16" text-anchor="end">0</text>
+                        <g fill="#9ca3af" font-size="16" text-anchor="middle">
+                            <text x="70" y="252">0</text><text x="277" y="252">1</text><text x="483" y="252">2</text><text x="690" y="252">3 s</text>
+                        </g>
+                        <text x="20" y="150" fill="#9ca3af" font-size="16" text-anchor="middle" transform="rotate(-90 20 150)">手先のずれ</text>
+                        <polyline points="70,228.4 74,181.5 78,138.5 82,111.2 87,94.7 91,84.8 95,78.9 99,75.3 103,73.2 107,71.9 111,71.1 115,70.7 120,70.4 124,70.2 128,70.1 132,70.1 136,70.1 140,70.0 144,70.0 149,70.0 153,70.0 157,70.0 161,70.0 165,70.0 169,70.0 173,70.0 177,70.0 182,70.0 186,70.0 190,70.0 194,70.0 198,70.0 202,70.0 206,70.0 211,70.0 215,70.0 219,70.0 223,70.0 227,70.0 231,70.0 235,70.0 239,70.0 244,70.0 248,70.0 252,70.0 256,70.0 260,70.0 264,70.0 268,70.0 273,70.0 277,70.0 281,70.0 285,70.0 289,70.0 293,70.0 297,70.0 301,70.0 306,70.0 310,70.0 314,70.0 318,70.0 322,70.0 326,70.0 330,70.0 335,70.0 339,70.0 343,70.0 347,70.0 351,70.0 355,70.0 359,70.0 363,70.0 368,70.0 372,70.0 376,70.0 380,71.6 384,118.5 388,161.5 392,188.8 397,205.3 401,215.2 405,221.1 409,224.7 413,226.8 417,228.1 421,228.9 425,229.3 430,229.6 434,229.8 438,229.9 442,229.9 446,229.9 450,230.0 454,230.0 459,230.0 463,230.0 467,230.0 471,230.0 475,230.0 479,230.0 483,230.0 487,230.0 492,230.0 496,230.0 500,230.0 504,230.0 508,230.0 512,230.0 516,230.0 521,230.0 525,230.0 529,230.0 533,230.0 537,230.0 541,230.0 545,230.0 549,230.0 554,230.0 558,230.0 562,230.0 566,230.0 570,230.0 574,230.0 578,230.0 583,230.0 587,230.0 591,230.0 595,230.0 599,230.0 603,230.0 607,230.0 611,230.0 616,230.0 620,230.0 624,230.0 628,230.0 632,230.0 636,230.0 640,230.0 645,230.0 649,230.0 653,230.0 657,230.0 661,230.0 665,230.0 669,230.0 673,230.0 678,230.0 682,230.0 686,230.0 690,230.0" fill="none" stroke="#4ade80" stroke-width="4"/>
+                        <polyline points="70,230.0 74,229.9 78,229.6 82,229.0 87,228.1 91,226.9 95,225.4 99,223.7 103,221.7 107,219.6 111,217.3 115,214.8 120,212.2 124,209.5 128,206.7 132,203.9 136,201.0 140,198.0 144,195.0 149,192.0 153,189.0 157,185.9 161,182.9 165,179.9 169,176.9 173,173.9 177,170.9 182,168.0 186,165.1 190,162.3 194,159.5 198,156.8 202,154.1 206,151.4 211,148.8 215,146.3 219,143.8 223,141.4 227,139.0 231,136.7 235,134.4 239,132.2 244,130.1 248,128.0 252,126.0 256,124.0 260,122.1 264,120.3 268,118.5 273,116.7 277,115.0 281,113.4 285,111.8 289,110.3 293,108.8 297,107.3 301,105.9 306,104.6 310,103.3 314,102.0 318,100.8 322,99.6 326,98.5 330,97.4 335,96.3 339,95.3 343,94.3 347,93.4 351,92.4 355,91.6 359,90.7 363,89.9 368,89.1 372,88.3 376,87.6 380,86.9 384,86.3 388,85.9 392,85.9 397,86.2 401,86.9 405,87.8 409,89.0 413,90.4 417,92.1 421,93.9 425,95.9 430,98.0 434,100.3 438,102.7 442,105.1 446,107.7 450,110.3 454,112.9 459,115.6 463,118.3 467,121.1 471,123.8 475,126.6 479,129.3 483,132.0 487,134.7 492,137.4 496,140.0 500,142.7 504,145.2 508,147.8 512,150.3 516,152.7 521,155.2 525,157.5 529,159.9 533,162.1 537,164.3 541,166.5 545,168.6 549,170.7 554,172.7 558,174.7 562,176.6 566,178.4 570,180.2 574,182.0 578,183.7 583,185.3 587,186.9 591,188.5 595,190.0 599,191.5 603,192.9 607,194.3 611,195.6 616,196.9 620,198.1 624,199.3 628,200.5 632,201.6 636,202.7 640,203.7 645,204.7 649,205.7 653,206.6 657,207.6 661,208.4 665,209.3 669,210.1 673,210.9 678,211.6 682,212.4 686,213.1 690,213.7" fill="none" stroke="#f472b6" stroke-width="4"/>
+                        <line x1="80" y1="285" x2="110" y2="285" stroke="#4ade80" stroke-width="4"/>
+                        <text x="116" y="291" fill="#4ade80" font-size="17">FZI：すぐ動き、すぐ戻る</text>
+                        <line x1="350" y1="285" x2="380" y2="285" stroke="#f472b6" stroke-width="4"/>
+                        <text x="386" y="291" fill="#f472b6" font-size="17">admittance：じわっと動き、離しても遅れる</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>admittance を軽くするなら：<code>damping_ratio</code> を 0.7〜1 に（D = 70〜100 N·s/m）、<code>filter_coefficient</code> を 0.05 程度に（時定数 約 40 ms）</li>
+                    </ul>
+                    <p style="font-size: 0.4em; color: #aaa;">※ admittance は設定値どおりの式で計算。FZI は手先質量 1 kg・並進だけの概算（関節空間の慣性・d ゲインは未考慮）。どちらも実機の測定値ではない</p>
+                </section>
+
                 <!-- 力センサーとロボット -->
                 <section>
                     <h2>力制御に必要なハードウェア</h2>
