@@ -1307,45 +1307,6 @@ admittance_controller:
                     </p>
                 </section>
 
-                <!-- フリードライブと接触作業の違い -->
-                <section>
-                    <h2 style="font-size: 1.1em;">フリードライブと接触作業の制御的な違い</h2>
-                    <svg viewBox="0 0 720 230" style="width: 85%; max-height: 36vh;">
-                        <defs>
-                            <marker id="kd-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker>
-                            <marker id="kd-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ade80"/></marker>
-                        </defs>
-                        <g font-size="20" fill="#e5e7eb" text-anchor="middle">
-                            <!-- 左：K = 0 -->
-                            <text x="180" y="28" font-weight="bold">フリードライブの典型例（K = 0）</text>
-                            <line x1="30" y1="150" x2="330" y2="150" stroke="#6b7280" stroke-width="3"/>
-                            <rect x="60" y="95" width="60" height="55" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 4"/>
-                            <rect x="210" y="95" width="60" height="55" fill="#4b5563"/>
-                            <line x1="125" y1="80" x2="200" y2="80" stroke="#60a5fa" stroke-width="5" marker-end="url(#kd-p)"/>
-                            <text x="162" y="68" fill="#60a5fa" font-size="17">押す</text>
-                            <text x="180" y="190">離してもその場に止まる</text>
-                            <!-- 右：K > 0 -->
-                            <text x="540" y="28" font-weight="bold">接触作業の典型例（K &gt; 0）</text>
-                            <line x1="390" y1="150" x2="700" y2="150" stroke="#6b7280" stroke-width="3"/>
-                            <line x1="400" y1="85" x2="400" y2="150" stroke="#f472b6" stroke-width="4"/>
-                            <text x="400" y="78" fill="#f472b6" font-size="17">x<tspan baseline-shift="sub" font-size="0.7em">d</tspan>（目標）</text>
-                            <path d="M400,122 l10,-12 l15,24 l15,-24 l15,24 l15,-24 l15,24 l15,-24 l15,24 l10,-12" fill="none" stroke="#fbbf24" stroke-width="3"/>
-                            <text x="470" y="100" fill="#fbbf24" font-size="17">K</text>
-                            <rect x="540" y="95" width="60" height="55" fill="#4b5563"/>
-                            <line x1="600" y1="80" x2="530" y2="80" stroke="#4ade80" stroke-width="5" marker-end="url(#kd-r)"/>
-                            <text x="565" y="68" fill="#4ade80" font-size="17">戻る</text>
-                            <text x="540" y="190">離すと目標位置に戻る</text>
-                        </g>
-                    </svg>
-                    <p style="font-size: 0.6em; margin: 4px 0;">M x″ + D x′ + K (x − x<sub>d</sub>) = F<sub>ext</sub></p>
-                    <ul style="font-size: 0.55em;">
-                        <li>同じ式で、違いは<strong>ばね K（と目標 x<sub>d</sub>）があるか</strong>だけ</li>
-                        <li>接触作業：目標を壁の少し奥に置くと、押し付け力 ≈ K (x<sub>d</sub> − x)</li>
-                        <li>フリードライブの「重さ」＝仮想質量 M（動かしやすさ）</li>
-                        <li>「軸ロック」＝特定の方向をアドミッタンス計算から外す → XY 平面だけ動かせる</li>
-                    </ul>
-                </section>
-
             </section>
 
          
@@ -1390,6 +1351,38 @@ admittance_controller:
                         <li>どちらも最高、は難しい → <strong>用途に合わせて選ぶ</strong></li>
                     </ul>
                     <p style="font-size: 0.35em; color: #aaa;">※ 配置はイメージ（定量的な比較ではない）。CRANE-X7 画像：<a href="https://rt-net.jp/products/crane-x7/?lang=ja" target="_blank" style="color: #aaa;">株式会社アールティ</a></p>
+                </section>
+
+                <!-- 繰り返し精度で比べる -->
+                <section>
+                    <h2 style="font-size: 1.3em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>繰り返し精度で比べる</h2>
+                    <div style="display: flex; gap: 10px; font-size: 0.45em;">
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 8px; padding: 6px;">
+                            <strong>産業用ロボット</strong><br>
+                            <img src="media/denso_industrial_robot.webp" alt="産業用ロボット（DENSO）" style="height: 20vh; margin: 4px 0; background: #fff; border-radius: 6px;"><br>
+                            <span style="color: #4ade80; font-size: 1.3em;"><strong>±0.02 mm 前後</strong></span><br>高減速・高剛性
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 8px; padding: 6px;">
+                            <strong>UR5e</strong><br>
+                            <img src="media/ur_robot.png" alt="UR" style="height: 20vh; margin: 4px 0; background: #fff; border-radius: 6px;"><br>
+                            <span style="color: #4ade80; font-size: 1.3em;"><strong>±0.03 mm</strong></span><br>位置制御＋手先FTセンサ
+                        </div>
+                        <div style="flex: 1; border: 2px solid #f87171; border-radius: 8px; padding: 6px;">
+                            <strong>Franka FR3</strong><br>
+                            <img src="media/franka_robot.png" alt="Franka" style="height: 20vh; margin: 4px 0; background: #fff; border-radius: 6px;"><br>
+                            <span style="color: #f87171; font-size: 1.3em;"><strong>±0.1 mm</strong></span><br>全関節にトルクセンサ
+                        </div>
+                        <div style="flex: 1; border: 2px solid #f87171; border-radius: 8px; padding: 6px;">
+                            <strong>CRANE-X7</strong><br>
+                            <img src="media/crane_x7.webp" alt="CRANE-X7" style="height: 20vh; margin: 4px 0; background: #fff; border-radius: 6px;"><br>
+                            <span style="color: #f87171; font-size: 1.3em;"><strong>公称値なし</strong></span><br>電流で柔らかく制御
+                        </div>
+                    </div>
+                    <ul style="font-size: 0.5em; margin-top: 10px;">
+                        <li>産業用・UR は位置精度が高いが、<strong>硬い物との接触が苦手</strong>（当たった瞬間に力が跳ね上がる）</li>
+                        <li>Franka・CRANE-X7 は位置精度は低めだが、関節を<strong>やわらかく動かせて力制御向き</strong></li>
+                    </ul>
+                    <p style="font-size: 0.35em; color: #aaa;">繰り返し精度（ISO 9283）：UR5e・Franka FR3 は各社データシート。産業用は小型機の代表値。CRANE-X7 画像：<a href="https://rt-net.jp/products/crane-x7/?lang=ja" target="_blank" style="color: #aaa;">株式会社アールティ</a></p>
                 </section>
 
                 <!-- なぜ？① 関節の剛性 -->
