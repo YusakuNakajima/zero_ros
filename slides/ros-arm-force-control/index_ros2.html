@@ -1491,6 +1491,24 @@ admittance_controller:
                         <li>「両立しにくい」を前提に、<strong>足りない側をハードや制御で補う</strong></li>
                     </ul>
                 </section>
+
+                <!-- 四足・ヒューマノイド -->
+                <section>
+                    <h2 style="font-size: 1.1em;"><span style="display: block; font-size: 0.45em; color: #fbbf24;">コラム</span>ヒューマノイド・四足ロボットは？</h2>
+                    <div style="display: flex; align-items: center; gap: 24px;">
+                        <div style="display: flex; gap: 10px; align-items: flex-end;">
+                            <figure style="margin: 0;"><img src="media/unitree_go2.jpg" alt="Unitree Go2（四足）" style="height: 24vh; margin: 0; border-radius: 8px;"><figcaption style="font-size: 0.4em;">Unitree Go2（四足）</figcaption></figure>
+                            <figure style="margin: 0;"><img src="media/unitree_g1.jpg" alt="Unitree G1（ヒューマノイド）" style="height: 36vh; margin: 0; border-radius: 8px;"><figcaption style="font-size: 0.4em;">Unitree G1</figcaption></figure>
+                        </div>
+                        <ul style="font-size: 0.55em; text-align: left;">
+                            <li>足は着地のたびに<strong>硬い地面にぶつかる</strong> → 力に強い設計</li>
+                            <li><strong>低減速（QDD）＋電流でトルク推定</strong>：衝撃を逃がしつつ力を出せる</li>
+                            <li>関節ごとに τ = K<sub>p</sub>(q<sub>d</sub> − q) + K<sub>d</sub>(v<sub>d</sub> − v) + τ<sub>ff</sub><br>→ <strong>関節空間のインピーダンス制御</strong></li>
+                            <li>足先の位置精度は求めない → バランスは IMU と<strong>強化学習の方策</strong>が補う</li>
+                        </ul>
+                    </div>
+                    <p style="font-size: 0.35em; color: #aaa;">写真：Unitree Go2 — HotNews Romania, CC BY 3.0（Wikimedia Commons）／ Unitree G1 — Sayanesy, CC0（Wikimedia Commons）</p>
+                </section>
             </section>
 
 
