@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ビジョンフィードバック制御</title>
+
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/theme/black.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js-plugins/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+    <style>
+        .reveal a.pg { color: #3b82f6; text-decoration: underline; }
+        .reveal .src { font-size: 0.42em; color: #9ca3af; }
+        .reveal .col { display: block; font-size: 0.45em; color: #fbbf24; }
+        .reveal blockquote.q { width: 92%; font-size: 0.52em; text-align: left; background: rgba(251, 191, 36, 0.08); border-left: 4px solid #fbbf24; box-shadow: none; padding: 10px 16px; font-style: normal; }
+        .reveal blockquote.q p { margin: 0.3em 0; }
+        .reveal pre code { font-size: 0.8em; line-height: 1.3; max-height: 62vh; }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- タイトル -->
+            <section>
+                <h1 style="font-size: 2.2em;">ビジョンフィードバック制御</h1>
+                <h2 style="font-size: 1.2em;">画像が合うまで動き続ける</h2>
+                <p>大阪大学 中島優作</p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- 参考資料 -->
+            <section>
+                <h2>参考資料</h2>
+                <ul style="font-size: 0.6em;">
+                    <li>F. Chaumette, S. Hutchinson: <strong>Visual Servo Control, Part I: Basic Approaches</strong>, IEEE Robotics &amp; Automation Magazine, 2006<br><span style="font-size: 0.85em; color: #9ca3af;">数式の基本はこれ 1 本で分かる（本スライドの記号もこれに合わせる）</span></li>
+                    <li>S. Hutchinson, G. Hager, P. Corke: <strong>A Tutorial on Visual Servo Control</strong>, IEEE Trans. Robotics and Automation, 1996</li>
+                    <li>P. Corke: <strong>Robotics, Vision and Control</strong>（教科書。Python のコード付き）</li>
+                    <li>川村貞夫: <a class="pg" href="https://chitose-robotics.com/column" target="_blank">相対位置誤差でロボットを動かす</a>（チトセロボティクス 技術コラム）</li>
+                </ul>
+                <p style="font-size: 0.5em;">前提：<a class="pg" href="../ros-camera/index_ros2.html" target="_blank">カメラ/デプスカメラ</a>（キャリブレーション）、<a class="pg" href="../object-detection/index.html" target="_blank">物体検出</a></p>
+            </section>
+
+            <!-- なぜビジョンフィードバックか -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">なぜビジョンフィードバックか？</h2>
+                    <p style="text-align: center; margin: 0 0 6px; font-size: 0.5em;">
+                        <a href="interactive_app/look_and_move_vs_feedback.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">全画面表示</a>
+                    </p>
+                    <iframe data-src="interactive_app/look_and_move_vs_feedback.html" width="100%" height="430" frameborder="0" style="border-radius: 8px;"></iframe>
+                    <p style="font-size: 0.5em; margin-top: 6px;">同じずれのまま、2 つの方式で「実行」してみよう。<strong>見ながら動く</strong>と、最後はぴったり合う</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">うれしいことは 2 つ</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.56em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #7dd3fc; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #7dd3fc; font-size: 1.15em;">① 目として使える</strong></div>
+                            <ul>
+                                <li>置き方が<strong>毎回違う</strong>物を見つけて取りに行く</li>
+                                <li><strong>動いている</strong>物を追いかける</li>
+                                <li>途中で物がずれても<strong>追従</strong>する</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80; font-size: 1.15em;">② 精度が上がる</strong></div>
+                            <ul>
+                                <li>キャリブレーション・ロボットのモデルが<strong>多少ずれていても</strong>合う</li>
+                                <li>画像が合うまで動き続けるので、誤差は<strong>フィードバックの中で吸収</strong>される</li>
+                                <li>精度の低いロボットでも、<strong>結果として</strong>精度が出る</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.56em; margin-top: 15px;">① はよく知られた使い方。<strong>② こそビジョンフィードバックのいちばんおいしいところ</strong></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">なぜ誤差が消えるのか</h2>
+                    <svg viewBox="0 0 760 250" style="width: 95%; max-height: 42vh;">
+                        <defs>
+                            <marker id="w-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="10" y="22" fill="#f87171" font-size="15" font-weight="bold">見てから動く：誤差が足し算で積み上がる</text>
+                        <g font-size="13" text-anchor="middle">
+                            <rect x="10" y="35" width="130" height="50" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/><text x="75" y="57" fill="#bae6fd">画像で検出</text><text x="75" y="75" fill="#f87171" font-size="11">＋ 検出誤差</text>
+                            <rect x="160" y="35" width="140" height="50" rx="8" fill="#1e293b" stroke="#94a3b8"/><text x="230" y="57" fill="#e2e8f0">カメラ→ロボット座標</text><text x="230" y="75" fill="#f87171" font-size="11">＋ キャリブ誤差</text>
+                            <rect x="320" y="35" width="130" height="50" rx="8" fill="#3b2f1e" stroke="#fbbf24"/><text x="385" y="57" fill="#fde68a">逆運動学</text><text x="385" y="75" fill="#f87171" font-size="11">＋ リンク長の誤差</text>
+                            <rect x="470" y="35" width="130" height="50" rx="8" fill="#3b1e3f" stroke="#f472b6"/><text x="535" y="57" fill="#f9a8d4">ロボットが動く</text><text x="535" y="75" fill="#f87171" font-size="11">＋ たわみ・熱</text>
+                            <rect x="620" y="35" width="130" height="50" rx="8" fill="#3f1e1e" stroke="#f87171" stroke-width="2"/><text x="685" y="57" fill="#fecaca" font-weight="bold">ずれて到着</text><text x="685" y="75" fill="#fecaca" font-size="11">全部の合計</text>
+                        </g>
+                        <line x1="140" y1="60" x2="158" y2="60" stroke="#cbd5e1" stroke-width="2" marker-end="url(#w-a)"/>
+                        <line x1="300" y1="60" x2="318" y2="60" stroke="#cbd5e1" stroke-width="2" marker-end="url(#w-a)"/>
+                        <line x1="450" y1="60" x2="468" y2="60" stroke="#cbd5e1" stroke-width="2" marker-end="url(#w-a)"/>
+                        <line x1="600" y1="60" x2="618" y2="60" stroke="#cbd5e1" stroke-width="2" marker-end="url(#w-a)"/>
+
+                        <text x="10" y="132" fill="#4ade80" font-size="15" font-weight="bold">見ながら動く：基準は「画像の中のずれ」だけ</text>
+                        <g font-size="13" text-anchor="middle">
+                            <rect x="60" y="150" width="200" height="50" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/><text x="160" y="172" fill="#bae6fd">画像で手先と相手のずれ</text><text x="160" y="190" fill="#bae6fd" font-size="11">同じ画像で両方を測る</text>
+                            <rect x="320" y="150" width="200" height="50" rx="8" fill="#3b2f1e" stroke="#fbbf24"/><text x="420" y="172" fill="#fde68a">ずれを減らす方向へ少し動く</text><text x="420" y="190" fill="#fde68a" font-size="11">モデルは「方向」が合えば十分</text>
+                            <rect x="580" y="150" width="170" height="50" rx="8" fill="#1e3f2a" stroke="#4ade80" stroke-width="2"/><text x="665" y="172" fill="#bbf7d0" font-weight="bold">ずれ 0 で止まる</text><text x="665" y="190" fill="#bbf7d0" font-size="11">残るのは画像の計測誤差</text>
+                        </g>
+                        <line x1="260" y1="175" x2="318" y2="175" stroke="#cbd5e1" stroke-width="2" marker-end="url(#w-a)"/>
+                        <line x1="520" y1="175" x2="578" y2="175" stroke="#cbd5e1" stroke-width="2" marker-end="url(#w-a)"/>
+                        <path d="M 420 200 L 420 230 L 160 230 L 160 204" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#w-a)"/>
+                        <text x="290" y="246" fill="#94a3b8" font-size="12" text-anchor="middle">ずれが残っている間は繰り返す</text>
+                    </svg>
+                    <p style="font-size: 0.55em;">モデルの誤差は「動く速さ・まっすぐさ」に効くだけで、<strong>最後に合う場所は変わらない</strong></p>
+                </section>
+            </section>
+
+            <!-- 種類 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">見てから動く vs 見ながら動く</h2>
+                    <table style="font-size: 0.5em; width: 96%;">
+                        <thead>
+                            <tr><th></th><th style="color: #f87171;">見てから動く（Look-and-Move）</th><th style="color: #4ade80;">見ながら動く（ビジュアルサーボ）</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap;"><strong>流れ</strong></td><td>1 回撮影 → 位置を計算 → 動く</td><td>撮影と動作を<strong>毎周期</strong>繰り返す</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>精度を決めるもの</strong></td><td>キャリブレーション＋ロボットの絶対精度</td><td><strong>画像の計測</strong>（分解能・検出の安定さ）</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>速さ</strong></td><td>速い（あとは位置制御で一気に）</td><td>合うまで時間がかかる。フレームレートで決まる</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>実装</strong></td><td>簡単。MoveIt で目標姿勢へ</td><td>速度指令でリアルタイムに動かす仕組みが必要</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>向く作業</strong></td><td>大まかに取りに行く（ピッキング）</td><td>穴への挿入・位置合わせ・動く物の追従</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.55em;">実際は<strong>組み合わせる</strong>：見てから大きく近づき、最後の数 cm を見ながら合わせる</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">何で誤差を測るか：IBVS と PBVS</h2>
+                    <svg viewBox="0 0 760 210" style="width: 95%; max-height: 36vh;">
+                        <defs>
+                            <marker id="t-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <!-- IBVS -->
+                        <rect x="10" y="10" width="360" height="190" rx="12" fill="none" stroke="#4ade80" stroke-width="2"/>
+                        <text x="190" y="36" fill="#4ade80" font-size="18" text-anchor="middle" font-weight="bold">IBVS（画像ベース）</text>
+                        <rect x="40" y="52" width="150" height="110" fill="#0f172a" stroke="#475569"/>
+                        <g fill="none" stroke="#4ade80" stroke-width="2" stroke-dasharray="4 3"><circle cx="85" cy="85" r="6"/><circle cx="145" cy="85" r="6"/><circle cx="85" cy="135" r="6"/><circle cx="145" cy="135" r="6"/></g>
+                        <g fill="#fbbf24"><circle cx="70" cy="75" r="5"/><circle cx="122" cy="68" r="5"/><circle cx="76" cy="122" r="5"/><circle cx="128" cy="116" r="5"/></g>
+                        <g stroke="#f472b6" stroke-width="1.5"><line x1="70" y1="75" x2="85" y2="85"/><line x1="122" y1="68" x2="145" y2="85"/><line x1="76" y1="122" x2="85" y2="135"/><line x1="128" y1="116" x2="145" y2="135"/></g>
+                        <text x="275" y="80" fill="#cbd5e1" font-size="13" text-anchor="middle">誤差＝</text>
+                        <text x="275" y="100" fill="#cbd5e1" font-size="13" text-anchor="middle"><tspan fill="#fbbf24">今の点</tspan>と<tspan fill="#4ade80">目標の点</tspan></text>
+                        <text x="275" y="120" fill="#cbd5e1" font-size="13" text-anchor="middle">の画像上の差</text>
+                        <text x="190" y="188" fill="#bbf7d0" font-size="13" text-anchor="middle">◎ キャリブ誤差に強い　△ 3D の動きが遠回りになることも</text>
+                        <!-- PBVS -->
+                        <rect x="390" y="10" width="360" height="190" rx="12" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+                        <text x="570" y="36" fill="#7dd3fc" font-size="18" text-anchor="middle" font-weight="bold">PBVS（位置ベース）</text>
+                        <rect x="410" y="70" width="80" height="60" rx="6" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="450" y="98" fill="#bae6fd" font-size="12" text-anchor="middle">画像から</text>
+                        <text x="450" y="114" fill="#bae6fd" font-size="12" text-anchor="middle">3D 姿勢推定</text>
+                        <line x1="490" y1="100" x2="525" y2="100" stroke="#cbd5e1" stroke-width="2" marker-end="url(#t-a)"/>
+                        <g transform="translate(580,100)">
+                            <line x1="0" y1="0" x2="34" y2="0" stroke="#f87171" stroke-width="3"/><line x1="0" y1="0" x2="0" y2="-34" stroke="#4ade80" stroke-width="3"/><line x1="0" y1="0" x2="-20" y2="20" stroke="#7dd3fc" stroke-width="3"/>
+                        </g>
+                        <g transform="translate(680,80) rotate(20)" opacity="0.7">
+                            <line x1="0" y1="0" x2="34" y2="0" stroke="#f87171" stroke-width="3" stroke-dasharray="4 3"/><line x1="0" y1="0" x2="0" y2="-34" stroke="#4ade80" stroke-width="3" stroke-dasharray="4 3"/><line x1="0" y1="0" x2="-20" y2="20" stroke="#7dd3fc" stroke-width="3" stroke-dasharray="4 3"/>
+                        </g>
+                        <text x="630" y="150" fill="#cbd5e1" font-size="13" text-anchor="middle">誤差＝今と目標の 3D 位置・姿勢の差</text>
+                        <text x="570" y="188" fill="#bae6fd" font-size="13" text-anchor="middle">◎ 3D でまっすぐ動く　△ キャリブ誤差がそのまま残る</text>
+                    </svg>
+                    <p style="font-size: 0.55em;">「誤差を<strong>画像のまま</strong>使うか、<strong>3D に直してから</strong>使うか」の違い</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">カメラをどこに付けるか</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #fbbf24; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #fbbf24; font-size: 1.15em;">手先に付ける（Eye-in-Hand）</strong></div>
+                            <ul>
+                                <li>近づくほど<strong>大きく・細かく</strong>見える → 最後の位置合わせに強い</li>
+                                <li>「目標の見え方」を<strong>1 枚撮っておく</strong>だけで教示できる</li>
+                                <li>近すぎると相手が視野から外れる</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #7dd3fc; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #7dd3fc; font-size: 1.15em;">外に固定（Eye-to-Hand）</strong></div>
+                            <ul>
+                                <li><strong>手先と相手を同じ画像</strong>で見られる → 相対的なずれを直接測れる</li>
+                                <li>作業場所全体を見渡せる</li>
+                                <li>ロボット自身で相手が<strong>隠れる</strong>ことがある</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.55em; margin-top: 15px;">両方を使うことも多い（固定カメラで近づき、手先カメラで合わせる）</p>
+                </section>
+            </section>
+
+            <!-- ハードウェアと制御の注意点 -->
+            <section>
+                <section>
+                    <h2>ビジョンフィードバックの<br>ハードウェアと制御の注意点</h2>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">フレームレートと遅れが効く</h2>
+                    <svg viewBox="0 0 760 200" style="width: 92%; max-height: 34vh;">
+                        <line x1="40" y1="170" x2="740" y2="170" stroke="#94a3b8" stroke-width="1.5"/>
+                        <line x1="40" y1="170" x2="40" y2="20" stroke="#94a3b8" stroke-width="1.5"/>
+                        <text x="740" y="190" fill="#94a3b8" font-size="12" text-anchor="end">時間</text>
+                        <text x="30" y="30" fill="#94a3b8" font-size="12" text-anchor="end">ずれ</text>
+                        <line x1="40" y1="150" x2="740" y2="150" stroke="#475569" stroke-dasharray="4 4"/>
+                        <text x="745" y="154" fill="#94a3b8" font-size="11">0</text>
+                        <!-- 低ゲイン・遅れ小 -->
+                        <path d="M 40 40 C 200 120, 330 145, 740 150" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="300" y="118" fill="#4ade80" font-size="13">遅れが小さい：ゲインを上げても素直に収束</text>
+                        <!-- 遅れ大で振動 -->
+                        <path d="M 40 40 L 90 40 C 130 40, 140 175, 190 178 C 240 181, 250 112, 300 112 C 350 112, 360 168, 410 168 C 460 168, 470 136, 520 136 C 570 136, 580 156, 630 156 C 680 156, 700 150, 740 150" fill="none" stroke="#f87171" stroke-width="3"/>
+                        <text x="200" y="70" fill="#f87171" font-size="13">遅れが大きいのにゲインが高い：行き過ぎて振動</text>
+                    </svg>
+                    <ul style="font-size: 0.56em;">
+                        <li>普通のカメラは <strong>30〜60 fps</strong>。撮影・転送・検出で、さらに<strong>数十 ms 遅れる</strong></li>
+                        <li>遅れがあるほど、ゲインを上げると<strong>行き過ぎ・振動</strong>する（力制御の制御周波数と同じ話）</li>
+                        <li>動く物を速く追うなら<strong>1000 fps 級の高速ビジョン</strong>という選択肢もある</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">見えなくなると止まる</h2>
+                    <ul style="font-size: 0.6em;">
+                        <li><strong>視野から外れる</strong>：近づくほど、回すほど起きやすい（特に Eye-in-Hand）</li>
+                        <li><strong>隠れる</strong>：ロボットのハンド・腕が相手を隠す（特に Eye-to-Hand）</li>
+                        <li><strong>検出が揺れる</strong>：照明・映り込みで特徴点が飛ぶ → ロボットが震える</li>
+                        <li>対策：見失ったら<strong>止まる・戻る</strong>処理、マーカー（AprilTag/ArUco）、前処理</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">安定した検出がすべての前提 → <a class="pg" href="../object-detection/index.html" target="_blank">物体検出</a>のスライドの前処理を参照</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">指令は位置ではなく速度で</h2>
+                    <svg viewBox="0 0 760 120" style="width: 95%; max-height: 20vh;">
+                        <defs>
+                            <marker id="s-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <g font-size="13" text-anchor="middle">
+                            <rect x="5" y="30" width="150" height="56" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/><text x="80" y="54" fill="#bae6fd">カメラ</text><text x="80" y="74" fill="#bae6fd" font-size="11">30〜60 Hz</text>
+                            <rect x="200" y="30" width="170" height="56" rx="8" fill="#3b2f1e" stroke="#fbbf24"/><text x="285" y="54" fill="#fde68a">ビジュアルサーボ</text><text x="285" y="74" fill="#fde68a" font-size="11">手先の速度を計算</text>
+                            <rect x="415" y="30" width="160" height="56" rx="8" fill="#3b1e3f" stroke="#f472b6"/><text x="495" y="54" fill="#f9a8d4">速度 → 関節角</text><text x="495" y="74" fill="#f9a8d4" font-size="11">ヤコビ行列・積分</text>
+                            <rect x="620" y="30" width="135" height="56" rx="8" fill="#1e3f2a" stroke="#4ade80"/><text x="687" y="54" fill="#bbf7d0">ロボット</text><text x="687" y="74" fill="#bbf7d0" font-size="11">125 Hz〜1 kHz</text>
+                        </g>
+                        <line x1="155" y1="58" x2="197" y2="58" stroke="#cbd5e1" stroke-width="2" marker-end="url(#s-a)"/>
+                        <line x1="370" y1="58" x2="412" y2="58" stroke="#cbd5e1" stroke-width="2" marker-end="url(#s-a)"/>
+                        <line x1="575" y1="58" x2="617" y2="58" stroke="#cbd5e1" stroke-width="2" marker-end="url(#s-a)"/>
+                        <text x="380" y="112" fill="#94a3b8" font-size="12" text-anchor="middle">遅いカメラと速いロボットの間をつなぐ</text>
+                    </svg>
+                    <ul style="font-size: 0.56em;">
+                        <li>毎フレーム「目標位置」を出し直すと、そのたびに<strong>加減速して止まる</strong> → ガタつく</li>
+                        <li>「この向きにこの速さで」と<strong>速度で指令</strong>し、ロボット側でなめらかにつなぐ</li>
+                        <li>ROS 2 では <strong>MoveIt Servo</strong> が速度指令を受けて関節の指令にしてくれる</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- IBVS -->
+            <section>
+                <section>
+                    <h2>画像ベース（IBVS）</h2>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">IBVS とは</h2>
+                    <ul style="font-size: 0.6em;">
+                        <li>目標の位置にいるときの<strong>見え方を 1 枚撮っておく</strong>（特徴点 s<sup>*</sup>）</li>
+                        <li>今の特徴点 s が s<sup>*</sup> に重なるように、カメラ（手先）を動かす</li>
+                        <li>誤差は<strong>画像の上だけ</strong>で計算 → ロボット座標での目標位置はどこにも出てこない</li>
+                        <li>カメラの内部パラメータやロボットのモデルがずれていても、<strong>重なったところで止まる</strong></li>
+                    </ul>
+                    <p style="font-size: 0.55em;">「この見え方になるまで動け」＝ <strong>Teach by Showing</strong>（見せて教える）</p>
+                </section>
+
+                <section>
+                    <h2>IBVS の数式</h2>
+                    <p style="font-size: 0.9em; margin: 0.3em 0;"><strong>v<sub>c</sub> = −λ L̂<sup>+</sup> (s − s<sup>*</sup>)</strong></p>
+                    <div style="display: flex; gap: 2em; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>s</strong>：今の画像の特徴（例：4 点の座標）（入力）</li>
+                                <li><strong>s<sup>*</sup></strong>：目標の見え方の特徴（撮っておく）</li>
+                                <li><strong>v<sub>c</sub></strong>：カメラの速度（並進 3 ＋ 回転 3）（出力）</li>
+                                <li><strong>L̂</strong>：相互作用行列（画像ヤコビ行列）の推定値</li>
+                                <li><strong>λ</strong>：ゲイン（自分で決める）</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <ol>
+                                <li>画像から特徴 s を測る</li>
+                                <li>e = s − s<sup>*</sup></li>
+                                <li>v<sub>c</sub> = −λ L̂<sup>+</sup> e（L̂<sup>+</sup> は擬似逆行列）</li>
+                                <li>v<sub>c</sub> を手先の速度指令に変換して送る（毎フレーム繰り返す）</li>
+                            </ol>
+                            <p style="margin: 0;">重なっていれば e = 0（動かない）</p>
+                        </div>
+                    </div>
+                    <p class="src">記号は Chaumette &amp; Hutchinson 2006 に合わせた</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">相互作用行列 L</h2>
+                    <p style="font-size: 0.75em; margin: 0.2em 0;"><strong>ds/dt = L v<sub>c</sub></strong></p>
+                    <p style="font-size: 0.5em; margin: 0;">カメラの速度 → 画像上の点の速度（関節速度 → 手先速度のヤコビ行列と同じ形）</p>
+                    <p style="font-size: 0.55em; margin: 0.2em 0;">画像上の 1 点 (x, y)（正規化座標）、奥行き Z のとき</p>
+                    <div style="font-size: 0.55em; font-family: 'Courier New', monospace; display: inline-block; text-align: left; border: 1px solid #475569; border-radius: 8px; padding: 8px 14px;">
+                        L = ⎡ −1/Z　 0　 x/Z　 xy　 −(1+x²)　 y ⎤<br>
+                        　　⎣　0　 −1/Z　y/Z　1+y²　 −xy　　−x ⎦
+                    </div>
+                    <ul style="font-size: 0.55em;">
+                        <li>1 点で 2 行 → 6 自由度を決めるには<strong>3 点以上</strong>（ふつうは 4 点）</li>
+                        <li>Z（奥行き）は正確でなくてよい。<strong>目標位置での Z を固定で使う</strong>ことも多い</li>
+                        <li>L がずれていても、<strong>動く方向がおおよそ合っていれば</strong>収束する</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">ゲイン λ の調整</h2>
+                    <svg viewBox="0 0 760 170" style="width: 88%; max-height: 28vh;">
+                        <line x1="40" y1="150" x2="740" y2="150" stroke="#94a3b8" stroke-width="1.5"/>
+                        <line x1="40" y1="150" x2="40" y2="15" stroke="#94a3b8" stroke-width="1.5"/>
+                        <text x="740" y="168" fill="#94a3b8" font-size="12" text-anchor="end">時間</text>
+                        <text x="30" y="25" fill="#94a3b8" font-size="12" text-anchor="end">ずれ</text>
+                        <path d="M 40 25 C 300 70, 500 130, 740 145" fill="none" stroke="#7dd3fc" stroke-width="3"/>
+                        <text x="560" y="110" fill="#7dd3fc" font-size="13">λ 小：安定だが遅い</text>
+                        <path d="M 40 25 C 120 120, 200 148, 740 150" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="210" y="138" fill="#4ade80" font-size="13">λ ちょうど</text>
+                        <path d="M 40 25 C 70 160, 100 165, 130 120 C 160 80, 180 160, 220 150 C 260 140, 280 155, 740 150" fill="none" stroke="#f87171" stroke-width="3"/>
+                        <text x="150" y="60" fill="#f87171" font-size="13">λ 大：遅れがあると振動</text>
+                    </svg>
+                    <ul style="font-size: 0.56em;">
+                        <li>ずれに比例した速度 → ずれが小さくなるほど<strong>ゆっくり</strong>近づく（指数関数的に収束）</li>
+                        <li>λ の上限は<strong>フレームレートと遅れ</strong>で決まる</li>
+                        <li>実用では<strong>速度の上限</strong>をかける・ずれが大きいときは λ を下げる</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- PBVS -->
+            <section>
+                <section>
+                    <h2>位置ベース（PBVS）</h2>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">PBVS とは</h2>
+                    <ul style="font-size: 0.6em;">
+                        <li>画像から相手の<strong>3D 位置・姿勢を推定</strong>（マーカー、物体の 3D モデル、深度）</li>
+                        <li>「相手に対して手先がどこにいるべきか」との差を 3D で計算</li>
+                        <li>3D 空間で<strong>まっすぐ</strong>動くので、動きが分かりやすい</li>
+                        <li>ただし姿勢推定に<strong>カメラの内部パラメータ</strong>を使う → その誤差は残る</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">それでも「<strong>相手に対する相対位置</strong>」で合わせるので、見てから動くよりは誤差に強い</p>
+                </section>
+
+                <section>
+                    <h2>PBVS の数式</h2>
+                    <p style="font-size: 0.9em; margin: 0.3em 0;"><strong>v<sub>c</sub> = −λ t,　ω<sub>c</sub> = −λ θu</strong></p>
+                    <div style="display: flex; gap: 2em; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1;">
+                            <ul>
+                                <li><strong>t</strong>：今のカメラから見た、目標のカメラ位置までの<strong>並進のずれ</strong>（入力）</li>
+                                <li><strong>θu</strong>：回転のずれ（回転軸 u × 角度 θ）（入力）</li>
+                                <li><strong>v<sub>c</sub>, ω<sub>c</sub></strong>：カメラの並進・回転速度（出力）</li>
+                                <li><strong>λ</strong>：ゲイン</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1;">
+                            <ol>
+                                <li>画像から相手の 3D 姿勢を推定</li>
+                                <li>目標との差 t, θu を計算</li>
+                                <li>v<sub>c</sub>, ω<sub>c</sub> を計算</li>
+                                <li>手先の速度指令にして送る（毎フレーム）</li>
+                            </ol>
+                            <p style="margin: 0;">IBVS と同じ「ずれに比例した速度」</p>
+                        </div>
+                    </div>
+                    <p class="src">並進のずれの取り方にはいくつか流儀がある（Chaumette &amp; Hutchinson 2006）</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">IBVS と PBVS の使い分け</h2>
+                    <table style="font-size: 0.5em; width: 92%;">
+                        <thead>
+                            <tr><th></th><th style="color: #4ade80;">IBVS</th><th style="color: #7dd3fc;">PBVS</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>誤差を測る場所</strong></td><td>画像の上</td><td>3D 空間</td></tr>
+                            <tr><td><strong>キャリブ誤差</strong></td><td><strong>強い</strong>（最後は画像で合う）</td><td>姿勢推定の誤差が残る</td></tr>
+                            <tr><td><strong>3D の動き</strong></td><td>大きく回ると遠回り・後退することも</td><td><strong>まっすぐ</strong></td></tr>
+                            <tr><td><strong>視野から外れる</strong></td><td>外れにくい（画像の中で動く）</td><td>外れることがある</td></tr>
+                            <tr><td><strong>準備</strong></td><td>目標の見え方を 1 枚撮る</td><td>相手の 3D モデル・マーカー</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.55em;"><strong>精度が欲しい最後の位置合わせは IBVS</strong>、大きく動くときは PBVS や見てから動く</p>
+                </section>
+            </section>
+
+            <!-- ROS 2 での実装 -->
+            <section>
+                <section>
+                    <h2>ROS 2 での実装</h2>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">ROS 2 での構成</h2>
+                    <svg viewBox="0 0 760 200" style="width: 95%; max-height: 36vh;">
+                        <defs>
+                            <marker id="r-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <g font-size="13" text-anchor="middle">
+                            <rect x="5" y="30" width="135" height="70" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/><text x="72" y="58" fill="#bae6fd">カメラノード</text><text x="72" y="80" fill="#bae6fd" font-size="11">image_raw</text>
+                            <rect x="165" y="30" width="135" height="70" rx="8" fill="#1e293b" stroke="#94a3b8"/><text x="232" y="58" fill="#e2e8f0">特徴の検出</text><text x="232" y="80" fill="#e2e8f0" font-size="11">AprilTag・YOLO</text>
+                            <rect x="325" y="30" width="145" height="70" rx="8" fill="#3b2f1e" stroke="#fbbf24" stroke-width="2.5"/><text x="397" y="58" fill="#fde68a" font-weight="bold">サーボノード</text><text x="397" y="80" fill="#fde68a" font-size="11">v = −λ L⁺ e（自作）</text>
+                            <rect x="495" y="30" width="125" height="70" rx="8" fill="#3b1e3f" stroke="#f472b6"/><text x="557" y="58" fill="#f9a8d4">MoveIt Servo</text><text x="557" y="80" fill="#f9a8d4" font-size="11">速度 → 関節</text>
+                            <rect x="645" y="30" width="110" height="70" rx="8" fill="#1e3f2a" stroke="#4ade80"/><text x="700" y="58" fill="#bbf7d0">ros2_control</text><text x="700" y="80" fill="#bbf7d0" font-size="11">ロボット</text>
+                        </g>
+                        <line x1="140" y1="65" x2="162" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <line x1="300" y1="65" x2="322" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <line x1="470" y1="65" x2="492" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <line x1="620" y1="65" x2="642" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <text x="232" y="125" fill="#94a3b8" font-size="12" text-anchor="middle">特徴点（画素 → 正規化座標）</text>
+                        <text x="480" y="125" fill="#94a3b8" font-size="12" text-anchor="middle">TwistStamped（手先の速度）</text>
+                        <path d="M 700 100 L 700 160 L 72 160 L 72 104" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#r-a)"/>
+                        <text x="390" y="182" fill="#94a3b8" font-size="12" text-anchor="middle">ロボットが動く → 見え方が変わる（ループ）</text>
+                    </svg>
+                    <ul style="font-size: 0.55em;">
+                        <li>自作するのは<strong>サーボノード</strong>だけ（誤差 → 速度の計算は数十行）</li>
+                        <li>本格的に使うなら <strong>ViSP</strong>（Inria のビジュアルサーボ用ライブラリ）</li>
+                    </ul>
+                    <p style="font-size: 0.5em;">▶ <a class="pg" href="https://moveit.picknik.ai/main/doc/examples/realtime_servo/realtime_servo_tutorial.html" target="_blank">MoveIt Servo</a>
+                        ▶ <a class="pg" href="https://visp.inria.fr/" target="_blank">ViSP</a></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">サーボノードの中身</h2>
+                    <pre><code class="language-python" data-trim>
+import numpy as np
+from geometry_msgs.msg import TwistStamped
+def interaction_matrix(x, y, Z):
+    return np.array([[-1/Z, 0, x/Z, x*y, -(1 + x*x), y],
+                     [0, -1/Z, y/Z, 1 + y*y, -x*y, -x]])
+def ibvs(s, s_star, Z_star, lam=0.5):
+    # s, s_star: 正規化座標 [(x, y), ...] の 4 点
+    L = np.vstack([interaction_matrix(x, y, Z_star) for x, y in s_star])
+    e = (np.asarray(s) - np.asarray(s_star)).ravel()
+    return -lam * np.linalg.pinv(L) @ e          # [vx, vy, vz, wx, wy, wz]
+
+v = ibvs(s, s_star, Z_star=0.25)
+v = np.clip(v, -0.1, 0.1)                        # 速度の上限
+msg = TwistStamped()
+msg.header.frame_id = "camera_color_optical_frame"   # カメラ座標系の速度
+t = msg.twist
+t.linear.x, t.linear.y, t.linear.z = v[:3]
+t.angular.x, t.angular.y, t.angular.z = v[3:]
+servo_pub.publish(msg)                           # → MoveIt Servo へ
+                    </code></pre>
+                    <p style="font-size: 0.5em;">L は<strong>目標の見え方 s<sup>*</sup> と Z<sup>*</sup> で固定</strong>（簡単で安定）。速度は必ず上限で切る</p>
+                </section>
+            </section>
+
+            <!-- 活用事例 -->
+            <section>
+                <section>
+                    <h2>活用事例</h2>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">活用事例：キャリブレーションなしで高精度</h2>
+                    <ul style="font-size: 0.58em;">
+                        <li>チトセロボティクスの<strong>「クルーボ」</strong>：ビジュアルフィードバック制御ソフトウェア</li>
+                        <li>手先カメラ＋固定カメラで、<strong>カメラとロボットのキャリブレーションが不要</strong>とうたう</li>
+                        <li>カメラの位置・向きが変わっても動く → 頑丈な架台が要らず<strong>軽く小さく</strong>作れる</li>
+                        <li>同社の発表では、位置決め精度 <strong>0.02 mm</strong>（従来方式の目安 0.5 mm を超える）</li>
+                        <li>考え方の土台は「<strong>相対位置誤差でロボットを動かす</strong>」（→ 最後のコラム）</li>
+                    </ul>
+                    <p style="font-size: 0.5em;">▶ <a class="pg" href="https://chitose-robotics.com/" target="_blank">チトセロボティクス</a>　<span style="color: #9ca3af;">※ 精度は同社の発表値</span></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">活用事例：よくある使われ方</h2>
+                    <table style="font-size: 0.5em; width: 94%;">
+                        <thead>
+                            <tr><th>作業</th><th>何を見るか</th><th>ポイント</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap;"><strong>穴へのピン挿入</strong></td><td>ピン先と穴</td><td>最後の数 mm を IBVS で合わせ、接触後は<strong>力制御</strong>へ</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>コネクタ・ケーブル</strong></td><td>コネクタの形・マーカー</td><td>柔らかい物はモデル通りに動かない → 見ながら直す</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>動く物の追従</strong></td><td>コンベア上の物</td><td>フレームレートと遅れが勝負</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>実験器具の操作</strong></td><td>ピペット先端と容器</td><td>器具の置き場所が毎回ずれても合う</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.55em;">見て近づく（ビジョン）→ 触れて合わせる（力）の<strong>組み合わせ</strong>が定番</p>
+                </section>
+            </section>
+
+            <!-- コラム：絶対位置と相対位置 -->
+            <section>
+                <section>
+                    <h2><span class="col">コラム</span>「絶対位置精度」は<br>本当に必要か？</h2>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span class="col">コラム</span>デカルトの見方：空間が先にある</h2>
+                    <blockquote class="q">
+                        <p>空間の 1 点は、直交する座標系などを利用して、座標（X,Y,Z）で表現されます。デカルトの発想です。（中略）ロボットにも、この点を（X,Y,Z）と教えればロボットの指先をこの点に移動させることができます。</p>
+                    </blockquote>
+                    <ul style="font-size: 0.56em;">
+                        <li>ロボットの「絶対位置精度」は、この<strong>空想した理想の座標系</strong>にどれだけ正しく行けるか</li>
+                        <li>見てから動く方式は、全部をこの座標系に<strong>そろえる努力</strong>の上に成り立つ</li>
+                    </ul>
+                    <p class="src">引用：川村貞夫「相対位置誤差でロボットを動かす」チトセロボティクス 技術コラム</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span class="col">コラム</span>アリストテレスの見方：物が先にある</h2>
+                    <svg viewBox="0 0 760 150" style="width: 88%; max-height: 24vh;">
+                        <rect x="10" y="10" width="360" height="130" rx="10" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+                        <g stroke="#334155"><line x1="40" y1="30" x2="40" y2="120"/><line x1="100" y1="30" x2="100" y2="120"/><line x1="160" y1="30" x2="160" y2="120"/><line x1="220" y1="30" x2="220" y2="120"/><line x1="280" y1="30" x2="280" y2="120"/><line x1="40" y1="120" x2="340" y2="120"/><line x1="40" y1="90" x2="340" y2="90"/><line x1="40" y1="60" x2="340" y2="60"/><line x1="40" y1="30" x2="340" y2="30"/></g>
+                        <circle cx="220" cy="60" r="12" fill="#f87171"/>
+                        <text x="190" y="138" fill="#bae6fd" font-size="13" text-anchor="middle">「リンゴは (3, 14, 28) cm にある」</text>
+                        <rect x="390" y="10" width="360" height="130" rx="10" fill="none" stroke="#4ade80" stroke-width="2"/>
+                        <rect x="470" y="85" width="200" height="12" fill="#a47551"/>
+                        <rect x="490" y="97" width="10" height="30" fill="#a47551"/><rect x="640" y="97" width="10" height="30" fill="#a47551"/>
+                        <circle cx="570" cy="72" r="12" fill="#f87171"/>
+                        <text x="570" y="40" fill="#bbf7d0" font-size="13" text-anchor="middle">座標系なし</text>
+                        <text x="570" y="138" fill="#bbf7d0" font-size="13" text-anchor="middle">「リンゴがテーブルの上に置かれている」</text>
+                    </svg>
+                    <blockquote class="q">
+                        <p>アリストテレスの場の捉え方は（中略）空間を定義する前に、対象物の存在から始まります。（中略）ロボットのシステムを構築する際に、空間（座標系）から考えるか、対象物から考えるかとなります。</p>
+                    </blockquote>
+                    <p class="src">引用：川村貞夫「相対位置誤差でロボットを動かす」チトセロボティクス 技術コラム</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span class="col">コラム</span>キャリブレーションは理想を追う作業</h2>
+                    <blockquote class="q">
+                        <p>現実の世界では、床が完全に水平ではなく、ロボットのリンクもわずかには撓み、固定されたはずのロボットも振動などでわずかにずれる、このような現実世界で、理想の空間を追い求めることがキャリブレーションとなります。</p>
+                    </blockquote>
+                    <ul style="font-size: 0.56em;">
+                        <li>どれだけ合わせても、<strong>時間・温度・振動で少しずつずれていく</strong></li>
+                        <li>精度を上げるほど、架台は重く、キャリブレーションは頻繁に</li>
+                    </ul>
+                    <p class="src">引用：川村貞夫「相対位置誤差でロボットを動かす」チトセロボティクス 技術コラム</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span class="col">コラム</span>相対位置で動かす</h2>
+                    <blockquote class="q">
+                        <p>我々が何かの作業をする場合に、まず初めに空間に注目するのではなく、対象物に注目します。（中略）その際、絶対座標系で表現する必要はなく、対象物と他の対象物の相対位置のみで表現して作業を達成できます。いわば、デカルト的ではなくアリストテレス的思考で十分となります。</p>
+                    </blockquote>
+                    <ul style="font-size: 0.56em;">
+                        <li>ビジュアルフィードバックは、<strong>手先と相手のずれ（相対位置）</strong>だけを見て動く</li>
+                        <li>相手に対して合っているかどうかがすべて → そもそも<strong>「絶対精度」という概念が要らない</strong></li>
+                    </ul>
+                    <p class="src">引用：川村貞夫「<a class="pg" href="https://chitose-robotics.com/column" target="_blank">相対位置誤差でロボットを動かす</a>」チトセロボティクス 技術コラム</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;"><span class="col">コラム</span>筆者の考え</h2>
+                    <ul style="font-size: 0.58em;">
+                        <li>「位置精度」というと、<strong>自分（ロボット）を基準にした絶対の XYZ</strong> があるかのように考えがち</li>
+                        <li>でも作業で大事なのは、<strong>相手に対して自分がずれているかどうか</strong>という相対の関係</li>
+                        <li>画像が合うまで動き続ければ、ロボットの精度は<strong>フィードバックの中に織り込まれ</strong>、結果として精度が出る</li>
+                        <li>力制御がうまく効かない・ロボットの精度が低い、というときこそ<strong>ビジョンフィードバックが効く</strong></li>
+                        <li>ただし「相手と手先が<strong>見えている</strong>」ことが前提。見えない区間は位置制御で</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- まとめ -->
+            <section>
+                <h2>まとめ</h2>
+                <ul style="font-size: 0.64em;">
+                    <li>ビジョンフィードバックは<strong>目</strong>として使えるだけでなく、<strong>精度</strong>も上げる</li>
+                    <li>画像が合うまで動き続けるので、キャリブ・ロボットの誤差は<strong>吸収</strong>される</li>
+                    <li>IBVS：v = −λ L⁺ (s − s*)。<strong>最後の位置合わせに強い</strong></li>
+                    <li>注意点は<strong>フレームレートと遅れ</strong>、見失い。指令は<strong>速度</strong>で（MoveIt Servo）</li>
+                    <li>「絶対位置」ではなく<strong>「相手との相対位置」</strong>で考える</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>ありがとうございました</h2>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline; font-size: 1.2em;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="../../assets/vendor/reveal.js/dist/reveal.js"></script>
+    <script src="../../assets/chapter-numbers.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/zoom/zoom.js"></script>
+    <script src="../../assets/vendor/reveal.js-menu/menu.js"></script>
+    <script src="../../assets/vendor/reveal.js-plugins/chalkboard/plugin.js"></script>
+    <script>
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: chapterSlideNumber, // 章-連番 (assets/chapter-numbers.js)
+
+            // プラグインの有効化
+            plugins: [
+                RevealHighlight,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+            }
+        });
+    </script>
+</body>
+
+</html>
