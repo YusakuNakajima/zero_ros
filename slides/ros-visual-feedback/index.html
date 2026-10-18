@@ -507,13 +507,13 @@ servo_pub.publish(msg)                           # → MoveIt Servo へ
                             <tr><th>作業</th><th>何を見るか</th><th>ポイント</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td style="white-space: nowrap;"><strong>穴へのピン挿入</strong></td><td>ピン先と穴</td><td>最後の数 mm を IBVS で合わせ、接触後は<strong>力制御</strong>へ</td></tr>
+                            <tr><td style="white-space: nowrap;"><strong>穴へのピン挿入</strong></td><td>ピン先と穴</td><td>最後の数 mm を <strong>IBVS で合わせる</strong></td></tr>
                             <tr><td style="white-space: nowrap;"><strong>コネクタ・ケーブル</strong></td><td>コネクタの形・マーカー</td><td>柔らかい物はモデル通りに動かない → 見ながら直す</td></tr>
                             <tr><td style="white-space: nowrap;"><strong>動く物の追従</strong></td><td>コンベア上の物</td><td>フレームレートと遅れが勝負</td></tr>
                             <tr><td style="white-space: nowrap;"><strong>実験器具の操作</strong></td><td>ピペット先端と容器</td><td>器具の置き場所が毎回ずれても合う</td></tr>
                         </tbody>
                     </table>
-                    <p style="font-size: 0.55em;">見て近づく（ビジョン）→ 触れて合わせる（力）の<strong>組み合わせ</strong>が定番</p>
+                    <p style="font-size: 0.55em;">どれも「置き場所や形が<strong>毎回少し違う</strong>」作業。その違いを画像で吸収する</p>
                 </section>
             </section>
 
@@ -585,7 +585,7 @@ servo_pub.publish(msg)                           # → MoveIt Servo へ
                         <li>「位置精度」というと、<strong>自分（ロボット）を基準にした絶対の XYZ</strong> があるかのように考えがち</li>
                         <li>でも作業で大事なのは、<strong>相手に対して自分がずれているかどうか</strong>という相対の関係</li>
                         <li>画像が合うまで動き続ければ、ロボットの精度は<strong>フィードバックの中に織り込まれ</strong>、結果として精度が出る</li>
-                        <li>力制御がうまく効かない・ロボットの精度が低い、というときこそ<strong>ビジョンフィードバックが効く</strong></li>
+                        <li>ロボットの精度が低い・キャリブレーションが難しい、というときこそ<strong>ビジョンフィードバックが効く</strong></li>
                         <li>ただし「相手と手先が<strong>見えている</strong>」ことが前提。見えない区間は位置制御で</li>
                     </ul>
                 </section>
