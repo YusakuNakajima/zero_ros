@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>物体検出</title>
+
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/dist/theme/black.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js-plugins/chalkboard/style.css">
+
+    <!-- 共通スタイル読み込み -->
+    <link rel="stylesheet" href="../../assets/common-styles.css">
+    <style>
+        .reveal a.vid { color: #f87171; text-decoration: underline; }
+        .reveal a.pg { color: #3b82f6; text-decoration: underline; }
+        .reveal .src { font-size: 0.42em; color: #9ca3af; }
+        .reveal iframe.app { width: 100%; height: 58vh; border: 0; border-radius: 8px; background: #111827; }
+        .reveal .app-link { font-size: 0.45em; margin: 0 0 6px; }
+        .reveal .app-link a { color: #3b82f6; text-decoration: underline; }
+        .reveal pre code { font-size: 0.85em; line-height: 1.35; }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- タイトル -->
+            <section>
+                <h1>物体検出</h1>
+                <h2 style="font-size: 1.4em;">ロボットが「何が・どこに」を知る</h2>
+                <p>大阪大学 中島優作</p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- 1. ロボットと物体検出 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">カメラを使うと、まず物体検出</h2>
+                    <svg viewBox="0 0 760 250" style="width: 92%; max-height: 42vh;">
+                        <defs>
+                            <marker id="r-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <rect x="10" y="95" width="120" height="60" rx="10" fill="#1e3a5f" stroke="#7dd3fc" stroke-width="2"/>
+                        <text x="70" y="131" fill="#bae6fd" font-size="16" text-anchor="middle">カメラ画像</text>
+                        <line x1="130" y1="125" x2="195" y2="125" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#r-a)"/>
+                        <rect x="200" y="80" width="190" height="90" rx="12" fill="#3b2f1e" stroke="#fbbf24" stroke-width="3"/>
+                        <text x="295" y="118" fill="#fde68a" font-size="20" text-anchor="middle" font-weight="bold">物体検出</text>
+                        <text x="295" y="145" fill="#fde68a" font-size="14" text-anchor="middle">何が・どこに・いくつ</text>
+                        <line x1="390" y1="110" x2="480" y2="45" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <line x1="390" y1="125" x2="480" y2="125" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <line x1="390" y1="140" x2="480" y2="205" stroke="#cbd5e1" stroke-width="2" marker-end="url(#r-a)"/>
+                        <rect x="485" y="15" width="265" height="58" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="617" y="40" fill="#bbf7d0" font-size="15" text-anchor="middle" font-weight="bold">取りに行く（ピッキング）</text>
+                        <text x="617" y="61" fill="#bbf7d0" font-size="12" text-anchor="middle">見つけた位置へ手を伸ばしてつかむ</text>
+                        <rect x="485" y="96" width="265" height="58" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                        <text x="617" y="121" fill="#f9a8d4" font-size="15" text-anchor="middle" font-weight="bold">合わせに行く（ビジョンFB）</text>
+                        <text x="617" y="142" fill="#f9a8d4" font-size="12" text-anchor="middle">検出した位置とのずれを毎回直す</text>
+                        <rect x="485" y="177" width="265" height="58" rx="8" fill="#1e293b" stroke="#94a3b8"/>
+                        <text x="617" y="202" fill="#e2e8f0" font-size="15" text-anchor="middle" font-weight="bold">数える・調べる</text>
+                        <text x="617" y="223" fill="#e2e8f0" font-size="12" text-anchor="middle">在庫・検査・人の見守り</text>
+                    </svg>
+                    <p style="font-size: 0.58em;">ほとんどの応用は<strong>「物体を見つけた」が前提</strong>。検出がこけると後ろが全部こける</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">分類・検出・セグメンテーション</h2>
+                    <svg viewBox="0 0 760 210" style="width: 92%; max-height: 36vh;">
+                        <!-- 分類 -->
+                        <rect x="20" y="20" width="220" height="140" rx="6" fill="#1f2937" stroke="#475569"/>
+                        <rect x="20" y="115" width="220" height="45" fill="#7c5434"/>
+                        <rect x="70" y="60" width="40" height="65" fill="#c81e1e"/>
+                        <rect x="150" y="85" width="50" height="40" fill="#1d4ed8"/>
+                        <text x="130" y="45" fill="#fde68a" font-size="15" text-anchor="middle">「コップがある」</text>
+                        <text x="130" y="190" fill="#fbbf24" font-size="17" text-anchor="middle" font-weight="bold">分類</text>
+                        <text x="130" y="207" fill="#94a3b8" font-size="12" text-anchor="middle">画像全体に 1 つのラベル</text>
+                        <!-- 検出 -->
+                        <rect x="270" y="20" width="220" height="140" rx="6" fill="#1f2937" stroke="#475569"/>
+                        <rect x="270" y="115" width="220" height="45" fill="#7c5434"/>
+                        <rect x="320" y="60" width="40" height="65" fill="#c81e1e"/>
+                        <rect x="400" y="85" width="50" height="40" fill="#1d4ed8"/>
+                        <rect x="314" y="54" width="52" height="77" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="314" y="49" fill="#4ade80" font-size="12">cup 0.92</text>
+                        <rect x="394" y="79" width="62" height="52" fill="none" stroke="#7dd3fc" stroke-width="3"/>
+                        <text x="394" y="74" fill="#7dd3fc" font-size="12">box 0.88</text>
+                        <text x="380" y="190" fill="#fbbf24" font-size="17" text-anchor="middle" font-weight="bold">物体検出</text>
+                        <text x="380" y="207" fill="#94a3b8" font-size="12" text-anchor="middle">物体ごとに 箱＋ラベル＋確信度</text>
+                        <!-- セグメンテーション -->
+                        <rect x="520" y="20" width="220" height="140" rx="6" fill="#1f2937" stroke="#475569"/>
+                        <rect x="520" y="115" width="220" height="45" fill="#7c5434"/>
+                        <rect x="570" y="60" width="40" height="65" fill="#4ade80" opacity="0.85"/>
+                        <rect x="650" y="85" width="50" height="40" fill="#7dd3fc" opacity="0.85"/>
+                        <text x="630" y="190" fill="#fbbf24" font-size="17" text-anchor="middle" font-weight="bold">セグメンテーション</text>
+                        <text x="630" y="207" fill="#94a3b8" font-size="12" text-anchor="middle">画素ごとにどの物体か（形まで）</text>
+                    </svg>
+                    <p style="font-size: 0.55em;">ロボットではまず<strong>検出（箱）</strong>。つかみ方まで考えるなら形が分かる<strong>セグメンテーション</strong></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">画像の箱から、ロボットの座標へ</h2>
+                    <svg viewBox="0 0 760 170" style="width: 95%; max-height: 30vh;">
+                        <defs>
+                            <marker id="c-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <rect x="5" y="40" width="160" height="70" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                        <text x="85" y="68" fill="#fde68a" font-size="14" text-anchor="middle">箱の中心 (u, v)</text>
+                        <text x="85" y="90" fill="#fde68a" font-size="12" text-anchor="middle">画素の位置</text>
+                        <line x1="165" y1="75" x2="200" y2="75" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#c-a)"/>
+                        <rect x="205" y="40" width="170" height="70" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="290" y="68" fill="#bae6fd" font-size="14" text-anchor="middle">＋ 深度 Z</text>
+                        <text x="290" y="90" fill="#bae6fd" font-size="12" text-anchor="middle">デプスカメラ・ステレオ</text>
+                        <line x1="375" y1="75" x2="410" y2="75" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#c-a)"/>
+                        <rect x="415" y="40" width="160" height="70" rx="8" fill="#1e293b" stroke="#94a3b8"/>
+                        <text x="495" y="68" fill="#e2e8f0" font-size="14" text-anchor="middle">カメラ座標 (X, Y, Z)</text>
+                        <text x="495" y="90" fill="#e2e8f0" font-size="12" text-anchor="middle">内部パラメータで変換</text>
+                        <line x1="575" y1="75" x2="610" y2="75" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#c-a)"/>
+                        <rect x="615" y="40" width="140" height="70" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                        <text x="685" y="68" fill="#bbf7d0" font-size="14" text-anchor="middle">ロボット座標</text>
+                        <text x="685" y="90" fill="#bbf7d0" font-size="12" text-anchor="middle">外部パラメータ・TF</text>
+                        <text x="380" y="150" fill="#94a3b8" font-size="13" text-anchor="middle">X = (u − c<tspan baseline-shift="sub" font-size="9">x</tspan>) Z / f<tspan baseline-shift="sub" font-size="9">x</tspan>,　Y = (v − c<tspan baseline-shift="sub" font-size="9">y</tspan>) Z / f<tspan baseline-shift="sub" font-size="9">y</tspan></text>
+                    </svg>
+                    <ul style="font-size: 0.58em;">
+                        <li>検出が出すのは<strong>画像上の箱</strong>だけ。つかむには 3 次元の位置が要る</li>
+                        <li>キャリブレーション（内部・外部パラメータ）がずれると、検出が正しくても<strong>手が届かない</strong></li>
+                    </ul>
+                    <p style="font-size: 0.5em;">キャリブレーションは<a class="pg" href="../ros-camera/index_ros2.html" target="_blank">カメラ/デプスカメラ</a>のスライドを参照</p>
+                </section>
+            </section>
+
+            <!-- 2. 前処理 -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">前処理が性能を決める</h2>
+                    <svg viewBox="0 0 760 150" style="width: 92%; max-height: 26vh;">
+                        <defs>
+                            <marker id="p-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <rect x="10" y="40" width="140" height="60" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="80" y="76" fill="#bae6fd" font-size="15" text-anchor="middle">撮影</text>
+                        <line x1="150" y1="70" x2="195" y2="70" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#p-a)"/>
+                        <rect x="200" y="30" width="170" height="80" rx="10" fill="#1e3f2a" stroke="#4ade80" stroke-width="3"/>
+                        <text x="285" y="66" fill="#bbf7d0" font-size="17" text-anchor="middle" font-weight="bold">前処理</text>
+                        <text x="285" y="90" fill="#bbf7d0" font-size="12" text-anchor="middle">ここで勝負が決まる</text>
+                        <line x1="370" y1="70" x2="415" y2="70" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#p-a)"/>
+                        <rect x="420" y="40" width="150" height="60" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                        <text x="495" y="76" fill="#f9a8d4" font-size="15" text-anchor="middle">検出モデル</text>
+                        <line x1="570" y1="70" x2="615" y2="70" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#p-a)"/>
+                        <rect x="620" y="40" width="130" height="60" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                        <text x="685" y="76" fill="#fde68a" font-size="15" text-anchor="middle">後処理</text>
+                        <text x="380" y="140" fill="#94a3b8" font-size="13" text-anchor="middle">撮影条件をそろえるのも、広い意味での前処理</text>
+                    </svg>
+                    <ul style="font-size: 0.6em;">
+                        <li>深層学習なら「そのまま突っ込めば動く」こともある。でも<strong>性能は前処理で大きく変わる</strong></li>
+                        <li>モデルは<strong>学習で見た画像に似た画像</strong>しか得意でない（明るさ・色・大きさ・向き）</li>
+                        <li>前処理の役目は、実際の画像を<strong>学習時の画像に近づける</strong>こと</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">いちばん効くのは撮影条件</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #f87171; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #f87171; font-size: 1.15em;">ありがちな失敗</strong></div>
+                            <ul>
+                                <li>窓の光で<strong>朝と夕方</strong>で色が違う</li>
+                                <li><strong>自動露出・自動ホワイトバランス</strong>で、フレームごとに明るさ・色が揺れる</li>
+                                <li>金属・ガラスの<strong>映り込み</strong>、ロボット自身の影</li>
+                                <li>カメラが振動・ピンぼけ</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #4ade80; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #4ade80; font-size: 1.15em;">対策</strong></div>
+                            <ul>
+                                <li>照明を足して<strong>外光に負けない</strong>（拡散光で影を減らす）</li>
+                                <li>露出・WB・ピントを<strong>固定値</strong>にする</li>
+                                <li>背景を<strong>物体と違う色</strong>の無地にする</li>
+                                <li>カメラを<strong>しっかり固定</strong>する</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.55em; margin-top: 15px;">画像を後から直すより、<strong>撮る前にそろえる</strong>方がずっと安くて確実</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">よく使う前処理</h2>
+                    <table style="font-size: 0.48em; width: 96%;">
+                        <thead>
+                            <tr><th>処理</th><th>何をする</th><th>効く場面</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="white-space: nowrap; color: #fbbf24;"><strong>歪み補正</strong></td><td>レンズの歪みを内部パラメータで戻す</td><td>広角カメラ、画像の端の物体の位置</td></tr>
+                            <tr><td style="white-space: nowrap; color: #fbbf24;"><strong>ROI 切り出し</strong></td><td>作業台など<strong>見る場所だけ</strong>切り出す</td><td>小さい物体、関係ない物の誤検出</td></tr>
+                            <tr><td style="white-space: nowrap; color: #fbbf24;"><strong>リサイズ</strong></td><td>モデルの入力サイズ（例 640）へ。縦横比を保って余白を足す（レターボックス）</td><td>必須。つぶすと形が変わる</td></tr>
+                            <tr><td style="white-space: nowrap; color: #7dd3fc;"><strong>色の変換</strong></td><td>BGR ↔ RGB、HSV（色と明るさを分ける）</td><td>色で判定、モデルの入力順</td></tr>
+                            <tr><td style="white-space: nowrap; color: #7dd3fc;"><strong>明るさ・色の補正</strong></td><td>ガンマ補正、CLAHE、ホワイトバランス</td><td>暗い・明暗差が大きい・色かぶり</td></tr>
+                            <tr><td style="white-space: nowrap; color: #7dd3fc;"><strong>平滑化</strong></td><td>ガウシアン・メディアンフィルタ</td><td>ノイズが多い（暗所・高感度）</td></tr>
+                            <tr><td style="white-space: nowrap; color: #4ade80;"><strong>正規化</strong></td><td>画素値を 0〜1 などにそろえる</td><td>モデルの入力（多くはライブラリが自動）</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;">試してみる：前処理で検出結果が変わる</h2>
+                    <p class="app-link"><a href="interactive_app/preprocessing_demo.html" target="_blank">全画面表示</a></p>
+                    <iframe class="app" data-src="interactive_app/preprocessing_demo.html"></iframe>
+                    <p style="font-size: 0.5em; margin-top: 6px;">「暗い部屋＋電球色」を押して、前処理を 1 つずつ足してみよう。<strong>1 つだけでは足りない</strong>ことも多い</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">OpenCV で書くと</h2>
+                    <pre><code class="language-python" data-trim>
+import cv2
+
+img = cv2.imread("table.png")                 # OpenCV は BGR の順で読む
+img = cv2.undistort(img, K, dist)             # 歪み補正（K, dist はキャリブレーション結果）
+roi = img[200:680, 300:1100]                  # 作業台だけ切り出す
+
+lab = cv2.cvtColor(roi, cv2.COLOR_BGR2LAB)    # 明るさ L だけを補正する
+l, a, b = cv2.split(lab)
+l = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(l)
+roi = cv2.cvtColor(cv2.merge((l, a, b)), cv2.COLOR_LAB2BGR)
+
+roi = cv2.GaussianBlur(roi, (5, 5), 0)        # ノイズを均す
+rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)    # モデルが RGB を期待するなら変換
+                    </code></pre>
+                    <p style="font-size: 0.5em;">色だけ・明るさだけを触れるよう、<strong>色空間を変えてから</strong>処理するのが定石</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">前処理のハマりどころ</h2>
+                    <ul style="font-size: 0.6em;">
+                        <li><strong>BGR と RGB の取り違え</strong>：赤と青が入れ替わっても動いてしまい、気づきにくい</li>
+                        <li><strong>縮めすぎ</strong>：4K 画像を 640 にすると小さい部品は数画素 → 見えなくなる（ROI 切り出しやタイル分割）</li>
+                        <li><strong>学習時と推論時で前処理が違う</strong>：同じ処理を同じ順で通す</li>
+                        <li><strong>補正しすぎ</strong>：強い補正は学習データにない見た目を作る</li>
+                        <li><strong>処理が重い</strong>：前処理だけでフレームレートが落ちていないか測る</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- 3. YOLO -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">YOLO：一度見るだけで検出</h2>
+                    <svg viewBox="0 0 760 220" style="width: 92%; max-height: 38vh;">
+                        <defs>
+                            <marker id="y-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="175" y="18" fill="#94a3b8" font-size="14" text-anchor="middle">2 段階型（R-CNN 系）</text>
+                        <rect x="10" y="30" width="100" height="50" rx="6" fill="#1e3a5f" stroke="#7dd3fc"/>
+                        <text x="60" y="60" fill="#bae6fd" font-size="13" text-anchor="middle">画像</text>
+                        <line x1="110" y1="55" x2="130" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#y-a)"/>
+                        <rect x="135" y="30" width="95" height="50" rx="6" fill="#1e293b" stroke="#94a3b8"/>
+                        <text x="182" y="52" fill="#e2e8f0" font-size="12" text-anchor="middle">① 候補の</text>
+                        <text x="182" y="68" fill="#e2e8f0" font-size="12" text-anchor="middle">場所を出す</text>
+                        <line x1="230" y1="55" x2="250" y2="55" stroke="#cbd5e1" stroke-width="2" marker-end="url(#y-a)"/>
+                        <rect x="255" y="30" width="95" height="50" rx="6" fill="#1e293b" stroke="#94a3b8"/>
+                        <text x="302" y="52" fill="#e2e8f0" font-size="12" text-anchor="middle">② 候補ごとに</text>
+                        <text x="302" y="68" fill="#e2e8f0" font-size="12" text-anchor="middle">分類</text>
+                        <text x="175" y="105" fill="#f87171" font-size="12" text-anchor="middle">正確だが遅い（候補の数だけ計算）</text>
+                        <!-- YOLO -->
+                        <text x="570" y="18" fill="#fbbf24" font-size="14" text-anchor="middle" font-weight="bold">1 段階型（YOLO）</text>
+                        <rect x="420" y="30" width="200" height="150" fill="#1f2937" stroke="#475569"/>
+                        <rect x="420" y="135" width="200" height="45" fill="#7c5434"/>
+                        <rect x="455" y="80" width="38" height="65" fill="#c81e1e"/>
+                        <rect x="540" y="105" width="50" height="40" fill="#1d4ed8"/>
+                        <g stroke="#94a3b8" stroke-width="0.8" opacity="0.6">
+                            <line x1="460" y1="30" x2="460" y2="180"/><line x1="500" y1="30" x2="500" y2="180"/><line x1="540" y1="30" x2="540" y2="180"/><line x1="580" y1="30" x2="580" y2="180"/>
+                            <line x1="420" y1="60" x2="620" y2="60"/><line x1="420" y1="90" x2="620" y2="90"/><line x1="420" y1="120" x2="620" y2="120"/><line x1="420" y1="150" x2="620" y2="150"/>
+                        </g>
+                        <rect x="460" y="90" width="40" height="30" fill="#fbbf24" opacity="0.35"/>
+                        <rect x="450" y="76" width="48" height="73" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <rect x="535" y="101" width="60" height="48" fill="none" stroke="#7dd3fc" stroke-width="3"/>
+                        <line x1="625" y1="105" x2="650" y2="105" stroke="#cbd5e1" stroke-width="2" marker-end="url(#y-a)"/>
+                        <text x="705" y="92" fill="#fde68a" font-size="12" text-anchor="middle">各マスが</text>
+                        <text x="705" y="108" fill="#fde68a" font-size="12" text-anchor="middle">箱・クラス・</text>
+                        <text x="705" y="124" fill="#fde68a" font-size="12" text-anchor="middle">確信度を一度に</text>
+                        <text x="570" y="205" fill="#4ade80" font-size="12" text-anchor="middle">1 回のネットワーク計算で全部出す → 速い</text>
+                    </svg>
+                    <ul style="font-size: 0.58em;">
+                        <li><strong>Y</strong>ou <strong>O</strong>nly <strong>L</strong>ook <strong>O</strong>nce（2016）。画像をマス目に分け、全マスの答えを同時に出す</li>
+                        <li>動画でも<strong>リアルタイム</strong>に動くので、ロボットで定番になった</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">従来の YOLO の後処理：NMS</h2>
+                    <svg viewBox="0 0 760 180" style="width: 88%; max-height: 30vh;">
+                        <defs>
+                            <marker id="n-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <rect x="80" y="20" width="200" height="140" fill="#1f2937" stroke="#475569"/>
+                        <rect x="150" y="60" width="50" height="80" fill="#c81e1e"/>
+                        <rect x="143" y="52" width="64" height="94" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+                        <rect x="136" y="60" width="62" height="88" fill="none" stroke="#fbbf24" stroke-width="2"/>
+                        <rect x="152" y="46" width="62" height="86" fill="none" stroke="#f472b6" stroke-width="2"/>
+                        <rect x="146" y="64" width="70" height="78" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+                        <text x="180" y="176" fill="#94a3b8" font-size="13" text-anchor="middle">1 つの物体に箱がたくさん</text>
+                        <line x1="300" y1="90" x2="440" y2="90" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#n-a)"/>
+                        <text x="370" y="78" fill="#fbbf24" font-size="15" text-anchor="middle" font-weight="bold">NMS</text>
+                        <text x="370" y="112" fill="#cbd5e1" font-size="11" text-anchor="middle">確信度の高い箱を残し</text>
+                        <text x="370" y="127" fill="#cbd5e1" font-size="11" text-anchor="middle">重なる箱を消す</text>
+                        <rect x="460" y="20" width="200" height="140" fill="#1f2937" stroke="#475569"/>
+                        <rect x="530" y="60" width="50" height="80" fill="#c81e1e"/>
+                        <rect x="523" y="52" width="64" height="94" fill="none" stroke="#4ade80" stroke-width="3"/>
+                        <text x="523" y="46" fill="#4ade80" font-size="12">cup 0.92</text>
+                        <text x="560" y="176" fill="#94a3b8" font-size="13" text-anchor="middle">1 物体に 1 つの箱</text>
+                    </svg>
+                    <ul style="font-size: 0.58em;">
+                        <li>NMS（Non-Maximum Suppression）は<strong>ネットワークの外</strong>で行う別の処理</li>
+                        <li>物体が多いと遅くなり、時間が読めない。<strong>エッジ機器への書き出しも面倒</strong></li>
+                        <li>しきい値（どれだけ重なったら消すか）の調整も必要</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">最新の YOLO：NMS が要らない</h2>
+                    <svg viewBox="0 0 760 130" style="width: 92%; max-height: 22vh;">
+                        <defs>
+                            <marker id="e-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <text x="10" y="22" fill="#94a3b8" font-size="14">従来</text>
+                        <rect x="70" y="5" width="140" height="30" rx="6" fill="#3b1e3f" stroke="#f472b6"/><text x="140" y="25" fill="#f9a8d4" font-size="13" text-anchor="middle">ネットワーク</text>
+                        <line x1="210" y1="20" x2="245" y2="20" stroke="#cbd5e1" stroke-width="2" marker-end="url(#e-a)"/>
+                        <text x="300" y="25" fill="#cbd5e1" font-size="12" text-anchor="middle">箱が何千個</text>
+                        <line x1="350" y1="20" x2="385" y2="20" stroke="#cbd5e1" stroke-width="2" marker-end="url(#e-a)"/>
+                        <rect x="390" y="5" width="90" height="30" rx="6" fill="#3b2f1e" stroke="#fbbf24"/><text x="435" y="25" fill="#fde68a" font-size="13" text-anchor="middle">NMS</text>
+                        <line x1="480" y1="20" x2="515" y2="20" stroke="#cbd5e1" stroke-width="2" marker-end="url(#e-a)"/>
+                        <text x="580" y="25" fill="#bbf7d0" font-size="13" text-anchor="middle">結果</text>
+                        <text x="10" y="82" fill="#4ade80" font-size="14" font-weight="bold">最新</text>
+                        <rect x="70" y="65" width="140" height="30" rx="6" fill="#3b1e3f" stroke="#f472b6"/><text x="140" y="85" fill="#f9a8d4" font-size="13" text-anchor="middle">ネットワーク</text>
+                        <line x1="210" y1="80" x2="515" y2="80" stroke="#4ade80" stroke-width="2.5" marker-end="url(#e-a)"/>
+                        <text x="362" y="72" fill="#4ade80" font-size="12" text-anchor="middle">1 物体に 1 つだけ出すよう学習（one-to-one）</text>
+                        <text x="580" y="85" fill="#bbf7d0" font-size="13" text-anchor="middle">結果</text>
+                        <text x="380" y="122" fill="#94a3b8" font-size="12" text-anchor="middle">エンドツーエンド：入力から結果まで 1 つのネットワーク</text>
+                    </svg>
+                    <ul style="font-size: 0.56em;">
+                        <li><strong>YOLOv10</strong>（2024、清華大）が NMS 不要の学習方法を導入</li>
+                        <li><strong>YOLO26</strong>（Ultralytics、2026 年 1 月）：NMS 不要を標準にし、<strong>CPU・エッジ機器</strong>向けに軽量化</li>
+                        <li>Ultralytics の発表では、最小モデルの CPU 推論が YOLO11 より<strong>最大 43% 高速</strong></li>
+                        <li>ロボットに載せる小型 PC（Jetson など）で<strong>速さと時間の読みやすさ</strong>が効く</li>
+                    </ul>
+                    <p class="src">Wang et al., YOLOv10: Real-Time End-to-End Object Detection, NeurIPS 2024 / <a class="pg" href="https://docs.ultralytics.com/models/yolo26/" target="_blank">Ultralytics YOLO26</a></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">YOLO の歩み</h2>
+                    <svg viewBox="0 0 760 210" style="width: 100%; max-height: 52vh;">
+                        <line x1="20" y1="105" x2="745" y2="105" stroke="#94a3b8" stroke-width="2"/>
+                        <g font-size="13" fill="#94a3b8" text-anchor="middle">
+                            <text x="40" y="125">2016</text><text x="130" y="125">2018</text><text x="235" y="125">2020</text>
+                            <text x="340" y="125">2022</text><text x="440" y="125">2023</text><text x="545" y="125">2024</text><text x="700" y="125">2026</text>
+                        </g>
+                        <g fill="#e2e8f0">
+                            <circle cx="40" cy="105" r="5"/><circle cx="130" cy="105" r="5"/><circle cx="235" cy="105" r="5"/>
+                            <circle cx="340" cy="105" r="5"/><circle cx="440" cy="105" r="5"/><circle cx="545" cy="105" r="5"/><circle cx="700" cy="105" r="6" fill="#4ade80"/>
+                        </g>
+                        <g font-size="13" text-anchor="middle" fill="#fde68a">
+                            <text x="40" y="60">YOLOv1</text><text x="40" y="76" font-size="11" fill="#94a3b8">1 段階で検出</text>
+                            <text x="130" y="60">YOLOv3</text><text x="130" y="76" font-size="11" fill="#94a3b8">定番化</text>
+                            <text x="235" y="60">v4 / v5</text><text x="235" y="76" font-size="11" fill="#94a3b8">v5 で PyTorch 化</text>
+                            <text x="340" y="60">YOLOv7</text>
+                            <text x="440" y="60">YOLOv8</text><text x="440" y="76" font-size="11" fill="#94a3b8">検出・セグメ・姿勢</text>
+                            <text x="545" y="44">YOLOv10</text><text x="545" y="60" font-size="11" fill="#94a3b8">NMS 不要</text>
+                            <text x="545" y="80">YOLO11</text>
+                        </g>
+                        <text x="700" y="60" fill="#4ade80" font-size="15" text-anchor="middle" font-weight="bold">YOLO26</text>
+                        <text x="700" y="76" fill="#94a3b8" font-size="11" text-anchor="middle">NMS 不要・エッジ向け</text>
+                        <text x="380" y="165" fill="#94a3b8" font-size="13" text-anchor="middle">作者・開発元はバージョンごとにバラバラ（番号が大きい＝同じ系列の後継、とは限らない）</text>
+                        <text x="380" y="188" fill="#94a3b8" font-size="13" text-anchor="middle">実用では Ultralytics 版（v5 / v8 / 11 / 26）が使いやすく、情報も多い</text>
+                    </svg>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">使ってみる（Ultralytics）</h2>
+                    <pre><code class="language-python" data-trim>
+# pip install ultralytics
+from ultralytics import YOLO
+
+model = YOLO("yolo26n.pt")            # n=最小。s/m/l/x と大きくなるほど高精度・低速
+results = model("table.jpg")          # 画像・動画・カメラ番号を渡せる
+
+for box in results[0].boxes:
+    name = model.names[int(box.cls)]  # クラス名（COCO の 80 クラス）
+    print(name, float(box.conf), box.xyxy.tolist())
+
+# 自分の物体で追加学習（ファインチューニング）
+model.train(data="my_objects.yaml", epochs=100, imgsz=640)
+                    </code></pre>
+                    <ul style="font-size: 0.5em;">
+                        <li>リサイズ・正規化などモデル用の前処理はライブラリが自動。<strong>撮影条件・ROI・色補正は自分の仕事</strong></li>
+                        <li>ライセンスは <strong>AGPL-3.0</strong>（製品に組み込むなら商用ライセンスを確認）</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">学習していない物は見つけられない</h2>
+                    <div style="display: flex; gap: 20px; font-size: 0.55em; text-align: left;">
+                        <div style="flex: 1; border: 2px solid #fbbf24; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #fbbf24; font-size: 1.15em;">普通の YOLO</strong></div>
+                            <ul>
+                                <li>COCO の<strong>80 クラス</strong>（人・コップ・瓶…）だけ</li>
+                                <li>実験器具・部品など自分の物は<strong>追加学習</strong>が必要</li>
+                                <li>そのぶん<strong>速くて確実</strong></li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; border: 2px solid #7dd3fc; border-radius: 10px; padding: 10px;">
+                            <div style="text-align: center;"><strong style="color: #7dd3fc; font-size: 1.15em;">オープンボキャブラリ</strong></div>
+                            <ul>
+                                <li><strong>言葉で</strong>探す物を指定（「赤いマグカップ」）</li>
+                                <li>Grounding DINO、YOLO-World、YOLOE など</li>
+                                <li>学習なしで使えるが、<strong>重い・確実さは劣る</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.55em; margin-top: 15px;">決まった物は<strong>追加学習した YOLO</strong>、初めて見る物は<strong>オープンボキャブラリ</strong>、と使い分け</p>
+                </section>
+            </section>
+
+            <!-- 4. ROS で使う -->
+            <section>
+                <h2 style="font-size: 1.3em;">ROS で使う</h2>
+                <svg viewBox="0 0 760 170" style="width: 95%; max-height: 30vh;">
+                    <defs>
+                        <marker id="ros-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                    </defs>
+                    <rect x="5" y="30" width="135" height="80" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                    <text x="72" y="58" fill="#bae6fd" font-size="14" text-anchor="middle">カメラノード</text>
+                    <text x="72" y="80" fill="#bae6fd" font-size="11" text-anchor="middle">RealSense など</text>
+                    <text x="72" y="96" fill="#bae6fd" font-size="11" text-anchor="middle">カラー＋深度</text>
+                    <line x1="140" y1="70" x2="185" y2="70" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ros-a)"/>
+                    <rect x="190" y="30" width="150" height="80" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                    <text x="265" y="58" fill="#fde68a" font-size="14" text-anchor="middle">前処理ノード</text>
+                    <text x="265" y="80" fill="#fde68a" font-size="11" text-anchor="middle">歪み補正（image_proc）</text>
+                    <text x="265" y="96" fill="#fde68a" font-size="11" text-anchor="middle">ROI・色補正</text>
+                    <line x1="340" y1="70" x2="385" y2="70" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ros-a)"/>
+                    <rect x="390" y="30" width="150" height="80" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                    <text x="465" y="58" fill="#f9a8d4" font-size="14" text-anchor="middle">YOLO ノード</text>
+                    <text x="465" y="80" fill="#f9a8d4" font-size="11" text-anchor="middle">2D 検出 ＋ 深度</text>
+                    <text x="465" y="96" fill="#f9a8d4" font-size="11" text-anchor="middle">→ 3D 検出</text>
+                    <line x1="540" y1="70" x2="585" y2="70" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ros-a)"/>
+                    <rect x="590" y="30" width="165" height="80" rx="8" fill="#1e3f2a" stroke="#4ade80"/>
+                    <text x="672" y="58" fill="#bbf7d0" font-size="14" text-anchor="middle">TF で変換</text>
+                    <text x="672" y="80" fill="#bbf7d0" font-size="11" text-anchor="middle">ロボット座標の位置</text>
+                    <text x="672" y="96" fill="#bbf7d0" font-size="11" text-anchor="middle">→ MoveIt で把持</text>
+                    <text x="380" y="145" fill="#94a3b8" font-size="12" text-anchor="middle">結果は RViz に重ねて表示できる（検出画像・3D の箱）</text>
+                </svg>
+                <ul style="font-size: 0.56em;">
+                    <li><strong>yolo_ros</strong>（ROS 2）：Ultralytics の YOLO26 まで対応。深度画像から<strong>3D 検出</strong>、追跡も出せる</li>
+                    <li><strong>Isaac ROS</strong>（NVIDIA）：Jetson の GPU で高速に推論</li>
+                </ul>
+                <pre><code class="language-bash" data-trim>
+ros2 launch yolo_bringup yolo.launch.py
+                </code></pre>
+                <p style="font-size: 0.5em;">▶ <a class="pg" href="https://github.com/mgonzs13/yolo_ros" target="_blank">yolo_ros</a>
+                    ▶ <a class="pg" href="https://nvidia-isaac-ros.github.io/" target="_blank">Isaac ROS</a></p>
+            </section>
+
+            <!-- 5. 応用例：RoboCup@Home -->
+            <section>
+                <section>
+                    <h2 style="font-size: 1.3em;">応用例：RoboCup@Home</h2>
+                    <ul style="font-size: 0.6em;">
+                        <li>家の中で<strong>人の手伝いをするロボット</strong>の競技会（RoboCup の 1 部門、2006 年〜）</li>
+                        <li>部屋のどこかにある物を見つけて<strong>持ってくる</strong>、テーブルを<strong>片付ける</strong>、食料品を<strong>棚にしまう</strong></li>
+                        <li>トヨタの生活支援ロボット <strong>HSR</strong> を全チーム共通で使うリーグ（DSPL）もある</li>
+                        <li>どの課題も、まず<strong>物体検出</strong>から始まる</li>
+                    </ul>
+                    <svg viewBox="0 0 760 90" style="width: 92%; max-height: 16vh;">
+                        <defs>
+                            <marker id="h-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <g font-size="13" text-anchor="middle">
+                            <rect x="5" y="20" width="130" height="46" rx="8" fill="#1e293b" stroke="#94a3b8"/><text x="70" y="48" fill="#e2e8f0">「コップを取って」</text>
+                            <rect x="160" y="20" width="130" height="46" rx="8" fill="#3b2f1e" stroke="#fbbf24" stroke-width="2.5"/><text x="225" y="48" fill="#fde68a" font-weight="bold">物体検出</text>
+                            <rect x="315" y="20" width="130" height="46" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/><text x="380" y="48" fill="#bae6fd">深度で 3D 位置</text>
+                            <rect x="470" y="20" width="130" height="46" rx="8" fill="#3b1e3f" stroke="#f472b6"/><text x="535" y="48" fill="#f9a8d4">近づいてつかむ</text>
+                            <rect x="625" y="20" width="130" height="46" rx="8" fill="#1e3f2a" stroke="#4ade80"/><text x="690" y="48" fill="#bbf7d0">人に渡す</text>
+                        </g>
+                        <line x1="135" y1="43" x2="157" y2="43" stroke="#cbd5e1" stroke-width="2" marker-end="url(#h-a)"/>
+                        <line x1="290" y1="43" x2="312" y2="43" stroke="#cbd5e1" stroke-width="2" marker-end="url(#h-a)"/>
+                        <line x1="445" y1="43" x2="467" y2="43" stroke="#cbd5e1" stroke-width="2" marker-end="url(#h-a)"/>
+                        <line x1="600" y1="43" x2="622" y2="43" stroke="#cbd5e1" stroke-width="2" marker-end="url(#h-a)"/>
+                    </svg>
+                    <p style="font-size: 0.5em;">▶ <a class="pg" href="https://athome.robocup.org/" target="_blank">RoboCup@Home 公式</a></p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.3em;">難しさ：物は大会で初めて知らされる</h2>
+                    <ul style="font-size: 0.6em;">
+                        <li>使う物（食品・食器・日用品）は<strong>大会会場で</strong>発表される</li>
+                        <li>数日のうちに<strong>写真を撮る → ラベルを付ける → 学習</strong>まで終わらせる</li>
+                        <li>会場の照明・家具は練習環境と違う → <strong>前処理とデータの多様さ</strong>が効く</li>
+                        <li>ロボットに載せた PC で動かすので<strong>軽くて速い YOLO</strong>が定番</li>
+                    </ul>
+                    <p style="font-size: 0.55em;">短時間で「自分の物」を検出できるようにする<strong>データづくり</strong>が勝負</p>
+                </section>
+
+                <section>
+                    <h2 style="font-size: 1.2em;">例：Hibikino-Musashi@Home</h2>
+                    <p style="font-size: 0.5em; margin-top: 0; color: #9ca3af;">九州工業大学などの合同チーム</p>
+                    <svg viewBox="0 0 760 150" style="width: 95%; max-height: 26vh;">
+                        <defs>
+                            <marker id="k-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/></marker>
+                        </defs>
+                        <g font-size="13" text-anchor="middle">
+                            <rect x="5" y="30" width="165" height="70" rx="8" fill="#1e3a5f" stroke="#7dd3fc"/>
+                            <text x="87" y="58" fill="#bae6fd" font-weight="bold">物を 3D スキャン</text>
+                            <text x="87" y="80" fill="#bae6fd" font-size="11">LiDAR 付きスマホ</text>
+                            <rect x="200" y="30" width="175" height="70" rx="8" fill="#3b2f1e" stroke="#fbbf24"/>
+                            <text x="287" y="58" fill="#fde68a" font-weight="bold">シミュレータで合成</text>
+                            <text x="287" y="80" fill="#fde68a" font-size="11">照明・家具・背景をばらつかせる</text>
+                            <rect x="405" y="30" width="165" height="70" rx="8" fill="#1e293b" stroke="#94a3b8"/>
+                            <text x="487" y="58" fill="#e2e8f0" font-weight="bold">ラベルは自動</text>
+                            <text x="487" y="80" fill="#e2e8f0" font-size="11">50 万枚を 2 時間以内</text>
+                            <rect x="600" y="30" width="155" height="70" rx="8" fill="#3b1e3f" stroke="#f472b6"/>
+                            <text x="677" y="58" fill="#f9a8d4" font-weight="bold">YOLOv8 を学習</text>
+                            <text x="677" y="80" fill="#f9a8d4" font-size="11">TensorRT で高速化</text>
+                        </g>
+                        <line x1="170" y1="65" x2="197" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#k-a)"/>
+                        <line x1="375" y1="65" x2="402" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#k-a)"/>
+                        <line x1="570" y1="65" x2="597" y2="65" stroke="#cbd5e1" stroke-width="2" marker-end="url(#k-a)"/>
+                        <text x="380" y="135" fill="#94a3b8" font-size="12" text-anchor="middle">人がラベルを付ける作業がゼロ → 新しい物にすぐ対応</text>
+                    </svg>
+                    <ul style="font-size: 0.56em;">
+                        <li>HSR を使う日本の強豪チーム。<strong>RoboCup 2024（アイントホーフェン）DSPL で 1 位</strong></li>
+                        <li>YOLO で足りない物は Grounding DINO（言葉で検出）と<strong>物ごとに使い分け</strong></li>
+                        <li>「カウンターの一番右の物を持ってきて」→ LLM が<strong>探す・つかむ・運ぶ</strong>に分解</li>
+                    </ul>
+                    <p class="src">Hibikino-Musashi@Home 2025 Team Description Paper, <a class="pg" href="https://arxiv.org/abs/2511.20180" target="_blank">arXiv:2511.20180</a></p>
+                </section>
+            </section>
+
+            <!-- まとめ -->
+            <section>
+                <h2>まとめ</h2>
+                <ul style="font-size: 0.66em;">
+                    <li>物体検出は、ピッキングもビジョンフィードバックも支える<strong>土台</strong></li>
+                    <li>性能は<strong>前処理</strong>で大きく変わる。まず<strong>撮影条件をそろえる</strong></li>
+                    <li>YOLO は<strong>一度見るだけ</strong>で検出。最新の YOLO26 は <strong>NMS 不要</strong>でエッジでも速い</li>
+                    <li>ROS では <strong>yolo_ros</strong> で検出 → 深度で 3D → TF でロボット座標へ</li>
+                    <li>RoboCup@Home のように、<strong>自分の物を短時間で学習させるデータづくり</strong>が実践の鍵</li>
+                </ul>
+                <p class="fragment" style="font-size: 0.6em;">次は、検出した物体に<strong>合わせに行く</strong>ビジョンフィードバック制御へ</p>
+                <p><a href="../../index.html" style="color: #3b82f6; text-decoration: underline;">← シリーズ一覧に戻る</a></p>
+            </section>
+
+            <!-- 参考資料 -->
+            <section>
+                <h2 style="font-size: 1.3em;">参考資料</h2>
+                <ul style="font-size: 0.5em;">
+                    <li>Redmon et al., You Only Look Once: Unified, Real-Time Object Detection, CVPR 2016</li>
+                    <li>Wang et al., YOLOv10: Real-Time End-to-End Object Detection, NeurIPS 2024</li>
+                    <li><a class="pg" href="https://docs.ultralytics.com/models/yolo26/" target="_blank">Ultralytics YOLO26 ドキュメント</a></li>
+                    <li><a class="pg" href="https://docs.opencv.org/4.x/d2/d96/tutorial_py_table_of_contents_imgproc.html" target="_blank">OpenCV-Python 画像処理チュートリアル</a></li>
+                    <li><a class="pg" href="https://github.com/mgonzs13/yolo_ros" target="_blank">yolo_ros（ROS 2）</a></li>
+                    <li><a class="pg" href="https://athome.robocup.org/" target="_blank">RoboCup@Home</a></li>
+                    <li>Hibikino-Musashi@Home 2025 Team Description Paper, <a class="pg" href="https://arxiv.org/abs/2511.20180" target="_blank">arXiv:2511.20180</a></li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <script src="../../assets/vendor/reveal.js/dist/reveal.js"></script>
+    <script src="../../assets/chapter-numbers.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/notes/notes.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="../../assets/vendor/reveal.js/plugin/zoom/zoom.js"></script>
+    <script src="../../assets/vendor/reveal.js-menu/menu.js"></script>
+    <script src="../../assets/vendor/reveal.js-plugins/chalkboard/plugin.js"></script>
+    <script>
+        Reveal.initialize({
+            // 基本的な表示設定
+            controls: true,  // ナビゲーションUIを表示
+            progress: true,  // 進捗バーを表示
+            center: true,    // スライドを中央揃え
+            hash: true,      // URLにスライド番号を反映
+            slideNumber: chapterSlideNumber, // 章-連番 (assets/chapter-numbers.js)
+
+            // プラグインの有効化
+            plugins: [
+                RevealNotes,
+                RevealHighlight,
+                RevealZoom,      // Zoomプラグインを有効化
+                RevealMenu,      // Menuプラグインを有効化
+                RevealChalkboard // Chalkboardプラグインを有効化
+            ],
+
+            // 各プラグインの設定（任意）
+            menu: {
+                numbers: true, // 目次にスライド番号を表示
+                title: 'プレゼンテーション目次' // メニューのタイトル
+            },
+            chalkboard: {
+                boardmarkerWidth: 3,
+                chalkWidth: 7,
+                transition: 200,
+                theme: "chalkboard"
+            },
+
+            // キーボードショートカットのカスタマイズ
+            keyboard: {
+                'm': function () { RevealMenu.toggle(); }, // 'm'キーでメニューを切り替え
+            }
+        });
+    </script>
+</body>
+
+</html>

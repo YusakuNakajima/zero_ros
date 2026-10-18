@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前処理で検出結果が変わる</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #111827; color: #e5e7eb; font-family: 'Noto Sans JP', sans-serif; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+        h1 { font-size: 1.5rem; color: #a5b4fc; margin: 0 0 4px; text-align: center; }
+        .sub { color: #9ca3af; text-align: center; margin: 0 0 14px; font-size: 0.9rem; }
+        .views { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .view { background: #1f2937; border-radius: 8px; padding: 6px; }
+        .view h2 { font-size: 0.85rem; margin: 0 0 4px; color: #cbd5e1; text-align: center; font-weight: 500; }
+        canvas { width: 100%; display: block; border-radius: 4px; image-rendering: auto; }
+        .panel { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 12px; margin-top: 10px; }
+        .box { background: #1f2937; border-radius: 8px; padding: 8px 12px; }
+        .box h3 { margin: 0 0 6px; font-size: 0.85rem; }
+        .cond h3 { color: #fca5a5; } .pre h3 { color: #86efac; }
+        label { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin: 3px 0; }
+        label span.n { width: 7.5em; flex: none; white-space: nowrap; }
+        input[type=range] { flex: 1; }
+        .result { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+        #verdict { font-size: 1.4rem; font-weight: 700; }
+        #detail { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; }
+        .ok { color: #4ade80; } .ng { color: #f87171; }
+        .presets { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        button { background: #374151; color: #e5e7eb; border: 1px solid #4b5563; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer; font-family: inherit; }
+        button:hover { background: #4b5563; }
+        .note { color: #9ca3af; font-size: 0.8rem; margin-top: 10px; line-height: 1.6; }
+        .embed .wrap { padding: 6px; max-width: none; }
+        .embed h1, .embed .sub, .embed .note { display: none; }
+        @media (max-width: 700px) { .views, .panel { grid-template-columns: 1fr; } }
+    </style>
+    <script>if (window.self !== window.top) document.documentElement.classList.add('embed');</script>
+</head>
+<body>
+<div class="wrap">
+    <h1>前処理で検出結果が変わる</h1>
+    <p class="sub">「赤いコップ」を色で見つける簡単な検出器。撮影条件を悪くして、前処理で立て直してみよう</p>
+
+    <div class="views">
+        <div class="view"><h2>① カメラ画像</h2><canvas id="cIn" width="320" height="200"></canvas></div>
+        <div class="view"><h2>② 前処理後</h2><canvas id="cPre" width="320" height="200"></canvas></div>
+        <div class="view"><h2>③ 検出結果（白＝赤と判定）</h2><canvas id="cOut" width="320" height="200"></canvas></div>
+    </div>
+
+    <div class="panel">
+        <div class="box cond">
+            <h3>撮影条件（悪くする）</h3>
+            <label><span class="n">暗さ</span><input id="dark" type="range" min="0" max="100" value="0"></label>
+            <label><span class="n">照明の色かぶり</span><input id="tint" type="range" min="0" max="100" value="0"></label>
+            <label><span class="n">ノイズ</span><input id="noise" type="range" min="0" max="100" value="0"></label>
+            <div class="presets">
+                <button data-p="good">良い条件</button>
+                <button data-p="bad">暗い部屋＋電球色</button>
+            </div>
+        </div>
+        <div class="box pre">
+            <h3>前処理（立て直す）</h3>
+            <label><input id="pBlur" type="checkbox"> 平滑化（ノイズを均す）</label>
+            <label><input id="pWB" type="checkbox"> ホワイトバランス補正（色かぶりを取る）</label>
+            <label><input id="pBright" type="checkbox"> 明るさの正規化（暗さを補う）</label>
+            <label><input id="pHSV" type="checkbox"> HSV で色を判定（明るさと色を分ける）</label>
+        </div>
+        <div class="box result">
+            <div id="verdict">-</div>
+            <div id="detail"></div>
+        </div>
+    </div>
+    <p class="note">
+        検出器はずっと同じ（「赤っぽい画素のかたまり」を探すだけ）。変えているのは<strong>入力画像</strong>だけです。<br>
+        深層学習の検出器（YOLO など）でも、学習時と違う明るさ・色・ノイズの画像では性能が落ちます。
+    </p>
+</div>
+
+<script>
+const W = 320, H = 200;
+// 正解（赤いコップ）の外接矩形
+const GT = { x0: 70, y0: 70, x1: 120, y1: 150 };
+
+// 元のシーンを描く
+function drawScene(ctx) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#d6d3d1'); g.addColorStop(0.45, '#c8c2bb');
+    g.addColorStop(0.46, '#a47551'); g.addColorStop(1, '#7c5434');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // 赤いコップ
+    ctx.fillStyle = '#c81e1e'; ctx.fillRect(GT.x0, GT.y0 + 6, GT.x1 - GT.x0, GT.y1 - GT.y0 - 6);
+    ctx.beginPath(); ctx.ellipse((GT.x0 + GT.x1) / 2, GT.y0 + 6, (GT.x1 - GT.x0) / 2, 6, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#7f1d1d'; ctx.fill();
+    ctx.fillStyle = '#e04848'; ctx.fillRect(GT.x0 + 6, GT.y0 + 14, 6, GT.y1 - GT.y0 - 22);
+    // 青い箱
+    ctx.fillStyle = '#1d4ed8'; ctx.fillRect(150, 95, 60, 50);
+    ctx.fillStyle = '#3b82f6'; ctx.fillRect(150, 85, 60, 10);
+    // 緑のボトル
+    ctx.fillStyle = '#15803d'; ctx.fillRect(235, 70, 26, 75); ctx.fillRect(242, 52, 12, 20);
+    // オレンジのボール（赤と間違えやすい）
+    ctx.beginPath(); ctx.arc(290, 132, 16, 0, Math.PI * 2); ctx.fillStyle = '#ea8a1a'; ctx.fill();
+    // 木目の茶色い棚の影
+    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0, 160, W, 40);
+}
+
+const base = (() => {
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const ctx = c.getContext('2d'); drawScene(ctx);
+    return ctx.getImageData(0, 0, W, H).data;
+})();
+
+// 再現性のある乱数（スライダーを動かしてもノイズ模様が変わらない）
+const rnd = (() => { let s = 12345; const a = new Float32Array(W * H * 3);
+    for (let i = 0; i < a.length; i++) { s = (s * 1103515245 + 12345) & 0x7fffffff; a[i] = s / 0x7fffffff - 0.5; } return a; })();
+
+const $ = id => document.getElementById(id);
+const clamp = v => v < 0 ? 0 : v > 255 ? 255 : v;
+
+function capture() {
+    const dark = $('dark').value / 100, tint = $('tint').value / 100, noise = $('noise').value / 100;
+    const gain = 1 - 0.78 * dark;
+    const tr = 1 + 0.35 * tint, tg = 1 + 0.05 * tint, tb = 1 - 0.6 * tint; // 電球色
+    const amp = 160 * noise;
+    const out = new Float32Array(W * H * 3);
+    for (let i = 0, j = 0; i < W * H; i++, j += 4) {
+        out[i * 3]     = clamp(base[j] * gain * tr + amp * rnd[i * 3]);
+        out[i * 3 + 1] = clamp(base[j + 1] * gain * tg + amp * rnd[i * 3 + 1]);
+        out[i * 3 + 2] = clamp(base[j + 2] * gain * tb + amp * rnd[i * 3 + 2]);
+    }
+    return out;
+}
+
+function boxBlur(src, r) {
+    const tmp = new Float32Array(src.length), dst = new Float32Array(src.length);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (let c = 0; c < 3; c++) {
+        let s = 0, n = 0;
+        for (let k = -r; k <= r; k++) { const xx = x + k; if (xx >= 0 && xx < W) { s += src[(y * W + xx) * 3 + c]; n++; } }
+        tmp[(y * W + x) * 3 + c] = s / n;
+    }
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (let c = 0; c < 3; c++) {
+        let s = 0, n = 0;
+        for (let k = -r; k <= r; k++) { const yy = y + k; if (yy >= 0 && yy < H) { s += tmp[(yy * W + x) * 3 + c]; n++; } }
+        dst[(y * W + x) * 3 + c] = s / n;
+    }
+    return dst;
+}
+
+function preprocess(img) {
+    let a = img;
+    if ($('pBlur').checked) a = boxBlur(boxBlur(a, 2), 2);
+    if ($('pWB').checked) { // グレーワールド仮定：画面全体の平均は灰色のはず
+        const m = [0, 0, 0];
+        for (let i = 0; i < W * H; i++) for (let c = 0; c < 3; c++) m[c] += a[i * 3 + c];
+        const g = (m[0] + m[1] + m[2]) / 3, b = Float32Array.from(a);
+        for (let i = 0; i < W * H; i++) for (let c = 0; c < 3; c++) b[i * 3 + c] = clamp(a[i * 3 + c] * g / Math.max(m[c], 1));
+        a = b;
+    }
+    if ($('pBright').checked) { // 明るい側 2% が 255 になるよう引き伸ばす
+        const lum = [];
+        for (let i = 0; i < W * H; i += 7) lum.push(Math.max(a[i * 3], a[i * 3 + 1], a[i * 3 + 2]));
+        lum.sort((p, q) => p - q);
+        const hi = Math.max(lum[Math.floor(lum.length * 0.98)], 1), k = 230 / hi, b = Float32Array.from(a);
+        for (let i = 0; i < b.length; i++) b[i] = clamp(a[i] * k);
+        a = b;
+    }
+    return a;
+}
+
+function isRed(r, g, b, hsv) {
+    if (!hsv) return r > 150 && g < 90 && b < 90; // RGB の固定しきい値
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), v = mx / 255, s = mx ? (mx - mn) / mx : 0;
+    let h = 0;
+    if (mx !== mn) {
+        if (mx === r) h = 60 * (((g - b) / (mx - mn)) % 6);
+        else if (mx === g) h = 60 * ((b - r) / (mx - mn) + 2);
+        else h = 60 * ((r - g) / (mx - mn) + 4);
+    }
+    if (h < 0) h += 360;
+    return (h < 18 || h > 340) && s > 0.5 && v > 0.18; // 色相で判定、明るさは緩く
+}
+
+function detect(img) {
+    const hsv = $('pHSV').checked, mask = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) mask[i] = isRed(img[i * 3], img[i * 3 + 1], img[i * 3 + 2], hsv) ? 1 : 0;
+    // 連結成分のうち最大のものを検出結果にする
+    const lab = new Int32Array(W * H), blobs = [];
+    let id = 0;
+    for (let s = 0; s < W * H; s++) {
+        if (!mask[s] || lab[s]) continue;
+        id++; const st = [s]; lab[s] = id;
+        let n = 0, x0 = W, y0 = H, x1 = 0, y1 = 0;
+        while (st.length) {
+            const p = st.pop(), x = p % W, y = (p / W) | 0; n++;
+            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+            for (const q of [p - 1, p + 1, p - W, p + W]) {
+                if (q < 0 || q >= W * H) continue;
+                if ((q === p - 1 && x === 0) || (q === p + 1 && x === W - 1)) continue;
+                if (mask[q] && !lab[q]) { lab[q] = id; st.push(q); }
+            }
+        }
+        blobs.push({ n, x0, y0, x1, y1 });
+    }
+    const big = blobs.filter(b => b.n >= 15);
+    big.sort((a, b) => b.n - a.n);
+    return { mask, blobs: big, best: big[0] };
+}
+
+function iou(b) {
+    if (!b) return 0;
+    const ix = Math.max(0, Math.min(b.x1, GT.x1) - Math.max(b.x0, GT.x0));
+    const iy = Math.max(0, Math.min(b.y1, GT.y1) - Math.max(b.y0, GT.y0));
+    const inter = ix * iy, ua = (b.x1 - b.x0) * (b.y1 - b.y0) + (GT.x1 - GT.x0) * (GT.y1 - GT.y0) - inter;
+    return ua > 0 ? inter / ua : 0;
+}
+
+function put(canvas, rgb) {
+    const ctx = canvas.getContext('2d'), im = ctx.createImageData(W, H);
+    for (let i = 0; i < W * H; i++) {
+        im.data[i * 4] = rgb[i * 3]; im.data[i * 4 + 1] = rgb[i * 3 + 1]; im.data[i * 4 + 2] = rgb[i * 3 + 2]; im.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(im, 0, 0);
+    return ctx;
+}
+
+function render() {
+    const raw = capture(), pre = preprocess(raw), det = detect(pre);
+    put($('cIn'), raw); put($('cPre'), pre);
+    const m = new Float32Array(W * H * 3);
+    for (let i = 0; i < W * H; i++) { const v = det.mask[i] ? 235 : 25; m[i * 3] = v; m[i * 3 + 1] = v; m[i * 3 + 2] = v; }
+    const ctx = put($('cOut'), m);
+    ctx.setLineDash([4, 3]); ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(GT.x0, GT.y0, GT.x1 - GT.x0, GT.y1 - GT.y0);
+    ctx.setLineDash([]);
+    det.blobs.slice(1, 8).forEach(b => { ctx.strokeStyle = '#f87171'; ctx.strokeRect(b.x0, b.y0, b.x1 - b.x0 + 1, b.y1 - b.y0 + 1); });
+    const score = iou(det.best && { x0: det.best.x0, y0: det.best.y0, x1: det.best.x1 + 1, y1: det.best.y1 + 1 });
+    if (det.best) {
+        ctx.strokeStyle = score > 0.6 ? '#4ade80' : '#f87171'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(det.best.x0, det.best.y0, det.best.x1 - det.best.x0 + 1, det.best.y1 - det.best.y0 + 1);
+    }
+    const ok = score > 0.6 && det.blobs.length <= 1;
+    const v = $('verdict');
+    v.textContent = ok ? '検出成功' : (score > 0.6 ? '見つけたが誤検出あり' : '検出失敗');
+    v.className = ok ? 'ok' : 'ng';
+    $('detail').innerHTML = `正解との重なり (IoU)：${score.toFixed(2)}<br>赤と判定したかたまり：${det.blobs.length} 個<br><span style="color:#60a5fa">点線＝正解</span>　<span style="color:#4ade80">緑</span>/<span style="color:#f87171">赤</span>＝検出`;
+}
+
+document.querySelectorAll('input').forEach(e => e.addEventListener('input', render));
+document.querySelectorAll('button[data-p]').forEach(b => b.addEventListener('click', () => {
+    const bad = b.dataset.p === 'bad';
+    $('dark').value = bad ? 70 : 0; $('tint').value = bad ? 80 : 0; $('noise').value = bad ? 45 : 0;
+    ['pBlur', 'pWB', 'pBright', 'pHSV'].forEach(k => $(k).checked = false);
+    render();
+}));
+render();
+</script>
+</body>
+</html>
