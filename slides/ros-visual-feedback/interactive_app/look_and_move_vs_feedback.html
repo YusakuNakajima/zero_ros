@@ -54,10 +54,6 @@
                     <button id="mOpen" class="on">見てから動く</button>
                     <button id="mFb">見ながら動く（ビジュアルFB）</button>
                 </div>
-                <div class="modes" style="margin-top: 6px;">
-                    <button id="go">▶ 実行</button>
-                    <button id="reset">↺ 戻す</button>
-                </div>
             </div>
             <div class="box result">
                 <div style="font-size: 0.8rem; color: #cbd5e1;">手先と穴の実際のずれ</div>
@@ -67,8 +63,8 @@
         </div>
     </div>
     <p class="note">
-        「見てから動く」：画像から部品の位置を<strong>ロボット座標に換算</strong>し、その座標へ一度で動く。カメラ・ロボットのモデルの誤差がそのまま残る。<br>
-        「見ながら動く」：画像の中で<strong>手先と穴のずれ</strong>を測り、ずれが 0 になるまで少しずつ動き続ける。モデルが多少違っていても最後は合う。
+        「見てから動く」：画像から部品の位置を<strong>ロボット座標に換算</strong>し、その座標へ動く（手先は見ない）。部品を動かすと追従するが、モデルの誤差の分ずれたまま。<br>
+        「見ながら動く」：画像の中で<strong>手先と穴のずれ</strong>を測り、ずれが 0 になるまで動き続ける。モデルが多少違っていても最後は合う。
     </p>
 </div>
 
@@ -81,7 +77,7 @@ const W = 640, H = 440;
 const Q0 = [1.9, -1.7];
 
 let target = { x: 330, y: 300 };     // 穴の位置（mm）
-let q = Q0.slice(), mode = 'open', running = false, trail = [], iter = 0;
+let q = Q0.slice(), mode = 'open', trail = [];
 
 const $ = id => document.getElementById(id);
 function errs() {
@@ -119,51 +115,41 @@ function jac(q, L) {
 }
 function realErr() { const t = fk(q, L_TRUE).tip; return Math.hypot(t.x - target.x, t.y - target.y); }
 
-// ---- 動作 ----
-let anim = null;
-function lookAndMove() {
-    // 1 回だけ撮影：穴の画像位置 → 思っているカメラで世界座標へ → 思っているリンク長で IK
-    const goalW = i2w(w2i(target), camBelief());
-    const qGoal = ik(goalW, linksBelief());
-    const q0 = q.slice(); let t = 0;
-    trail = [];
-    anim = () => {
-        t = Math.min(1, t + 0.025);
-        const k = 0.5 - 0.5 * Math.cos(Math.PI * t);
-        q = [q0[0] + (qGoal[0] - q0[0]) * k, q0[1] + (qGoal[1] - q0[1]) * k];
-        trail.push(fk(q, L_TRUE).tip);
-        if (t >= 1) finish();
-    };
+// ---- 動作（毎フレーム動き続ける）----
+function stepOpen() {
+    // 穴の画像位置 → 思っているカメラでロボット座標へ → 思っているリンク長で IK。手先は見ない
+    const qGoal = ik(i2w(w2i(target), camBelief()), linksBelief());
+    for (let i = 0; i < 2; i++) q[i] += Math.max(-0.03, Math.min(0.03, 0.08 * (qGoal[i] - q[i])));
 }
-function visualFeedback() {
-    trail = []; iter = 0;
-    const cam = camBelief(), L = linksBelief();
-    anim = () => {
-        // 毎周期：画像の中の手先と穴のずれを測る
-        const pe = w2i(fk(q, L_TRUE).tip), pt = w2i(target);
-        const du = pt.u - pe.u, dv = pt.v - pe.v;
-        // 画像のずれ → 思っているカメラでロボット座標の移動量へ（回転と縮尺だけ）
-        const a = du / PX, b = -dv / PX, c = Math.cos(cam.th), s = Math.sin(cam.th);
-        const dx = c * a - s * b, dy = s * a + c * b;
-        // 思っているリンク長のヤコビ行列で関節の動きへ
-        const J = jac(q, L), det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
-        const gain = 0.12;
-        q[0] += gain * (J[1][1] * dx - J[0][1] * dy) / det;
-        q[1] += gain * (-J[1][0] * dx + J[0][0] * dy) / det;
-        trail.push(fk(q, L_TRUE).tip); iter++;
-        if (Math.hypot(du, dv) < 0.05 || iter > 400) finish();
-    };
+function stepFb() {
+    // 画像の中の手先と穴のずれを測る
+    const pe = w2i(fk(q, L_TRUE).tip), pt = w2i(target);
+    const du = pt.u - pe.u, dv = pt.v - pe.v;
+    // 画像のずれ → 思っているカメラでロボット座標の移動量へ（回転と縮尺だけ）
+    const cam = camBelief(), a = du / PX, b = -dv / PX, c = Math.cos(cam.th), s = Math.sin(cam.th);
+    let dx = 0.08 * (c * a - s * b), dy = 0.08 * (s * a + c * b);
+    const n = Math.hypot(dx, dy); if (n > 8) { dx *= 8 / n; dy *= 8 / n; }   // 1 フレームの移動量の上限
+    // 思っているリンク長のヤコビ行列で関節の動きへ
+    const J = jac(q, linksBelief()), det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
+    q[0] += (J[1][1] * dx - J[0][1] * dy) / det;
+    q[1] += (-J[1][0] * dx + J[0][0] * dy) / det;
 }
-function finish() { anim = null; running = false; showResult(true); }
+let prevTip = fk(q, L_TRUE).tip, moving = true;
+function tick() {
+    mode === 'open' ? stepOpen() : stepFb();
+    const tip = fk(q, L_TRUE).tip;
+    moving = Math.hypot(tip.x - prevTip.x, tip.y - prevTip.y) > 0.02;
+    prevTip = tip;
+    trail.push(tip); if (trail.length > 150) trail.shift();
+}
 
-function showResult(done) {
+function showResult() {
     const e = realErr(), el = $('err');
     el.textContent = e.toFixed(2) + ' mm';
     el.className = e < 0.5 ? 'ok' : e < 3 ? 'mid' : 'ng';
-    if (!done) { $('msg').textContent = '部品はドラッグで動かせる'; return; }
-    $('msg').innerHTML = mode === 'open'
-        ? '一度で動いて終わり。<strong>モデルの誤差がそのまま残る</strong>'
-        : `${iter} 回見て直した。<strong>画像の一致が基準</strong>なので誤差が消える`;
+    $('msg').innerHTML = moving ? '追従中…（部品はドラッグで動かせる）'
+        : mode === 'open' ? 'ずれたまま止まる。<strong>モデルの誤差がそのまま残る</strong>'
+        : 'ぴったり合って止まる。<strong>画像の一致が基準</strong>';
 }
 
 // ---- 描画 ----
@@ -202,12 +188,12 @@ function draw() {
     ctx.beginPath(); ctx.moveTo(t.u - 10, t.v); ctx.lineTo(t.u + 10, t.v); ctx.moveTo(t.u, t.v - 10); ctx.lineTo(t.u, t.v + 10); ctx.stroke();
     // カメラ視野の表示
     ctx.fillStyle = '#94a3b8'; ctx.font = '12px "Noto Sans JP"'; ctx.fillText('固定カメラの画像（真上から）', 10, 18);
-    if (mode === 'fb' && running) {
+    if (mode === 'fb' && realErr() > 1) {
         ctx.setLineDash([3, 3]); line(t, pt, '#f472b6', 1.5); ctx.setLineDash([]);
         ctx.fillStyle = '#f472b6'; ctx.fillText('画像の中のずれ', (t.u + pt.u) / 2 + 8, (t.v + pt.v) / 2 - 8);
     }
 }
-function loop() { if (anim) anim(); draw(); requestAnimationFrame(loop); }
+function loop() { tick(); draw(); showResult(); requestAnimationFrame(loop); }
 
 // ---- 操作 ----
 function labels() {
@@ -219,8 +205,6 @@ function labels() {
 function setMode(m) { mode = m; $('mOpen').classList.toggle('on', m === 'open'); $('mFb').classList.toggle('on', m === 'fb'); }
 $('mOpen').onclick = () => setMode('open');
 $('mFb').onclick = () => setMode('fb');
-$('go').onclick = () => { if (running) return; running = true; mode === 'open' ? lookAndMove() : visualFeedback(); };
-$('reset').onclick = () => { anim = null; running = false; q = Q0.slice(); trail = []; showResult(false); };
 
 let drag = false;
 function evPt(ev) { const r = cv.getBoundingClientRect(); return { u: (ev.clientX - r.left) * W / r.width, v: (ev.clientY - r.top) * H / r.height }; }
@@ -228,13 +212,13 @@ cv.addEventListener('pointerdown', ev => { const p = evPt(ev), t = w2i(target); 
 cv.addEventListener('pointermove', ev => {
     if (!drag) return;
     const w = i2w(evPt(ev), CAM_TRUE), r = Math.hypot(w.x, w.y);
-    if (r > 120 && r < 520 && w.y > 20) { target = w; showResult(false); }
+    if (r > 120 && r < 520 && w.y > 20) target = w;
 });
 cv.addEventListener('pointerup', () => { drag = false; });
 
-labels(); showResult(false); loop();
+labels(); loop();
 // テスト用
-window.__vf = { run: m => { setMode(m); q = Q0.slice(); m === 'open' ? lookAndMove() : visualFeedback(); running = true; let n = 0; while (anim && n++ < 1000) anim(); return realErr(); } };
+window.__vf = { run: (m, n = 600) => { setMode(m); for (let i = 0; i < n; i++) tick(); return realErr(); }, move: p => { target = p; } };
 </script>
 </body>
 </html>
