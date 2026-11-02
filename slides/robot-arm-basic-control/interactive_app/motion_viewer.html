@@ -346,8 +346,18 @@
 
             <div id="tab-blend" hidden>
             <div class="step" style="--step: #2dd4bf;">
-                <h2 class="step-title">ブレンド半径<span class="step-sub">直角コーナーを PTP / LIN で通過</span></h2>
-                <p class="text-xs text-gray-400 mb-2">開始 → コーナー（中間点）→ 終了 の直角に曲がる動きです</p>
+                <h2 class="step-title">ブレンド半径<span class="step-sub">コーナーを PTP / LIN で通過</span></h2>
+                <p class="text-xs text-gray-400 mb-2">開始 → コーナー → 終了 の動き。直角の経路と、コーナーを円弧で置き換えた滑らかな経路を選べます</p>
+                <div id="blend-path-selector" class="grid grid-cols-2 gap-1 bg-gray-800 p-2 rounded-lg text-sm mb-2">
+                    <div>
+                        <input type="radio" name="blend-path" value="corner" id="blend-path-corner" class="hidden" checked>
+                        <label for="blend-path-corner" class="radio-label justify-center">直角の経路</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="blend-path" value="smooth" id="blend-path-smooth" class="hidden">
+                        <label for="blend-path-smooth" class="radio-label justify-center">滑らかな経路（点を追加）</label>
+                    </div>
+                </div>
                 <div id="blend-mode-selector" class="grid grid-cols-2 gap-1 bg-gray-800 p-2 rounded-lg text-sm mb-2">
                     <div>
                         <input type="radio" name="blend-mode" value="PTP" id="blend-mode-ptp" class="hidden">
@@ -366,13 +376,17 @@
                     <p class="text-xs text-gray-400">r = 0：コーナーで止まる ／ r &gt; 0：手前から丸めて止まらずに通過</p>
                     <ul class="text-xs text-gray-300 mt-2 space-y-1">
                         <li><span class="text-gray-300">┄ 点線</span>：r = 0 のときの経路（PTP は直線にならない）</li>
-                        <li><span style="color: #facc15;">● 黄色の点</span>：曲がり始め・曲がり終わり（コーナーから r の位置）</li>
+                        <li><label class="cursor-pointer"><input type="checkbox" id="show-blend-points" checked style="accent-color: #facc15;"> <span style="color: #facc15;">● 黄色の点</span>：曲がり始め・曲がり終わり（コーナーから r の位置）</label></li>
                         <li><span style="color: #facc15;">━ 黄色の線</span>：実際に通る経路</li>
                         <li><span style="color: #2dd4bf;">○ 円</span>：半径 r の範囲</li>
+                        <li><span style="color: #2dd4bf;">● 小さい点</span>：滑らかな経路で追加した教示点（コーナーを円弧で置き換え）</li>
                     </ul>
                     <p class="text-xs text-gray-300 mt-2">
                         下の<strong>角加速度</strong>のグラフに注目：r が小さいほどコーナーで加速度が大きく跳ぶ。
                         加速度の急な変化は構造を揺らし、<strong>振動</strong>の原因になる。r = 0 は止まる分だけ時間がかかる。
+                    </p>
+                    <p class="text-xs text-gray-300 mt-1">
+                        <strong>滑らかな経路</strong>に切り替えると、同じ r でも角加速度が下がる → そもそも<strong>振動しにくい経路</strong>を作るのが有効。
                     </p>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-3">
@@ -387,7 +401,7 @@
                     </div>
                     <table class="w-full text-center text-xs">
                         <thead class="text-gray-400">
-                            <tr><th>#</th><th>動作</th><th>r [mm]</th><th>所要時間 [s]</th><th>最大角速度 [rad/s]</th><th>最大角加速度 [rad/s²]</th></tr>
+                            <tr><th>#</th><th>経路</th><th>動作</th><th>r [mm]</th><th>所要時間 [s]</th><th>最大角速度 [rad/s]</th><th>最大角加速度 [rad/s²]</th></tr>
                         </thead>
                         <tbody id="blend-log-body"></tbody>
                     </table>
@@ -490,6 +504,15 @@
             via: new THREE.Vector3(55, -25, 20),
             end: new THREE.Vector3(55, 25, 20)
         };
+        // 滑らかな経路: 直角コーナーを半径 25 の円弧 (30° 刻みの教示点) で置き換える
+        const smoothCornerWaypoints = [
+            blendPreset.start,
+            ...[-90, -60, -30, 0].map(deg => {
+                const a = THREE.MathUtils.degToRad(deg);
+                return new THREE.Vector3(30 + 25 * Math.cos(a), 25 * Math.sin(a), 20);
+            }),
+            blendPreset.end
+        ];
         // 基本タブの座標 (タブを戻したときに復元する)
         const basicPoints = {};
         const STOP_DWELL_MS = 300; // r = 0 のとき中間点で止まっている時間
@@ -728,28 +751,39 @@
                 new THREE.LineDashedMaterial({ color: 0xd1d5db, dashSize: 2, gapSize: 1.5 }));
             taught.computeLineDistances();
             blendGuide.add(taught);
+            const points = getWaypoints();
+            // 滑らかな経路で追加した教示点
+            if (points.length > 3) {
+                points.slice(1, -1).forEach(point => {
+                    const dot = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: markerColors.via }));
+                    dot.position.copy(point);
+                    blendGuide.add(dot);
+                });
+            }
             if (r <= 0) return;
             const motion = buildViaMotion(kind, r);
             if (!motion) return;
-            const { blendIn, blendOut } = motion;
             // 丸め後の経路 (実際に通る道)
             blendGuide.add(new THREE.Line(
                 new THREE.BufferGeometry().setFromPoints(getTcpPathPoints(motion)),
                 new THREE.LineBasicMaterial({ color: 0xfacc15 })));
-            // 半径 r の円 (経路と同じ平面)
-            const u1 = viaPos.clone().sub(startPos).normalize();
-            const normal = new THREE.Vector3().crossVectors(u1, endPos.clone().sub(viaPos)).normalize();
+            // 各中間点まわりの半径 r の円 (経路と同じ平面)
+            const u1 = points[1].clone().sub(points[0]).normalize();
+            const normal = new THREE.Vector3().crossVectors(u1, points[points.length - 1].clone().sub(points[1])).normalize();
             const v = new THREE.Vector3().crossVectors(normal, u1);
-            const ring = [];
-            for (let i = 0; i <= 64; i++) {
-                const a = i / 64 * Math.PI * 2;
-                ring.push(viaPos.clone().addScaledVector(u1, r * Math.cos(a)).addScaledVector(v, r * Math.sin(a)));
-            }
-            blendGuide.add(new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints(ring),
-                new THREE.LineBasicMaterial({ color: markerColors.via })));
-            // 曲がり始め・曲がり終わり
-            [blendIn, blendOut].forEach(point => {
+            points.slice(1, -1).forEach(center => {
+                const ring = [];
+                for (let i = 0; i <= 64; i++) {
+                    const a = i / 64 * Math.PI * 2;
+                    ring.push(center.clone().addScaledVector(u1, r * Math.cos(a)).addScaledVector(v, r * Math.sin(a)));
+                }
+                blendGuide.add(new THREE.Line(
+                    new THREE.BufferGeometry().setFromPoints(ring),
+                    new THREE.LineBasicMaterial({ color: markerColors.via })));
+            });
+            // 曲がり始め・曲がり終わり (チェックボックスで表示を切り替え)
+            if (!document.getElementById('show-blend-points').checked) return;
+            motion.blendPoints.forEach(point => {
                 const dot = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
                 dot.position.copy(point);
                 blendGuide.add(dot);
@@ -809,7 +843,8 @@
             body.querySelectorAll('tr').forEach(row => row.classList.remove('text-yellow-300', 'font-bold'));
             const row = document.createElement('tr');
             row.className = 'text-yellow-300 font-bold';
-            [blendLogCount, motion.kind, motion.r.toFixed(0), (motion.duration / 1000).toFixed(2),
+            const pathLabel = (getBlendPathType() === 'smooth') ? '滑らか' : '直角';
+            [blendLogCount, pathLabel, motion.kind, motion.r.toFixed(0), (motion.duration / 1000).toFixed(2),
              motion.profile.peakVelocity.toFixed(2), motion.profile.peakAcceleration.toFixed(1)].forEach(value => {
                 const cell = document.createElement('td');
                 cell.textContent = value;
@@ -834,14 +869,28 @@
         }
 
         // 隣のブレンドと重ならないよう、r は点間距離の半分までに制限する
+        function getBlendPathType() {
+            return (currentTab === 'blend') ? document.querySelector('input[name="blend-path"]:checked').value : 'corner';
+        }
+
+        // 教示点の列 (開始・中間・終了)。滑らかな経路では中間点が複数になる
+        function getWaypoints() {
+            return (getBlendPathType() === 'smooth') ? smoothCornerWaypoints : [startPos, viaPos, endPos];
+        }
+
         function getEffectiveBlendRadius() {
             if (currentTab !== 'blend') return 0;
-            return Math.min(getBlendRadius(), startPos.distanceTo(viaPos) / 2, viaPos.distanceTo(endPos) / 2);
+            const points = getWaypoints();
+            let r = getBlendRadius();
+            for (let i = 1; i < points.length; i++) r = Math.min(r, points[i - 1].distanceTo(points[i]) / 2);
+            return r;
         }
 
         function updateBlendZone() {
             const r = getEffectiveBlendRadius();
-            blendZone.visible = r > 0;
+            const smooth = getBlendPathType() === 'smooth';
+            blendZone.visible = r > 0 && !smooth;
+            viaMarkerGroup.visible = !smooth;
             blendZone.scale.setScalar(Math.max(r, 0.001));
             blendZone.position.copy(viaPos);
             drawBlendGuide(r);
@@ -865,43 +914,57 @@
         const anglesToVector = (angles) => new THREE.Vector3(angles.j1, angles.j2, angles.j3);
         const vectorToAngles = (v) => ({ j1: v.x, j2: v.y, j3: v.z });
 
-        // 関節空間の線分 a→b 上で、TCP が中間点からちょうど r 離れる位置 (二分法)。nearEnd: 中間点が b 側
-        function findBlendJointPoint(a, b, r, nearEnd) {
+        // 関節空間の線分 a→b 上で、TCP が target からちょうど r 離れる位置 (二分法)。nearEnd: target が b 側
+        function findBlendJointPoint(a, b, r, nearEnd, target) {
             let lo = 0, hi = 1;
             for (let i = 0; i < 40; i++) {
                 const mid = (lo + hi) / 2;
-                const outside = forwardKinematics(vectorToAngles(a.clone().lerp(b, mid))).distanceTo(viaPos) > r;
+                const outside = forwardKinematics(vectorToAngles(a.clone().lerp(b, mid))).distanceTo(target) > r;
                 if (outside === nearEnd) lo = mid; else hi = mid;
             }
             return a.clone().lerp(b, (lo + hi) / 2);
         }
 
-        // 開始→中間→終了 の動き。r = 0 なら中間点で停止、r > 0 なら TCP が中間点から r の位置で曲がり始め、r の位置で曲がり終わる
+        // 教示点を順にたどる動き。r = 0 なら中間点ごとに停止、r > 0 なら TCP が各中間点から r の位置で曲がり始め、r の位置で曲がり終わる
         //   LIN: 直交空間の直線を丸める / PTP: 関節空間の直線を丸める
         function buildViaMotion(kind, r) {
-            const blendPath = (a, via, b, p, q) => {
-                const path = new THREE.CurvePath();
-                path.add(new THREE.LineCurve3(a, p));
-                path.add(new THREE.QuadraticBezierCurve3(p, via, q));
-                path.add(new THREE.LineCurve3(q, b));
-                return path;
-            };
+            const points = getWaypoints();
+            let nodes, toAngles;
             if (kind === 'PTP') {
-                const toAngles = vectorToAngles;
-                const angles = [startPos, viaPos, endPos].map(p => calculateAnglesFor(p));
+                const angles = points.map(p => calculateAnglesFor(p));
                 if (angles.some(a => !a)) return null;
-                const [qs, qv, qe] = angles.map(anglesToVector);
-                if (r <= 0) return { kind, r: 0, toAngles, segments: [new THREE.LineCurve3(qs, qv), new THREE.LineCurve3(qv, qe)] };
-                const qIn = findBlendJointPoint(qs, qv, r, true);
-                const qOut = findBlendJointPoint(qv, qe, r, false);
-                return { kind, r, toAngles, segments: [blendPath(qs, qv, qe, qIn, qOut)],
-                         blendIn: forwardKinematics(toAngles(qIn)), blendOut: forwardKinematics(toAngles(qOut)) };
+                nodes = angles.map(anglesToVector);
+                toAngles = vectorToAngles;
+            } else {
+                nodes = points.map(p => p.clone());
+                toAngles = (p) => calculateAnglesFor(p);
             }
-            const toAngles = (p) => calculateAnglesFor(p);
-            if (r <= 0) return { kind, r: 0, toAngles, segments: [new THREE.LineCurve3(startPos.clone(), viaPos.clone()), new THREE.LineCurve3(viaPos.clone(), endPos.clone())] };
-            const blendIn = viaPos.clone().addScaledVector(viaPos.clone().sub(startPos).normalize(), -r);
-            const blendOut = viaPos.clone().addScaledVector(endPos.clone().sub(viaPos).normalize(), r);
-            return { kind, r, toAngles, segments: [blendPath(startPos.clone(), viaPos.clone(), endPos.clone(), blendIn, blendOut)], blendIn, blendOut };
+            const last = nodes.length - 1;
+            if (r <= 0) {
+                const segments = [];
+                for (let i = 0; i < last; i++) segments.push(new THREE.LineCurve3(nodes[i], nodes[i + 1]));
+                return { kind, r: 0, toAngles, segments, blendPoints: [] };
+            }
+            const path = new THREE.CurvePath();
+            const blendPoints = [];
+            const addLine = (a, b) => { if (a.distanceTo(b) > 1e-6) path.add(new THREE.LineCurve3(a, b)); };
+            let cursor = nodes[0];
+            for (let i = 1; i < last; i++) {
+                let blendIn, blendOut;
+                if (kind === 'PTP') {
+                    blendIn = findBlendJointPoint(nodes[i - 1], nodes[i], r, true, points[i]);
+                    blendOut = findBlendJointPoint(nodes[i], nodes[i + 1], r, false, points[i]);
+                } else {
+                    blendIn = nodes[i].clone().addScaledVector(nodes[i].clone().sub(nodes[i - 1]).normalize(), -r);
+                    blendOut = nodes[i].clone().addScaledVector(nodes[i + 1].clone().sub(nodes[i]).normalize(), r);
+                }
+                addLine(cursor, blendIn);
+                path.add(new THREE.QuadraticBezierCurve3(blendIn, nodes[i], blendOut));
+                blendPoints.push(forwardKinematics(toAngles(blendIn)), forwardKinematics(toAngles(blendOut)));
+                cursor = blendOut;
+            }
+            addLine(cursor, nodes[last]);
+            return { kind, r, toAngles, segments: [path], blendPoints };
         }
 
         // 動きに沿った TCP の位置の列 (3D 表示用)
@@ -960,12 +1023,21 @@
             // r > 0: 曲がり始め・終わりの位置 (経路長に対する割合)
             let blendThresholds = [];
             if (motion.r > 0) {
-                const [line1, arc] = plan[0].curve.curves;
                 const total = plan[0].curve.getLength();
-                blendThresholds = [line1.getLength() / total, (line1.getLength() + arc.getLength()) / total];
+                let length = 0;
+                plan[0].curve.curves.forEach(curve => {
+                    if (curve instanceof THREE.QuadraticBezierCurve3) blendThresholds.push(length / total);
+                    length += curve.getLength();
+                    if (curve instanceof THREE.QuadraticBezierCurve3) blendThresholds.push(length / total);
+                });
             }
             const cornerTimes = [];
-            if (motion.r <= 0) cornerTimes.push(plan[0].duration / 1000, plan[1].start / 1000); // コーナーへの到着・出発
+            if (motion.r <= 0) {
+                // 中間点への到着・出発
+                for (let i = 0; i < plan.length - 1; i++) {
+                    cornerTimes.push((plan[i].start + plan[i].duration) / 1000, plan[i + 1].start / 1000);
+                }
+            }
             const keys = ['j1', 'j2', 'j3'];
             const dt = PROFILE_DT_MS / 1000;
             const samples = [];
@@ -1013,7 +1085,8 @@
             document.getElementById('blend-start-btn').addEventListener('click', startComparison);
             document.getElementById('blend-reset-btn').addEventListener('click', resetScene);
             document.getElementById('blend-log-clear-btn').addEventListener('click', clearBlendLog);
-            document.querySelectorAll('input[name="blend-mode"]').forEach(radio => radio.addEventListener('change', () => {
+            document.getElementById('show-blend-points').addEventListener('change', updateBlendZone);
+            document.querySelectorAll('input[name="blend-mode"], input[name="blend-path"]').forEach(radio => radio.addEventListener('change', () => {
                 if (isAnimating) return;
                 updateBlendZone();
                 resetScene();
