@@ -97,6 +97,80 @@
         input[type="radio"]:checked + .radio-label {
             background-color: #3b82f6;
         }
+        .tab-btn {
+            flex: 1;
+            padding: 0.4rem 0.5rem;
+            border-radius: 0.5rem;
+            color: #9ca3af;
+        }
+        .tab-btn.active {
+            background-color: #374151;
+            color: #f9fafb;
+        }
+        #joint-charts {
+            cursor: zoom-in;
+        }
+        #chart-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            padding: 1.5rem;
+            background-color: rgba(17, 24, 39, 0.85);
+        }
+        #chart-overlay[hidden] {
+            display: none;
+        }
+        .chart-overlay-inner {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            background-color: #1f2937;
+        }
+        #chart-overlay #joint-charts {
+            cursor: zoom-out;
+            height: 100%;
+        }
+        #chart-overlay #joint-charts > div {
+            height: calc((100vh - 11rem) / 3) !important;
+        }
+        .step {
+            margin-top: 1rem;
+            padding: 0.75rem 0 0.25rem 0.75rem;
+            border-left: 4px solid var(--step);
+        }
+        .step-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--step);
+        }
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 9999px;
+            background-color: var(--step);
+            color: #111827;
+        }
+        .step-sub {
+            font-size: 0.75rem;
+            font-weight: normal;
+            color: #9ca3af;
+        }
+        .step input[type="radio"]:checked + .radio-label {
+            background-color: var(--step);
+            color: #111827;
+            font-weight: bold;
+        }
+        #jog-panel-container.disabled,
         .jog-panel-container.disabled {
             opacity: 0.6;
             pointer-events: none;
@@ -108,110 +182,46 @@
 
     <div id="canvas-container"></div>
 
+    <!-- グラフの拡大表示 -->
+    <div id="chart-overlay" hidden>
+        <div class="chart-overlay-inner">
+            <div class="flex items-center justify-between mb-2">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">各関節の角度・角速度・角加速度</h2>
+                    <p class="text-sm" style="color: #facc15;">黄色の縦線：曲がり始め・曲がり終わり（r = 0 ではコーナーへの到着・出発）</p>
+                </div>
+                <button id="chart-close-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg px-4 py-2">✕ 閉じる（Esc）</button>
+            </div>
+            <div id="chart-overlay-slot" class="flex-1"></div>
+        </div>
+    </div>
+
     <div id="ui-container">
         <div class="control-panel">
-            <h1 class="text-xl font-bold text-center mb-4 text-white">ロボット動作軌跡 比較シミュレーター</h1>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p class="text-sm font-bold text-gray-400">コントロール</p>
-                    <div class="flex flex-col space-y-2 mt-2">
-                        <button id="start-btn"
-                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">アニメーション開始</button>
-                        <button id="reset-btn"
-                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">リセット</button>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-400">動作モード選択</p>
-                    <div id="mode-selector" class="mt-2 text-left bg-gray-800 p-2 rounded-lg h-full text-sm space-y-1">
-                        <div>
-                            <input type="radio" name="animation-mode" value="PTP" id="mode-ptp" class="hidden" checked>
-                            <label for="mode-ptp" class="radio-label">PTP (関節補間)</label>
-                        </div>
-                        <div>
-                            <input type="radio" name="animation-mode" value="LIN" id="mode-lin" class="hidden">
-                            <label for="mode-lin" class="radio-label">LIN (直線補間)</label>
-                        </div>
-                        <div>
-                            <input type="radio" name="animation-mode" value="CIRC" id="mode-circ" class="hidden">
-                            <label for="mode-circ" class="radio-label">CIRC (円弧補間)</label>
-                        </div>
-                        <div>
-                            <input type="radio" name="animation-mode" value="COMP" id="mode-comp" class="hidden">
-                            <label for="mode-comp" class="radio-label font-bold text-yellow-300">全軌道比較</label>
-                        </div>
-                    </div>
-                </div>
+            <h1 class="text-xl font-bold text-center mb-2 text-white">ロボット動作軌跡 比較シミュレーター</h1>
+            <div id="tab-bar" class="flex bg-gray-800 p-1 rounded-lg text-sm font-bold">
+                <button class="tab-btn active" data-tab="basic">基本の動作 ①〜④</button>
+                <button class="tab-btn" data-tab="blend">ブレンド半径</button>
             </div>
 
-            <div class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">エンドエフェクタ選択</h2>
+            <div id="tab-basic">
+
+            <div class="step" style="--step: #f472b6;">
+                <h2 class="step-title"><span class="step-badge">1</span>TCPの設定<span class="step-sub">エンドエフェクタ</span></h2>
                 <div id="end-effector-selector" class="flex justify-center space-x-4 bg-gray-800 p-2 rounded-lg">
                      <div>
                         <input type="radio" name="end-effector-type" value="A" id="ee-type-a" class="hidden">
-                        <label for="ee-type-a" class="radio-label text-sm">タイプA (コーン)</label>
+                        <label for="ee-type-a" class="radio-label text-sm">フランジ面 (ツールなし)</label>
                     </div>
                     <div>
                         <input type="radio" name="end-effector-type" value="B" id="ee-type-b" class="hidden" checked>
-                        <label for="ee-type-b" class="radio-label text-sm">タイプB (グリッパー)</label>
+                        <label for="ee-type-b" class="radio-label text-sm">グリッパー</label>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">座標設定 (Z-up 右手系)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <h3 class="font-semibold text-pink-400 mb-2">開始点 (X, Y, Z)</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
-                            <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
-                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center" value="70">
-                        </div>
-                    </div>
-                     <div>
-                        <h3 class="font-semibold text-teal-400 mb-2">中間点 (X, Y, Z)</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center" value="60">
-                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center" value="0">
-                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center" value="30">
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-orange-400 mb-2">終了点 (X, Y, Z)</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
-                            <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center" value="-20">
-                            <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center" value="10">
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4 flex justify-center">
-                    <button id="update-pos-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg">座標を更新</button>
-                </div>
-                <p id="error-message" class="text-yellow-400 text-center mt-2 text-sm h-4"></p>
-            </div>
-            
-            <div class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">速度設定</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="joint-speed" class="font-semibold text-pink-400 mb-2 block text-center">PTP目標速度 (deg/s)</label>
-                        <input type="number" id="joint-speed" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="90">
-                    </div>
-                    <div>
-                        <label for="tcp-speed" class="font-semibold text-teal-400 mb-2 block text-center">LIN/CIRC 手先速度 (mm/s)</label>
-                        <input type="number" id="tcp-speed" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="100">
-                    </div>
-                </div>
-                <div class="mt-4">
-                     <label for="joint-speed-limit" class="font-semibold text-yellow-400 mb-2 block text-center">全体 関節最大速度 (rad/s)</label>
-                     <input type="number" id="joint-speed-limit" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="1.0">
-                </div>
-            </div>
-
-            <div id="jog-panel-container" class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">ジョグ操作</h2>
+            <div id="jog-panel-container" class="step" style="--step: #4fc3f7;">
+                <h2 class="step-title"><span class="step-badge">2</span>座標系の指定<span class="step-sub">ジョグ操作</span></h2>
                 <div id="jog-mode-selector" class="flex justify-center space-x-2 bg-gray-800 p-2 rounded-lg mb-4">
                     <div>
                         <input type="radio" name="jog-mode" value="joint" id="jog-mode-joint" class="hidden" checked>
@@ -229,19 +239,19 @@
                 <div id="jog-controls">
                     <div id="joint-jog-panel">
                         <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
-                            <span class="font-bold w-16 text-center">J1 (deg)</span>
+                            <span class="font-bold w-20 text-center">J1 (deg)</span>
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="0" data-dir="-1">-</button>
                             <input type="text" id="j1-angle-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="0" data-dir="1">+</button>
                         </div>
                         <div class="flex items-center justify-between mb-2 p-1 bg-gray-900/50 rounded-md">
-                            <span class="font-bold w-16 text-center">J2 (deg)</span>
+                            <span class="font-bold w-20 text-center">J2 (deg)</span>
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="1" data-dir="-1">-</button>
                             <input type="text" id="j2-angle-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="1" data-dir="1">+</button>
                         </div>
                         <div class="flex items-center justify-between p-1 bg-gray-900/50 rounded-md">
-                            <span class="font-bold w-16 text-center">J3 (deg)</span>
+                            <span class="font-bold w-20 text-center">J3 (deg)</span>
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="2" data-dir="-1">-</button>
                             <input type="text" id="j3-angle-display" class="bg-gray-700 text-white w-24 text-center rounded" readonly>
                             <button class="jog-btn bg-gray-600 hover:bg-gray-500 w-10 h-8 rounded" data-type="joint" data-joint="2" data-dir="1">+</button>
@@ -269,11 +279,156 @@
                     </div>
                 </div>
             </div>
-            
+
+            <div class="step" style="--step: #fb923c;">
+                <h2 class="step-title"><span class="step-badge">3</span>動作の種類<span class="step-sub">補間方法・経由点</span></h2>
+                <div id="mode-selector" class="grid grid-cols-2 gap-1 bg-gray-800 p-2 rounded-lg text-sm">
+                        <div>
+                            <input type="radio" name="animation-mode" value="PTP" id="mode-ptp" class="hidden" checked>
+                            <label for="mode-ptp" class="radio-label">PTP (関節補間)</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="animation-mode" value="LIN" id="mode-lin" class="hidden">
+                            <label for="mode-lin" class="radio-label">LIN (直線補間・中間点経由)</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="animation-mode" value="CIRC" id="mode-circ" class="hidden">
+                            <label for="mode-circ" class="radio-label">CIRC (円弧補間)</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="animation-mode" value="COMP" id="mode-comp" class="hidden">
+                            <label for="mode-comp" class="radio-label font-bold text-yellow-300">全軌道比較</label>
+                        </div>
+                </div>
+                <h3 class="font-bold text-sm text-gray-300 mt-3 mb-2">座標設定 (Z-up 右手系)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <h3 class="font-semibold text-pink-400 mb-2">開始点 (X, Y, Z)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="start-x" class="bg-gray-700 text-white rounded p-1 text-center" value="40">
+                            <input type="number" id="start-y" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
+                            <input type="number" id="start-z" class="bg-gray-700 text-white rounded p-1 text-center" value="70">
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="font-semibold text-teal-400 mb-2">中間点 (X, Y, Z)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="via-x" class="bg-gray-700 text-white rounded p-1 text-center" value="60">
+                            <input type="number" id="via-y" class="bg-gray-700 text-white rounded p-1 text-center" value="0">
+                            <input type="number" id="via-z" class="bg-gray-700 text-white rounded p-1 text-center" value="30">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-orange-400 mb-2">終了点 (X, Y, Z)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="end-x" class="bg-gray-700 text-white rounded p-1 text-center" value="20">
+                            <input type="number" id="end-y" class="bg-gray-700 text-white rounded p-1 text-center" value="-20">
+                            <input type="number" id="end-z" class="bg-gray-700 text-white rounded p-1 text-center" value="10">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-center">
+                    <button id="update-pos-btn" class="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded-lg">座標を更新</button>
+                </div>
+            </div>
+
+            <div class="step" style="--step: #86efac;">
+                <h2 class="step-title"><span class="step-badge">4</span>実行・テスト<span class="step-sub"></span></h2>
+                <div class="grid grid-cols-2 gap-2">
+                        <button id="start-btn"
+                            class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg">アニメーション開始</button>
+                        <button id="reset-btn"
+                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">リセット</button>
+                </div>
+                <p class="motion-info text-sm text-gray-300 text-center mt-2 h-5"></p>
+            </div>
+            </div>
+
+            <div id="tab-blend" hidden>
+            <div class="step" style="--step: #2dd4bf;">
+                <h2 class="step-title">ブレンド半径<span class="step-sub">直角コーナーを PTP / LIN で通過</span></h2>
+                <p class="text-xs text-gray-400 mb-2">開始 → コーナー（中間点）→ 終了 の直角に曲がる動きです</p>
+                <div id="blend-mode-selector" class="grid grid-cols-2 gap-1 bg-gray-800 p-2 rounded-lg text-sm mb-2">
+                    <div>
+                        <input type="radio" name="blend-mode" value="PTP" id="blend-mode-ptp" class="hidden">
+                        <label for="blend-mode-ptp" class="radio-label justify-center">PTP (関節補間)</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="blend-mode" value="LIN" id="blend-mode-lin" class="hidden" checked>
+                        <label for="blend-mode-lin" class="radio-label justify-center">LIN (直線補間)</label>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-2 rounded-lg text-sm">
+                    <label for="blend-radius" class="flex justify-between font-bold">
+                        <span>ブレンド半径 r</span><span id="blend-radius-value">0 mm</span>
+                    </label>
+                    <input type="range" id="blend-radius" min="0" max="20" step="1" value="0" class="w-full" style="accent-color: var(--step);">
+                    <p class="text-xs text-gray-400">r = 0：コーナーで止まる ／ r &gt; 0：手前から丸めて止まらずに通過</p>
+                    <ul class="text-xs text-gray-300 mt-2 space-y-1">
+                        <li><span class="text-gray-300">┄ 点線</span>：r = 0 のときの経路（PTP は直線にならない）</li>
+                        <li><span style="color: #facc15;">● 黄色の点</span>：曲がり始め・曲がり終わり（コーナーから r の位置）</li>
+                        <li><span style="color: #facc15;">━ 黄色の線</span>：実際に通る経路</li>
+                        <li><span style="color: #2dd4bf;">○ 円</span>：半径 r の範囲</li>
+                    </ul>
+                    <p class="text-xs text-gray-300 mt-2">
+                        下の<strong>角加速度</strong>のグラフに注目：r が小さいほどコーナーで加速度が大きく跳ぶ。
+                        加速度の急な変化は構造を揺らし、<strong>振動</strong>の原因になる。r = 0 は止まる分だけ時間がかかる。
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-3">
+                    <button id="blend-start-btn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg">実行</button>
+                    <button id="blend-reset-btn" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">リセット</button>
+                </div>
+                <p class="motion-info text-sm text-gray-300 text-center mt-2 h-5"></p>
+                <div class="mt-2 bg-gray-800 p-2 rounded-lg text-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold">実行ログ</span>
+                        <button id="blend-log-clear-btn" class="text-xs text-gray-400 hover:text-white">クリア</button>
+                    </div>
+                    <table class="w-full text-center text-xs">
+                        <thead class="text-gray-400">
+                            <tr><th>#</th><th>動作</th><th>r [mm]</th><th>所要時間 [s]</th><th>最大角速度 [rad/s]</th><th>最大角加速度 [rad/s²]</th></tr>
+                        </thead>
+                        <tbody id="blend-log-body"></tbody>
+                    </table>
+                    <p id="blend-log-empty" class="text-xs text-gray-500 text-center mt-1">r を変えて実行すると、ここに結果が並びます</p>
+                </div>
+            </div>
+            </div>
+
+            <p id="error-message" class="text-yellow-400 text-center mt-2 text-sm h-4"></p>
+
+            <details class="mt-4 pt-4 border-t border-gray-600">
+                <summary class="cursor-pointer text-sm font-bold text-gray-400">詳細設定：速度</summary>
+                <div class="mt-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="joint-speed" class="font-semibold text-pink-400 mb-2 block text-center">PTP目標速度 (deg/s)</label>
+                            <input type="number" id="joint-speed" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="90">
+                        </div>
+                        <div>
+                            <label for="tcp-speed" class="font-semibold text-teal-400 mb-2 block text-center">LIN/CIRC 手先速度 (mm/s)</label>
+                            <input type="number" id="tcp-speed" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="100">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                         <label for="joint-speed-limit" class="font-semibold text-yellow-400 mb-2 block text-center">全体 関節最大速度 (rad/s)</label>
+                         <input type="number" id="joint-speed-limit" class="bg-gray-700 text-white rounded p-1 text-center w-full" value="1.0">
+                    </div>
+                </div>
+            </details>
+
             <div class="mt-4 pt-4 border-t border-gray-600">
-                <h2 class="text-lg font-bold text-center mb-2 text-white">各関節のリアルタイム角速度 (rad/s)</h2>
-                <div class="bg-gray-900 p-2 rounded-lg">
-                    <canvas id="velocity-chart"></canvas>
+                <div class="flex items-center justify-center gap-2 mb-1">
+                    <h2 class="text-lg font-bold text-white">各関節の角度・角速度・角加速度</h2>
+                    <button id="chart-enlarge-btn" class="text-xs bg-gray-700 hover:bg-gray-600 text-white rounded px-2 py-1">⤢ 拡大</button>
+                </div>
+                <p class="text-xs text-center mb-2" style="color: #facc15;">黄色の縦線：曲がり始め・曲がり終わり（r = 0 ではコーナーへの到着・出発）</p>
+                <div id="chart-home"></div>
+                <div id="joint-charts" class="bg-gray-900 p-2 rounded-lg space-y-1" title="クリックで拡大">
+                    <div style="height: 130px;"><canvas id="angle-chart"></canvas></div>
+                    <div style="height: 110px;"><canvas id="velocity-chart"></canvas></div>
+                    <div style="height: 130px;"><canvas id="acceleration-chart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -326,6 +481,18 @@
         let isAnimating = false;
         let startMarkerGroup, endMarkerGroup, viaMarkerGroup;
         let pathLines = [];
+        let blendZone, blendGuide;
+        let savedCameraView = null;
+        let currentTab = 'basic';
+        // ブレンド半径タブ用の直角コーナー (開始 → コーナー → 終了)
+        const blendPreset = {
+            start: new THREE.Vector3(15, -25, 20),
+            via: new THREE.Vector3(55, -25, 20),
+            end: new THREE.Vector3(55, 25, 20)
+        };
+        // 基本タブの座標 (タブを戻したときに復元する)
+        const basicPoints = {};
+        const STOP_DWELL_MS = 300; // r = 0 のとき中間点で止まっている時間
 
         // --- ロボットの関節とリンク ---
         const joints = [];
@@ -335,8 +502,8 @@
         let endEffectorGroupA, endEffectorGroupB;
         let currentEndEffectorType = 'B';
         const endEffectorDefs = {
-            'A': { tcpOffset: 6 },
-            'B': { tcpOffset: 12 }
+            'A': { tcpOffset: 1 },
+            'B': { tcpOffset: 11 }
         };
 
         // --- ジョグ関連 ---
@@ -352,7 +519,11 @@
         let viaPos = new THREE.Vector3(60, 0, 30);
         
         // --- 速度プロット用 ---
-        let velocityChart;
+        let jointCharts = [];
+        let lastVelocities = null;
+        let plannedProfile = null; // LIN の計画済みプロファイル (あればフレーム差分の代わりに使う)
+        let plottedSampleCount = 0;
+        let cornerEventTimes = []; // 曲がり始め・終わりを通過した時刻 [s]
         let lastAngles = { j1: 0, j2: 0, j3: 0 };
         let lastTime = 0;
         let animationStartTime = 0;
@@ -400,7 +571,7 @@
             switchEndEffector(currentEndEffectorType);
             createMarkers();
             setupUI();
-            createJointVelocityChart();
+            createJointCharts();
             resetScene();
             animate();
         }
@@ -469,7 +640,7 @@
             flange.position.x = l3Length;
             l3.add(flange);
             endEffectorGroupA = new THREE.Group();
-            const eeA_visual = new THREE.Mesh(new THREE.ConeGeometry(3, endEffectorDefs.A.tcpOffset, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c }));
+            const eeA_visual = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, endEffectorDefs.A.tcpOffset, 32), new THREE.MeshStandardMaterial({ color: 0x9ca3af }));
             eeA_visual.rotation.z = -Math.PI / 2;
             eeA_visual.position.x = endEffectorDefs.A.tcpOffset / 2;
             eeA_visual.castShadow = true;
@@ -481,11 +652,15 @@
             tcpA.add(new THREE.AxesHelper(5));
             endEffectorGroupA.tcp = tcpA;
             endEffectorGroupB = new THREE.Group();
+            // フランジ面 (タイプAと同じ円板) にグリッパを取り付ける
+            const flangeFaceB = eeA_visual.clone();
+            endEffectorGroupB.add(flangeFaceB);
+            const flangeThickness = endEffectorDefs.A.tcpOffset;
             const gripperBase = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 5), new THREE.MeshStandardMaterial({ color: 0x6b7280 }));
-            gripperBase.position.x = 2;
+            gripperBase.position.x = flangeThickness + 2;
             endEffectorGroupB.add(gripperBase);
             const finger1 = new THREE.Mesh(new THREE.BoxGeometry(8, 1, 3), new THREE.MeshStandardMaterial({ color: 0x9ca3af }));
-            finger1.position.set(4 + 4, 2, 0);
+            finger1.position.set(flangeThickness + 4 + 4, 2, 0);
             endEffectorGroupB.add(finger1);
             const finger2 = finger1.clone();
             finger2.position.y = -2;
@@ -523,6 +698,297 @@
             startMarkerGroup = createLabeledMarker('開始', startPos, markerColors.start);
             endMarkerGroup = createLabeledMarker('終了', endPos, markerColors.end);
             viaMarkerGroup = createLabeledMarker('中間', viaPos, markerColors.via);
+            // ブレンド半径の範囲 (中間点まわりの球)
+            blendZone = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), new THREE.MeshBasicMaterial({ color: markerColors.via, transparent: true, opacity: 0.1, depthWrite: false }));
+            scene.add(blendZone);
+            // 教示した経路・丸め後の経路・曲がり始め/終わりの点を描くグループ
+            blendGuide = new THREE.Group();
+            scene.add(blendGuide);
+            updateBlendZone();
+        }
+
+        function clearBlendGuide() {
+            while (blendGuide.children.length > 0) {
+                const obj = blendGuide.children[0];
+                blendGuide.remove(obj);
+                obj.geometry.dispose();
+                obj.material.dispose();
+            }
+        }
+
+        function drawBlendGuide(r) {
+            clearBlendGuide();
+            if (currentTab !== 'blend') return;
+            const kind = getBlendMode();
+            // r = 0 のときの経路 (点線)
+            const unblended = buildViaMotion(kind, 0);
+            if (!unblended) return;
+            const taught = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(getTcpPathPoints(unblended)),
+                new THREE.LineDashedMaterial({ color: 0xd1d5db, dashSize: 2, gapSize: 1.5 }));
+            taught.computeLineDistances();
+            blendGuide.add(taught);
+            if (r <= 0) return;
+            const motion = buildViaMotion(kind, r);
+            if (!motion) return;
+            const { blendIn, blendOut } = motion;
+            // 丸め後の経路 (実際に通る道)
+            blendGuide.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(getTcpPathPoints(motion)),
+                new THREE.LineBasicMaterial({ color: 0xfacc15 })));
+            // 半径 r の円 (経路と同じ平面)
+            const u1 = viaPos.clone().sub(startPos).normalize();
+            const normal = new THREE.Vector3().crossVectors(u1, endPos.clone().sub(viaPos)).normalize();
+            const v = new THREE.Vector3().crossVectors(normal, u1);
+            const ring = [];
+            for (let i = 0; i <= 64; i++) {
+                const a = i / 64 * Math.PI * 2;
+                ring.push(viaPos.clone().addScaledVector(u1, r * Math.cos(a)).addScaledVector(v, r * Math.sin(a)));
+            }
+            blendGuide.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(ring),
+                new THREE.LineBasicMaterial({ color: markerColors.via })));
+            // 曲がり始め・曲がり終わり
+            [blendIn, blendOut].forEach(point => {
+                const dot = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+                dot.position.copy(point);
+                blendGuide.add(dot);
+            });
+        }
+
+        function setMarkerPositions(points) {
+            startPos.copy(points.start);
+            viaPos.copy(points.via);
+            endPos.copy(points.end);
+            startMarkerGroup.position.copy(startPos);
+            viaMarkerGroup.position.copy(viaPos);
+            endMarkerGroup.position.copy(endPos);
+            updateBlendZone();
+        }
+
+        function switchTab(tab) {
+            if (isAnimating || tab === currentTab) return;
+            if (currentTab === 'basic') {
+                basicPoints.start = startPos.clone();
+                basicPoints.via = viaPos.clone();
+                basicPoints.end = endPos.clone();
+            }
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+            document.getElementById('tab-basic').hidden = (tab !== 'basic');
+            document.getElementById('tab-blend').hidden = (tab !== 'blend');
+            setMarkerPositions(tab === 'blend' ? blendPreset : basicPoints);
+            setBlendCameraView(tab === 'blend');
+            document.getElementById('error-message').textContent = '';
+            resetScene();
+        }
+
+        // ブレンド半径タブでは直角コーナーを真上から見る
+        function setBlendCameraView(topView) {
+            if (topView) {
+                savedCameraView = { position: camera.position.clone(), target: controls.target.clone() };
+                controls.target.set(15, 0, 20);
+                camera.position.set(15, -10, 110);
+            } else if (savedCameraView) {
+                camera.position.copy(savedCameraView.position);
+                controls.target.copy(savedCameraView.target);
+            }
+            controls.update();
+        }
+
+        function setRunButtonsDisabled(disabled) {
+            document.getElementById('start-btn').disabled = disabled;
+            document.getElementById('blend-start-btn').disabled = disabled;
+        }
+
+        // ブレンド半径タブの実行結果を表に積み上げる (r ごとの比較用)
+        let blendLogCount = 0;
+        function addBlendLog(motion) {
+            blendLogCount++;
+            const body = document.getElementById('blend-log-body');
+            body.querySelectorAll('tr').forEach(row => row.classList.remove('text-yellow-300', 'font-bold'));
+            const row = document.createElement('tr');
+            row.className = 'text-yellow-300 font-bold';
+            [blendLogCount, motion.kind, motion.r.toFixed(0), (motion.duration / 1000).toFixed(2),
+             motion.profile.peakVelocity.toFixed(2), motion.profile.peakAcceleration.toFixed(1)].forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+            body.appendChild(row);
+            document.getElementById('blend-log-empty').hidden = true;
+        }
+
+        function clearBlendLog() {
+            blendLogCount = 0;
+            document.getElementById('blend-log-body').innerHTML = '';
+            document.getElementById('blend-log-empty').hidden = false;
+        }
+
+        function showMotionInfo(text) {
+            document.querySelectorAll('.motion-info').forEach(el => { el.textContent = text; });
+        }
+
+        function getBlendRadius() {
+            return parseFloat(document.getElementById('blend-radius').value) || 0;
+        }
+
+        // 隣のブレンドと重ならないよう、r は点間距離の半分までに制限する
+        function getEffectiveBlendRadius() {
+            if (currentTab !== 'blend') return 0;
+            return Math.min(getBlendRadius(), startPos.distanceTo(viaPos) / 2, viaPos.distanceTo(endPos) / 2);
+        }
+
+        function updateBlendZone() {
+            const r = getEffectiveBlendRadius();
+            blendZone.visible = r > 0;
+            blendZone.scale.setScalar(Math.max(r, 0.001));
+            blendZone.position.copy(viaPos);
+            drawBlendGuide(r);
+            document.getElementById('blend-radius-value').textContent =
+                (currentTab === 'blend' && r < getBlendRadius()) ? `${r.toFixed(0)} mm（点間距離の半分が上限）` : `${r} mm`;
+        }
+
+        function getBlendMode() {
+            return (currentTab === 'blend') ? document.querySelector('input[name="blend-mode"]:checked').value : 'LIN';
+        }
+
+        // 関節角 → TCP 位置 (calculateAnglesFor の逆)
+        function forwardKinematics(angles) {
+            const L2 = 40, L3 = 29 + endEffectorDefs[currentEndEffectorType].tcpOffset, j2PivotZ = 30;
+            const reach = L2 * Math.cos(angles.j2) + L3 * Math.cos(angles.j2 - angles.j3);
+            const height = L2 * Math.sin(angles.j2) + L3 * Math.sin(angles.j2 - angles.j3);
+            return new THREE.Vector3(reach * Math.cos(angles.j1), reach * Math.sin(angles.j1), height + j2PivotZ);
+        }
+
+        // PTP では関節角 (j1, j2, j3) を Vector3 として関節空間の曲線で扱う
+        const anglesToVector = (angles) => new THREE.Vector3(angles.j1, angles.j2, angles.j3);
+        const vectorToAngles = (v) => ({ j1: v.x, j2: v.y, j3: v.z });
+
+        // 関節空間の線分 a→b 上で、TCP が中間点からちょうど r 離れる位置 (二分法)。nearEnd: 中間点が b 側
+        function findBlendJointPoint(a, b, r, nearEnd) {
+            let lo = 0, hi = 1;
+            for (let i = 0; i < 40; i++) {
+                const mid = (lo + hi) / 2;
+                const outside = forwardKinematics(vectorToAngles(a.clone().lerp(b, mid))).distanceTo(viaPos) > r;
+                if (outside === nearEnd) lo = mid; else hi = mid;
+            }
+            return a.clone().lerp(b, (lo + hi) / 2);
+        }
+
+        // 開始→中間→終了 の動き。r = 0 なら中間点で停止、r > 0 なら TCP が中間点から r の位置で曲がり始め、r の位置で曲がり終わる
+        //   LIN: 直交空間の直線を丸める / PTP: 関節空間の直線を丸める
+        function buildViaMotion(kind, r) {
+            const blendPath = (a, via, b, p, q) => {
+                const path = new THREE.CurvePath();
+                path.add(new THREE.LineCurve3(a, p));
+                path.add(new THREE.QuadraticBezierCurve3(p, via, q));
+                path.add(new THREE.LineCurve3(q, b));
+                return path;
+            };
+            if (kind === 'PTP') {
+                const toAngles = vectorToAngles;
+                const angles = [startPos, viaPos, endPos].map(p => calculateAnglesFor(p));
+                if (angles.some(a => !a)) return null;
+                const [qs, qv, qe] = angles.map(anglesToVector);
+                if (r <= 0) return { kind, r: 0, toAngles, segments: [new THREE.LineCurve3(qs, qv), new THREE.LineCurve3(qv, qe)] };
+                const qIn = findBlendJointPoint(qs, qv, r, true);
+                const qOut = findBlendJointPoint(qv, qe, r, false);
+                return { kind, r, toAngles, segments: [blendPath(qs, qv, qe, qIn, qOut)],
+                         blendIn: forwardKinematics(toAngles(qIn)), blendOut: forwardKinematics(toAngles(qOut)) };
+            }
+            const toAngles = (p) => calculateAnglesFor(p);
+            if (r <= 0) return { kind, r: 0, toAngles, segments: [new THREE.LineCurve3(startPos.clone(), viaPos.clone()), new THREE.LineCurve3(viaPos.clone(), endPos.clone())] };
+            const blendIn = viaPos.clone().addScaledVector(viaPos.clone().sub(startPos).normalize(), -r);
+            const blendOut = viaPos.clone().addScaledVector(endPos.clone().sub(viaPos).normalize(), r);
+            return { kind, r, toAngles, segments: [blendPath(startPos.clone(), viaPos.clone(), endPos.clone(), blendIn, blendOut)], blendIn, blendOut };
+        }
+
+        // 動きに沿った TCP の位置の列 (3D 表示用)
+        function getTcpPathPoints(motion) {
+            const points = [];
+            motion.segments.forEach(curve => curve.getSpacedPoints(100).forEach(p => {
+                const angles = motion.toAngles(p);
+                if (angles) points.push(forwardKinematics(angles));
+            }));
+            return points;
+        }
+
+        // 区間ごとに台形速度で動く Tween を作って連結する。範囲外なら null
+        function createViaMotion(kind, pathLine, { tcpSpeed, jointSpeedRad, jointSpeedLimitRad }) {
+            const motion = buildViaMotion(kind, getEffectiveBlendRadius());
+            if (!motion) return null;
+            const { r, segments, toAngles } = motion;
+            // LIN は手先速度、PTP は関節速度 (関節空間での長さ) で所要時間を決める
+            const speed = (kind === 'PTP') ? Math.min(jointSpeedRad, jointSpeedLimitRad) : tcpSpeed;
+            const baseDurations = segments.map(curve => (curve.getLength() / speed) / (1 - blendRatio) * 1000);
+            // LIN が関節速度の上限で減速するときは、r によらず比べられるよう全区間を同じ割合で遅くする
+            let slowdownFactor = 1;
+            if (kind === 'LIN') {
+                for (let i = 0; i < segments.length; i++) {
+                    const estimatedMaxSpeed = estimateMaxJointVelocity(segments[i], baseDurations[i]);
+                    if (estimatedMaxSpeed === Infinity) return null;
+                    if (estimatedMaxSpeed) slowdownFactor = Math.max(slowdownFactor, estimatedMaxSpeed / jointSpeedLimitRad);
+                }
+            }
+            // 動作計画: 各区間の開始時刻と所要時間 [ms]。r = 0 では中間点で STOP_DWELL_MS 止まる
+            const plan = [];
+            let totalDuration = 0;
+            segments.forEach((curve, i) => {
+                if (i > 0) totalDuration += STOP_DWELL_MS;
+                const duration = baseDurations[i] * slowdownFactor;
+                plan.push({ curve, start: totalDuration, duration });
+                totalDuration += duration;
+            });
+            const tweens = plan.map(({ curve, duration }, i) => {
+                const tween = new TWEEN.Tween({ t: 0 }).to({ t: 1 }, duration).easing(trapezoidalEase)
+                    .onUpdate(({ t }) => {
+                        const angles = toAngles(curve.getPointAt(t));
+                        if (angles) { setJointAngles(angles); updatePath(pathLine); }
+                    });
+                if (i > 0) tween.delay(STOP_DWELL_MS);
+                return tween;
+            });
+            for (let i = 0; i < tweens.length - 1; i++) tweens[i].chain(tweens[i + 1]);
+            return { kind, r, first: tweens[0], last: tweens[tweens.length - 1], duration: totalDuration,
+                     profile: sampleProfile(plan, motion, totalDuration) };
+        }
+
+        // 動作計画を一定間隔でサンプリングして角度・角速度・角加速度を求める (描画のフレームレートに依存しない)
+        const PROFILE_DT_MS = 5;
+        function sampleProfile(plan, motion, totalDuration) {
+            // r > 0: 曲がり始め・終わりの位置 (経路長に対する割合)
+            let blendThresholds = [];
+            if (motion.r > 0) {
+                const [line1, arc] = plan[0].curve.curves;
+                const total = plan[0].curve.getLength();
+                blendThresholds = [line1.getLength() / total, (line1.getLength() + arc.getLength()) / total];
+            }
+            const cornerTimes = [];
+            if (motion.r <= 0) cornerTimes.push(plan[0].duration / 1000, plan[1].start / 1000); // コーナーへの到着・出発
+            const keys = ['j1', 'j2', 'j3'];
+            const dt = PROFILE_DT_MS / 1000;
+            const samples = [];
+            let maxAcceleration = 0;
+            let maxVelocity = 0;
+            for (let ms = 0; ms <= totalDuration + 1e-6; ms += PROFILE_DT_MS) {
+                // この時刻に動いている (または直前に終わった) 区間
+                let segment = plan[0];
+                plan.forEach(p => { if (ms >= p.start) segment = p; });
+                const u = trapezoidalEase(THREE.MathUtils.clamp((ms - segment.start) / segment.duration, 0, 1));
+                while (blendThresholds.length > 0 && u >= blendThresholds[0]) { blendThresholds.shift(); cornerTimes.push(ms / 1000); }
+                const angles = motion.toAngles(segment.curve.getPointAt(u));
+                const prev = samples[samples.length - 1];
+                const velocities = {}, accelerations = {};
+                keys.forEach(k => {
+                    velocities[k] = prev ? (angles[k] - prev.angles[k]) / dt : 0;
+                    accelerations[k] = prev ? (velocities[k] - prev.velocities[k]) / dt : 0;
+                    maxAcceleration = Math.max(maxAcceleration, Math.abs(accelerations[k]));
+                    maxVelocity = Math.max(maxVelocity, Math.abs(velocities[k]));
+                });
+                samples.push({ t: ms / 1000, angles, velocities, accelerations });
+            }
+            return { samples, cornerTimes, peakAcceleration: maxAcceleration, peakVelocity: maxVelocity };
         }
 
         function setupUI() {
@@ -543,6 +1009,16 @@
                     document.getElementById('cartesian-jog-panel').style.display = (currentJogMode !== 'joint') ? 'block' : 'none';
                 });
             });
+            document.getElementById('blend-radius').addEventListener('input', updateBlendZone);
+            document.getElementById('blend-start-btn').addEventListener('click', startComparison);
+            document.getElementById('blend-reset-btn').addEventListener('click', resetScene);
+            document.getElementById('blend-log-clear-btn').addEventListener('click', clearBlendLog);
+            document.querySelectorAll('input[name="blend-mode"]').forEach(radio => radio.addEventListener('change', () => {
+                if (isAnimating) return;
+                updateBlendZone();
+                resetScene();
+            }));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
             setupJogHold();
         }
 
@@ -562,6 +1038,7 @@
             startMarkerGroup.position.copy(startPos);
             endMarkerGroup.position.copy(endPos);
             viaMarkerGroup.position.copy(viaPos);
+            updateBlendZone();
             resetScene();
         }
 
@@ -609,7 +1086,7 @@
             resetScene();
             isAnimating = true;
             setJogPanelEnabled(false);
-            document.getElementById('start-btn').disabled = true;
+            setRunButtonsDisabled(true);
             document.getElementById('update-pos-btn').disabled = true;
 
             robot.visible = true;
@@ -625,13 +1102,19 @@
             setJointAngles(startAngles);
             lastAngles = { ...startAngles };
             lastTime = animationStartTime;
+            lastVelocities = null;
+            plannedProfile = null;
+            plottedSampleCount = 0;
 
-            const selectedMode = document.querySelector('input[name="animation-mode"]:checked').value;
+            const selectedMode = (currentTab === 'blend') ? 'VIA' : document.querySelector('input[name="animation-mode"]:checked').value;
+            const speeds = { tcpSpeed: safeTcpSpeed, jointSpeedRad, jointSpeedLimitRad };
             
             const onComplete = () => {
+                // 計画済みプロファイルの残りを描き切る
+                if (plannedProfile) plotPlannedProfile(Infinity);
                 isAnimating = false;
                 setJogPanelEnabled(true);
-                document.getElementById('start-btn').disabled = false;
+                setRunButtonsDisabled(false);
                 document.getElementById('update-pos-btn').disabled = false;
             };
 
@@ -656,31 +1139,22 @@
                         .onUpdate((angles) => { setJointAngles(angles); updatePath(pathLine); }).onComplete(onComplete).start();
                     break;
                 }
-                case 'LIN': {
-                    const pathLine = createPathLine(pathColors.lin);
-                    const lineCurve = new THREE.Line3(startPos, endPos);
-                    
-                    const distance = startPos.distanceTo(endPos);
-                    const baseDuration = (distance / safeTcpSpeed) * 1000;
-                    
-                    const estimatedMaxSpeed = estimateMaxJointVelocity(lineCurve, baseDuration);
-                    if (estimatedMaxSpeed === Infinity) {
-                        document.getElementById('error-message').textContent = 'LIN: 軌道の一部が可動範囲外です。';
+                // LIN (中間点経由) と、ブレンド半径タブの PTP / LIN
+                case 'LIN':
+                case 'VIA': {
+                    const kind = (selectedMode === 'VIA') ? getBlendMode() : 'LIN';
+                    const pathLine = createPathLine(kind === 'PTP' ? pathColors.ptp : pathColors.lin);
+                    const motion = createViaMotion(kind, pathLine, speeds);
+                    if (!motion) {
+                        document.getElementById('error-message').textContent = `${kind}: 軌道の一部が可動範囲外です。`;
                         resetScene(); return;
                     }
-                    
-                    let finalDuration = baseDuration;
-                    if (estimatedMaxSpeed && estimatedMaxSpeed > jointSpeedLimitRad) {
-                        const slowdownFactor = estimatedMaxSpeed / jointSpeedLimitRad;
-                        finalDuration = baseDuration * slowdownFactor;
-                    }
-                    
-                    new TWEEN.Tween({ t: 0 }).to({ t: 1 }, finalDuration).easing(TWEEN.Easing.Linear.None)
-                        .onUpdate(({ t }) => {
-                            const targetPoint = new THREE.Vector3();
-                            lineCurve.at(t, targetPoint);
-                            if (solveIK(targetPoint)) { updatePath(pathLine); }
-                        }).onComplete(onComplete).start();
+                    plannedProfile = motion.profile;
+                    if (currentTab === 'blend') addBlendLog(motion);
+                    showMotionInfo(
+                        `${kind} 所要時間 ${(motion.duration / 1000).toFixed(2)} s（r = ${motion.r.toFixed(0)} mm） ／ 最大角加速度 ${motion.profile.peakAcceleration.toFixed(1)} rad/s²`);
+                    motion.last.onComplete(onComplete);
+                    motion.first.start();
                     break;
                 }
                 case 'CIRC': {
@@ -731,17 +1205,9 @@
                     const deltaAngles = { j1: Math.abs(endAngles.j1 - startAngles.j1), j2: Math.abs(endAngles.j2 - startAngles.j2), j3: Math.abs(endAngles.j3 - startAngles.j3) };
                     const durationPtp = (Math.max(deltaAngles.j1, deltaAngles.j2, deltaAngles.j3) / effectivePtpSpeed) / (1 - blendRatio) * 1000;
 
-                    // LIN duration
-                    const lineCurve = new THREE.Line3(startPos, endPos);
-                    const distanceLin = lineCurve.distance();
-                    const baseDurationLin = (distanceLin / safeTcpSpeed) * 1000;
-                    const estMaxSpeedLin = estimateMaxJointVelocity(lineCurve, baseDurationLin);
-                    let durationLin = baseDurationLin;
-                    if (estMaxSpeedLin && estMaxSpeedLin > jointSpeedLimitRad) {
-                        durationLin = baseDurationLin * (estMaxSpeedLin / jointSpeedLimitRad);
-                    }
-                     if (estMaxSpeedLin === Infinity) { document.getElementById('error-message').textContent = 'LIN軌道が範囲外です'; resetScene(); return; }
-
+                    // LIN (ブレンド半径を反映)
+                    const lin = createViaMotion('LIN', linPath, speeds);
+                    if (!lin) { document.getElementById('error-message').textContent = 'LIN軌道が範囲外です'; resetScene(); return; }
 
                     // CIRC duration
                     const circCurve = new THREE.CatmullRomCurve3([startPos, viaPos, endPos]);
@@ -759,13 +1225,12 @@
                         .onStart(() => solveIK(startPos))
                         .onUpdate(({t}) => { if (solveIK(circCurve.getPoint(t))) updatePath(circPath); }).onComplete(onComplete);
 
-                    const linTween = new TWEEN.Tween({t: 0}).to({t: 1}, durationLin).easing(TWEEN.Easing.Linear.None)
-                        .onStart(() => solveIK(startPos))
-                        .onUpdate(({t}) => { if (solveIK(lineCurve.at(t, new THREE.Vector3()))) updatePath(linPath); }).chain(circTween);
+                    lin.first.onStart(() => solveIK(startPos));
+                    lin.last.chain(circTween);
                     
                     const ptpTween = new TWEEN.Tween(startAngles).to(endAngles, durationPtp).easing(trapezoidalEase)
                         .onStart(() => setJointAngles(startAngles))
-                        .onUpdate((angles) => { setJointAngles(angles); updatePath(ptpPath); }).chain(linTween);
+                        .onUpdate((angles) => { setJointAngles(angles); updatePath(ptpPath); }).chain(lin.first);
 
                     ptpTween.start();
                     break;
@@ -803,12 +1268,13 @@
             });
             pathLines = [];
             setJogPanelEnabled(true);
-            document.getElementById('start-btn').disabled = false;
+            setRunButtonsDisabled(false);
             document.getElementById('update-pos-btn').disabled = false;
             const errorMsg = document.getElementById('error-message');
             if (!errorMsg.textContent.includes('軌道')) { // Do not clear critical path error
                  errorMsg.textContent = '';
             }
+            showMotionInfo('');
             robot.visible = true;
             resetVelocityChart();
             solveIK(startPos);
@@ -919,56 +1385,155 @@
             if (enabled) panel.classList.remove('disabled'); else panel.classList.add('disabled');
         }
         
-        function createJointVelocityChart() {
-            const ctx = document.getElementById('velocity-chart').getContext('2d');
-            velocityChart = new Chart(ctx, {
-                type: 'line', data: { labels: [], datasets: [
+        // 曲がり始め・終わりの時刻に黄色の縦線を引く
+        const cornerMarkerPlugin = {
+            id: 'cornerMarkers',
+            afterDatasetsDraw(chart) {
+                const { ctx, chartArea, scales } = chart;
+                ctx.save();
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 3]);
+                cornerEventTimes.forEach(t => {
+                    const x = scales.x.getPixelForValue(t);
+                    if (x < chartArea.left || x > chartArea.right) return;
+                    ctx.beginPath();
+                    ctx.moveTo(x, chartArea.top);
+                    ctx.lineTo(x, chartArea.bottom);
+                    ctx.stroke();
+                });
+                ctx.restore();
+            }
+        };
+
+        function createJointChart(canvasId, yTitle, { showLegend, showXTitle }) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const axisStyle = { ticks: { color: '#9ca3af', maxRotation: 0, minRotation: 0 }, grid: { color: 'rgba(75, 85, 99, 0.5)' } };
+            return new Chart(ctx, {
+                type: 'line', data: { datasets: [
                     { label: 'J1 (基部回転)', data: [], borderColor: '#ef4444', borderWidth: 1.5, pointRadius: 0 },
                     { label: 'J2 (根本アーム)', data: [], borderColor: '#22c55e', borderWidth: 1.5, pointRadius: 0 },
                     { label: 'J3 (先端アーム)', data: [], borderColor: '#3b82f6', borderWidth: 1.5, pointRadius: 0 }
                 ]},
-                options: { animation: false, scales: {
-                    x: { type: 'linear', title: { display: true, text: 'Time (s)', color: '#9ca3af' }, ticks: { color: '#9ca3af', maxRotation: 0, minRotation: 0 }, grid: { color: 'rgba(75, 85, 99, 0.5)' }},
-                    y: { title: { display: true, text: 'Angular Velocity (rad/s)', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(75, 85, 99, 0.5)' }}
-                }, plugins: { legend: { labels: { color: '#f3f4f6' } } } }
+                options: {
+                    animation: false, maintainAspectRatio: false, parsing: false,
+                    scales: {
+                        x: { type: 'linear', min: 0, title: { display: showXTitle, text: 'Time (s)', color: '#9ca3af' }, ...axisStyle },
+                        y: { title: { display: true, text: yTitle, color: '#9ca3af', font: { size: 10 } }, ...axisStyle }
+                    },
+                    plugins: { legend: { display: showLegend, labels: { color: '#f3f4f6', boxWidth: 12, font: { size: 10 } } } }
+                },
+                plugins: [cornerMarkerPlugin]
             });
         }
-        
-        function updateJointVelocityPlot() {
-            if (!isAnimating) return;
-            const currentTime = performance.now();
-            const deltaTime = (currentTime - lastTime) / 1000.0;
-            if (deltaTime < 1e-5) return;
-            const currentAngles = getJointAngles();
-            const angularVelocities = {
-                j1: (currentAngles.j1 - lastAngles.j1) / deltaTime,
-                j2: (currentAngles.j2 - lastAngles.j2) / deltaTime,
-                j3: (currentAngles.j3 - lastAngles.j3) / deltaTime,
-            };
-            const chartTime = (currentTime - animationStartTime) / 1000.0;
-            velocityChart.data.labels.push(chartTime.toFixed(2));
-            velocityChart.data.datasets[0].data.push(angularVelocities.j1);
-            velocityChart.data.datasets[1].data.push(angularVelocities.j2);
-            velocityChart.data.datasets[2].data.push(angularVelocities.j3);
-            velocityChart.update('none');
-            lastAngles = { ...currentAngles };
-            lastTime = currentTime;
+
+        function setChartFontSize(size) {
+            jointCharts.forEach(chart => {
+                const { scales, plugins } = chart.options;
+                [scales.x, scales.y].forEach(axis => {
+                    axis.ticks.font = { size };
+                    axis.title.font = { size };
+                });
+                plugins.legend.labels.font = { size };
+                chart.update('none');
+            });
         }
-        
-        function resetVelocityChart() {
-            if (velocityChart) {
-                velocityChart.data.labels = [];
-                velocityChart.data.datasets.forEach(d => { d.data = []; });
-                velocityChart.update();
+
+        // グラフをパネルの外の全画面オーバーレイへ移して大きく表示する
+        function setChartsEnlarged(enlarged) {
+            const charts = document.getElementById('joint-charts');
+            const overlay = document.getElementById('chart-overlay');
+            if (enlarged) {
+                document.getElementById('chart-overlay-slot').appendChild(charts);
+            } else {
+                document.getElementById('chart-home').after(charts);
             }
+            overlay.hidden = !enlarged;
+            setChartFontSize(enlarged ? 16 : 10);
+        }
+
+        function setupChartEnlarge() {
+            const isEnlarged = () => !document.getElementById('chart-overlay').hidden;
+            document.getElementById('chart-enlarge-btn').addEventListener('click', () => setChartsEnlarged(true));
+            document.getElementById('chart-close-btn').addEventListener('click', () => setChartsEnlarged(false));
+            document.getElementById('joint-charts').addEventListener('click', () => setChartsEnlarged(!isEnlarged()));
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && isEnlarged()) setChartsEnlarged(false);
+            });
+        }
+
+        function createJointCharts() {
+            jointCharts = [
+                createJointChart('angle-chart', '角度 (rad)', { showLegend: true, showXTitle: false }),
+                createJointChart('velocity-chart', '角速度 (rad/s)', { showLegend: false, showXTitle: false }),
+                createJointChart('acceleration-chart', '角加速度 (rad/s²)', { showLegend: false, showXTitle: true })
+            ];
+            setupChartEnlarge();
+        }
+
+        // now は TWEEN.update に渡したのと同じ時刻 (差分のノイズを抑えるため)
+        function updateJointPlots(now) {
+            if (!isAnimating) return;
+            if (plannedProfile) {
+                plotPlannedProfile((now - animationStartTime) / 1000);
+                return;
+            }
+            const deltaTime = (now - lastTime) / 1000.0;
+            if (deltaTime < 1e-4) return;
+            const angles = getJointAngles();
+            const keys = ['j1', 'j2', 'j3'];
+            const velocities = {};
+            keys.forEach(k => { velocities[k] = (angles[k] - lastAngles[k]) / deltaTime; });
+            const t = (now - animationStartTime) / 1000.0;
+            const [angleChart, velocityChart, accelerationChart] = jointCharts;
+            keys.forEach((k, i) => {
+                angleChart.data.datasets[i].data.push({ x: t, y: angles[k] });
+                velocityChart.data.datasets[i].data.push({ x: t, y: velocities[k] });
+                if (lastVelocities) {
+                    const acceleration = (velocities[k] - lastVelocities[k]) / deltaTime;
+                    accelerationChart.data.datasets[i].data.push({ x: t, y: acceleration });
+                }
+            });
+            jointCharts.forEach(chart => chart.update('none'));
+            lastAngles = { ...angles };
+            lastVelocities = velocities;
+            lastTime = now;
+        }
+
+        // 計画済みプロファイルのうち、経過時間 elapsed [s] までを描く
+        function plotPlannedProfile(elapsed) {
+            const { samples, cornerTimes } = plannedProfile;
+            const [angleChart, velocityChart, accelerationChart] = jointCharts;
+            let added = false;
+            while (plottedSampleCount < samples.length && samples[plottedSampleCount].t <= elapsed) {
+                const { t, angles, velocities, accelerations } = samples[plottedSampleCount];
+                ['j1', 'j2', 'j3'].forEach((k, i) => {
+                    angleChart.data.datasets[i].data.push({ x: t, y: angles[k] });
+                    velocityChart.data.datasets[i].data.push({ x: t, y: velocities[k] });
+                    if (plottedSampleCount > 0) accelerationChart.data.datasets[i].data.push({ x: t, y: accelerations[k] });
+                });
+                plottedSampleCount++;
+                added = true;
+            }
+            cornerEventTimes = cornerTimes.filter(t => t <= elapsed);
+            if (added) jointCharts.forEach(chart => chart.update('none'));
+        }
+
+        function resetVelocityChart() {
+            cornerEventTimes = [];
+            jointCharts.forEach(chart => {
+                chart.data.datasets.forEach(d => { d.data = []; });
+                chart.update();
+            });
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            TWEEN.update();
+            const now = performance.now();
+            TWEEN.update(now);
             controls.update();
             if (!isAnimating) updateJogUI();
-            updateJointVelocityPlot();
+            updateJointPlots(now);
             renderer.render(scene, camera);
         }
 
