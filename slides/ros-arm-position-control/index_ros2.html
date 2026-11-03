@@ -1318,6 +1318,29 @@ ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller
                     </div>
                 </section>
                 <section>
+                    <h2>特異姿勢の3種類（実機の例）</h2>
+                    <div style="display: flex; justify-content: center; align-items: flex-end; gap: 24px;">
+                        <figure style="flex: none; margin: 0; text-align: center;">
+                            <img src="media/singularity_shoulder_dobot_nova.png" alt="肩関節の特異位置"
+                                style="height: 40vh; max-width: none; background: #fff; border-radius: 8px; padding: 6px;">
+                            <figcaption style="font-size: 0.5em;"><strong>肩</strong>：手首中心が J1 軸上</figcaption>
+                        </figure>
+                        <figure style="flex: none; margin: 0; text-align: center;">
+                            <img src="media/singularity_elbow_dobot_nova.png" alt="肘関節の特異位置"
+                                style="height: 40vh; max-width: none; background: #fff; border-radius: 8px; padding: 6px;">
+                            <figcaption style="font-size: 0.5em;"><strong>肘</strong>：J3 = 0°（上腕と前腕が一直線）</figcaption>
+                        </figure>
+                        <figure style="flex: none; margin: 0; text-align: center;">
+                            <img src="media/singularity_wrist_dobot_nova.png" alt="手首関節の特異位置"
+                                style="height: 40vh; max-width: none; background: #fff; border-radius: 8px; padding: 6px;">
+                            <figcaption style="font-size: 0.5em;"><strong>手首</strong>：J5 = 0°（J4 と J6 が平行）</figcaption>
+                        </figure>
+                    </div>
+                    <p style="font-size: 0.5em;">直線・円弧動作で近づくと停止 → 関節動作に切り替える／中継点を増やす</p>
+                    <p style="font-size: 0.4em; color: #aaa;">図の出典：<a href="https://cobotaro.com/knowledge/manual/dobot/nova/#33-特異位置" target="_blank"
+                        style="color: #aaa; text-decoration: underline;">Dobot Nova シリーズ ハードウェアユーザーガイド 3.3 特異位置（cobotaro ナレッジベース）</a></p>
+                </section>
+                <section>
                     <h2>特異姿勢は3種類</h2>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex: 1.3;">
